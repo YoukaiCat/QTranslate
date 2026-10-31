@@ -115,8 +115,10 @@ qtranslate/
 │   ├── main.cpp
 │   ├── app/
 │   │   ├── appcontroller.h/.cpp
+│   │   ├── logging.h/.cpp            категория логирования qtranslate.app
 │   │   └── singleinstance.h/.cpp
 │   ├── core/                   ← статическая библиотека qtranslate_core (без Widgets и WinAPI)
+│   │   ├── appinfo.h/.cpp            имя и версия приложения
 │   │   ├── translationtypes.h        TranslationRequest/Result/Error
 │   │   ├── translationservice.h      интерфейс сервиса + TranslationReply
 │   │   ├── translationmanager.h/.cpp реестр сервисов, кэш, логика языков, отмена
@@ -139,7 +141,10 @@ qtranslate/
 │   │   ├── autostart.h
 │   │   ├── autostart_win.cpp
 │   │   ├── secretprotector.h
-│   │   └── secretprotector_win.cpp   DPAPI
+│   │   ├── secretprotector_win.cpp   DPAPI
+│   │   ├── windowactivation.h        право вывести окно на передний план
+│   │   ├── windowactivation_win.cpp  AllowSetForegroundWindow
+│   │   └── windowactivation_stub.cpp заглушка для не-Windows сборок
 │   └── ui/
 │       ├── trayicon.h/.cpp
 │       ├── mainwindow.h/.cpp
@@ -160,20 +165,14 @@ qtranslate/
 
 ### 3.2. Соответствие текущему `CMakeLists.txt`
 
-В `CMakeLists.txt` уже перечислены файлы в плоском `src/`. Предлагаемая структура — их развитие:
+Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
+этапов. Сейчас:
 
-| Сейчас в CMake | Куда переходит |
+| Цель | Что входит сейчас (этап 1) |
 |---|---|
-| `appcontroller.*` | `app/appcontroller.*` |
-| `appicon.*` | `ui/appicon.*` |
-| `autostart.*` | `platform/autostart.h` + `autostart_win.cpp` |
-| `hotkeymanager.*` | `platform/hotkeymanager.h` + `hotkeymanager_win.cpp` |
-| `languages.*` | `core/languages.*` |
-| `mainwindow.*`, `popupwindow.*`, `settingsdialog.*` | `ui/…` |
-| `selectiongrabber.*` | `platform/selectiongrabber.h` + `selectiongrabber_win.cpp` |
-| `settings.*` | `core/settings.*` |
-| `translator.*` | разделяется на `core/translationservice.h`, `core/translationmanager.*`, `services/*` |
-| — | новые: `singleinstance`, `networkmanager`, `textchunker`, `hotkeysequence`, `secretprotector`, `trayicon`, `languagecombobox` |
+| `qtranslate_core` | `core/appinfo.*` |
+| `qtranslate` | `main.cpp`, `app/*`, `ui/*`, `platform/windowactivation.h` + `windowactivation_win.cpp` (на не-Windows — `windowactivation_stub.cpp`) |
+| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`; каждый тест подключается функцией `qtranslate_add_test(<имя>)` и линкуется с `qtranslate_core` |
 
 ### 3.3. Сборка
 
@@ -197,8 +196,10 @@ qtranslate/
 
 `main()`:
 
-1. Создаёт `QApplication`, задаёт `organizationName`/`applicationName`,
+1. Создаёт `QApplication`, задаёт `applicationName`/`applicationVersion`,
    `setQuitOnLastWindowClosed(false)` — иначе скрытие последнего окна завершит процесс.
+   `organizationName` намеренно не задаётся, чтобы данные лежали в `%APPDATA%\qtranslate`
+   (см. §4.11).
 2. Разбирает аргументы (`QCommandLineParser`): `--minimized` (передаётся из автозагрузки).
 3. `SingleInstance` (ключ `qtranslate-<имя пользователя>`):
    - Основной экземпляр выбирается захватом файла блокировки `%TEMP%\qtranslate-<user>.lock`
@@ -580,6 +581,11 @@ signals:
 
 - Обычный режим: `%APPDATA%\qtranslate\qtranslate.ini`.
 - Портативный режим: если рядом с exe лежит `qtranslate.ini`, используется он.
+
+Замечание для этапа 5: `organizationName` не задан (§4.1), поэтому конструктор `QSettings` по
+умолчанию для этого не годится. `SettingsStore` открывает INI по явному пути —
+`QSettings(path, QSettings::IniFormat)`, где `path` — `%APPDATA%\qtranslate\qtranslate.ini`
+(или файл рядом с exe в портативном режиме).
 
 Секреты (API-ключи, пароль прокси) хранятся зашифрованными через Windows DPAPI
 (`CryptProtectData`, привязка к учётной записи пользователя) в base64. Модуль

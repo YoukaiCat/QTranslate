@@ -32,6 +32,9 @@ cmake --build build/release
 ctest --test-dir build/release --output-on-failure
 ```
 
+With CMake older than 3.22, the Qt `bin` directory (e.g. `C:\Qt\6.12.0\msvc2022_64\bin`) must be
+in `PATH` for `ctest` to find the Qt DLLs.
+
 Unit tests are built by default; pass `-DQTRANSLATE_BUILD_TESTS=OFF` to skip them.
 
 To produce a self-contained folder with the Qt libraries:

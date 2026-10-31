@@ -37,9 +37,10 @@ SingleInstance::SingleInstance(const QString &key, QObject *parent)
     , m_serverName(key)
     , m_lock(QDir::temp().absoluteFilePath(key + QStringLiteral(".lock")))
 {
-    // The primary may run for weeks, so never treat its lock as stale by age;
-    // locks left by crashed processes are still detected by PID.
-    m_lock.setStaleLockTime(0);
+    // Keep the default stale lock time (30 s). On Windows QLockFile keeps the
+    // file open without FILE_SHARE_DELETE, so a live primary's lock cannot be
+    // removed however old it is, while an empty or corrupt lock left by a
+    // power loss is cleared after 30 s.
 }
 
 SingleInstance::~SingleInstance() = default;

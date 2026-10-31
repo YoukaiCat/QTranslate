@@ -68,7 +68,8 @@
 - Проверка: иконка видна в трее и в заголовке окна.
 
 **1.4. `main.cpp`.**
-- `QApplication`, `organizationName`/`applicationName`/`applicationVersion` из `appinfo`.
+- `QApplication`, `applicationName`/`applicationVersion` из `appinfo`. `organizationName` не задаётся
+  намеренно: данные приложения лежат в `%APPDATA%\qtranslate`, без лишнего уровня каталогов.
 - `setQuitOnLastWindowClosed(false)`.
 - `QCommandLineParser`: `--minimized`, `--help`, `--version`.
 - Категория логирования `qtranslate.app` (`Q_LOGGING_CATEGORY` в `app/`).
