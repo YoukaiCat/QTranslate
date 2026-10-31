@@ -1,0 +1,18 @@
+# Каталоги сборки
+build/
+build-*/
+out/
+
+# Qt Creator
+*.user
+*.user.*
+.qtcreator/
+CMakeLists.txt.user*
+
+# Visual Studio / CMake
+.vs/
+CMakeSettings.json
+CMakeUserPresets.json
+
+# Локальные настройки Claude Code
+.claude/settings.local.json
