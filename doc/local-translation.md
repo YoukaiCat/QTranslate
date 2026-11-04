@@ -25,10 +25,48 @@
 | **MetalTranslate** | Экспериментальный C++-шаблон Argos на CTranslate2 | Показывает минимальный native-путь | Не production: нет менеджера моделей, сегментации, Windows-сборки «из коробки» |
 | **OPUS-MT + CTranslate2** | Модели Helsinki-NLP + CTranslate2 | Много моделей, понятный формат | Лицензии моделей разные, качество/размер сильно варьируются |
 | **llama.cpp + GGUF LLM** | Локальная LLM через промпт | Контекст, тон, глоссарии | 2,5–5 ГБ на модель, медленно на CPU, недетерминированно |
+| **ONNX Runtime GenAI** | Универсальный runtime для ONNX-моделей | DirectML/OpenVINO, один runtime для разных моделей | Нужны совместимые ONNX-модели, сложнее экспорт; меньше готовых LLM |
 | **LibreTranslate** | Python-сервер поверх Argos | Готовый HTTP API, self-hosted | AGPL-3.0, Python, тяжёлый; это сервер, а не библиотека |
 
 Для qtranslate рекомендуемый путь: **Argos-модели + CTranslate2**. Python-Argos использовать
 только для прототипа и проверки качества.
+
+### 2.1. ONNX Runtime GenAI и llama.cpp
+
+**ONNX** — это формат модели, а не движок. Сам `.onnx` не запускается: нужен **ONNX Runtime**.
+Для LLM поверх него есть **ONNX Runtime GenAI** — обёртка с токенизатором, KV-cache и генерацией.
+Обычный ONNX Runtime даёт только тензоры, и токенизацию/sampling/KV-cache пришлось бы писать самим.
+
+- **CPU:** да, ONNX Runtime работает на CPU (x86-64/ARM64, AVX2/AVX-512, INT8).
+- **Linux:** да, есть официальные сборки x64/ARM64 и C++ API; GenAI тоже собирается под Linux.
+- **GPU:** CUDA/TensorRT/OpenVINO — Linux и Windows; **DirectML — только Windows**; Metal — macOS.
+- **Модели:** нужны совместимые ONNX-экспорты, часто многофайловые; не любой `.onnx` подойдёт для GenAI.
+- **Размер:** гигабайты — это модель, а не движок; у ONNX и llama.cpp модель 4B/7B весит
+  примерно одинаково (2,5–5 ГБ в INT4/Q4).
+
+**llama.cpp** — специализированный C++-движок для GGUF-моделей. Он тоже встраивается, но:
+
+- модель GGUF — один файл, внутри токенизатор и chat template;
+- готовых GGUF-моделей гораздо больше;
+- CPU-инференс очень хорошо оптимизирован;
+- есть готовые релизы; для продукта движок собирается один раз в CI, пользователь ничего не компилирует;
+- `llama-server` можно запускать как сайдкар с OpenAI-совместимым API.
+
+| | ONNX Runtime GenAI | llama.cpp |
+|---|---|---|
+| Формат | ONNX | GGUF |
+| Назначение | общий ML + LLM | в первую очередь LLM |
+| CPU | да, MLAS/oneDNN | да, ggml |
+| GPU | CUDA/TensorRT/DirectML/OpenVINO | CUDA/Vulkan/Metal/HIP |
+| Linux | да | да |
+| Готовые LLM | меньше, нужен экспорт | очень много |
+| Квантизация | INT8/INT4 инструментами ORT | GGUF K-quants |
+| Интеграция | C++ API + DLL/SO + провайдеры | C++ API, часто один бинарник/библиотека |
+| Когда выбирать | DirectML/OpenVINO, уже есть ONNX-модель, один runtime на всё | локальная LLM, CPU-first, простая раздача моделей |
+
+Для qtranslate: **llama.cpp** — основной кандидат для локальной LLM; **ONNX Runtime GenAI** —
+альтернатива, если понадобится DirectML/OpenVINO или конкретная ONNX-модель. Для NMT
+(Argos/OPUS) всё равно лучше **CTranslate2**, а не ONNX.
 
 ## 3. Как устроен Argos
 
