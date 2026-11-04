@@ -6,7 +6,7 @@
 любой программе по глобальной горячей клавише и умеет сразу заменять выделение переводом в
 активном поле ввода.
 
-> **Статус:** 0.9.0, release candidate. Доступны установщик для Windows и портативный архив.
+> **Статус:** 0.9.1, release candidate. Доступны установщик для Windows и портативный архив.
 > Поддержка Linux в разработке.
 
 [English](README.md) | **Русский**
@@ -42,11 +42,11 @@
 
 Последняя сборка — на странице [Releases](https://github.com/youkaicat/qtranslate/releases/latest):
 
-- **Установщик** — `qtranslate-0.9.0-win64-setup.exe`. Устанавливает qtranslate для текущего
+- **Установщик** — `qtranslate-0.9.1-win64-setup.exe`. Устанавливает qtranslate для текущего
   пользователя без прав администратора; по умолчанию создаёт ярлык в меню «Пуск» и включает
   автозагрузку, ярлык на рабочем столе — по желанию. Добавляет деинсталлятор. При удалении
   настройки в `%APPDATA%\qtranslate` сохраняются.
-- **Портативный архив** — `qtranslate-0.9.0-win64.zip`. Распакуйте и запустите
+- **Портативный архив** — `qtranslate-0.9.1-win64.zip`. Распакуйте и запустите
   `bin\qtranslate.exe`; установка и права администратора не нужны. Архив самодостаточен: Qt и
   runtime MSVC уже включены.
 - **`SHA256SUMS.txt`** — контрольные суммы SHA-256 обоих файлов.
@@ -101,7 +101,7 @@ ctest --test-dir build/release --output-on-failure
 
 Результат — в `build/artifacts`. Workflow CI
 [`.github/workflows/build.yml`](.github/workflows/build.yml) запускает те же шаги на
-`windows-latest` с Qt 6.8.3 LTS. Пуш тега вроде `v0.9.0` публикует GitHub Release с этими
+`windows-latest` с Qt 6.8.3 LTS. Пуш тега вроде `v0.9.1` публикует GitHub Release с этими
 файлами; версия тега должна совпадать с версией в `CMakeLists.txt`.
 
 ### Linux (в разработке)

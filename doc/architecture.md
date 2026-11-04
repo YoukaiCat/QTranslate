@@ -46,7 +46,7 @@
 
 ### 1.4. Матрица платформ
 
-| Компонент | Windows 10/11 x64 (0.9.0) | Linux x86_64 (план, этап 11) |
+| Компонент | Windows 10/11 x64 (0.9.1) | Linux x86_64 (план, этап 11) |
 |---|---|---|
 | Сборка | MSVC 2022, Qt 6.12 | GCC/Clang, Qt 6.5+, CMake |
 | Интерфейс | Qt Widgets, трей | Qt Widgets, StatusNotifierItem/AppIndicator |
@@ -131,7 +131,7 @@ qtranslate/
 ├── doc/
 │   ├── architecture.md
 │   ├── plan.md
-│   └── releases/0.9.0.md       заметки к релизу
+│   └── releases/0.9.1.md       заметки к релизу
 ├── resources/
 │   ├── qtranslate.qrc          иконки трея, окна
 │   ├── icons/                  app.ico, tray-*.png (светлая/тёмная тема)
@@ -208,7 +208,7 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (0.9.0) |
+| Цель | Что входит сейчас (0.9.1) |
 |---|---|
 | `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (кэш, умный язык); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice` |
 | `qtranslate` | `main.cpp`, `app/*` (включая файловый лог), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` с автопереводом, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*`, `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_ru_RU.ts` |
@@ -237,9 +237,9 @@ qtranslate/
 
 ### 3.4. Упаковка, CI и выпуск
 
-Версия проекта задаётся один раз — `project(qtranslate VERSION 0.9.0)`; из неё получаются
+Версия проекта задаётся один раз — `project(qtranslate VERSION 0.9.1)`; из неё получаются
 `AppInfo::version()`, `User-Agent`, ресурс версии exe и имена артефактов. Тег релиза имеет вид
-`v0.9.0`, CI сверяет его с `CMakeLists.txt` и падает при расхождении.
+`v0.9.1`, CI сверяет его с `CMakeLists.txt` и падает при расхождении.
 
 **Портативный архив.** `cmake --install <build> --prefix build/dist` создаёт самодостаточный
 каталог `bin/`, `plugins/`, `translations/` с Qt, плагинами и MSVC CRT. `package.ps1` проверяет
@@ -1304,16 +1304,19 @@ SOCKS5-прокси с авторизацией; автозапуск после
 недоступна (проверен запуск `build/dist/bin/qtranslate.exe` без Qt в `PATH`); реальная перезагрузка
 для автозагрузки и прокси с авторизацией не проверялись; см. §9.2.
 
-### 8.2. CI и проверка релиза 0.9.0
+### 8.2. CI и проверка релиза 0.9.1
+
+v0.9.0 — первый публичный release candidate; v0.9.1 — патч с галочками установщика и
+обновлённой документацией.
 
 Локальная проверка (Windows 11, Qt 6.12.0 MSVC 2022 x64):
 
 - Debug и Release: сборка без предупреждений `/W4`, **17/17 тестов**;
-- `package.ps1` собрал `qtranslate-0.9.0-win64.zip` (22,4 МБ),
-  `qtranslate-0.9.0-win64-setup.exe` (16,6 МБ) и `SHA256SUMS.txt`; обе контрольные суммы
+- `package.ps1` собрал `qtranslate-0.9.1-win64.zip` (22,4 МБ),
+  `qtranslate-0.9.1-win64-setup.exe` (16,6 МБ) и `SHA256SUMS.txt`; обе контрольные суммы
   совпали с файлами;
-- установщик: тихая установка в отдельный каталог, `FileVersion` exe = 0.9.0 (`qtranslate
-  --version` → `qtranslate 0.9.0`), ярлык в меню «Пуск» создан; запуск `bin\qtranslate.exe`
+- установщик: тихая установка в отдельный каталог, `FileVersion` exe = 0.9.1 (`qtranslate
+  --version` → `qtranslate 0.9.1`), ярлык в меню «Пуск» создан; запуск `bin\qtranslate.exe`
   без Qt в `PATH` успешен, `Qt6Core.dll` и `vcruntime140.dll` загрузились из каталога установки;
 - `AppMutex`: при запущенном qtranslate деинсталлятор завершился с кодом 1 и не удалил файлы;
 - задачи установщика: по умолчанию меню «Пуск» и автозагрузка включены, рабочий стол выключен;
@@ -1327,11 +1330,11 @@ SOCKS5-прокси с авторизацией; автозапуск после
 Артефакты CI (Qt 6.8.3 LTS, `windows-latest`) скачаны и проверены отдельно: zip 22,5 МБ,
 установщик 16,4 МБ; установка, запуск без Qt в `PATH`, удаление и контрольные суммы — в порядке.
 CI: workflow `.github/workflows/build.yml` собирает и тестирует Release на `windows-latest`,
-затем повторяет упаковку; по тегу `v0.9.0` публикует релиз.
+затем повторяет упаковку; по тегу `v0.9.1` публикует релиз.
 
 - workflow: https://github.com/youkaicat/qtranslate/actions/workflows/build.yml
 - успешный прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41897455346
-- релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.9.0
+- релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.9.1
 
 Файлы, скачанные из релиза, совпали с `SHA256SUMS.txt`.
 
@@ -1369,7 +1372,7 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 - Захват в окнах администраторских процессов и запись Win+V — известные ограничения (§9.1).
 - Установщик не подписан кодом: Windows SmartScreen может показать предупреждение. Сертификата
   в проекте нет; добавление подписи не меняет формат артефактов.
-- Linux-сборка в 0.9.0 отсутствует: платформенные модули — заглушки, полноценный порт — этап 11
+- Linux-сборка в 0.9.1 отсутствует: платформенные модули — заглушки, полноценный порт — этап 11
   (§4.14). macOS не планируется.
 
 Возможное развитие:

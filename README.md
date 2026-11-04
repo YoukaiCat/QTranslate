@@ -6,7 +6,7 @@ Lightweight desktop translator. It lives in the system tray, translates the text
 selected in any application with a global hotkey, and can replace the selection with the
 translation directly in the active input field.
 
-> **Status:** 0.9.0 release candidate. The Windows installer and the portable archive are
+> **Status:** 0.9.1 release candidate. The Windows installer and the portable archive are
 > available. Linux support is in development.
 
 **English** | [Русский](README.ru.md)
@@ -42,11 +42,11 @@ translation directly in the active input field.
 
 The latest build is on the [Releases](https://github.com/youkaicat/qtranslate/releases/latest) page:
 
-- **Installer** — `qtranslate-0.9.0-win64-setup.exe`. Installs qtranslate for the current user
+- **Installer** — `qtranslate-0.9.1-win64-setup.exe`. Installs qtranslate for the current user
   without administrator rights; by default it creates a Start menu shortcut and enables autostart,
   with an optional desktop shortcut. It also adds an uninstaller. Uninstalling keeps the settings
   in `%APPDATA%\qtranslate`.
-- **Portable archive** — `qtranslate-0.9.0-win64.zip`. Extract it and run `bin\qtranslate.exe`;
+- **Portable archive** — `qtranslate-0.9.1-win64.zip`. Extract it and run `bin\qtranslate.exe`;
   no installation or administrator rights are needed. The archive is self-contained: Qt and the
   MSVC runtime are included.
 - **`SHA256SUMS.txt`** — SHA-256 checksums of both files.
@@ -101,7 +101,7 @@ To build the release artifacts (portable ZIP, per-user installer and `SHA256SUMS
 
 The output goes to `build/artifacts`. The CI workflow
 [`.github/workflows/build.yml`](.github/workflows/build.yml) runs the same steps on
-`windows-latest` with Qt 6.8.3 LTS. Pushing a tag such as `v0.9.0` publishes a GitHub release with
+`windows-latest` with Qt 6.8.3 LTS. Pushing a tag such as `v0.9.1` publishes a GitHub release with
 these artifacts; the tag must match the version in `CMakeLists.txt`.
 
 ### Linux (in progress)
