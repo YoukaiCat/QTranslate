@@ -11,6 +11,18 @@ translation directly in the active input field.
 
 **English** | [Русский](README.ru.md)
 
+## Main features
+
+- **Ctrl+Q** translates the selected text in a compact window next to the cursor.
+- **Ctrl+Shift+Q** translates the selected text and replaces the selection in the active input
+  field, which is convenient for replying in chats.
+- **Ctrl+W** opens the main window with the selection translated.
+- Google Translate (free endpoint or Cloud API) and DeepL (Free/Pro).
+- Automatic source language detection, smart switching to the additional language, in-memory
+  translation cache and automatic translation while typing.
+- System/manual HTTP and SOCKS5 proxies with optional authentication.
+- English and Russian interface, autostart, portable INI mode, `--verbose` logging.
+
 ## Screenshots
 
 <p align="center">
@@ -25,18 +37,6 @@ translation directly in the active input field.
   <img src="docs/screenshots/settings-translation.png" alt="Translation settings" width="49%">
   <img src="docs/screenshots/settings-hotkeys.png" alt="Hotkey settings" width="49%">
 </p>
-
-## Main features
-
-- **Ctrl+Q** translates the selected text in a compact window next to the cursor.
-- **Ctrl+Shift+Q** translates the selected text and replaces the selection in the active input
-  field, which is convenient for replying in chats.
-- **Ctrl+W** opens the main window with the selection translated.
-- Google Translate (free endpoint or Cloud API) and DeepL (Free/Pro).
-- Automatic source language detection, smart switching to the additional language, in-memory
-  translation cache and automatic translation while typing.
-- System/manual HTTP and SOCKS5 proxies with optional authentication.
-- English and Russian interface, autostart, portable INI mode, `--verbose` logging.
 
 ## Download and install
 
