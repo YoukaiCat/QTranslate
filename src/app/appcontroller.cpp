@@ -11,6 +11,7 @@
 #include "platform/autostart.h"
 #include "platform/hotkeymanager.h"
 #include "platform/selectiongrabber.h"
+#include "platform/windowactivation.h"
 #include "services/deeplservice.h"
 #include "services/googletranslateservice.h"
 #include "ui/appicon.h"
@@ -18,13 +19,17 @@
 #include "ui/popupwindow.h"
 #include "ui/settingsdialog.h"
 #include "ui/trayicon.h"
+#include "ui/translationerrortext.h"
 
 #include <QApplication>
+#include <QClipboard>
 #include <QCursor>
 #include <QDialog>
 #include <QElapsedTimer>
 #include <QEvent>
+#include <QMimeData>
 #include <QSessionManager>
+#include <QTimer>
 #include <QTranslator>
 #include <QUrl>
 
@@ -169,6 +174,9 @@ void AppController::createHotkeys()
         case HotkeyAction::TranslateToPopup:
             translateSelectionInPopup();
             break;
+        case HotkeyAction::TranslateAndReplace:
+            translateSelectionInPlace();
+            break;
         case HotkeyAction::TranslateToMainWindow:
             translateSelectionInMainWindow();
             break;
@@ -196,6 +204,7 @@ void AppController::createHotkeys()
             m_hotkeys->registerHotkey(action, sequence);
     };
     registerHotkey(HotkeyAction::TranslateToPopup, settings.hotkeys.popup);
+    registerHotkey(HotkeyAction::TranslateAndReplace, settings.hotkeys.replaceSelection);
     registerHotkey(HotkeyAction::TranslateToMainWindow, settings.hotkeys.mainWindow);
     registerHotkey(HotkeyAction::ShowMainWindow, settings.hotkeys.showMainWindow);
     updateTrayToolTip();
@@ -208,8 +217,8 @@ void AppController::updateTrayToolTip()
 
     QStringList keys;
     for (const HotkeyAction action :
-         {HotkeyAction::TranslateToPopup, HotkeyAction::TranslateToMainWindow,
-          HotkeyAction::ShowMainWindow}) {
+         {HotkeyAction::TranslateToPopup, HotkeyAction::TranslateAndReplace,
+          HotkeyAction::TranslateToMainWindow, HotkeyAction::ShowMainWindow}) {
         const QKeySequence sequence = m_hotkeys->hotkey(action);
         if (!sequence.isEmpty())
             keys << sequence.toString(QKeySequence::NativeText);
@@ -369,6 +378,8 @@ void AppController::applySettings(const AppSettings &oldSettings,
 
     updateHotkey(HotkeyAction::TranslateToPopup, oldSettings.hotkeys.popup,
                  newSettings.hotkeys.popup);
+    updateHotkey(HotkeyAction::TranslateAndReplace, oldSettings.hotkeys.replaceSelection,
+                 newSettings.hotkeys.replaceSelection);
     updateHotkey(HotkeyAction::TranslateToMainWindow, oldSettings.hotkeys.mainWindow,
                  newSettings.hotkeys.mainWindow);
     updateHotkey(HotkeyAction::ShowMainWindow, oldSettings.hotkeys.showMainWindow,
@@ -611,6 +622,135 @@ void AppController::translateInPopup(const TranslationRequest &request)
     });
 }
 
+void AppController::translateSelectionInPlace()
+{
+    if (m_grabber->isBusy()) {
+        // A grab is already talking to the source application; sending
+        // another Ctrl+C or pasting now would break both operations.
+        qCDebug(lcApp) << "Ctrl+Shift+Q ignored: a selection grab is already in progress";
+        return;
+    }
+
+    // A new invocation replaces an unfinished answer from the previous one.
+    m_translations->cancel(TranslationManager::Channel::InPlace);
+    m_inPlaceReply = nullptr;
+
+    // The window is captured before the grab: it is the window the user is
+    // typing in and it must still be foreground when the answer arrives.
+    const quintptr target = Platform::foregroundWindow();
+    if (target == 0) {
+        qCWarning(lcApp) << "Translate-and-replace: no foreground window";
+        return;
+    }
+
+    m_grabber->grab([this, target](const QString &text) {
+        if (text.isEmpty()) {
+            showInPlaceMessage(tr("Nothing is selected."));
+            return;
+        }
+
+        const TranslationRequest request{text, m_sourceLanguage, m_targetLanguage};
+        TranslationReply *reply =
+            m_translations->translate(request, TranslationManager::Channel::InPlace);
+        reply->setParent(this); // freed with the controller if still pending at exit
+        m_inPlaceReply = reply;
+        m_inPlaceTarget = target;
+
+        connect(reply, &TranslationReply::finished, this, [this, reply] {
+            const bool current = reply == m_inPlaceReply;
+            if (current)
+                m_inPlaceReply = nullptr;
+            const TranslationResult result = reply->result();
+            reply->deleteLater();
+
+            if (!current || result.error == TranslationError::Cancelled)
+                return;
+            if (!result.ok()) {
+                showInPlaceMessage(TranslationErrorText::forResult(result));
+                return;
+            }
+
+            if (!Platform::isForegroundWindow(m_inPlaceTarget)) {
+                // Do not paste into whatever window happened to become active
+                // while the request was in flight.
+                QGuiApplication::clipboard()->setText(result.translatedText);
+                showInPlaceMessage(tr("The active window changed; the translation was copied "
+                                      "to the clipboard."));
+                return;
+            }
+
+            pasteTranslation(result.translatedText);
+        });
+    });
+}
+
+void AppController::pasteTranslation(const QString &text)
+{
+    QClipboard *clipboard = QGuiApplication::clipboard();
+
+    // Restore a previous pending snapshot before taking a new one.
+    if (m_pasteSnapshot)
+        restoreClipboardAfterPaste();
+
+    const bool restore =
+        !m_settings || m_settings->current().general.restoreClipboard;
+    if (restore)
+        m_pasteSnapshot = snapshotClipboard();
+
+    auto data = std::make_unique<QMimeData>();
+    data->setText(text);
+    // Keep the synthetic paste out of clipboard history where Windows allows
+    // it; the target application still receives normal text on Ctrl+V.
+    data->setData(QStringLiteral("ExcludeClipboardContentFromMonitorProcessing"),
+                  QByteArray(1, '\0'));
+    data->setData(QStringLiteral("CanIncludeInClipboardHistory"), QByteArray(4, '\0'));
+    clipboard->setMimeData(data.release());
+
+    if (!Platform::sendPasteShortcut()) {
+        // Leave the translation on the clipboard so it can be pasted by hand.
+        m_pasteSnapshot.reset();
+        qCWarning(lcApp) << "Translate-and-replace: SendInput failed";
+        showInPlaceMessage(
+            tr("Could not paste automatically; the translation is on the clipboard."));
+        return;
+    }
+
+    if (m_pasteSnapshot)
+        QTimer::singleShot(500, this, &AppController::restoreClipboardAfterPaste);
+}
+
+void AppController::restoreClipboardAfterPaste()
+{
+    if (!m_pasteSnapshot)
+        return;
+
+    m_pasteSnapshot->setData(QStringLiteral("ExcludeClipboardContentFromMonitorProcessing"),
+                             QByteArray(1, '\0'));
+    QByteArray noHistory(4, '\0');
+    m_pasteSnapshot->setData(QStringLiteral("CanIncludeInClipboardHistory"), noHistory);
+    QGuiApplication::clipboard()->setMimeData(m_pasteSnapshot.release());
+}
+
+void AppController::showInPlaceMessage(const QString &message)
+{
+    qCDebug(lcApp) << "Translate-and-replace:" << message;
+    if (m_tray)
+        m_tray->showMessage(tr("Translate and replace"), message);
+}
+
+std::unique_ptr<QMimeData> AppController::snapshotClipboard() const
+{
+    auto copy = std::make_unique<QMimeData>();
+    const QMimeData *source = QGuiApplication::clipboard()->mimeData();
+    if (!source)
+        return copy;
+
+    const QStringList formats = source->formats();
+    for (const QString &format : formats)
+        copy->setData(format, source->data(format));
+    return copy;
+}
+
 void AppController::openPopupInMainWindow(const TranslationRequest &request,
                                           const TranslationResult &result)
 {
@@ -649,6 +789,9 @@ void AppController::prepareForQuit()
         settings.mainWindow.state = m_mainWindow->saveState();
         m_settings->save(settings);
     }
+
+    if (m_pasteSnapshot)
+        restoreClipboardAfterPaste();
 
     if (m_hotkeys)
         m_hotkeys->unregisterAll();

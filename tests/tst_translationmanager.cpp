@@ -169,15 +169,19 @@ private slots:
             manager.translate(request(QStringLiteral("one")), TranslationManager::Channel::MainWindow));
         std::unique_ptr<TranslationReply> popup(
             manager.translate(request(QStringLiteral("two")), TranslationManager::Channel::Popup));
+        std::unique_ptr<TranslationReply> inPlace(
+            manager.translate(request(QStringLiteral("three")), TranslationManager::Channel::InPlace));
         QVERIFY(!main->isFinished());
         QCOMPARE(service->replies.at(0)->abortCount, 0);
 
         manager.cancel(TranslationManager::Channel::Popup);
         QCOMPARE(popup->result().error, TranslationError::Cancelled);
         QVERIFY(!main->isFinished());
+        QVERIFY(!inPlace->isFinished());
 
         manager.cancelAll();
         QCOMPARE(main->result().error, TranslationError::Cancelled);
+        QCOMPARE(inPlace->result().error, TranslationError::Cancelled);
     }
 
     void finishedRequestIsNotAborted()

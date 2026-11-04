@@ -76,6 +76,7 @@ private:
     QComboBox *m_uiLanguage = nullptr;
 
     QKeySequenceEdit *m_popupHotkey = nullptr;
+    QKeySequenceEdit *m_replaceSelectionHotkey = nullptr;
     QKeySequenceEdit *m_mainWindowHotkey = nullptr;
     QKeySequenceEdit *m_showMainWindowHotkey = nullptr;
 

@@ -21,8 +21,13 @@ Working now:
 - **Ctrl+Q** translates the selected text in a compact window next to the cursor. The window
   has a loading indicator, error and retry states, a target-language menu, Copy, “Open in
   Main Window”, and a pin that keeps it open when focus is lost.
+- **Ctrl+Shift+Q** translates the selected text and replaces the selection with the translation
+  directly in the active input field, without a popup or manual copy/paste. This is intended for
+  chatting: select your reply, press the hotkey, and the translated text takes its place. If the
+  active window changes while the request is in flight, nothing is pasted; the translation is
+  copied to the clipboard and a tray notification is shown.
 - Settings dialog: autostart with Windows, start minimized, clipboard restore, popup focus
-  behavior, hotkeys for both scenarios, source/target languages, maximum text length and the
+  behavior, hotkeys for all scenarios, source/target languages, maximum text length and the
   auto-translate delay.
 - Settings are stored in `%APPDATA%\qtranslate\qtranslate.ini`; a `qtranslate.ini` next to the
   executable switches to portable mode. API keys and proxy passwords are protected with DPAPI.
@@ -96,16 +101,21 @@ qtranslate [--minimized]
   source and the translation to the main window. **Esc**, the ✕ button or a click outside
   closes the window; 📌 keeps it open when focus is lost. The selection is copied through the
   clipboard and the previous clipboard contents are restored.
+- Select the text you want to send (for example, your reply in a chat input field) and press
+  **Ctrl+Shift+Q**: the translation replaces the selection in place. The source window must stay
+  active until the answer arrives; otherwise the translation is only copied to the clipboard.
+  The previous clipboard contents are restored after the paste.
 - In the main window, type or paste text and press **Translate** or **Ctrl+Enter**. The source
   language defaults to auto-detection, the target language to the system language. **⇄** swaps
   the languages and translates the translation back; **Copy** puts the translation on the
   clipboard. The detected language and errors are shown in the status bar. Repeating a translation
   is instant (in-memory cache), and the text is translated automatically after the configured
   delay while typing.
-- Open **Settings…** from the tray menu to change autostart, hotkey combinations, languages, the
-  interface language (System/English/Русский), maximum text length, the auto-translate delay, and
-  Google Cloud/DeepL API keys. Global hotkeys are disabled while a key combination field is
-  focused. Settings apply immediately and survive a restart.
+- Open **Settings…** from the tray menu to change autostart, hotkey combinations (popup,
+  replace-selection, main window, show window), languages, the interface language
+  (System/English/Русский), maximum text length, the auto-translate delay, and Google
+  Cloud/DeepL API keys. Global hotkeys are disabled while a key combination field is focused.
+  Settings apply immediately and survive a restart.
 - Select the active translation service in the main window or in the tray **Service** menu. Without
   a DeepL key, or with Google Cloud selected but no key, translation shows a clear “needs an API
   key” message.

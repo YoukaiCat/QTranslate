@@ -56,6 +56,8 @@ private slots:
         QCOMPARE(settings.general.uiLanguage, QStringLiteral("system"));
 
         QCOMPARE(settings.hotkeys.popup, QKeySequence(Qt::CTRL | Qt::Key_Q));
+        QCOMPARE(settings.hotkeys.replaceSelection,
+                 QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Q));
         QCOMPARE(settings.hotkeys.mainWindow, QKeySequence(Qt::CTRL | Qt::Key_W));
         QVERIFY(settings.hotkeys.showMainWindow.isEmpty());
 
@@ -89,6 +91,7 @@ private slots:
         settings.general.restoreClipboard = false;
 
         settings.hotkeys.popup = QKeySequence(QStringLiteral("Ctrl+Alt+T"));
+        settings.hotkeys.replaceSelection = QKeySequence(QStringLiteral("Ctrl+Alt+R"));
         settings.hotkeys.mainWindow = QKeySequence();
         settings.hotkeys.showMainWindow = QKeySequence(QStringLiteral("Ctrl+Shift+F12"));
 
@@ -133,6 +136,8 @@ private slots:
         QCOMPARE(result.general.restoreClipboard, false);
 
         QCOMPARE(result.hotkeys.popup, QKeySequence(QStringLiteral("Ctrl+Alt+T")));
+        QCOMPARE(result.hotkeys.replaceSelection,
+                 QKeySequence(QStringLiteral("Ctrl+Alt+R")));
         QVERIFY(result.hotkeys.mainWindow.isEmpty());
         QCOMPARE(result.hotkeys.showMainWindow,
                  QKeySequence(QStringLiteral("Ctrl+Shift+F12")));

@@ -21,7 +21,7 @@ class TranslationManager : public QObject
 public:
     // Independent request streams: a new request cancels the unfinished one of
     // the same channel only.
-    enum class Channel { MainWindow, Popup };
+    enum class Channel { MainWindow, Popup, InPlace };
 
     static constexpr int kDefaultMaxLength = 20000;
 
@@ -76,4 +76,5 @@ private:
     QStringList m_cacheOrder; // oldest first
     QPointer<TranslationReply> m_mainWindowReply;
     QPointer<TranslationReply> m_popupReply;
+    QPointer<TranslationReply> m_inPlaceReply;
 };

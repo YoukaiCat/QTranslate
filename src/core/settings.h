@@ -19,6 +19,7 @@ struct GeneralSettings
 struct HotkeySettings
 {
     QKeySequence popup;
+    QKeySequence replaceSelection;
     QKeySequence mainWindow;
     QKeySequence showMainWindow;
 };

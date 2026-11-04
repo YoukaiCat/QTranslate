@@ -45,6 +45,8 @@ private slots:
         auto *autoClose = dialog.findChild<QCheckBox *>(QStringLiteral("autoClosePopup"));
         auto *popupHotkey =
             dialog.findChild<QKeySequenceEdit *>(QStringLiteral("popupHotkey"));
+        auto *replaceHotkey =
+            dialog.findChild<QKeySequenceEdit *>(QStringLiteral("replaceSelectionHotkey"));
         auto *mainHotkey =
             dialog.findChild<QKeySequenceEdit *>(QStringLiteral("mainWindowHotkey"));
         auto *source =
@@ -62,6 +64,7 @@ private slots:
         QVERIFY(restoreClipboard);
         QVERIFY(autoClose);
         QVERIFY(popupHotkey);
+        QVERIFY(replaceHotkey);
         QVERIFY(mainHotkey);
         QVERIFY(source);
         QVERIFY(primary);
@@ -74,6 +77,8 @@ private slots:
         QVERIFY(!restoreClipboard->isChecked());
         QVERIFY(!autoClose->isChecked());
         QCOMPARE(popupHotkey->keySequence(), QKeySequence(Qt::CTRL | Qt::Key_Q));
+        QCOMPARE(replaceHotkey->keySequence(),
+                 QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Q));
         QCOMPARE(mainHotkey->keySequence(), QKeySequence(Qt::CTRL | Qt::Key_W));
         QCOMPARE(source->currentCode(), QStringLiteral("en"));
         QCOMPARE(primary->currentCode(), QStringLiteral("de"));
@@ -102,6 +107,8 @@ private slots:
                     ->findData(QStringLiteral("en")));
         dialog.findChild<QKeySequenceEdit *>(QStringLiteral("popupHotkey"))
             ->setKeySequence(QKeySequence(QStringLiteral("Ctrl+Alt+T")));
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("replaceSelectionHotkey"))
+            ->setKeySequence(QKeySequence(QStringLiteral("Ctrl+Alt+R")));
         dialog.findChild<QKeySequenceEdit *>(QStringLiteral("mainWindowHotkey"))
             ->setKeySequence(QKeySequence());
         dialog.findChild<LanguageComboBox *>(QStringLiteral("sourceLanguage"))
@@ -120,6 +127,8 @@ private slots:
         QCOMPARE(result.general.uiLanguage, QStringLiteral("en"));
         QVERIFY(!result.popup.autoCloseOnFocusLoss);
         QCOMPARE(result.hotkeys.popup, QKeySequence(QStringLiteral("Ctrl+Alt+T")));
+        QCOMPARE(result.hotkeys.replaceSelection,
+                 QKeySequence(QStringLiteral("Ctrl+Alt+R")));
         QVERIFY(result.hotkeys.mainWindow.isEmpty());
         QCOMPARE(result.translation.sourceLang, QStringLiteral("en"));
         QCOMPARE(result.translation.primaryLang, QStringLiteral("fr"));
@@ -137,7 +146,7 @@ private slots:
         const QKeySequence duplicate(QStringLiteral("Ctrl+Alt+T"));
         dialog.findChild<QKeySequenceEdit *>(QStringLiteral("popupHotkey"))
             ->setKeySequence(duplicate);
-        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("mainWindowHotkey"))
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("replaceSelectionHotkey"))
             ->setKeySequence(duplicate);
 
         QString error;
@@ -173,7 +182,8 @@ private slots:
     {
         SettingsDialog dialog(AppSettings{}, {QStringLiteral("en"), QStringLiteral("ru")},
                               {QStringLiteral("en"), QStringLiteral("ru")}, true);
-        for (const char *name : {"popupHotkey", "mainWindowHotkey", "showMainWindowHotkey"}) {
+        for (const char *name : {"popupHotkey", "replaceSelectionHotkey",
+                                 "mainWindowHotkey", "showMainWindowHotkey"}) {
             dialog.findChild<QKeySequenceEdit *>(QString::fromLatin1(name))
                 ->setKeySequence(QKeySequence());
         }

@@ -4,6 +4,7 @@
 #include <QPointer>
 #include <QString>
 #include <QStringList>
+#include <QtGlobal>
 
 #include <memory>
 
@@ -11,6 +12,7 @@ class HotkeyManager;
 class MainWindow;
 class NetworkManager;
 class PopupWindow;
+class QMimeData;
 class SelectionGrabber;
 class SettingsStore;
 class SingleInstance;
@@ -59,7 +61,12 @@ private:
     void translateInMainWindow(const TranslationRequest &request);
     void translateSelectionInMainWindow();
     void translateSelectionInPopup();
+    void translateSelectionInPlace();
     void translateInPopup(const TranslationRequest &request);
+    void pasteTranslation(const QString &text);
+    void restoreClipboardAfterPaste();
+    void showInPlaceMessage(const QString &message);
+    std::unique_ptr<QMimeData> snapshotClipboard() const;
     void openPopupInMainWindow(const TranslationRequest &request,
                                const TranslationResult &result);
     void showMainWindow();
@@ -79,6 +86,9 @@ private:
     DeepLService *m_deepl = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for
     QPointer<TranslationReply> m_popupReply;      // the request the popup waits for
+    QPointer<TranslationReply> m_inPlaceReply;    // the request for replacing a selection
+    quintptr m_inPlaceTarget = 0;                 // window that had the selection
+    std::unique_ptr<QMimeData> m_pasteSnapshot;   // clipboard to restore after pasting
 
     QStringList m_targetLanguages;
     QString m_sourceLanguage;

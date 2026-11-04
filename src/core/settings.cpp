@@ -159,6 +159,7 @@ void normalize(AppSettings &settings)
 AppSettings::AppSettings()
 {
     hotkeys.popup = QKeySequence(Qt::CTRL | Qt::Key_Q);
+    hotkeys.replaceSelection = QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Q);
     hotkeys.mainWindow = QKeySequence(Qt::CTRL | Qt::Key_W);
 
     translation.primaryLang = Languages::systemLanguage();
@@ -246,6 +247,9 @@ void SettingsStore::load()
     settings.beginGroup(QStringLiteral("hotkeys"));
     loaded.hotkeys.popup = readKeySequence(settings, QStringLiteral("popup"),
                                            loaded.hotkeys.popup);
+    loaded.hotkeys.replaceSelection =
+        readKeySequence(settings, QStringLiteral("replaceSelection"),
+                        loaded.hotkeys.replaceSelection);
     loaded.hotkeys.mainWindow = readKeySequence(settings, QStringLiteral("mainWindow"),
                                                 loaded.hotkeys.mainWindow);
     loaded.hotkeys.showMainWindow = readKeySequence(settings, QStringLiteral("showMainWindow"),
@@ -365,6 +369,8 @@ void SettingsStore::save(const AppSettings &settings)
     out.beginGroup(QStringLiteral("hotkeys"));
     out.setValue(QStringLiteral("popup"),
                  normalized.hotkeys.popup.toString(QKeySequence::PortableText));
+    out.setValue(QStringLiteral("replaceSelection"),
+                 normalized.hotkeys.replaceSelection.toString(QKeySequence::PortableText));
     out.setValue(QStringLiteral("mainWindow"),
                  normalized.hotkeys.mainWindow.toString(QKeySequence::PortableText));
     out.setValue(QStringLiteral("showMainWindow"),

@@ -6,4 +6,19 @@ void allowAnyProcessToActivate()
 {
 }
 
+quintptr foregroundWindow()
+{
+    return 0;
+}
+
+bool isForegroundWindow(quintptr)
+{
+    return false;
+}
+
+bool sendPasteShortcut()
+{
+    return false;
+}
+
 } // namespace Platform

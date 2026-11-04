@@ -26,6 +26,22 @@
             <source>DeepL is not available.</source>
             <translation>DeepL недоступен.</translation>
         </message>
+        <message>
+            <source>Nothing is selected.</source>
+            <translation>Ничего не выделено.</translation>
+        </message>
+        <message>
+            <source>The active window changed; the translation was copied to the clipboard.</source>
+            <translation>Активное окно изменилось; перевод скопирован в буфер обмена.</translation>
+        </message>
+        <message>
+            <source>Could not paste automatically; the translation is on the clipboard.</source>
+            <translation>Не удалось вставить автоматически; перевод находится в буфере обмена.</translation>
+        </message>
+        <message>
+            <source>Translate and replace</source>
+            <translation>Перевод с заменой</translation>
+        </message>
     </context>
     <context>
         <name>DeepLService</name>
@@ -727,6 +743,10 @@
             <translation>Переводить во всплывающем окне:</translation>
         </message>
         <message>
+            <source>Replace the selected text with the translation:</source>
+            <translation>Заменить выделенный текст переводом:</translation>
+        </message>
+        <message>
             <source>Translate in the main window:</source>
             <translation>Переводить в главном окне:</translation>
         </message>
@@ -917,6 +937,10 @@
         <message>
             <source>Translate in a popup</source>
             <translation>Переводить во всплывающем окне</translation>
+        </message>
+        <message>
+            <source>Replace the selected text with the translation</source>
+            <translation>Заменить выделенный текст переводом</translation>
         </message>
         <message>
             <source>Translate in the main window</source>

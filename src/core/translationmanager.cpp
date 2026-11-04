@@ -235,6 +235,7 @@ void TranslationManager::cancelAll()
 {
     cancel(Channel::MainWindow);
     cancel(Channel::Popup);
+    cancel(Channel::InPlace);
 }
 
 QString TranslationManager::cacheKey(const QString &serviceId,
@@ -275,5 +276,13 @@ void TranslationManager::clearCache()
 
 QPointer<TranslationReply> &TranslationManager::current(Channel channel)
 {
-    return channel == Channel::Popup ? m_popupReply : m_mainWindowReply;
+    switch (channel) {
+    case Channel::Popup:
+        return m_popupReply;
+    case Channel::InPlace:
+        return m_inPlaceReply;
+    case Channel::MainWindow:
+        break;
+    }
+    return m_mainWindowReply;
 }

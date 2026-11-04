@@ -89,11 +89,15 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     auto *hotkeysForm = new QFormLayout;
     m_popupHotkey = new QKeySequenceEdit(hotkeysPage);
     m_popupHotkey->setObjectName(QStringLiteral("popupHotkey"));
+    m_replaceSelectionHotkey = new QKeySequenceEdit(hotkeysPage);
+    m_replaceSelectionHotkey->setObjectName(QStringLiteral("replaceSelectionHotkey"));
     m_mainWindowHotkey = new QKeySequenceEdit(hotkeysPage);
     m_mainWindowHotkey->setObjectName(QStringLiteral("mainWindowHotkey"));
     m_showMainWindowHotkey = new QKeySequenceEdit(hotkeysPage);
     m_showMainWindowHotkey->setObjectName(QStringLiteral("showMainWindowHotkey"));
     hotkeysForm->addRow(tr("Translate in a popup:"), m_popupHotkey);
+    hotkeysForm->addRow(tr("Replace the selected text with the translation:"),
+                        m_replaceSelectionHotkey);
     hotkeysForm->addRow(tr("Translate in the main window:"), m_mainWindowHotkey);
     hotkeysForm->addRow(tr("Show the main window:"), m_showMainWindowHotkey);
     auto *hotkeysHint = new QLabel(
@@ -298,6 +302,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     updateAutostartHint();
 
     m_popupHotkey->setKeySequence(settings.hotkeys.popup);
+    m_replaceSelectionHotkey->setKeySequence(settings.hotkeys.replaceSelection);
     m_mainWindowHotkey->setKeySequence(settings.hotkeys.mainWindow);
     m_showMainWindowHotkey->setKeySequence(settings.hotkeys.showMainWindow);
 
@@ -349,6 +354,7 @@ AppSettings SettingsDialog::settings() const
     result.general.restoreClipboard = m_restoreClipboard->isChecked();
     result.general.uiLanguage = m_uiLanguage->currentData().toString();
     result.hotkeys.popup = m_popupHotkey->keySequence();
+    result.hotkeys.replaceSelection = m_replaceSelectionHotkey->keySequence();
     result.hotkeys.mainWindow = m_mainWindowHotkey->keySequence();
     result.hotkeys.showMainWindow = m_showMainWindowHotkey->keySequence();
     result.translation.sourceLang = m_sourceLanguage->currentCode();
@@ -414,6 +420,8 @@ bool SettingsDialog::validate(QString *error) const
         QString name;
     } hotkeys[] = {
         {m_popupHotkey->keySequence(), tr("Translate in a popup")},
+        {m_replaceSelectionHotkey->keySequence(),
+         tr("Replace the selected text with the translation")},
         {m_mainWindowHotkey->keySequence(), tr("Translate in the main window")},
         {m_showMainWindowHotkey->keySequence(), tr("Show the main window")},
     };
@@ -490,7 +498,8 @@ bool SettingsDialog::anyHotkeyEditFocused() const
     if (!focus)
         return false;
     for (const QKeySequenceEdit *edit :
-         {m_popupHotkey, m_mainWindowHotkey, m_showMainWindowHotkey}) {
+         {m_popupHotkey, m_replaceSelectionHotkey, m_mainWindowHotkey,
+          m_showMainWindowHotkey}) {
         if (edit == focus || edit->isAncestorOf(focus))
             return true;
     }
