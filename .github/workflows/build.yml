@@ -1,0 +1,128 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows x64
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      QT_QPA_PLATFORM: offscreen
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.12.0"
+          arch: "win64_msvc2022_64"
+          cache: true
+
+      - name: Verify tag matches the project version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $cmakeLists = Get-Content CMakeLists.txt -Raw
+          if ($cmakeLists -notmatch 'project\s*\(\s*qtranslate\s+VERSION\s+([0-9]+\.[0-9]+\.[0-9]+)') {
+            throw "Cannot read the project version from CMakeLists.txt."
+          }
+          $expected = "v" + $Matches[1]
+          if ($env:GITHUB_REF_NAME -ne $expected) {
+            throw "Tag '$env:GITHUB_REF_NAME' does not match the project version '$expected'."
+          }
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          cmake -S . -B build/ci -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+
+      - name: Build
+        run: cmake --build build/ci --config Release --parallel
+
+      - name: Test
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:QT_ROOT_DIR\bin;$env:PATH"
+          ctest --test-dir build/ci -C Release --output-on-failure
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Package
+        shell: pwsh
+        run: |
+          ./packaging/windows/package.ps1 `
+            -BuildDir build/ci `
+            -DistDir build/dist `
+            -OutputDir build/artifacts
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: qtranslate-windows-x64
+          path: build/artifacts/*
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: qtranslate-windows-x64
+          path: artifacts
+
+      - name: Create or update the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          notes="doc/releases/${version}.md"
+
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" artifacts/* --repo "$GITHUB_REPOSITORY" --clobber
+            if [[ -f "$notes" ]]; then
+              gh release edit "$tag" --repo "$GITHUB_REPOSITORY" \
+                --title "qtranslate ${version}" --notes-file "$notes" --latest
+            else
+              gh release edit "$tag" --repo "$GITHUB_REPOSITORY" \
+                --title "qtranslate ${version}" --generate-notes --latest
+            fi
+          else
+            if [[ -f "$notes" ]]; then
+              gh release create "$tag" artifacts/* --repo "$GITHUB_REPOSITORY" \
+                --title "qtranslate ${version}" --notes-file "$notes" --latest
+            else
+              gh release create "$tag" artifacts/* --repo "$GITHUB_REPOSITORY" \
+                --title "qtranslate ${version}" --generate-notes --latest
+            fi
+          fi

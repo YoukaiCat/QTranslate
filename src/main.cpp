@@ -18,6 +18,12 @@ int main(int argc, char *argv[])
 {
 #ifdef Q_OS_WIN
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
+    // The installer and uninstaller detect a running copy through this named
+    // mutex (AppMutex in packaging/windows/qtranslate.iss). The handle stays
+    // open until the process exits; Windows releases it automatically.
+    const HANDLE installerMutex = CreateMutexW(nullptr, FALSE, L"Local\\qtranslate-app");
+    Q_UNUSED(installerMutex);
 #endif
 
     QElapsedTimer startupTimer;

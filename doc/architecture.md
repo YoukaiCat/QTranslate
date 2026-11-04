@@ -35,12 +35,31 @@
 
 ### 1.3. Технологический стек
 
-- C++17, Qt 6.5+ (разработка ведётся на Qt 6.12, MSVC 2022 x64), CMake ≥ 3.19.
+- C++17, Qt 6.5+ (Windows: Qt 6.12, MSVC 2022 x64; Linux: GCC/Clang — этап 11), CMake ≥ 3.19.
 - Модули Qt: `Core`, `Gui`, `Widgets`, `Network`. В тестах дополнительно `Test`.
-- Целевая платформа — Windows 10/11. Платформенный код изолирован (см. §3.3), чтобы позже можно было
-  добавить Linux/macOS, не трогая ядро.
-- TLS — штатный Schannel-бэкенд Qt 6 (`qschannelbackend`), OpenSSL не нужен.
-- WinAPI: `user32` (горячие клавиши, `SendInput`, буфер обмена), `crypt32` (DPAPI для секретов).
+- Платформы: **Windows 10/11 x64 — текущая**; **Linux x86_64 — запланирована** (этап 11);
+  macOS не планируется. Платформенный код изолирован (см. §3.3 и §4.14), чтобы порт не трогал ядро.
+- TLS: на Windows — штатный Schannel-бэкенд Qt 6 (`qschannelbackend`), OpenSSL не нужен; на Linux
+  будет использоваться OpenSSL-бэкенд Qt.
+- WinAPI (только Windows): `user32` (горячие клавиши, `SendInput`, буфер обмена), `crypt32`
+  (DPAPI для секретов).
+
+### 1.4. Матрица платформ
+
+| Компонент | Windows 10/11 x64 (0.9.0) | Linux x86_64 (план, этап 11) |
+|---|---|---|
+| Сборка | MSVC 2022, Qt 6.12 | GCC/Clang, Qt 6.5+, CMake |
+| Интерфейс | Qt Widgets, трей | Qt Widgets, StatusNotifierItem/AppIndicator |
+| Горячие клавиши | `RegisterHotKey` | X11 `XGrabKey`; Wayland — портал `GlobalShortcuts` или CLI + сочетания рабочего стола |
+| Захват выделения | `SendInput` Ctrl+C + буфер | X11 XTest; Wayland — копирование пользователем |
+| Вставка перевода | `SendInput` Ctrl+V | X11 XTest; Wayland — недоступно надёжно |
+| Автозагрузка | реестр `Run` | XDG autostart |
+| Секреты | DPAPI | libsecret; fallback-файл 0600 |
+| Настройки | `%APPDATA%\qtranslate` | `$XDG_CONFIG_HOME/qtranslate` |
+| Пакеты | установщик + portable zip | `tar.gz`, `.deb`, AppImage |
+
+Windows-специфичные ограничения (администраторские окна, Win+V, DPI) на Linux не действуют;
+вместо них появляются ограничения Wayland (§4.14).
 
 ---
 
@@ -103,8 +122,16 @@
 ```
 qtranslate/
 ├── CMakeLists.txt
+├── .github/
+│   └── workflows/build.yml     сборка, тесты, упаковка и релиз
+├── packaging/
+│   └── windows/
+│       ├── qtranslate.iss      установщик Inno Setup
+│       └── package.ps1         dist + zip + setup + SHA256SUMS
 ├── doc/
-│   └── architecture.md
+│   ├── architecture.md
+│   ├── plan.md
+│   └── releases/0.9.0.md       заметки к релизу
 ├── resources/
 │   ├── qtranslate.qrc          иконки трея, окна
 │   ├── icons/                  app.ico, tray-*.png (светлая/тёмная тема)
@@ -181,7 +208,7 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (этап 8) |
+| Цель | Что входит сейчас (0.9.0) |
 |---|---|
 | `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (кэш, умный язык); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice` |
 | `qtranslate` | `main.cpp`, `app/*` (включая файловый лог), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` с автопереводом, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*`, `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_ru_RU.ts` |
@@ -205,6 +232,47 @@ qtranslate/
   `windeployqt` не находит runtime без `VCINSTALLDIR`, поэтому CMake копирует его сам. Это нужно
   для запуска на Windows без установленного Visual C++ Redistributable.
 
+### 3.4. Упаковка, CI и выпуск
+
+Версия проекта задаётся один раз — `project(qtranslate VERSION 0.9.0)`; из неё получаются
+`AppInfo::version()`, `User-Agent`, ресурс версии exe и имена артефактов. Тег релиза имеет вид
+`v0.9.0`, CI сверяет его с `CMakeLists.txt` и падает при расхождении.
+
+**Портативный архив.** `cmake --install <build> --prefix build/dist` создаёт самодостаточный
+каталог `bin/`, `plugins/`, `translations/` с Qt, плагинами и MSVC CRT. `package.ps1` проверяет
+обязательные файлы и упаковывает содержимое `dist` в `qtranslate-<версия>-win64.zip`; внутри
+архива лежат те же `bin/`, `plugins/`, `translations/`, запуск — `bin\qtranslate.exe`.
+
+**Установщик.** `packaging/windows/qtranslate.iss` (Inno Setup 6.3+ / 7) ставит приложение
+**для текущего пользователя**: `PrivilegesRequired=lowest`, каталог
+`%LOCALAPPDATA%\Programs\qtranslate`, меню «Пуск», необязательный ярлык на рабочем столе,
+деинсталлятор. UAC не запрашивается. Языки установщика — English и Русский. Настройки в
+`%APPDATA%\qtranslate` не удаляются при деинсталляции. Установщик и деинсталлятор проверяют
+`AppMutex=Local\qtranslate-app`, который держит запущенное приложение (`main.cpp`), поэтому файлы
+не заменяются и не удаляются под работающей копией. `CloseApplications=yes` дополнительно
+позволяет Restart Manager закрыть приложение, если пользователь согласится.
+
+**Скрипт.** `packaging/windows/package.ps1` делает `cmake --install`, проверяет наличие
+`qtranslate.exe`, Qt DLL, `qwindows.dll`, `qschannelbackend.dll` и CRT, собирает zip и установщик,
+затем пишет `SHA256SUMS.txt`. Параметры `-SkipInstall` и `-SkipInstaller` нужны для отладки
+упаковки; CI использует полный путь.
+
+**CI.** `.github/workflows/build.yml` на `windows-latest`:
+1. `install-qt-action` ставит Qt 6.12.0 MSVC 2022 x64;
+2. CMake (Visual Studio 2022 generator) собирает Release;
+3. `ctest` запускает 17 тестов с `QT_QPA_PLATFORM=offscreen`;
+4. Chocolatey ставит Inno Setup, `package.ps1` собирает артефакты;
+5. `upload-artifact` сохраняет `build/artifacts/*`.
+
+Workflow запускается на push в `main`, pull request и вручную. По тегу `v*` отдельная job с
+`contents: write` скачивает артефакты и создаёт/обновляет GitHub Release, прикладывая установщик,
+zip и `SHA256SUMS.txt`; заметки берутся из `doc/releases/<версия>.md`. Повторный запуск
+перезаписывает файлы релиза (`gh release upload --clobber`).
+
+**Подпись.** Кодовой подписи пока нет: сертификата в проекте нет, SmartScreen может показать
+предупреждение. Добавление подписи не меняет формат артефактов и CI-шагов (нужен секрет с
+сертификатом и вызов `signtool`).
+
 ---
 
 ## 4. Модули
@@ -216,8 +284,10 @@ qtranslate/
 1. Создаёт `QApplication`, задаёт `applicationName`/`applicationVersion`,
    `setQuitOnLastWindowClosed(false)` — иначе скрытие последнего окна завершит процесс.
    `organizationName` намеренно не задаётся, чтобы данные лежали в `%APPDATA%\qtranslate`
-   (см. §4.11).
-2. Разбирает аргументы (`QCommandLineParser`): `--minimized` (передаётся из автозагрузки).
+   (см. §4.11). На Windows дополнительно создаётся именованный mutex `Local\qtranslate-app`,
+   который проверяют установщик и деинсталлятор (`AppMutex`, §3.4).
+2. Разбирает аргументы (`QCommandLineParser`): `--minimized` (передаётся из автозагрузки) и
+   `--verbose` (подробный лог).
 3. `SingleInstance` (ключ `qtranslate-<имя пользователя>`):
    - Основной экземпляр выбирается захватом файла блокировки `%TEMP%\qtranslate-<user>.lock`
      (`QLockFile`). Это атомарно, а блокировка упавшего процесса определяется по PID и
@@ -948,6 +1018,54 @@ namespace Autostart {
 переприменяет статические тексты, трей перестраивает меню, popup пересоздаётся при следующем
 вызове. Английский — исходный язык, русский — перевод.
 
+### 4.14. Переносимость и план поддержки Linux
+
+Windows-код изолирован: заголовки `platform/*.h` не включают `<windows.h>`, а реализации —
+`*_win.cpp`; для остальных платформ есть `*_stub.cpp`. `qtranslate_core`, `net/`, `services/` и
+UI не используют WinAPI. Благодаря этому `CMakeLists.txt` рассчитан на сборку каркаса под Linux,
+но фактическая проверка и реальные платформенные действия появятся только на этапе 11:
+сейчас все Linux-реализации — заглушки.
+
+| Модуль | Windows (сейчас) | Linux X11 (план) | Linux Wayland (план) |
+|---|---|---|---|
+| Горячие клавиши | `RegisterHotKey` | `XGrabKey` через xcb/Xlib | портал `org.freedesktop.portal.GlobalShortcuts`; если нет — команды CLI, привязанные в DE |
+| Захват выделения | `SendInput` Ctrl+C | XTest + `QClipboard` | синтетический ввод недоступен; пользователь копирует сам |
+| Вставка перевода | `SendInput` Ctrl+V | XTest Ctrl+V | недоступна надёжно; максимум — `wtype`/`ydotool` как внешняя зависимость |
+| Активное окно | `GetForegroundWindow` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus` | нет надёжного API; режим «в поле» не гарантируется |
+| Автозагрузка | реестр `Run` | `~/.config/autostart/qtranslate.desktop` | то же |
+| Секреты | DPAPI | libsecret | libsecret; fallback — файл 0600 + предупреждение |
+| Трей | `QSystemTrayIcon`/WinAPI | StatusNotifierItem | StatusNotifierItem; в GNOME нужен AppIndicator-extension |
+| Настройки | `%APPDATA%\qtranslate` | `$XDG_CONFIG_HOME/qtranslate` | то же |
+| Логи | `%LOCALAPPDATA%\qtranslate` | `$XDG_STATE_HOME/qtranslate` | то же |
+
+**Команды CLI.** Чтобы горячие клавиши работали в любом окружении (и на Wayland, где портала
+может не быть), приложение получит команды `--translate-popup`, `--translate-main` и
+`--translate-inplace`. Их можно назначить на сочетания в настройках GNOME/KDE/Xfce; для
+X11-реализации они не нужны, но остаются удобным fallback и используются тестами.
+
+**Трей.** Qt использует StatusNotifierItem/DBus. В GNOME по умолчанию иконки приложений не
+показываются — потребуется расширение AppIndicator; если трей недоступен, приложение должно
+показать главное окно и предупредить, а не завершаться молча.
+
+**Секреты.** Предпочтительный вариант — libsecret (`secret_password_store_sync`), который
+использует системный keyring. Если библиотеки нет при сборке, секреты пишутся в INI с правами
+0600, а в настройках показывается предупреждение. Молчаливое хранение паролей в открытом виде
+недопустимо.
+
+**Сборка и пакеты.** CMake уже умеет `install` и `qt_generate_deploy_app_script`; для Linux
+добавляются `.desktop`, иконки hicolor, `share/applications` и `RPATH`/`$ORIGIN` для AppImage.
+Планируемые артефакты: `qtranslate-<версия>-linux-x86_64.tar.gz` (портативный, с Qt),
+`.deb` (зависимости Qt из дистрибутива) и AppImage. CI — `ubuntu-24.04`, Qt 6.5+, тесты в
+`xvfb-run`; платформенные тесты Windows (`tst_hotkeymanager`, `tst_autostart`,
+`tst_secretprotector`) заменяются Linux-аналогами, остальные 14 тестов общие.
+
+**Ограничения Wayland.** Глобальные сочетания и синтетический ввод — не базовые возможности
+Wayland. Портал `GlobalShortcuts` поддерживается не всеми рабочими столами и версиями; вставка
+в активное поле и Ctrl+Shift+Q на Wayland не могут быть гарантированы без внешних инструментов
+или портала RemoteDesktop. Поэтому на первом этапе Linux-поддержки X11 считается полноценным
+таргетом, а Wayland — ограниченным: Ctrl+Q с копированием вручную, CLI-команды и явные
+предупреждения в интерфейсе. macOS не планируется.
+
 ---
 
 ## 5. Основные сценарии
@@ -1165,6 +1283,27 @@ SOCKS5-прокси с авторизацией; автозапуск после
 недоступна (проверен запуск `build/dist/bin/qtranslate.exe` без Qt в `PATH`); реальная перезагрузка
 для автозагрузки и прокси с авторизацией не проверялись; см. §9.2.
 
+### 8.2. CI и проверка релиза 0.9.0
+
+Локальная проверка (Windows 11, Qt 6.12.0 MSVC 2022 x64):
+
+- Debug и Release: сборка без предупреждений `/W4`, **17/17 тестов**;
+- `package.ps1` собрал `qtranslate-0.9.0-win64.zip` (24,0 МБ),
+  `qtranslate-0.9.0-win64-setup.exe` (17,9 МБ) и `SHA256SUMS.txt`; обе контрольные суммы
+  совпали с файлами;
+- установщик: тихая установка в отдельный каталог, `FileVersion` exe = 0.9.0, ярлык в меню
+  «Пуск» создан; запуск `bin\qtranslate.exe` без Qt в `PATH` успешен, `Qt6Core.dll` и
+  `vcruntime140.dll` загрузились из каталога установки;
+- `AppMutex`: при запущенном qtranslate деинсталлятор завершился с кодом 1 и не удалил файлы;
+- удаление: exe и ярлык удалены, каталог установки очищен, `%APPDATA%\qtranslate\qtranslate.ini`
+  сохранён;
+- портативный zip: распакован в отдельный каталог, `bin\qtranslate.exe` запустился без Qt в
+  `PATH`, Qt и CRT загрузились из архива.
+
+CI: workflow `.github/workflows/build.yml` собирает и тестирует Release на `windows-latest`,
+затем повторяет упаковку; по тегу `v0.9.0` публикует релиз. Результат прогона и ссылка на релиз
+фиксируются в `doc/plan.md` (этап 10).
+
 ---
 
 ## 9. Принятые решения и развитие
@@ -1180,6 +1319,10 @@ SOCKS5-прокси с авторизацией; автозапуск после
 | Закрепление 📌 во всплывающем окне | Действует до закрытия окна; новый Ctrl+Q начинает с незакреплённого состояния (§4.13) |
 | HTTP/2 и бесплатный Google | Принудительно HTTP/1.1: gtx стабильно отвечал `429` на HTTP/2-запросы Qt, по HTTP/1.1 работает (§4.10) |
 | Перевод с заменой выделения | Отдельное действие Ctrl+Shift+Q, не меняет Ctrl+Q. Вставка только если исходное окно всё ещё активно; иначе перевод копируется в буфер и показывается уведомление (§5.4) |
+| Установщик | Inno Setup 6.3+/7, установка **для текущего пользователя** без UAC в `%LOCALAPPDATA%\Programs\qtranslate`; настройки при удалении сохраняются (§3.4) |
+| Портативная сборка | Остаётся вторым артефактом релиза: zip с `bin/`, `plugins/`, `translations/`; нужна пользователям без прав установки (§3.4) |
+| CI и релизы | GitHub Actions на `windows-latest`; push/PR собирают и тестируют, тег `v*` публикует установщик, zip и `SHA256SUMS.txt`; версия тега сверяется с CMake (§3.4) |
+| Linux | Отдельный этап 11 после перехода на Linux-машину: X11 — полноценный таргет, Wayland — портал/CLI-fallback с явными ограничениями; macOS не планируется (§4.14) |
 | Запись в журнале Win+V при захвате | Промежуточный Ctrl+C может оставить запись; exclusion-форматы защищают только восстановление буфера. Полный обход — стратегия через UI Automation (§9.2), принята как будущее развитие |
 
 ### 9.2. Ограничения и возможное развитие
@@ -1193,6 +1336,10 @@ SOCKS5-прокси с авторизацией; автозапуск после
 - Реальная перезагрузка Windows для автозагрузки и внешний прокси с авторизацией не проверялись
   (локальные HTTP/SOCKS5-прокси с авторизацией покрыты `tst_networkmanager`).
 - Захват в окнах администраторских процессов и запись Win+V — известные ограничения (§9.1).
+- Установщик не подписан кодом: Windows SmartScreen может показать предупреждение. Сертификата
+  в проекте нет; добавление подписи не меняет формат артефактов.
+- Linux-сборка в 0.9.0 отсутствует: платформенные модули — заглушки, полноценный порт — этап 11
+  (§4.14). macOS не планируется.
 
 Возможное развитие:
 
@@ -1200,7 +1347,9 @@ SOCKS5-прокси с авторизацией; автозапуск после
 2. Словарные статьи (варианты перевода, части речи) — Google gtx отдаёт их при `dt=bd`.
 3. Дополнительные сервисы (Yandex, Microsoft, LibreTranslate) — новый класс `TranslationService`.
 4. Озвучивание текста (`QTextToSpeech`), история переводов.
-5. Linux/macOS: реализации `platform/*` (X11/Wayland-ограничения на глобальные клавиши, PRIMARY selection).
+5. **Linux** — этап 11: X11-реализации `platform/*`, Wayland через портал `GlobalShortcuts` и
+   CLI-fallback, пакеты `.deb`/AppImage (§4.14).
+6. Кодовая подпись установщика и автообновление поверх установленной версии.
 
 ---
 

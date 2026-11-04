@@ -1,18 +1,36 @@
 # qtranslate
 
+[![build](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml)
+
 Fast and simple desktop translator for Windows. It lives in the system tray and translates
 the text selected in any application with a global hotkey.
 
-> **Status:** release candidate. The tray translator, Google/DeepL services, Ctrl+Q/Ctrl+W,
-> settings, autostart, portable mode, proxy support, translation cache, smart language switching,
-> auto-translation, Russian/English UI, file logging and a self-contained build with the MSVC
-> runtime work. Word/VS Code, a second monitor and a real reboot were not available for the final
-> manual checks; see [architecture §9.2](doc/architecture.md).
+> **Status:** 0.9.0 release candidate. The tray translator, Google/DeepL services,
+> Ctrl+Q/Ctrl+Shift+Q/Ctrl+W, settings, autostart, portable mode, proxy support, translation
+> cache, smart language switching, auto-translation, Russian/English UI, file logging and a
+> self-contained build with the MSVC runtime work. Linux support is planned for a later stage;
+> see [architecture §4.14](doc/architecture.md). Word/VS Code, a second monitor and a real reboot
+> were not available for the final manual checks; see [architecture §9.2](doc/architecture.md).
+
+## Download and install
+
+The latest build is on the [Releases](https://github.com/youkaicat/qtranslate/releases/latest) page:
+
+- **Installer** — `qtranslate-0.9.0-win64-setup.exe`. Installs qtranslate for the current user
+  without administrator rights, creates Start menu and optional desktop shortcuts, and adds an
+  uninstaller. Uninstalling keeps the settings in `%APPDATA%\qtranslate`.
+- **Portable archive** — `qtranslate-0.9.0-win64.zip`. Extract it and run
+  `bin\qtranslate.exe`; no installation or administrator rights are needed. The archive is
+  self-contained (Qt and the MSVC runtime are included).
+- **`SHA256SUMS.txt`** — SHA-256 checksums of both files.
+
+The installer is not code-signed yet, so Windows SmartScreen may show a warning.
 
 ## Features
 
 Working now:
 
+- Windows installer and portable ZIP with the same self-contained application.
 - Lives in the system tray (`--minimized` starts hidden), one instance per user.
 - Main window translation with automatic source language detection; long texts are split
   into parts and translated completely.
@@ -82,6 +100,23 @@ To produce a self-contained folder with the Qt libraries and the MSVC runtime:
 ```bat
 cmake --install build/release --prefix dist
 ```
+
+To build both release artifacts (portable ZIP, per-user installer and `SHA256SUMS.txt`), install
+[Inno Setup 6.3+](https://jrsoftware.org/isinfo.php) and run from the repository root:
+
+```powershell
+./packaging/windows/package.ps1 -BuildDir build/release
+```
+
+The output goes to `build/artifacts`:
+
+- `qtranslate-0.9.0-win64.zip` — portable archive;
+- `qtranslate-0.9.0-win64-setup.exe` — per-user installer;
+- `SHA256SUMS.txt` — SHA-256 checksums.
+
+The CI workflow [`.github/workflows/build.yml`](.github/workflows/build.yml) runs the same steps on
+`windows-latest` for every push and pull request. Pushing a tag such as `v0.9.0` publishes a GitHub
+release with these artifacts; the tag must match the version in `CMakeLists.txt`.
 
 ## Usage
 
