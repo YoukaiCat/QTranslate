@@ -1,0 +1,73 @@
+#pragma once
+
+#include "core/settings.h"
+
+#include <QDialog>
+#include <QStringList>
+
+class QCheckBox;
+class QCloseEvent;
+class QLabel;
+class QKeySequenceEdit;
+class QSpinBox;
+class QTabWidget;
+class LanguageComboBox;
+
+// Edits a copy of AppSettings; AppController applies and saves it on OK
+// (see doc/architecture.md, §4.13). Knows nothing about services or WinAPI.
+class SettingsDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    SettingsDialog(const AppSettings &settings, const QStringList &sourceLanguages,
+                   const QStringList &targetLanguages, bool autostartApproved,
+                   QWidget *parent = nullptr);
+    ~SettingsDialog() override;
+
+    // Exposed for tests: the current widget values as AppSettings.
+    AppSettings settings() const;
+
+    // Empty error text means the values can be accepted. A multi-chord or
+    // unsupported key sequence, duplicate hotkeys or equal languages fail.
+    bool validate(QString *error) const;
+
+    void accept() override;
+
+signals:
+    // While a QKeySequenceEdit has focus, global hotkeys must be suspended.
+    void hotkeyEditingChanged(bool editing);
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
+private:
+    void buildUi(const QStringList &sourceLanguages);
+    void loadValues(const AppSettings &settings, bool autostartApproved);
+    void updateHotkeyEditing();
+    void setHotkeyEditing(bool editing);
+    bool anyHotkeyEditFocused() const;
+
+    AppSettings m_initial;
+    QStringList m_targetLanguages;
+
+    QTabWidget *m_tabs = nullptr;
+
+    QCheckBox *m_autostart = nullptr;
+    QLabel *m_autostartHint = nullptr;
+    QCheckBox *m_startMinimized = nullptr;
+    QCheckBox *m_restoreClipboard = nullptr;
+    QCheckBox *m_autoClosePopup = nullptr;
+
+    QKeySequenceEdit *m_popupHotkey = nullptr;
+    QKeySequenceEdit *m_mainWindowHotkey = nullptr;
+    QKeySequenceEdit *m_showMainWindowHotkey = nullptr;
+
+    LanguageComboBox *m_sourceLanguage = nullptr;
+    LanguageComboBox *m_primaryLanguage = nullptr;
+    LanguageComboBox *m_secondaryLanguage = nullptr;
+    QSpinBox *m_maxLength = nullptr;
+    QSpinBox *m_autoTranslateDelay = nullptr;
+
+    bool m_hotkeyEditing = false;
+};

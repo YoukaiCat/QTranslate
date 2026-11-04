@@ -23,6 +23,7 @@ public:
 
     void show();
     void showMessage(const QString &title, const QString &message);
+    void setToolTip(const QString &text);
 
 signals:
     void showWindowRequested();

@@ -12,10 +12,12 @@ class MainWindow;
 class NetworkManager;
 class PopupWindow;
 class SelectionGrabber;
+class SettingsStore;
 class SingleInstance;
 class TranslationManager;
 class TranslationReply;
 class TrayIcon;
+struct AppSettings;
 struct TranslationRequest;
 struct TranslationResult;
 
@@ -31,7 +33,8 @@ public:
         bool startHidden = false; // --minimized
     };
 
-    AppController(SingleInstance *instance, const Options &options, QObject *parent = nullptr);
+    AppController(SingleInstance *instance, SettingsStore *settings, const Options &options,
+                  QObject *parent = nullptr);
     ~AppController() override;
 
     // Creates the UI and shows the tray icon (and the main window unless hidden).
@@ -41,6 +44,10 @@ private:
     void createTranslation();
     void createHotkeys();
     void initMainWindowLanguages();
+    void updateLanguageConfiguration();
+    void updateTrayToolTip();
+    void applySettings(const AppSettings &oldSettings, const AppSettings &newSettings);
+    void showSettings();
     PopupWindow *ensurePopup();
     void translateInMainWindow(const TranslationRequest &request);
     void translateSelectionInMainWindow();
@@ -54,8 +61,10 @@ private:
     void prepareForQuit();
 
     SingleInstance *m_instance = nullptr;
+    SettingsStore *m_settings = nullptr;
     Options m_options;
     bool m_trayAvailable = false;
+    bool m_quitting = false;
 
     NetworkManager *m_network = nullptr;
     TranslationManager *m_translations = nullptr;

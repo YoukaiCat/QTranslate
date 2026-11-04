@@ -34,6 +34,15 @@ qtranslate_add_test(tst_popupwindow
 )
 target_link_libraries(tst_popupwindow PRIVATE Qt::Widgets)
 set_tests_properties(tst_popupwindow PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+qtranslate_add_test(tst_settings)
+qtranslate_add_test(tst_settingsdialog
+    ${PROJECT_SOURCE_DIR}/src/ui/languagecombobox.cpp
+    ${PROJECT_SOURCE_DIR}/src/ui/languagecombobox.h
+    ${PROJECT_SOURCE_DIR}/src/ui/settingsdialog.cpp
+    ${PROJECT_SOURCE_DIR}/src/ui/settingsdialog.h
+)
+target_link_libraries(tst_settingsdialog PRIVATE Qt::Widgets)
+set_tests_properties(tst_settingsdialog PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 qtranslate_add_test(tst_textchunker)
 qtranslate_add_test(tst_translationmanager)
 
@@ -43,4 +52,15 @@ if(WIN32)
         ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager_win.cpp
     )
     target_link_libraries(tst_hotkeymanager PRIVATE user32)
+
+    qtranslate_add_test(tst_autostart
+        ${PROJECT_SOURCE_DIR}/src/platform/autostart.h
+        ${PROJECT_SOURCE_DIR}/src/platform/autostart_win.cpp
+    )
+
+    qtranslate_add_test(tst_secretprotector
+        ${PROJECT_SOURCE_DIR}/src/platform/secretprotector.h
+        ${PROJECT_SOURCE_DIR}/src/platform/secretprotector_win.cpp
+    )
+    target_link_libraries(tst_secretprotector PRIVATE crypt32)
 endif()

@@ -2,6 +2,8 @@
 #include "app/logging.h"
 #include "app/singleinstance.h"
 #include "core/appinfo.h"
+#include "core/settings.h"
+#include "platform/secretprotector.h"
 
 #include <QApplication>
 #include <QCommandLineParser>
@@ -37,7 +39,15 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    AppController controller(&instance, AppController::Options{startHidden});
+    SettingsStore settings;
+    settings.setSecretCodec(
+        {[](const QString &plainText) { return SecretProtector::protect(plainText); },
+         [](const QByteArray &protectedData) {
+             return SecretProtector::unprotect(protectedData);
+         }});
+    settings.load();
+
+    AppController controller(&instance, &settings, AppController::Options{startHidden});
     controller.start();
     qCInfo(lcApp) << "Started in" << startupTimer.elapsed() << "ms";
 

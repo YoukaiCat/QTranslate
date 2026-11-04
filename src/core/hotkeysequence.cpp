@@ -54,6 +54,10 @@ quint32 modifierBits(Qt::KeyboardModifiers modifiers)
         bits |= HotkeySequence::ModAlt;
     if (modifiers & Qt::ControlModifier)
         bits |= HotkeySequence::ModControl;
+    // On Windows AltGr is reported as Ctrl+Alt (or as GroupSwitch by Qt).
+    // RegisterHotKey only knows MOD_CONTROL | MOD_ALT, so normalize it.
+    if (modifiers & Qt::GroupSwitchModifier)
+        bits |= HotkeySequence::ModControl | HotkeySequence::ModAlt;
     if (modifiers & Qt::ShiftModifier)
         bits |= HotkeySequence::ModShift;
     if (modifiers & Qt::MetaModifier)
@@ -352,9 +356,6 @@ Hotkey fromKeySequence(const QKeySequence &sequence)
     const QKeyCombination combination = sequence[0];
     const Qt::KeyboardModifiers modifiers = combination.keyboardModifiers();
     const Qt::Key key = combination.key();
-
-    if (modifiers & Qt::GroupSwitchModifier)
-        return {};
 
     const bool keypad = modifiers & Qt::KeypadModifier;
     bool implicitShift = false;

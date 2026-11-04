@@ -168,7 +168,10 @@ qtranslate/
     ├── tst_hotkeysequence.cpp
     ├── tst_popupplacement.cpp
     ├── tst_popupwindow.cpp
-    └── tst_settings.cpp
+    ├── tst_secretprotector.cpp
+    ├── tst_settings.cpp
+    ├── tst_settingsdialog.cpp
+    └── tst_autostart.cpp
 ```
 
 ### 3.2. Соответствие текущему `CMakeLists.txt`
@@ -176,11 +179,11 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (этап 4) |
+| Цель | Что входит сейчас (этап 5) |
 |---|---|
-| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice` |
-| `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `popupwindow`, `translationerrortext`, `trayicon`), `platform/hotkeymanager.h` + `*_win.cpp` (на других платформах — `*_stub.cpp`), `platform/selectiongrabber.h` + `*_win.cpp`/`*_stub.cpp`, `platform/windowactivation.h` + `windowactivation_win.cpp`/`_stub.cpp` |
-| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_popupplacement`, `tst_popupwindow` (offscreen, с исходниками `popupwindow`/`translationerrortext`), `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
+| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice` |
+| `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/hotkeymanager.h` + `*_win.cpp` (на других платформах — `*_stub.cpp`), `platform/selectiongrabber.h` + `*_win.cpp`/`*_stub.cpp`, `platform/autostart.h` + `autostart_win.cpp`/`_stub.cpp`, `platform/secretprotector.h` + `secretprotector_win.cpp`/`_stub.cpp`, `platform/windowactivation.h` + `windowactivation_win.cpp`/`_stub.cpp` |
+| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
 
 ### 3.3. Сборка
 
@@ -671,48 +674,59 @@ SOCKS4 Qt не поддерживает; в UI предлагается толь
 
 ### 4.11. Настройки — `AppSettings` и `SettingsStore`
 
-`AppSettings` — обычная структура-значение со всеми параметрами. `SettingsStore` загружает и
-сохраняет её и сообщает об изменениях:
+`AppSettings` — обычная структура-значение со всеми параметрами (вложенные группы `general`,
+`hotkeys`, `translation`, `google`, `deepl`, `network`, `popup`, `mainWindow` и
+`settingsVersion`). `SettingsStore` загружает и сохраняет её и сообщает об изменениях:
 
 ```cpp
 class SettingsStore : public QObject {
     Q_OBJECT
 public:
+    explicit SettingsStore(QObject *parent = nullptr);
+    SettingsStore(const QString &filePath, const SecretCodec &codec,
+                  QObject *parent = nullptr);
+    static QString defaultFilePath(const QString &applicationDir,
+                                   const QString &appDataDir);
     const AppSettings &current() const;
+    void setSecretCodec(const SecretCodec &codec);
+    void load();
     void save(const AppSettings &s);       // пишет на диск и испускает changed
 signals:
     void changed(const AppSettings &oldS, const AppSettings &newS);
 };
 ```
 
-Окно настроек редактирует **копию** `AppSettings`; по «Применить»/«ОК» отдаёт её в `save()`.
+Окно настроек редактирует **копию** `AppSettings`; по «ОК» отдаёт её в `save()`.
 `AppController` сравнивает старое и новое значение и применяет только изменившееся
-(перерегистрирует клавиши, меняет прокси и т.д.).
+(перерегистрирует клавиши, меняет языки, автозагрузку и т.д.).
 
 Хранение: INI-файл через `QSettings`.
 
 - Обычный режим: `%APPDATA%\qtranslate\qtranslate.ini`.
-- Портативный режим: если рядом с exe лежит `qtranslate.ini`, используется он.
+- Портативный режим: если рядом с exe лежит `qtranslate.ini`, используется он. Путь выбирает
+  чистая `SettingsStore::defaultFilePath(applicationDir, appDataDir)`, поэтому правило проверяется
+  тестом без записи рядом с тестовым exe.
 
-Замечание для этапа 5: `organizationName` не задан (§4.1), поэтому конструктор `QSettings` по
-умолчанию для этого не годится. `SettingsStore` открывает INI по явному пути —
-`QSettings(path, QSettings::IniFormat)`, где `path` — `%APPDATA%\qtranslate\qtranslate.ini`
-(или файл рядом с exe в портативном режиме).
+`organizationName` не задан (§4.1), поэтому `QSettings` по умолчанию для этого не годится.
+`SettingsStore` открывает INI по явному пути — `QSettings(path, QSettings::IniFormat)`. Группа
+`general` в INI называется `[app]`: `QSettings` зарезервировал имя `[General]` для ключей верхнего
+уровня и иначе экранирует группу в `[%General]`.
 
 Секреты (API-ключи, пароль прокси) хранятся зашифрованными через Windows DPAPI
 (`CryptProtectData`, привязка к учётной записи пользователя) в base64. Модуль
 `platform/secretprotector` предоставляет `protect(QString) → QByteArray` и
-`unprotect(QByteArray) → QString`. Если расшифровать не удалось (файл перенесён на другую машину),
-поле считается пустым.
+`unprotect(QByteArray) → QString`. `SettingsStore` не знает WinAPI: приложение передаёт ему
+`SecretCodec` из двух `std::function`; без кодека секреты не пишутся вовсе (открытым текстом —
+никогда). Если расшифровать не удалось (файл перенесён на другую машину), поле считается пустым.
 
 Ключи файла:
 
 | Ключ | Тип | По умолчанию |
 |---|---|---|
-| `general/autostart` | bool | `false` |
-| `general/startMinimized` | bool | `true` |
-| `general/uiLanguage` | string | системный (`ru`/`en`) |
-| `general/restoreClipboard` | bool | `true` |
+| `app/autostart` | bool | `false` |
+| `app/startMinimized` | bool | `true` |
+| `app/uiLanguage` | string | `system` (переключение — этап 8) |
+| `app/restoreClipboard` | bool | `true` |
 | `hotkeys/popup` | QKeySequence (portable text) | `Ctrl+Q` |
 | `hotkeys/mainWindow` | QKeySequence | `Ctrl+W` |
 | `hotkeys/showMainWindow` | QKeySequence | пусто |
@@ -741,9 +755,11 @@ signals:
 
 ```cpp
 namespace Autostart {
+    QString commandForExecutable(const QString &path);
     bool isEnabled();
     bool setEnabled(bool on);   // false — нет доступа к реестру
-    void sync(bool wanted);     // привести реестр к настройке, обновить путь
+    bool sync(bool wanted);     // привести реестр к настройке, обновить путь
+    bool isApproved();          // учитывает StartupApproved
 }
 ```
 
@@ -858,18 +874,22 @@ namespace Autostart {
 
 #### `SettingsDialog`
 
-Вкладки:
+Модальный диалог редактирует копию `AppSettings`; «ОК» возвращает её, `AppController` сохраняет и
+применяет изменения, «Отмена» ничего не меняет. Вкладки:
 
-1. **Общие** — автозагрузка, запуск свёрнутым, язык интерфейса, восстановление буфера обмена.
-2. **Горячие клавиши** — `QKeySequenceEdit` для каждого действия; пока поле в фокусе,
-   `HotkeyManager::setSuspended(true)`, чтобы сочетание не перехватывалось глобально. При
-   «Применить» показывается, какие сочетания не удалось зарегистрировать.
-3. **Перевод** — сервис по умолчанию, исходный язык, основной и дополнительный языки, максимальная
-   длина, задержка автоперевода.
+1. **Общие** — автозагрузка (с подсказкой, если Windows отключила её в Диспетчере задач), запуск
+   свёрнутым, восстановление буфера обмена, закрытие popup при потере фокуса. Язык интерфейса
+   появится вместе с локализацией на этапе 8.
+2. **Горячие клавиши** — `QKeySequenceEdit` для Ctrl+Q, Ctrl+W и показа главного окна. Пустое поле
+   отключает действие. Перед принятием проверяются односоставность, поддержка Win32 и отсутствие
+   дубликатов. Пока фокус в любом поле, диалог испускает `hotkeyEditingChanged(true)`, и
+   `AppController` приостанавливает глобальные клавиши; после ухода фокуса/закрытия — возобновляет.
+3. **Перевод** — исходный язык (с «Auto-detect»), основной и дополнительный языки, максимальная
+   длина, задержка автоперевода. Дополнительный язык зарезервирован под этап 8.
 4. **Сервисы** — Google: режим (бесплатный/Cloud API), ключ. DeepL: ключ, вариант английского,
-   кнопка «Проверить ключ» (показывает остаток лимита).
+   кнопка «Проверить ключ» (показывает остаток лимита). Добавляется на этапе 6.
 5. **Сеть** — режим прокси, тип, хост, порт, авторизация, таймаут, кнопка «Проверить соединение»
-   (`NetworkManager::testProxy` — запрос к сервису через ещё не сохранённые параметры).
+   (`NetworkManager::testProxy`). Добавляется на этапе 7.
 
 #### `AppIcon`
 
@@ -886,15 +906,15 @@ namespace Autostart {
 main
  ├─ QApplication, setQuitOnLastWindowClosed(false)
  ├─ SingleInstance: уже запущены? → отправить "activate" → exit(0)
- ├─ SettingsStore::load()          (миграция, расшифровка секретов)
- ├─ установить QTranslator
+ ├─ SettingsStore: DPAPI SecretCodec, load()   (миграция, расшифровка секретов)
+ ├─ установить QTranslator                     (этап 8)
  └─ AppController
-     ├─ NetworkManager.applyProxy(settings.proxy)
-     ├─ GoogleTranslateService, DeepLService → TranslationManager
+     ├─ NetworkManager (timeout), GoogleTranslateService → TranslationManager
+     ├─ языки/сервис/maxLength/restoreClipboard из настроек
+     ├─ MainWindow + восстановление геометрии; PopupWindow — лениво при первом Ctrl+Q
      ├─ TrayIcon.show()
      ├─ HotkeyManager.register(...)  → занятые сочетания → уведомление в трее
      ├─ Autostart::sync(settings.autostart)
-     ├─ MainWindow создаётся скрытым; PopupWindow — лениво при первом Ctrl+Q
      └─ если нет --minimized и не startMinimized → MainWindow.show()
 ```
 
@@ -939,20 +959,29 @@ main
 ### 5.4. Применение настроек
 
 ```
-SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)──► AppController
-                                                                    ├─ hotkeys изменились → unregisterAll + register
-                                                                    ├─ proxy изменился   → NetworkManager.applyProxy
-                                                                    ├─ autostart         → Autostart::setEnabled
-                                                                    ├─ service/ключи     → service.applySettings,
-                                                                    │                      TranslationManager.setActiveService
-                                                                    └─ uiLanguage        → перезагрузить QTranslator
-                                                                                           (окна обрабатывают LanguageChange)
+SettingsDialog ──OK──► SettingsStore::save ──changed(old,new)──► AppController
+                                                                    ├─ hotkeys изменились → register/unregister только их
+                                                                    ├─ autostart         → Autostart::sync
+                                                                    ├─ языки/сервис      → MainWindow/PopupWindow + TranslationManager
+                                                                    ├─ maxLength         → TranslationManager + SelectionGrabber
+                                                                    ├─ restoreClipboard  → SelectionGrabber
+                                                                    ├─ timeoutMs         → NetworkManager
+                                                                    ├─ popup width/focus → PopupWindow
+                                                                    └─ service/ключи     → service (этап 6)
+                                                                       uiLanguage        → QTranslator (этап 8)
 ```
+
+Пока фокус находится в любом `QKeySequenceEdit`, `SettingsDialog` испускает
+`hotkeyEditingChanged(true)`, и `AppController` приостанавливает глобальные клавиши
+(`HotkeyManager::setSuspended`). После ухода фокуса или закрытия диалога регистрация
+восстанавливается.
 
 ### 5.5. Завершение
 
-«Выход» в трее → `AppController::shutdown()`: `HotkeyManager::unregisterAll()`, отмена активных
-запросов, сохранение геометрии окон → `QApplication::quit()`.
+«Выход» в трее → `AppController::prepareForQuit()`: флаг завершения (чтобы `closeEvent` не прятал
+окно и `changed` не применялся повторно), сохранение геометрии главного окна в `SettingsStore`,
+`HotkeyManager::unregisterAll()`, отмена активных запросов, скрытие popup → `QApplication::quit()`.
+Повторный вызов (`aboutToQuit`, завершение сеанса) ничего не делает.
 
 ---
 
@@ -977,7 +1006,8 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 ## 7. Логирование, безопасность, приватность
 
 - Категории `QLoggingCategory`: `qtranslate.app`, `.hotkey`, `.grab`, `.net`, `.translation`
-  (`TranslationManager`), `.service.google`, `.service.deepl`. По умолчанию выводятся только предупреждения; подробный лог включается
+  (`TranslationManager`), `.service.google`, `.service.deepl`, `.settings`, `.autostart`, `.secret`.
+  По умолчанию выводятся только предупреждения; подробный лог включается
   переменной окружения `QT_LOGGING_RULES` или флагом `--verbose` (запись в
   `%LOCALAPPDATA%\qtranslate\qtranslate.log`).
 - **В лог не пишутся переводимые тексты, ключи и пароли** — только длины, коды ответов, время.
@@ -1004,7 +1034,10 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 | `tst_textchunker` | Разбиение по абзацам/предложениям, слова длиннее лимита, суррогатные пары не разрываются |
 | `tst_hotkeysequence` | `QKeySequence` ↔ `(MOD, VK)`, неподдерживаемые клавиши |
 | `tst_hotkeymanager` | `RegisterHotKey`: конфликт сочетаний, `setSuspended`, отложенная регистрация (Windows; собирается вместе с `platform/hotkeymanager_win.cpp`) |
-| `tst_settings` | Значения по умолчанию, запись/чтение, миграция версий |
+| `tst_settings` | Значения по умолчанию, запись/чтение, миграция версий, портативный путь, DPAPI-совместимое шифрование секретов |
+| `tst_settingsdialog` | Заполнение вкладок, возврат изменённой копии, проверка сочетаний и языков, приостановка глобальных клавиш (offscreen) |
+| `tst_secretprotector` | DPAPI: round-trip, пустые и испорченные данные |
+| `tst_autostart` | Формат команды автозагрузки |
 | `tst_translationmanager` | Отмена запросов в канале, кэш, повтор на дополнительный язык — на фейковом сервисе |
 
 Сервисы тестируются через подмену сети: фейковый `TranslationService` для менеджера и
@@ -1025,6 +1058,7 @@ SOCKS5-прокси с авторизацией; автозапуск после
 | Вопрос | Решение |
 |---|---|
 | Ctrl+Q / Ctrl+W перехватываются у всех программ | Оставить по умолчанию, без предупреждений; меняются в настройках (§4.3) |
+| Ctrl+Alt на не-английской раскладке | Qt может вернуть `GroupSwitchModifier` (AltGr); нормализуем его в `MOD_CONTROL \| MOD_ALT`, иначе сочетание ошибочно отвергалось бы (§4.3) |
 | HTTPS-прокси | HTTP-прокси с туннелем `CONNECT`; TLS до прокси не поддерживается (§4.10) |
 | Окна процессов, запущенных от администратора | Захват выделения в них не работает — это известное ограничение, его не обходим (§4.4) |
 | Закрепление 📌 во всплывающем окне | Действует до закрытия окна; новый Ctrl+Q начинает с незакреплённого состояния (§4.13) |

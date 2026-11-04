@@ -149,6 +149,12 @@ private slots:
         QVERIFY(!HotkeySequence::fromKeySequence(QKeySequence(Qt::Key_LaunchMail)).isValid());
     }
 
+    void altGrBecomesCtrlAlt()
+    {
+        const QKeySequence sequence(QKeyCombination(Qt::GroupSwitchModifier, Qt::Key_E));
+        QCOMPARE(HotkeySequence::fromKeySequence(sequence), (Hotkey{ModControl | ModAlt, 'E'}));
+    }
+
     void roundTrip()
     {
         const QKeySequence sequences[] = {

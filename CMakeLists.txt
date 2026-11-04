@@ -24,6 +24,7 @@ qt_add_library(qtranslate_core STATIC
     src/core/hotkeysequence.cpp             src/core/hotkeysequence.h
     src/core/languages.cpp                  src/core/languages.h
     src/core/popupplacement.cpp             src/core/popupplacement.h
+    src/core/settings.cpp                   src/core/settings.h
     src/core/textchunker.cpp                src/core/textchunker.h
     src/core/translationmanager.cpp         src/core/translationmanager.h
     src/core/translationservice.cpp         src/core/translationservice.h
@@ -49,26 +50,33 @@ qt_add_executable(qtranslate
     src/app/appcontroller.cpp       src/app/appcontroller.h
     src/app/logging.cpp             src/app/logging.h
     src/app/singleinstance.cpp      src/app/singleinstance.h
+    src/platform/autostart.h
     src/platform/hotkeymanager.h
+    src/platform/secretprotector.h
     src/platform/selectiongrabber.h
     src/platform/windowactivation.h
     src/ui/appicon.cpp              src/ui/appicon.h
     src/ui/languagecombobox.cpp     src/ui/languagecombobox.h
     src/ui/mainwindow.cpp           src/ui/mainwindow.h
     src/ui/popupwindow.cpp          src/ui/popupwindow.h
+    src/ui/settingsdialog.cpp       src/ui/settingsdialog.h
     src/ui/translationerrortext.cpp src/ui/translationerrortext.h
     src/ui/trayicon.cpp             src/ui/trayicon.h
 )
 
 if(WIN32)
     target_sources(qtranslate PRIVATE
+        src/platform/autostart_win.cpp
         src/platform/hotkeymanager_win.cpp
+        src/platform/secretprotector_win.cpp
         src/platform/selectiongrabber_win.cpp
         src/platform/windowactivation_win.cpp
     )
 else()
     target_sources(qtranslate PRIVATE
+        src/platform/autostart_stub.cpp
         src/platform/hotkeymanager_stub.cpp
+        src/platform/secretprotector_stub.cpp
         src/platform/selectiongrabber_stub.cpp
         src/platform/windowactivation_stub.cpp
     )
@@ -81,7 +89,7 @@ target_link_libraries(qtranslate
 )
 
 if(WIN32)
-    target_link_libraries(qtranslate PRIVATE user32)
+    target_link_libraries(qtranslate PRIVATE user32 crypt32)
 endif()
 
 qtranslate_set_compile_options(qtranslate)

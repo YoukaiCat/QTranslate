@@ -4,9 +4,9 @@ Fast and simple desktop translator for Windows. It lives in the system tray and 
 the text selected in any application with a global hotkey.
 
 > **Status:** early development. The tray icon, single instance, translation in the main
-> window through Google Translate (free endpoint), the **Ctrl+W** scenario (translate the
-> selected text in the main window) and the **Ctrl+Q** popup next to the cursor work;
-> settings and global hotkey configuration are not implemented yet. See the
+> window through Google Translate (free endpoint), **Ctrl+W**, the **Ctrl+Q** popup,
+> settings (including configurable hotkeys and autostart) and the portable INI mode work;
+> additional services and proxy support are not implemented yet. See the
 > [plan](doc/plan.md).
 
 ## Features
@@ -21,12 +21,15 @@ Working now:
 - **Ctrl+Q** translates the selected text in a compact window next to the cursor. The window
   has a loading indicator, error and retry states, a target-language menu, Copy, “Open in
   Main Window”, and a pin that keeps it open when focus is lost.
+- Settings dialog: autostart with Windows, start minimized, clipboard restore, popup focus
+  behavior, hotkeys for both scenarios, source/target languages, maximum text length and the
+  auto-translate delay.
+- Settings are stored in `%APPDATA%\qtranslate\qtranslate.ini`; a `qtranslate.ini` next to the
+  executable switches to portable mode. API keys and proxy passwords are protected with DPAPI.
 
 Planned:
 
-- Optional autostart with Windows.
-- Hotkeys are configurable.
-- Translation services: Google Translate (free endpoint or Cloud API key) and DeepL (API key).
+- Translation services: Google Translate Cloud API and DeepL (API keys).
 - HTTP and SOCKS5 proxy support, with or without authentication, or the system proxy.
 
 ## Building
@@ -78,6 +81,13 @@ qtranslate [--minimized]
   language defaults to auto-detection, the target language to the system language. **⇄** swaps
   the languages and translates the translation back; **Copy** puts the translation on the
   clipboard. The detected language and errors are shown in the status bar.
+- Open **Settings…** from the tray menu to change autostart, hotkey combinations, languages,
+  maximum text length and the auto-translate delay. Global hotkeys are disabled while a key
+  combination field is focused. Settings apply immediately and survive a restart.
+- Portable mode: put an empty `qtranslate.ini` next to `qtranslate.exe` and the application
+  will use that file instead of `%APPDATA%\qtranslate\qtranslate.ini`.
+- With **Start qtranslate when Windows starts** enabled, the application is launched with
+  `--minimized` and starts in the tray.
 
 The text you translate is sent to the selected online service (currently Google Translate).
 The application does not log the texts.

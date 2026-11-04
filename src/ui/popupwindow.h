@@ -36,6 +36,7 @@ public:
 
     void setServiceName(const QString &name);
     void setAutoCloseOnFocusLoss(bool enabled);
+    void setPreferredWidth(int width);
 
     bool isPinned() const { return m_pinned; }
     void setPinned(bool pinned);
@@ -108,6 +109,7 @@ private:
     TranslationResult m_result;
     QString m_detectedLang;
     QPoint m_anchor;
+    int m_width = 460;
     State m_state = State::Loading;
     bool m_pinned = false;
     bool m_autoCloseOnFocusLoss = true;

@@ -30,7 +30,9 @@
 
 namespace {
 
-constexpr int kWidth = 460;
+constexpr int kDefaultWidth = 460;
+constexpr int kMinWidth = 320;
+constexpr int kMaxWidth = 800;
 constexpr int kMargin = 12;
 constexpr int kSpacing = 8;
 constexpr int kAnchorOffset = 14;
@@ -100,7 +102,7 @@ PopupWindow::PopupWindow(QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose, false);
     setFocusPolicy(Qt::StrongFocus);
     setAutoFillBackground(true);
-    setFixedWidth(kWidth);
+    setFixedWidth(kDefaultWidth);
     setStyleSheet(QStringLiteral(
         "QToolButton { border: 0; padding: 2px 6px; border-radius: 4px; }"
         "QToolButton:hover { background-color: palette(midlight); }"
@@ -125,7 +127,7 @@ PopupWindow::PopupWindow(QWidget *parent)
 
     setState(State::Loading);
     updateLanguageButton();
-    resize(kWidth, 180);
+    resize(m_width, 180);
 }
 
 PopupWindow::~PopupWindow() = default;
@@ -315,6 +317,17 @@ void PopupWindow::setServiceName(const QString &name)
 void PopupWindow::setAutoCloseOnFocusLoss(bool enabled)
 {
     m_autoCloseOnFocusLoss = enabled;
+}
+
+void PopupWindow::setPreferredWidth(int width)
+{
+    const int bounded = qBound(kMinWidth, width, kMaxWidth);
+    if (m_width == bounded)
+        return;
+    m_width = bounded;
+    setFixedWidth(m_width);
+    if (isVisible())
+        updateGeometryAndPlacement();
 }
 
 void PopupWindow::setPinned(bool pinned)
@@ -519,7 +532,7 @@ void PopupWindow::updateGeometryAndPlacement()
     if (!screen)
         screen = QGuiApplication::primaryScreen();
     const QRect available = screen ? screen->availableGeometry() : QRect(0, 0, 1280, 720);
-    const int textWidth = kWidth - 2 * kMargin - 28;
+    const int textWidth = m_width - 2 * kMargin - 28;
 
     int contentHeight = 60;
     switch (m_state) {
@@ -551,7 +564,7 @@ void PopupWindow::updateGeometryAndPlacement()
 
     contentHeight = qMin(contentHeight, qMax(40, maxWindowHeight - chrome));
     m_stack->setFixedHeight(contentHeight);
-    setFixedSize(kWidth, qMin(maxWindowHeight, chrome + contentHeight));
+    setFixedSize(m_width, qMin(maxWindowHeight, chrome + contentHeight));
     layout()->activate();
 
     move(PopupPlacement::positionNear(m_anchor, size(), available, kAnchorOffset));

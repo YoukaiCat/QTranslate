@@ -16,7 +16,6 @@ TrayIcon::TrayIcon(const QIcon &icon, QObject *parent)
     m_menu->setDefaultAction(showAction);
 
     m_settingsAction = m_menu->addAction(tr("Settings…"));
-    m_settingsAction->setEnabled(false); // settings dialog arrives in stage 5
     connect(m_settingsAction, &QAction::triggered, this, &TrayIcon::settingsRequested);
 
     m_menu->addSeparator();
@@ -48,6 +47,11 @@ void TrayIcon::show()
 void TrayIcon::showMessage(const QString &title, const QString &message)
 {
     m_tray->showMessage(title, message, QSystemTrayIcon::Information, 5000);
+}
+
+void TrayIcon::setToolTip(const QString &text)
+{
+    m_tray->setToolTip(text);
 }
 
 void TrayIcon::onActivated(QSystemTrayIcon::ActivationReason reason)
