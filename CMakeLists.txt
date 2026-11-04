@@ -20,7 +20,15 @@ endfunction()
 # qtranslate_core: UI- and WinAPI-free logic shared by the app and the tests.
 # ---------------------------------------------------------------------------
 qt_add_library(qtranslate_core STATIC
-    src/core/appinfo.cpp    src/core/appinfo.h
+    src/core/appinfo.cpp                    src/core/appinfo.h
+    src/core/languages.cpp                  src/core/languages.h
+    src/core/textchunker.cpp                src/core/textchunker.h
+    src/core/translationmanager.cpp         src/core/translationmanager.h
+    src/core/translationservice.cpp         src/core/translationservice.h
+    src/core/translationtypes.h
+    src/net/networkmanager.cpp              src/net/networkmanager.h
+    src/services/googleparser.cpp           src/services/googleparser.h
+    src/services/googletranslateservice.cpp src/services/googletranslateservice.h
 )
 
 target_include_directories(qtranslate_core PUBLIC src)
@@ -41,7 +49,9 @@ qt_add_executable(qtranslate
     src/app/singleinstance.cpp      src/app/singleinstance.h
     src/platform/windowactivation.h
     src/ui/appicon.cpp              src/ui/appicon.h
+    src/ui/languagecombobox.cpp     src/ui/languagecombobox.h
     src/ui/mainwindow.cpp           src/ui/mainwindow.h
+    src/ui/translationerrortext.cpp src/ui/translationerrortext.h
     src/ui/trayicon.cpp             src/ui/trayicon.h
 )
 

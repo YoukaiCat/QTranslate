@@ -120,7 +120,7 @@ qtranslate/
 │   ├── core/                   ← статическая библиотека qtranslate_core (без Widgets и WinAPI)
 │   │   ├── appinfo.h/.cpp            имя и версия приложения
 │   │   ├── translationtypes.h        TranslationRequest/Result/Error
-│   │   ├── translationservice.h      интерфейс сервиса + TranslationReply
+│   │   ├── translationservice.h/.cpp интерфейс сервиса + TranslationReply
 │   │   ├── translationmanager.h/.cpp реестр сервисов, кэш, логика языков, отмена
 │   │   ├── languages.h/.cpp          справочник языков и маппинг кодов
 │   │   ├── textchunker.h/.cpp        разбиение длинного текста на части
@@ -151,14 +151,17 @@ qtranslate/
 │       ├── popupwindow.h/.cpp
 │       ├── settingsdialog.h/.cpp
 │       ├── languagecombobox.h/.cpp
+│       ├── translationerrortext.h/.cpp  текст ошибки перевода для пользователя
 │       └── appicon.h/.cpp
 └── tests/
     ├── CMakeLists.txt
-    ├── fixtures/                     сохранённые ответы Google/DeepL
+    ├── fixtures/                     сохранённые ответы Google/DeepL (google/, deepl/)
     ├── tst_googleparser.cpp
+    ├── tst_googletranslateservice.cpp  сервис против локального HTTP-сервера
     ├── tst_deeplparser.cpp
     ├── tst_languages.cpp
     ├── tst_textchunker.cpp
+    ├── tst_translationmanager.cpp
     ├── tst_hotkeysequence.cpp
     └── tst_settings.cpp
 ```
@@ -168,11 +171,11 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (этап 1) |
+| Цель | Что входит сейчас (этап 2) |
 |---|---|
-| `qtranslate_core` | `core/appinfo.*` |
-| `qtranslate` | `main.cpp`, `app/*`, `ui/*`, `platform/windowactivation.h` + `windowactivation_win.cpp` (на не-Windows — `windowactivation_stub.cpp`) |
-| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`; каждый тест подключается функцией `qtranslate_add_test(<имя>)` и линкуется с `qtranslate_core` |
+| `qtranslate_core` | `core/`: `appinfo`, `languages`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice` |
+| `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `translationerrortext`, `trayicon`), `platform/windowactivation.h` + `windowactivation_win.cpp` (на не-Windows — `windowactivation_stub.cpp`) |
+| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_googleparser`, `tst_googletranslateservice`, `tst_languages`, `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
 
 ### 3.3. Сборка
 
@@ -341,6 +344,7 @@ enum class TranslationError {
     UnsupportedLanguage,
     BadResponse,    // ответ не удалось разобрать
     Cancelled,
+    EmptyText,      // нечего переводить; определяется до запроса
 };
 
 struct TranslationResult {
@@ -348,9 +352,13 @@ struct TranslationResult {
     QString detectedSourceLang;   // внутренний код, если сервис его вернул
     QString serviceId;
     TranslationError error = TranslationError::None;
-    QString errorMessage;         // подробности для пользователя/лога
+    QString errorMessage;         // технические подробности для пользователя/лога, без самого текста
+    bool ok() const;
 };
 ```
+
+Текст ошибки для пользователя собирает UI (`ui/translationerrortext`): заголовок по виду ошибки
+(переводимый) и в скобках `errorMessage`, например «Network error (Host … not found)».
 
 `core/translationservice.h`:
 
@@ -358,11 +366,16 @@ struct TranslationResult {
 class TranslationReply : public QObject {
     Q_OBJECT
 public:
+    // Готовый ответ для ошибок до сети: finished() придёт через цикл событий
+    static TranslationReply *createFinished(const TranslationResult &r, QObject *parent = nullptr);
     const TranslationResult &result() const;
     bool isFinished() const;
     void abort();                 // → error = Cancelled, finished() испускается один раз
 signals:
-    void finished();
+    void finished();              // ровно один раз и никогда — изнутри translate()
+protected:
+    void finish(const TranslationResult &r);   // для реализаций; повторные вызовы игнорируются
+    virtual void abortImpl();                  // остановить сетевую работу
 };
 
 class TranslationService : public QObject {
@@ -371,15 +384,23 @@ public:
     virtual QString id() const = 0;            // "google", "deepl"
     virtual QString displayName() const = 0;
     virtual bool isConfigured() const = 0;     // DeepL без ключа — false
-    virtual QStringList sourceLanguages() const = 0;  // внутренние коды
+    virtual QStringList sourceLanguages() const = 0;  // внутренние коды, без "auto"
     virtual QStringList targetLanguages() const = 0;
-    virtual void applySettings(const AppSettings &s) = 0;
+    virtual void applySettings(const AppSettings &s) = 0;   // появится на этапе 5
     // Возвращает объект ответа; владеет им вызывающий (deleteLater после finished)
     virtual TranslationReply *translate(const TranslationRequest &req) = 0;
 };
 ```
 
-Каждый сервис получает `QNetworkAccessManager*` от `NetworkManager` и не создаёт свой — так прокси
+- `abort()` сначала завершает ответ с `Cancelled`, а потом вызывает `abortImpl()`. Поэтому ошибка,
+  которую сообщит прерванный сетевой запрос, уже ничего не меняет.
+- `finished()` не испускается внутри `translate()`, даже если ответ известен сразу (неподдерживаемый
+  язык, пустой текст): вызывающий должен успеть подключиться. Для этого есть `createFinished()`.
+- Вызывающий может удалить ответ и до `finished()` — это отменяет запрос без сигнала.
+- `applySettings()` в интерфейсе пока нет: метод добавляется вместе с `AppSettings` на этапе 5.
+
+Каждый сервис получает указатель на `NetworkManager` (общий `QNetworkAccessManager` и
+`makeRequest()` с таймаутом и `User-Agent`) и не создаёт свой менеджер — так прокси
 настраивается в одном месте.
 
 Разбор ответов вынесен в чистые функции (`googleparser`, `deeplparser`): `QByteArray → TranslationResult`.
@@ -407,6 +428,35 @@ POST вместо GET — чтобы не упираться в длину URL. 
 Парсер должен быть терпимым к лишним/отсутствующим полям, а при неожиданном формате возвращать
 `BadResponse`, а не падать.
 
+Что известно по ответам эндпоинта (этап 2) и как это учтено в `GoogleParser::parseFreeResponse`:
+
+- строки `data[0]`, где первый элемент — не строка (транслитерация `[null, null, "…"]` при
+  `dt=rm`), пропускаются;
+- язык берётся из `data[2]`, если его нет — из `data[8][0][0]`; код переводится во внутренний с
+  учётом синонимов: иврит приходит как `iw`, китайский — как `zh-CN` (§4.8). Неизвестный код —
+  пустой `detectedSourceLang`, а не ошибка;
+- старые версии отдавали «разреженные» массивы (`[,,"en"]`, это не JSON) — перед повторным разбором
+  в пропуски вставляется `null`;
+- неизвестный код целевого языка ошибки не даёт: приходит HTTP 200 с непереведённым текстом. Поэтому
+  коды проверяются до запроса: язык не из таблицы → сразу `UnsupportedLanguage`.
+
+Ошибки бесплатного режима (`GoogleParser::errorForFreeHttpStatus` и сетевой уровень):
+
+| Ситуация | `TranslationError` |
+|---|---|
+| HTTP 429, 403 (эндпоинт так блокирует частые запросы) | `RateLimited` |
+| HTTP 413, 414 | `TooLong` |
+| HTTP 5xx | `Network` (`errorMessage` = «HTTP 503») |
+| прочие не-2xx | `BadResponse` |
+| таймаут передачи (`TimeoutError`/`OperationCanceledError` без нашего `abort()`) | `Timeout` |
+| прочие ошибки `QNetworkReply` | `Network`, `errorMessage` = текст ошибки Qt |
+
+Текст ошибки Qt содержит URL запроса. В бесплатном режиме в URL нет ни текста, ни секретов; в режиме
+Cloud API (ключ в `?key=`) этот текст нельзя показывать и писать в лог как есть — учесть на этапе 6.
+
+Для тестов адрес эндпоинта подменяется (`setEndpoint()`): `tst_googletranslateservice` поднимает
+локальный HTTP-сервер.
+
 **2. Google Cloud Translation API v2 (с ключом).**
 
 ```
@@ -419,9 +469,12 @@ Content-Type: application/json
 Ответ: `data.translations[].translatedText` и `detectedSourceLanguage`. `source` не передаётся,
 если выбран «auto».
 
-Длинный текст режется `TextChunker` на части до ~5000 символов по границам абзацев/предложений.
-Части отправляются последовательно, результат склеивается; при ошибке любой части запрос
-завершается с этой ошибкой.
+Длинный текст режется `TextChunker` на части до 5000 символов (UTF-16) по границам
+абзацев/предложений. Пробный POST на ~6900 символов к gtx проходит, но лимит не документирован,
+поэтому разбиение делается всегда. Части отправляются последовательно, результат склеивается; при
+ошибке любой части запрос завершается с этой ошибкой. Пробелы и переводы строк на краях каждой
+части в запрос не попадают и возвращаются на место при склейке — сервис может их не сохранить, а на
+стыках частей это сломало бы форматирование. Определённый язык берётся из первой части, где он есть.
 
 ### 4.7. `DeepLService`
 
@@ -458,10 +511,24 @@ Content-Type: application/json
 | `pt-BR` | `pt` | `PT` | `PT-BR` |
 | `zh-Hans` | `zh-CN` | `ZH` | `ZH-HANS` |
 | `ru` | `ru` | `RU` | `RU` |
+| `he` | `iw` | `HE` | `HE` |
+| `nb` | `no` | `NB` | `NB` |
+| `fil` | `tl` | — | — |
 
-Модуль хранит таблицу `{код, английское название, название на родном языке, коды сервисов}` и
-предоставляет функции `toServiceCode(serviceId, code, direction)` и `fromServiceCode(...)`.
-Обратное преобразование нужно для `detectedSourceLang`.
+Модуль хранит таблицу `{код, английское название, название на родном языке, коды сервисов}`
+(около 110 языков Google, из них около 35 есть у DeepL) и предоставляет функции в пространстве имён
+`Languages`:
+
+- `toServiceCode(serviceId, code, direction)` — пустая строка, если сервис язык не поддерживает;
+- `fromServiceCode(serviceId, serviceCode, direction)` — без учёта регистра; сначала код нужного
+  направления, затем другого (DeepL `EN-US` как исходный, `PT` как целевой), затем синонимы
+  (Google `he`/`jv`/`zh`, DeepL `EN-GB`); неизвестный код — пустая строка. Обратное
+  преобразование нужно для `detectedSourceLang`;
+- `supported(serviceId, direction)` — списки языков для сервисов и `LanguageComboBox`;
+- `displayName(code)` — название для UI, помечено `QT_TRANSLATE_NOOP` (контекст `Languages`) под
+  локализацию этапа 8; `nativeName(code)` — самоназвание (подсказка в списке);
+- `autoCode()` — `"auto"`; `forLocale(QLocale)` / `systemLanguage()` — язык системы с учётом
+  письменности и региона (`zh-Hans`/`zh-Hant`, `pt-BR`/`pt-PT`, нюнорск → `nb`), иначе `en`.
 
 Списки языков у сервисов разные (у DeepL их меньше). `LanguageComboBox` показывает только
 поддерживаемые выбранным сервисом; если при смене сервиса текущий язык не поддерживается,
@@ -475,18 +542,29 @@ Content-Type: application/json
 class TranslationManager : public QObject {
     Q_OBJECT
 public:
-    void registerService(TranslationService *service);
+    enum class Channel { MainWindow, Popup };
+
+    void registerService(TranslationService *service);   // забирает владение; первый — активный
     QList<TranslationService *> services() const;
+    TranslationService *service(const QString &id) const;
     TranslationService *activeService() const;
     void setActiveService(const QString &id);
+    void setMaxLength(int length);                         // 20 000 по умолчанию; из настроек — этап 5
 
     // channel — «канал» запроса: Popup или MainWindow.
     // Новый запрос в том же канале отменяет предыдущий незавершённый.
     TranslationReply *translate(const TranslationRequest &req, Channel channel);
+    void cancel(Channel channel);
+    void cancelAll();                                      // при завершении программы (§5.5)
 signals:
     void activeServiceChanged(const QString &id);
 };
 ```
+
+Менеджер хранит на текущий ответ каждого канала только `QPointer`: ответом владеет вызывающий.
+Пока кэша и повтора на дополнительный язык нет (этап 8), `translate()` возвращает ответ сервиса как
+есть; для кэша и повтора понадобится обёртка над ответом сервиса — интерфейс менеджера от этого не
+меняется. Отменённый ответ приходит вызывающему с `Cancelled`, и UI его не показывает.
 
 Ответственность:
 
@@ -499,8 +577,9 @@ signals:
    работает в обе стороны: английский → русский и русский → английский.
 3. **Кэш.** LRU на 200 записей, ключ — `serviceId|src|dst|text`. Повторный перевод того же
    фрагмента мгновенный и не тратит квоту DeepL. Кэш только в памяти.
-4. **Проверки до сети.** Пустой текст, превышение `maxLength`, ненастроенный сервис — ошибка
-   возвращается сразу, без запроса.
+4. **Проверки до сети.** Пустой текст (`EmptyText`), превышение `maxLength` (`TooLong`),
+   ненастроенный сервис (`Auth`) — ошибка возвращается сразу, без запроса (через
+   `TranslationReply::createFinished`, то есть асинхронно).
 
 ### 4.10. Сеть и прокси — `NetworkManager`
 
@@ -556,6 +635,11 @@ SOCKS4 Qt не поддерживает; в UI предлагается толь
 
 Общие параметры запросов: `setTransferTimeout(10 000 мс)` (настраивается), постоянный
 `User-Agent: qtranslate/<версия>`, только HTTPS.
+
+**Состояние на этапе 2.** Реализованы `nam()`, `makeRequest()` и `setTimeoutMs()` (таймаут из
+настроек подключается на этапе 5). Прокси не настраивается совсем: до этапа 7 запросы идут напрямую,
+системный прокси Windows не используется (Qt без `setUseSystemConfiguration(true)` его не читает,
+переменные окружения `HTTPS_PROXY` и т. п. на Windows тоже не учитываются).
 
 ### 4.11. Настройки — `AppSettings` и `SettingsStore`
 
@@ -706,11 +790,26 @@ namespace Autostart {
 ```
 
 - Два `QPlainTextEdit`: исходный текст и перевод (read-only).
-- Автоперевод при наборе с задержкой `autoTranslateDelayMs`; Ctrl+Enter — перевести сразу.
-- ⇄ меняет языки местами и переносит перевод в поле исходного текста.
-- Строка состояния: определённый язык, ошибки.
+- Автоперевод при наборе с задержкой `autoTranslateDelayMs` (этап 8); «Перевести» и Ctrl+Enter —
+  перевести сразу. Повторное нажатие до ответа заменяет запрос (канал `MainWindow`, §4.9).
+- ⇄ меняет языки местами, переносит перевод в поле исходного текста и сразу переводит его. Если
+  исходный язык «авто», новым целевым становится определённый язык последнего перевода; пока он
+  неизвестен, кнопка недоступна.
+- Строка состояния: «Translating…», определённый язык (когда исходный — «авто»), ошибки (красным,
+  текст из `ui/translationerrortext`). «Копировать» доступна, когда есть перевод.
+- Выбор сервиса показывает активный сервис и доступен, только когда сервисов больше одного (этап 6).
+- Окно не знает о сервисах и сети: испускает `translateRequested(request)`, а `AppController`
+  вызывает `TranslationManager` и возвращает итог через `showTranslationStarted()` /
+  `showResult(result)`; результат показывается, только если это текущий запрос окна.
 - `closeEvent` скрывает окно в трей; выход — только из меню трея.
 - Геометрия сохраняется в настройках.
+
+#### `LanguageComboBox`
+
+`QComboBox` с внутренними кодами языков: `setLanguages(codes, includeAuto)` (сортировка по
+названию, «Auto-detect» сверху, текущий язык сохраняется, если он остался в списке),
+`currentCode()` / `setCurrentCode()`, сигнал `currentCodeChanged`. Подстановка ближайшего языка
+при смене сервиса (§4.8) добавляется на этапе 6.
 
 #### `SettingsDialog`
 
@@ -815,6 +914,7 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 | Нет выделения | `AppController` | «Ничего не выделено» у курсора / пустое главное окно |
 | Нет сети, ошибка прокси, TLS | сервис → `Network` | Текст ошибки и «Повторить» в окне перевода |
 | Таймаут | `Timeout` | «Сервис не ответил за N с» |
+| Пустой текст | `TranslationManager` до запроса → `EmptyText` | «Нечего переводить» |
 | Неверный ключ | `Auth` | «Неверный API-ключ DeepL» + ссылка «Открыть настройки» |
 | Квота / частые запросы | `QuotaExceeded`, `RateLimited` | Пояснение и совет сменить сервис |
 | Неожиданный формат ответа | парсер → `BadResponse` | «Сервис вернул неожиданный ответ», подробности в лог |
@@ -826,8 +926,8 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 
 ## 7. Логирование, безопасность, приватность
 
-- Категории `QLoggingCategory`: `qtranslate.app`, `.hotkey`, `.grab`, `.net`, `.service.google`,
-  `.service.deepl`. По умолчанию выводятся только предупреждения; подробный лог включается
+- Категории `QLoggingCategory`: `qtranslate.app`, `.hotkey`, `.grab`, `.net`, `.translation`
+  (`TranslationManager`), `.service.google`, `.service.deepl`. По умолчанию выводятся только предупреждения; подробный лог включается
   переменной окружения `QT_LOGGING_RULES` или флагом `--verbose` (запись в
   `%LOCALAPPDATA%\qtranslate\qtranslate.log`).
 - **В лог не пишутся переводимые тексты, ключи и пароли** — только длины, коды ответов, время.
@@ -845,6 +945,7 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 | Тест | Что проверяет |
 |---|---|
 | `tst_googleparser` | Разбор ответов gtx и Cloud API по фикстурам: несколько предложений, определение языка, пустой/битый ответ |
+| `tst_googletranslateservice` | Сервис против локального HTTP-сервера: тело запроса, разбиение длинного текста и склейка, HTTP-ошибки, отказ в соединении, таймаут, отмена |
 | `tst_deeplparser` | Разбор `translations[]`, коды ошибок → `TranslationError` |
 | `tst_languages` | Маппинг кодов в обе стороны, варианты `EN-US/EN-GB`, `PT-BR`, неизвестные коды |
 | `tst_textchunker` | Разбиение по абзацам/предложениям, слова длиннее лимита, суррогатные пары не разрываются |

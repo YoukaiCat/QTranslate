@@ -3,12 +3,21 @@
 Fast and simple desktop translator for Windows. It lives in the system tray and translates
 the text selected in any application with a global hotkey.
 
-> **Status:** early development. The application skeleton (tray icon, main window,
-> single instance) works; translation is not implemented yet. See the [plan](doc/plan.md).
+> **Status:** early development. The tray icon, single instance and translation in the main
+> window through Google Translate (free endpoint) work; global hotkeys, the popup window and
+> settings are not implemented yet. See the [plan](doc/plan.md).
 
-## Features (planned)
+## Features
 
-- Starts minimized to the system tray, optional autostart with Windows.
+Working now:
+
+- Lives in the system tray (`--minimized` starts hidden), one instance per user.
+- Main window translation with automatic source language detection; long texts are split
+  into parts and translated completely.
+
+Planned:
+
+- Optional autostart with Windows.
 - **Ctrl+Q** translates the selected text in a popup next to the cursor.
 - **Ctrl+W** translates the selected text in the main window.
 - Hotkeys are configurable.
@@ -52,6 +61,13 @@ qtranslate [--minimized]
 - `--minimized` starts hidden in the tray (used by autostart).
 - Starting a second copy brings the window of the running one to the front.
 - Closing the window hides it to the tray; use **Quit** in the tray menu to exit.
+- In the main window, type or paste text and press **Translate** or **Ctrl+Enter**. The source
+  language defaults to auto-detection, the target language to the system language. **⇄** swaps
+  the languages and translates the translation back; **Copy** puts the translation on the
+  clipboard. The detected language and errors are shown in the status bar.
+
+The text you translate is sent to the selected online service (currently Google Translate).
+The application does not log the texts.
 
 Verbose logging: set `QT_LOGGING_RULES=qtranslate.*=true`.
 
