@@ -232,10 +232,11 @@ qtranslate/
   `windeployqt` не находит runtime без `VCINSTALLDIR`, поэтому CMake копирует его сам. Это нужно
   для запуска на Windows без установленного Visual C++ Redistributable. Сам `windeployqt`
   вызывается с `NO_COMPILER_RUNTIME`, `--no-system-d3d-compiler`/`--no-system-dxc-compiler`,
-  `--no-opengl-sw` и `--translations en,ru`: иначе при заданном `VCINSTALLDIR` он добавляет
-  `vc_redist.x64.exe` (~18 МБ), компиляторы Direct3D/DXC и software-OpenGL `opengl32sw.dll`
-  (~20 МБ), которые Qt Widgets не использует. Qt-переводы ограничены английским и русским;
-  перевод интерфейса qtranslate встроен в exe.
+  `--no-opengl-sw` и `--translations ru,es,de,fr,pt_BR,it,pl,uk,tr,zh_CN,ja,ko,ar`: иначе при
+  заданном `VCINSTALLDIR` он добавляет `vc_redist.x64.exe` (~18 МБ), компиляторы Direct3D/DXC и
+  software-OpenGL `opengl32sw.dll` (~20 МБ), которые Qt Widgets не использует. Qt-переводы нужны
+  для стандартных диалогов и меню; для хинди Qt 6.12 файла не содержит, поэтому они остаются
+  английскими. Перевод интерфейса qtranslate встроен в exe.
 
 ### 3.4. Упаковка, CI и выпуск
 
@@ -1056,6 +1057,12 @@ namespace Autostart {
 `.ts`, сохранность `%1`/`%2`, эмодзи и краевых пробелов. Переводы — машинно-ассистированный первый
 проход; перед публичным релизом желательна проверка носителями языка, особенно для арабского RTL и
 длинных строк в настройках.
+
+Стандартные диалоги Qt переводятся отдельными `qt_<locale>.qm`; `AppController::applyUiLanguage()`
+загружает их из `../translations` рядом с exe (в dev-сборке — из
+`QLibraryInfo::TranslationsPath`). `windeployqt --translations` развёртывает каталоги для
+`ru,es,de,fr,pt_BR,it,pl,uk,tr,zh_CN,ja,ko,ar`; в Qt 6.12 нет `qt_hi.qm`, поэтому стандартные
+кнопки и меню для хинди остаются английскими.
 
 ### 4.14. Переносимость и план поддержки Linux
 

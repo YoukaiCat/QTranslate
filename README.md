@@ -129,6 +129,8 @@ ctest --test-dir build --output-on-failure
 - The intermediate `Ctrl+C` used to grab a selection may appear in the Windows clipboard history
   (`Win+V`); the original clipboard contents are restored.
 - The installer is not code-signed yet.
+- The Hindi interface is translated, but Qt 6.12 has no Hindi catalog, so standard Qt dialogs
+  remain English.
 - Linux support is not ready yet; see the build section above.
 
 The text being translated is sent to the selected online service (Google or DeepL). qtranslate

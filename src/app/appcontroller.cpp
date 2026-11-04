@@ -26,8 +26,10 @@
 #include <QClipboard>
 #include <QCursor>
 #include <QDialog>
+#include <QDir>
 #include <QElapsedTimer>
 #include <QEvent>
+#include <QLibraryInfo>
 #include <QMimeData>
 #include <QSessionManager>
 #include <QTimer>
@@ -239,6 +241,11 @@ void AppController::applyUiLanguage(const QString &code)
         delete m_translator;
         m_translator = nullptr;
     }
+    if (m_qtTranslator) {
+        QApplication::removeTranslator(m_qtTranslator);
+        delete m_qtTranslator;
+        m_qtTranslator = nullptr;
+    }
 
     const QString resource = UiLanguages::resourceFor(language);
     if (!resource.isEmpty()) {
@@ -250,6 +257,27 @@ void AppController::applyUiLanguage(const QString &code)
             qCWarning(lcApp) << "Cannot load the UI translation" << language;
             delete translator;
         }
+    }
+
+    const QString qtFile = UiLanguages::qtTranslationFile(language);
+    if (!qtFile.isEmpty()) {
+        const QStringList directories = {
+            QDir::cleanPath(QCoreApplication::applicationDirPath()
+                            + QStringLiteral("/../translations")),
+            QLibraryInfo::path(QLibraryInfo::TranslationsPath),
+        };
+        for (const QString &directory : directories) {
+            auto *translator = new QTranslator(this);
+            if (translator->load(qtFile, directory)) {
+                m_qtTranslator = translator;
+                QApplication::installTranslator(translator);
+                qCInfo(lcApp) << "Loaded Qt translation" << qtFile << "from" << directory;
+                break;
+            }
+            delete translator;
+        }
+        if (!m_qtTranslator)
+            qCWarning(lcApp) << "Cannot load the Qt translation" << qtFile;
     }
 
     QApplication::setLayoutDirection(language == QStringLiteral("ar")

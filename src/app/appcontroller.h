@@ -100,4 +100,5 @@ private:
     HotkeyManager *m_hotkeys = nullptr;
     SelectionGrabber *m_grabber = nullptr;
     QTranslator *m_translator = nullptr;
+    QTranslator *m_qtTranslator = nullptr;
 };

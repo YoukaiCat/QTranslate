@@ -142,10 +142,10 @@ qt_generate_deploy_app_script(
         # Qt Widgets renders with the raster engine; the 20 MB software OpenGL
         # rasterizer is not used by qtranslate.
         --no-opengl-sw
-        # Only English and Russian Qt translations are needed; the application
-        # translation is embedded in the executable.
+        # Deploy Qt's own translations for the supported interface languages.
+        # Hindi is absent from Qt 6.12, so its standard dialogs stay in English.
         --translations
-        en,ru
+        ru,es,de,fr,pt_BR,it,pl,uk,tr,zh_CN,ja,ko,ar
 )
 install(SCRIPT ${deploy_script})
 

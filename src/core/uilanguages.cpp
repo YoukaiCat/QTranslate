@@ -98,6 +98,20 @@ QString resourceFor(const QString &code)
     return {};
 }
 
+QString qtTranslationFile(const QString &code)
+{
+    const QString canonicalCode = canonical(code);
+    if (canonicalCode.isEmpty() || canonicalCode == QStringLiteral("en")
+        || canonicalCode == QStringLiteral("hi")) {
+        return {};
+    }
+    if (canonicalCode == QStringLiteral("pt-BR"))
+        return QStringLiteral("qt_pt_BR.qm");
+    if (canonicalCode == QStringLiteral("zh-Hans"))
+        return QStringLiteral("qt_zh_CN.qm");
+    return QStringLiteral("qt_%1.qm").arg(canonicalCode);
+}
+
 QString nativeName(const QString &code)
 {
     for (const Info &language : languages()) {

@@ -87,10 +87,10 @@
 - `AppController::start()` calls `Autostart::sync(settings.general.autostart)`; keep installer-written
   settings consistent with it.
 - Deployment intentionally excludes `vc_redist.x64.exe`, D3D/DXC compilers and `opengl32sw.dll`
-  (Qt Widgets uses the raster engine), and deploys only `en,ru` Qt translations. CMake installs the
-  MSVC CRT explicitly. This keeps the local dist at ~32.6 MB and setup at ~11.2 MB instead of
-  ~57.8/16.6 MB. Do not remove these options unless the app starts using OpenGL/Qt Quick or adds
-  locales.
+  (Qt Widgets uses the raster engine), and deploys Qt's own translations for the supported UI
+  languages (`ru,es,de,fr,pt_BR,it,pl,uk,tr,zh_CN,ja,ko,ar`). Qt 6.12 has no Hindi translation, so
+  Hindi standard dialogs stay English. Application translations are embedded in the exe. CMake
+  installs the MSVC CRT explicitly.
 - UI strings use `tr()`; Russian is in `i18n/qtranslate_ru_RU.ts` and is compiled by
   `qt_add_translations`. Run `lupdate`/`lrelease` when adding strings and keep both READMEs and
   screenshots current.

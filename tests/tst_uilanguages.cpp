@@ -49,6 +49,14 @@ void TestUiLanguages::exposesResourcesAndNames()
              QStringLiteral(":/i18n/qtranslate_zh_CN.qm"));
     QCOMPARE(UiLanguages::nativeName(QStringLiteral("de")), QStringLiteral("Deutsch"));
     QCOMPARE(UiLanguages::nativeName(QStringLiteral("unknown")), QStringLiteral("unknown"));
+    QCOMPARE(UiLanguages::qtTranslationFile(QStringLiteral("de")),
+             QStringLiteral("qt_de.qm"));
+    QCOMPARE(UiLanguages::qtTranslationFile(QStringLiteral("pt-BR")),
+             QStringLiteral("qt_pt_BR.qm"));
+    QCOMPARE(UiLanguages::qtTranslationFile(QStringLiteral("zh-Hans")),
+             QStringLiteral("qt_zh_CN.qm"));
+    QVERIFY(UiLanguages::qtTranslationFile(QStringLiteral("en")).isEmpty());
+    QVERIFY(UiLanguages::qtTranslationFile(QStringLiteral("hi")).isEmpty());
 }
 
 void TestUiLanguages::tableIsCompleteAndUnique()
