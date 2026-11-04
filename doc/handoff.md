@@ -43,8 +43,9 @@
   обрезалось.
 - Добавлены `tst_translations` (полнота всех `.ts`, `%1`/`%2`, эмодзи `⧉ ⇄ ✓ →`, краевые
   пробелы) и `tst_uilanguages` (нормализация кодов и ресурсы).
-- Debug и Release: 19/19 тестов. Проверен запуск с `uiLanguage=es`, `de`, `ar`: переводы
-  загружаются, арабский интерфейс зеркалируется, длинные немецкие подписи не обрезаются.
+- Debug и Release: 19/19 тестов на момент локализации; после DeepL free web — 21/21.
+  Проверен запуск с `uiLanguage=es`, `de`, `ar`: переводы загружаются, арабский интерфейс
+  зеркалируется, длинные немецкие подписи не обрезаются.
 - Переводы — машинно-ассистированный первый проход. Перед публичным релизом желательна
   выборочная проверка носителями, особенно арабский RTL и длинные строки в настройках.
 - `i18n/README.md` описывает добавление языка, `lupdate` и правила перевода.
@@ -59,20 +60,27 @@
   «UIA → буфер обмена», ограничение UIPI/UIAccess; §9.2 — словарные статьи `dt=bd` (части речи,
   значения, примеры; только для коротких текстов).
 
-## Бесплатные веб-эндпоинты (этап 13)
+## Бесплатные веб-эндпоинты (этап 13, частично)
 
-- `doc/free-endpoints.md`: исследование бесплатных эндпоинтов без ключа — DeepL web, Yandex web,
-  Bing web, Reverso, Mozhi, MyMemory. Код **не реализован**; этап 13 в плане.
-- DeepL web: `POST https://oneshot-free.www.deepl.com/v1/translate`, `Authorization: None`,
-  JSON; QTranslate использует его как fallback, 2 с между запросами, 5000 символов, `429`.
-  Endpoint проверен 2026-11-05: первый запрос дал `429`, второй — `200`.
+- `doc/free-endpoints.md`: DeepL web реализован; Yandex web, Bing web, Reverso, Mozhi, MyMemory —
+  исследование.
+- **DeepL web реализован:** `src/services/deeplwebservice.*` и `deeplwebparser.*`, сервис
+  `deepl-web` с именем «DeepL (free web)». Ключ не нужен; доступен в списке сервисов сразу, как
+  бесплатный Google. Скрытого переключателя нет; в настройках — предупреждение, что эндпоинт
+  неофициальный.
+- `POST https://oneshot-free.www.deepl.com/v1/translate`, `Authorization: None`, JSON;
+  5000 символов на часть, запросы сериализуются и идут не чаще раза в 2 с, на `429` — одна
+  повторная попытка через 3 с. `403` → `RateLimited`, `413` → `TooLong`, `5xx` → `Network`.
+- Коды языков: базовые в нижнем регистре (`DE` → `de`), региональные — `pt-BR`, `en-US`,
+  `zh-Hans`. Верхний регистр базового кода эндпоинт молча возвращает без перевода, поэтому
+  приведение обязательно. `DE`, `PT-BR`, `EN-US`, `zh-Hans` проверены живыми запросами.
+- `tst_deeplwebparser` и `tst_deeplwebservice`; Debug: 21/21 тестов.
 - Yandex web: `api.browser.yandex.com/instaserp/translate`, form-urlencoded; Bing web:
   `www.bing.com/ttranslatev3` с токенами из HTML; Reverso: `cps.reverso.net/api2/TranslateText`;
   Mozhi: `/api/translate` на публичном/своём инстансе; MyMemory: `api.mymemory.translated.net/get`,
   ~500 байт на запрос, нужен исходный язык.
-- Все, кроме MyMemory и self-hosted Mozhi/LibreTranslate, — неофициальные: нет SLA, возможны
-  `429`, смена HTML/API и ограничения условий. Включать только как экспериментальные, выключенные
-  по умолчанию, с rate limit и fallback.
+- Остальные, кроме MyMemory и self-hosted Mozhi/LibreTranslate, — неофициальные: нет SLA,
+  возможны `429`, смена HTML/API и ограничения условий. Для них нужен rate limit и fallback.
 - **DeepL API Developer** (ранее Free): 1 000 000 символов **всего**, без месячного сброса;
   после лимита — Growth/Pro. Прежняя информация про 500 000 в месяц устарела.
 

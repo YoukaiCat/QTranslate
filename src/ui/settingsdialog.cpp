@@ -205,8 +205,19 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
         emit deepLKeyCheckRequested(m_deeplApiKey->text().trimmed());
     });
 
+    auto *deepLWebGroup = new QGroupBox(tr("DeepL (free web)"), servicesPage);
+    auto *deepLWebLayout = new QVBoxLayout(deepLWebGroup);
+    auto *deepLWebHint = new QLabel(
+        tr("Available without an API key. This unofficial endpoint may stop working, apply "
+           "rate limits or block requests, and the text is sent to DeepL."),
+        deepLWebGroup);
+    deepLWebHint->setObjectName(QStringLiteral("deepLWebHint"));
+    deepLWebHint->setWordWrap(true);
+    deepLWebLayout->addWidget(deepLWebHint);
+
     servicesLayout->addWidget(googleGroup);
     servicesLayout->addWidget(deepLGroup);
+    servicesLayout->addWidget(deepLWebGroup);
     servicesLayout->addStretch();
     m_tabs->addTab(servicesPage, tr("Services"));
 

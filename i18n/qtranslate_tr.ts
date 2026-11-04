@@ -855,6 +855,14 @@
             <translation>Kontrol ediliyor…</translation>
         </message>
         <message>
+            <source>DeepL (free web)</source>
+            <translation>DeepL (ücretsiz web)</translation>
+        </message>
+        <message>
+            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+            <translation>API anahtarı olmadan kullanılabilir. Bu resmî olmayan uç nokta çalışmayı durdurabilir, hız sınırları uygulayabilir veya istekleri engelleyebilir; metin DeepL'e gönderilir.</translation>
+        </message>
+        <message>
             <source>Services</source>
             <translation>Hizmetler</translation>
         </message>

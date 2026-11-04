@@ -855,6 +855,14 @@
             <translation>Проверка…</translation>
         </message>
         <message>
+            <source>DeepL (free web)</source>
+            <translation>DeepL (бесплатный веб-сервис)</translation>
+        </message>
+        <message>
+            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+            <translation>Доступно без API-ключа. Этот неофициальный эндпоинт может перестать работать, ограничивать частоту запросов или блокировать их; текст отправляется в DeepL.</translation>
+        </message>
+        <message>
             <source>Services</source>
             <translation>Сервисы</translation>
         </message>

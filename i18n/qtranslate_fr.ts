@@ -855,6 +855,14 @@
             <translation>Vérification…</translation>
         </message>
         <message>
+            <source>DeepL (free web)</source>
+            <translation>DeepL (web gratuit)</translation>
+        </message>
+        <message>
+            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+            <translation>Disponible sans clé API. Ce point de terminaison non officiel peut cesser de fonctionner, appliquer des limites de débit ou bloquer des requêtes ; le texte est envoyé à DeepL.</translation>
+        </message>
+        <message>
             <source>Services</source>
             <translation>Services</translation>
         </message>

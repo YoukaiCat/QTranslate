@@ -855,6 +855,14 @@
             <translation>جارٍ التحقق…</translation>
         </message>
         <message>
+            <source>DeepL (free web)</source>
+            <translation>DeepL (الويب المجاني)</translation>
+        </message>
+        <message>
+            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+            <translation>متاح بدون مفتاح API. قد تتوقف نقطة النهاية غير الرسمية هذه عن العمل أو تفرض حدودًا على المعدل أو تحظر الطلبات؛ يُرسَل النص إلى DeepL.</translation>
+        </message>
+        <message>
             <source>Services</source>
             <translation>خدمات</translation>
         </message>

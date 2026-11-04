@@ -281,6 +281,18 @@ private slots:
         QCOMPARE(result.deepl.englishVariant, QStringLiteral("EN-US"));
     }
 
+    void deepLWebHint()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("deepLWebHint"));
+        QVERIFY(hint);
+        QVERIFY(hint->text().contains(QStringLiteral("without an API key"),
+                                      Qt::CaseInsensitive));
+        QVERIFY(hint->text().contains(QStringLiteral("unofficial"),
+                                      Qt::CaseInsensitive));
+    }
+
     void deepLKeyCheck()
     {
         SettingsDialog dialog(AppSettings{}, {QStringLiteral("en"), QStringLiteral("ru")},

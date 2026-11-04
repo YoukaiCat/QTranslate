@@ -855,6 +855,14 @@
             <translation>Kontrola…</translation>
         </message>
         <message>
+            <source>DeepL (free web)</source>
+            <translation>DeepL (bezpłatna wersja web)</translation>
+        </message>
+        <message>
+            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+            <translation>Dostępne bez klucza API. Ten nieoficjalny endpoint może przestać działać, nakładać limity lub blokować żądania; tekst jest wysyłany do DeepL.</translation>
+        </message>
+        <message>
             <source>Services</source>
             <translation>Usługi</translation>
         </message>

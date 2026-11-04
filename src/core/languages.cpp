@@ -152,6 +152,7 @@ constexpr Synonym kSynonyms[] = {
 
 constexpr QLatin1String kGoogle("google");
 constexpr QLatin1String kDeepL("deepl");
+constexpr QLatin1String kDeepLWeb("deepl-web");
 
 const LanguageInfo *findInfo(const QString &code)
 {
@@ -167,7 +168,7 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
 {
     if (serviceId == kGoogle)
         return info.google;
-    if (serviceId == kDeepL)
+    if (serviceId == kDeepL || serviceId == kDeepLWeb)
         return d == Languages::Direction::Source ? info.deeplSource : info.deeplTarget;
     return nullptr;
 }

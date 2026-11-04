@@ -17,7 +17,8 @@ translation directly in the active input field.
 - **Ctrl+Shift+Q** translates the selected text and replaces the selection in the active input
   field, which is convenient for replying in chats.
 - **Ctrl+W** opens the main window with the selection translated.
-- Google Translate (free endpoint or Cloud API) and DeepL (Developer/Growth).
+- Google Translate (free endpoint or Cloud API), DeepL (Developer/Growth) and DeepL free web
+  (unofficial, no API key).
 - Automatic source language detection, smart switching to the additional language, in-memory
   translation cache and automatic translation while typing.
 - System/manual HTTP and SOCKS5 proxies with optional authentication.
@@ -126,6 +127,8 @@ ctest --test-dir build --output-on-failure
 - Selection capture does not work in windows of processes started as administrator.
 - The free Google endpoint can answer `HTTP 429` when it rate-limits a client; wait or use Google
   Cloud/DeepL with an API key.
+- DeepL free web is an unofficial endpoint without an API key. It may be rate-limited, change or
+  stop working; the official DeepL API is more reliable.
 - The intermediate `Ctrl+C` used to grab a selection may appear in the Windows clipboard history
   (`Win+V`); the original clipboard contents are restored.
 - The installer is not code-signed yet.

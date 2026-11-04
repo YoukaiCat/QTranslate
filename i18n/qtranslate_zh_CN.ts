@@ -855,6 +855,14 @@
             <translation>检查…</translation>
         </message>
         <message>
+            <source>DeepL (free web)</source>
+            <translation>DeepL（免费网页版）</translation>
+        </message>
+        <message>
+            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+            <translation>无需 API 密钥。此非官方端点可能停止工作、限制请求频率或阻止请求；文本会发送至 DeepL。</translation>
+        </message>
+        <message>
             <source>Services</source>
             <translation>服务</translation>
         </message>

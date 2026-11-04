@@ -855,6 +855,14 @@
             <translation>De cheques…</translation>
         </message>
         <message>
+            <source>DeepL (free web)</source>
+            <translation>DeepL (web gratis)</translation>
+        </message>
+        <message>
+            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+            <translation>Disponible sin clave de API. Este endpoint no oficial puede dejar de funcionar, aplicar límites de velocidad o bloquear solicitudes; el texto se envía a DeepL.</translation>
+        </message>
+        <message>
             <source>Services</source>
             <translation>Servicios</translation>
         </message>

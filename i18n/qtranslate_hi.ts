@@ -855,6 +855,14 @@
             <translation>जाँच हो रही है...</translation>
         </message>
         <message>
+            <source>DeepL (free web)</source>
+            <translation>DeepL (मुफ़्त वेब)</translation>
+        </message>
+        <message>
+            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+            <translation>API कुंजी के बिना उपलब्ध। यह अनौपचारिक एंडपॉइंट काम करना बंद कर सकता है, दर सीमाएँ लागू कर सकता है या अनुरोधों को अवरुद्ध कर सकता है; पाठ DeepL को भेजा जाता है।</translation>
+        </message>
+        <message>
             <source>Services</source>
             <translation>सेवाएं</translation>
         </message>

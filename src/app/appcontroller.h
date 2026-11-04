@@ -20,6 +20,7 @@ class TranslationManager;
 class TranslationReply;
 class TrayIcon;
 class DeepLService;
+class DeepLWebService;
 class GoogleTranslateService;
 class QTranslator;
 struct AppSettings;
@@ -84,6 +85,7 @@ private:
     TranslationManager *m_translations = nullptr;
     GoogleTranslateService *m_google = nullptr;
     DeepLService *m_deepl = nullptr;
+    DeepLWebService *m_deeplWeb = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for
     QPointer<TranslationReply> m_popupReply;      // the request the popup waits for
     QPointer<TranslationReply> m_inPlaceReply;    // the request for replacing a selection

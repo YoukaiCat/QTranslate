@@ -855,6 +855,14 @@
             <translation>チェック中…</translation>
         </message>
         <message>
+            <source>DeepL (free web)</source>
+            <translation>DeepL（無料ウェブ）</translation>
+        </message>
+        <message>
+            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+            <translation>API キーなしで利用できます。この非公式エンドポイントは停止したり、レート制限やリクエストのブロックを行う場合があります。テキストは DeepL に送信されます。</translation>
+        </message>
+        <message>
             <source>Services</source>
             <translation>サービス</translation>
         </message>
