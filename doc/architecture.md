@@ -1443,8 +1443,11 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
   и `HKCU\...\Run` восстановлены после проверки;
 - живой smoke DeepL free web через собранный сервис: `Hello, world` → `Hallo, Welt`,
   `detected_source_language=en`;
-- по тегу `v0.10.0` CI повторяет сборку, тесты и упаковку и публикует ассеты; старые теги
-  `v0.9.0`/`v0.9.1` не изменяются.
+- CI (Qt 6.8.3 LTS): setup 10,63 МБ, ZIP 13,12 МБ; хэши совпали с `SHA256SUMS.txt`;
+  CI-установщик проверен тихой установкой, запуском и удалением;
+- CI-прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41930568365
+- релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.10.0
+- старые теги `v0.9.0`/`v0.9.1` не изменяются.
 
 ---
 
