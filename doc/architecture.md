@@ -46,7 +46,7 @@
 
 ### 1.4. Матрица платформ
 
-| Компонент | Windows 10/11 x64 (0.9.1) | Linux x86_64 (план, этап 11) |
+| Компонент | Windows 10/11 x64 (0.10.0) | Linux x86_64 (план, этап 11) |
 |---|---|---|
 | Сборка | MSVC 2022, Qt 6.12 | GCC/Clang, Qt 6.5+, CMake |
 | Интерфейс | Qt Widgets, трей | Qt Widgets, StatusNotifierItem/AppIndicator |
@@ -131,7 +131,7 @@ qtranslate/
 ├── doc/
 │   ├── architecture.md
 │   ├── plan.md
-│   └── releases/0.9.1.md       заметки к релизу
+│   └── releases/0.10.0.md      заметки к релизу
 ├── resources/
 │   ├── qtranslate.qrc          иконки трея, окна
 │   ├── icons/                  app.ico, tray-*.png (светлая/тёмная тема)
@@ -208,11 +208,11 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (0.9.1) |
+| Цель | Что входит сейчас (0.10.0) |
 |---|---|
-| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (кэш, умный язык); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice` |
-| `qtranslate` | `main.cpp`, `app/*` (включая файловый лог), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` с автопереводом, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*`, `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_ru_RU.ts` |
-| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (кэш и smart retry); каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
+| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (кэш, умный язык); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice` |
+| `qtranslate` | `main.cpp`, `app/*` (включая файловый лог), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` с автопереводом, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*`, `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
+| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (кэш и smart retry); каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
 
 ### 3.3. Сборка
 
@@ -224,7 +224,7 @@ qtranslate/
 - Платформенные файлы подключаются условием `if(WIN32)`; для остальных платформ у каждого модуля
   есть заглушка, чтобы цели собирались. Заголовки в `platform/` не содержат `<windows.h>` —
   WinAPI виден только в `*_win.cpp`.
-- Перевод интерфейса: `qt_add_translations(qtranslate TS_FILES i18n/qtranslate_ru_RU.ts)`,
+- Перевод интерфейса: `qt_add_translations(qtranslate TS_FILES <все i18n/qtranslate_*.ts>)`,
   `.qm` встраиваются в ресурсы.
 - `enable_testing()` + `add_subdirectory(tests)`, каждый тест — отдельный `qt_add_executable` и `add_test`.
 - Развёртывание — `qt_generate_deploy_app_script` (windeployqt). В дистрибутив попадают плагин
@@ -240,9 +240,9 @@ qtranslate/
 
 ### 3.4. Упаковка, CI и выпуск
 
-Версия проекта задаётся один раз — `project(qtranslate VERSION 0.9.1)`; из неё получаются
+Версия проекта задаётся один раз — `project(qtranslate VERSION 0.10.0)`; из неё получаются
 `AppInfo::version()`, `User-Agent`, ресурс версии exe и имена артефактов. Тег релиза имеет вид
-`v0.9.1`, CI сверяет его с `CMakeLists.txt` и падает при расхождении.
+`v0.10.0`, CI сверяет его с `CMakeLists.txt` и падает при расхождении.
 
 **Портативный архив.** `cmake --install <build> --prefix build/dist` создаёт самодостаточный
 каталог `bin/`, `plugins/`, `translations/` с Qt, плагинами и MSVC CRT. `package.ps1` проверяет
@@ -1430,6 +1430,22 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 
 Файлы, скачанные из релиза, совпали с `SHA256SUMS.txt`.
 
+### 8.3. CI и проверка релиза 0.10.0
+
+Локальная проверка (Windows 11, Qt 6.12.0 MSVC 2022 x64):
+
+- Debug и Release: сборка без предупреждений `/W4`, **21/21 тест**;
+- `package.ps1` собрал `qtranslate-0.10.0-win64-setup.exe` (11,51 МБ),
+  `qtranslate-0.10.0-win64.zip` (14,58 МБ) и `SHA256SUMS.txt`; обе контрольные суммы совпали;
+- `build/dist` — 35,0 МБ; в ZIP 41 запись, 13 Qt-переводов, `opengl32sw.dll` отсутствует;
+- установщик: тихая установка во временный каталог, `FileVersion`/`ProductVersion` = 0.10.0,
+  запуск `bin\qtranslate.exe` без Qt в `PATH`, удаление; `%APPDATA%\qtranslate\qtranslate.ini`
+  и `HKCU\...\Run` восстановлены после проверки;
+- живой smoke DeepL free web через собранный сервис: `Hello, world` → `Hallo, Welt`,
+  `detected_source_language=en`;
+- по тегу `v0.10.0` CI повторяет сборку, тесты и упаковку и публикует ассеты; старые теги
+  `v0.9.0`/`v0.9.1` не изменяются.
+
 ---
 
 ## 9. Принятые решения и развитие
@@ -1465,7 +1481,7 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 - Установщик не подписан кодом: Windows SmartScreen может показать предупреждение. Сертификата
   в проекте нет; варианты и требования описаны в [`code-signing.md`](code-signing.md).
   Добавление подписи не меняет формат артефактов.
-- Linux-сборка в 0.9.1 отсутствует: платформенные модули — заглушки, полноценный порт — этап 11
+- Linux-сборка в 0.10.0 отсутствует: платформенные модули — заглушки, полноценный порт — этап 11
   (§4.14). macOS не планируется.
 
 Возможное развитие:
