@@ -19,6 +19,7 @@ class TranslationReply;
 class TrayIcon;
 class DeepLService;
 class GoogleTranslateService;
+class QTranslator;
 struct AppSettings;
 struct TranslationRequest;
 struct TranslationResult;
@@ -51,6 +52,7 @@ private:
     void onActiveServiceChanged(const QString &id);
     void selectService(const QString &id);
     void updateTrayToolTip();
+    void applyUiLanguage(const QString &code);
     void applySettings(const AppSettings &oldSettings, const AppSettings &newSettings);
     void showSettings();
     PopupWindow *ensurePopup();
@@ -87,4 +89,5 @@ private:
     TrayIcon *m_tray = nullptr;
     HotkeyManager *m_hotkeys = nullptr;
     SelectionGrabber *m_grabber = nullptr;
+    QTranslator *m_translator = nullptr;
 };

@@ -9,8 +9,17 @@
 #include <QCommandLineParser>
 #include <QElapsedTimer>
 
+#ifdef Q_OS_WIN
+#  define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+#endif
+
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_WIN
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+#endif
+
     QElapsedTimer startupTimer;
     startupTimer.start();
 
@@ -29,9 +38,14 @@ int main(int argc, char *argv[])
         QStringLiteral("minimized"),
         QApplication::translate("main", "Start hidden in the system tray."));
     parser.addOption(minimizedOption);
+    const QCommandLineOption verboseOption(
+        QStringLiteral("verbose"),
+        QApplication::translate("main", "Write verbose logs to the application log file."));
+    parser.addOption(verboseOption);
     parser.process(app);
 
     const bool startHidden = parser.isSet(minimizedOption);
+    Logging::initialize(parser.isSet(verboseOption));
 
     SingleInstance instance(SingleInstance::defaultKey());
     if (!instance.tryBecomePrimary(startHidden ? SingleInstance::Command::None

@@ -16,10 +16,20 @@ class FakeReply : public TranslationReply
 public:
     using TranslationReply::TranslationReply;
 
-    void complete(const QString &text)
+    void complete(const QString &text, const QString &detected = QString())
     {
         TranslationResult result;
         result.translatedText = text;
+        result.detectedSourceLang = detected;
+        result.serviceId = QStringLiteral("fake");
+        finish(result);
+    }
+
+    void completeError(TranslationError error, const QString &message)
+    {
+        TranslationResult result;
+        result.error = error;
+        result.errorMessage = message;
         result.serviceId = QStringLiteral("fake");
         finish(result);
     }
@@ -281,6 +291,100 @@ private slots:
         QCOMPARE(finished.size(), 1);
         QCOMPARE(reply.abortCount, 1);
         QCOMPARE(reply.result().error, TranslationError::Cancelled);
+    }
+
+    void cacheReturnsSuccessfulTranslation()
+    {
+        TranslationManager manager;
+        auto *service = new FakeService;
+        manager.registerService(service);
+
+        auto first = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        service->replies.first()->complete(QStringLiteral("Привет"));
+        QVERIFY(first->result().ok());
+
+        auto second = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        QSignalSpy finished(second.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(1000));
+        QCOMPARE(second->result().translatedText, QStringLiteral("Привет"));
+        QCOMPARE(service->requests.size(), 1);
+    }
+
+    void errorsAreNotCached()
+    {
+        TranslationManager manager;
+        auto *service = new FakeService;
+        manager.registerService(service);
+
+        auto first = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        service->replies.first()->completeError(TranslationError::Network, QStringLiteral("offline"));
+        QCOMPARE(first->result().error, TranslationError::Network);
+
+        auto second = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        QCOMPARE(service->requests.size(), 2);
+        service->replies.at(1)->complete(QStringLiteral("Привет"));
+        QCOMPARE(second->result().translatedText, QStringLiteral("Привет"));
+    }
+
+    void smartRetryUsesSecondaryLanguage()
+    {
+        TranslationManager manager;
+        manager.setPrimaryLanguage(QStringLiteral("ru"));
+        manager.setSecondaryLanguage(QStringLiteral("en"));
+        auto *service = new FakeService;
+        manager.registerService(service);
+
+        auto reply = std::unique_ptr<TranslationReply>(manager.translate(
+            {QStringLiteral("Привет"), QStringLiteral("auto"), QStringLiteral("ru")},
+            TranslationManager::Channel::MainWindow));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        service->replies.first()->complete(QStringLiteral("Привет"), QStringLiteral("ru"));
+        QCOMPARE(finished.size(), 0);
+        QCOMPARE(service->requests.size(), 2);
+        QCOMPARE(service->requests.at(1).targetLang, QStringLiteral("en"));
+
+        service->replies.at(1)->complete(QStringLiteral("Hello"), QStringLiteral("ru"));
+        QCOMPARE(finished.size(), 1);
+        QCOMPARE(reply->result().translatedText, QStringLiteral("Hello"));
+    }
+
+    void smartRetryFallsBackToFirstResult()
+    {
+        TranslationManager manager;
+        manager.setPrimaryLanguage(QStringLiteral("ru"));
+        manager.setSecondaryLanguage(QStringLiteral("en"));
+        auto *service = new FakeService;
+        manager.registerService(service);
+
+        auto reply = std::unique_ptr<TranslationReply>(manager.translate(
+            {QStringLiteral("Привет"), QStringLiteral("auto"), QStringLiteral("ru")},
+            TranslationManager::Channel::MainWindow));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        service->replies.first()->complete(QStringLiteral("Привет"), QStringLiteral("ru"));
+        service->replies.at(1)->completeError(TranslationError::Network, QStringLiteral("offline"));
+        QCOMPARE(finished.size(), 1);
+        QCOMPARE(reply->result().translatedText, QStringLiteral("Привет"));
+    }
+
+    void languageChangeClearsCache()
+    {
+        TranslationManager manager;
+        auto *service = new FakeService;
+        manager.registerService(service);
+        auto first = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        service->replies.first()->complete(QStringLiteral("Привет"));
+
+        manager.setPrimaryLanguage(QStringLiteral("de"));
+        auto second = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        QCOMPARE(service->requests.size(), 2);
+        service->replies.at(1)->complete(QStringLiteral("Hallo"));
+        QCOMPARE(second->result().translatedText, QStringLiteral("Hallo"));
     }
 };
 

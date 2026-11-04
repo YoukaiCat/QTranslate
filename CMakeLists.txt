@@ -4,7 +4,7 @@ project(qtranslate VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Network)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Network LinguistTools)
 
 qt_standard_project_setup()
 
@@ -68,6 +68,7 @@ qt_add_executable(qtranslate
 
 if(WIN32)
     target_sources(qtranslate PRIVATE
+        resources/qtranslate.rc
         src/platform/autostart_win.cpp
         src/platform/hotkeymanager_win.cpp
         src/platform/secretprotector_win.cpp
@@ -94,7 +95,16 @@ if(WIN32)
     target_link_libraries(qtranslate PRIVATE user32 crypt32)
 endif()
 
+if(MSVC)
+    set_property(TARGET qtranslate PROPERTY VS_DPI_AWARE "PerMonitor")
+endif()
+
 qtranslate_set_compile_options(qtranslate)
+
+qt_add_translations(qtranslate
+    TS_FILES i18n/qtranslate_ru_RU.ts
+    RESOURCE_PREFIX "/i18n"
+)
 
 install(TARGETS qtranslate
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

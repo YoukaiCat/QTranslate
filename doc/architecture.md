@@ -107,8 +107,7 @@ qtranslate/
 ├── resources/
 │   ├── qtranslate.qrc          иконки трея, окна
 │   ├── icons/                  app.ico, tray-*.png (светлая/тёмная тема)
-│   ├── qtranslate.rc           иконка и версия exe
-│   └── qtranslate.manifest     DPI awareness, supportedOS
+│   └── qtranslate.rc           иконка и версия exe
 ├── i18n/
 │   └── qtranslate_ru_RU.ts     перевод интерфейса
 ├── src/
@@ -181,11 +180,11 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (этап 7) |
+| Цель | Что входит сейчас (этап 8) |
 |---|---|
-| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice` |
-| `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/hotkeymanager.h` + `*_win.cpp` (на других платформах — `*_stub.cpp`), `platform/selectiongrabber.h` + `*_win.cpp`/`*_stub.cpp`, `platform/autostart.h` + `autostart_win.cpp`/`_stub.cpp`, `platform/secretprotector.h` + `secretprotector_win.cpp`/`_stub.cpp`, `platform/windowactivation.h` + `windowactivation_win.cpp`/`_stub.cpp` |
-| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
+| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (кэш, умный язык); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice` |
+| `qtranslate` | `main.cpp`, `app/*` (включая файловый лог), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` с автопереводом, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*`, `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_ru_RU.ts` |
+| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (кэш и smart retry); каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
 
 ### 3.3. Сборка
 
@@ -870,7 +869,7 @@ namespace Autostart {
 ```
 
 - Два `QPlainTextEdit`: исходный текст и перевод (read-only).
-- Автоперевод при наборе с задержкой `autoTranslateDelayMs` (этап 8); «Перевести» и Ctrl+Enter —
+- Автоперевод при наборе с задержкой `autoTranslateDelayMs` (0 — выкл.); «Перевести» и Ctrl+Enter —
   перевести сразу. Повторное нажатие до ответа заменяет запрос (канал `MainWindow`, §4.9).
 - ⇄ меняет языки местами, переносит перевод в поле исходного текста и сразу переводит его. Если
   исходный язык «авто», новым целевым становится определённый язык последнего перевода; пока он
@@ -901,8 +900,8 @@ namespace Autostart {
 применяет изменения, «Отмена» ничего не меняет. Вкладки:
 
 1. **Общие** — автозагрузка (с подсказкой, если Windows отключила её в Диспетчере задач), запуск
-   свёрнутым, восстановление буфера обмена, закрытие popup при потере фокуса. Язык интерфейса
-   появится вместе с локализацией на этапе 8.
+   свёрнутым, язык интерфейса (системный/English/Русский), восстановление буфера обмена, закрытие
+   popup при потере фокуса.
 2. **Горячие клавиши** — `QKeySequenceEdit` для Ctrl+Q, Ctrl+W и показа главного окна. Пустое поле
    отключает действие. Перед принятием проверяются односоставность, поддержка Win32 и отсутствие
    дубликатов. Пока фокус в любом поле, диалог испускает `hotkeyEditingChanged(true)`, и
@@ -922,6 +921,15 @@ namespace Autostart {
 
 Иконки для трея и окна. Для трея — отдельные варианты под светлую и тёмную тему панели задач
 (`QStyleHints::colorScheme()`), во время запроса можно показывать анимированный индикатор.
+Иконка exe (`resources/icons/app.ico`) и версия встраиваются через `resources/qtranslate.rc`.
+
+#### Локализация
+
+Строки помечены `tr()`/`QT_TRANSLATE_NOOP`; `i18n/qtranslate_ru_RU.ts` содержит русский перевод и
+встраивается `qt_add_translations`. `AppController::applyUiLanguage()` выбирает
+системный/English/Русский, ставит `QTranslator` и рассылает `LanguageChange`; главное окно
+переприменяет статические тексты, трей перестраивает меню, popup пересоздаётся при следующем
+вызове. Английский — исходный язык, русский — перевод.
 
 ---
 
@@ -934,7 +942,7 @@ main
  ├─ QApplication, setQuitOnLastWindowClosed(false)
  ├─ SingleInstance: уже запущены? → отправить "activate" → exit(0)
  ├─ SettingsStore: DPAPI SecretCodec, load()   (миграция, расшифровка секретов)
- ├─ установить QTranslator                     (этап 8)
+ ├─ QTranslator по general/uiLanguage
  └─ AppController
      ├─ NetworkManager (timeout, applyProxy), GoogleTranslateService + DeepLService → TranslationManager
      ├─ языки/сервис/maxLength/restoreClipboard из настроек
@@ -994,8 +1002,8 @@ SettingsDialog ──OK──► SettingsStore::save ──changed(old,new)─�
                                                                     ├─ restoreClipboard  → SelectionGrabber
                                                                     ├─ network           → NetworkManager.applyProxy / setTimeoutMs
                                                                     ├─ popup width/focus → PopupWindow
-                                                                    └─ service/ключи     → service (этап 6)
-                                                                       uiLanguage        → QTranslator (этап 8)
+                                                                    ├─ uiLanguage       → QTranslator + LanguageChange
+                                                                    └─ service/ключи     → service
 ```
 
 Пока фокус находится в любом `QKeySequenceEdit`, `SettingsDialog` испускает
@@ -1041,7 +1049,8 @@ SettingsDialog ──OK──► SettingsStore::save ──changed(old,new)─�
   (`TranslationManager`), `.service.google`, `.service.deepl`, `.settings`, `.autostart`, `.secret`.
   По умолчанию выводятся только предупреждения; подробный лог включается
   переменной окружения `QT_LOGGING_RULES` или флагом `--verbose` (запись в
-  `%LOCALAPPDATA%\qtranslate\qtranslate.log`).
+  `%LOCALAPPDATA%\qtranslate\qtranslate.log`, ротация при 5 МБ в `.1`). Обработчик сообщений
+  пишет время, уровень, категорию и текст; каталог создаётся при старте.
 - **В лог не пишутся переводимые тексты, ключи и пароли** — только длины, коды ответов, время.
 - Все запросы только по HTTPS; ошибки TLS не игнорируются.
 - Секреты в INI зашифрованы DPAPI (§4.11).

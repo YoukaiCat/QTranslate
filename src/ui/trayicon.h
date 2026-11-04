@@ -33,6 +33,7 @@ public:
     void showMessage(const QString &title, const QString &message);
     void setToolTip(const QString &text);
     void setServices(const QList<ServiceEntry> &services, const QString &activeId);
+    void retranslate();
 
 signals:
     void showWindowRequested();
@@ -47,5 +48,7 @@ private:
     std::unique_ptr<QMenu> m_menu; // QMenu needs a QWidget parent, so own it explicitly
     QMenu *m_serviceMenu = nullptr;
     QSystemTrayIcon *m_tray = nullptr;
+    QAction *m_showAction = nullptr;
     QAction *m_settingsAction = nullptr;
+    QAction *m_quitAction = nullptr;
 };

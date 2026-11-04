@@ -286,7 +286,7 @@ TranslationReply *DeepLService::translate(const TranslationRequest &request)
         TranslationResult result;
         result.serviceId = kServiceId;
         result.error = TranslationError::Auth;
-        result.errorMessage = tr("DeepL needs an API key");
+        result.errorMessage = DeepLService::tr("DeepL needs an API key");
         return TranslationReply::createFinished(result);
     }
 
@@ -303,7 +303,7 @@ TranslationReply *DeepLService::translate(const TranslationRequest &request)
         const QString code = source.isEmpty() ? request.sourceLang : request.targetLang;
         return TranslationReply::createFinished(
             TranslationResult{ {}, {}, kServiceId, TranslationError::UnsupportedLanguage,
-                               tr("language \"%1\" is not supported").arg(code) });
+                               DeepLService::tr("language \"%1\" is not supported").arg(code) });
     }
 
     const QList<DeepLPart> parts = splitParts(request.text);

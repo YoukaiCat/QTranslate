@@ -12,6 +12,7 @@ TrayIcon::TrayIcon(const QIcon &icon, QObject *parent)
     , m_tray(new QSystemTrayIcon(icon, this))
 {
     QAction *showAction = m_menu->addAction(tr("Show window"));
+    m_showAction = showAction;
     connect(showAction, &QAction::triggered, this, &TrayIcon::showWindowRequested);
     m_menu->setDefaultAction(showAction);
 
@@ -24,6 +25,7 @@ TrayIcon::TrayIcon(const QIcon &icon, QObject *parent)
     connect(m_settingsAction, &QAction::triggered, this, &TrayIcon::settingsRequested);
 
     QAction *quitAction = m_menu->addAction(tr("Quit"));
+    m_quitAction = quitAction;
     connect(quitAction, &QAction::triggered, this, &TrayIcon::quitRequested);
 
     m_tray->setContextMenu(m_menu.get());
@@ -77,6 +79,18 @@ void TrayIcon::setServices(const QList<ServiceEntry> &services, const QString &a
                 [this, id = service.id] { emit serviceSelected(id); });
     }
     m_serviceMenu->setEnabled(!services.isEmpty());
+}
+
+void TrayIcon::retranslate()
+{
+    if (m_showAction)
+        m_showAction->setText(tr("Show window"));
+    if (m_serviceMenu)
+        m_serviceMenu->setTitle(tr("Service"));
+    if (m_settingsAction)
+        m_settingsAction->setText(tr("Settings…"));
+    if (m_quitAction)
+        m_quitAction->setText(tr("Quit"));
 }
 
 void TrayIcon::onActivated(QSystemTrayIcon::ActivationReason reason)

@@ -73,6 +73,7 @@ private:
     QCheckBox *m_startMinimized = nullptr;
     QCheckBox *m_restoreClipboard = nullptr;
     QCheckBox *m_autoClosePopup = nullptr;
+    QComboBox *m_uiLanguage = nullptr;
 
     QKeySequenceEdit *m_popupHotkey = nullptr;
     QKeySequenceEdit *m_mainWindowHotkey = nullptr;

@@ -2,9 +2,11 @@
 
 #include "core/translationtypes.h"
 
+#include <QHash>
 #include <QList>
 #include <QObject>
 #include <QPointer>
+#include <QStringList>
 
 class TranslationReply;
 class TranslationService;
@@ -37,6 +39,13 @@ public:
     int maxLength() const { return m_maxLength; }
     void setMaxLength(int length);
 
+    // Primary/secondary languages for the automatic language switch; changing
+    // either clears the in-memory cache.
+    QString primaryLanguage() const { return m_primaryLanguage; }
+    void setPrimaryLanguage(const QString &code);
+    QString secondaryLanguage() const { return m_secondaryLanguage; }
+    void setSecondaryLanguage(const QString &code);
+
     // Translates with the active service. The returned reply is owned by the
     // caller; it finishes with Cancelled if a newer request in the same channel
     // replaces it. finished() is never emitted from inside this call.
@@ -50,11 +59,21 @@ signals:
     void activeServiceChanged(const QString &id);
 
 private:
+    class Reply;
+
     QPointer<TranslationReply> &current(Channel channel);
+    QString cacheKey(const QString &serviceId, const TranslationRequest &request) const;
+    bool cached(const QString &key, TranslationResult *result);
+    void storeCached(const QString &key, const TranslationResult &result);
+    void clearCache();
 
     QList<TranslationService *> m_services;
     TranslationService *m_active = nullptr;
     int m_maxLength = kDefaultMaxLength;
+    QString m_primaryLanguage;
+    QString m_secondaryLanguage;
+    QHash<QString, TranslationResult> m_cache;
+    QStringList m_cacheOrder; // oldest first
     QPointer<TranslationReply> m_mainWindowReply;
     QPointer<TranslationReply> m_popupReply;
 };

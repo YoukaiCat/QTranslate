@@ -10,6 +10,7 @@ class QComboBox;
 class QLabel;
 class QPlainTextEdit;
 class QPushButton;
+class QTimer;
 class QToolButton;
 
 // Main translator window: source text on the left, translation on the right.
@@ -52,9 +53,15 @@ public:
     // starts a translation with the current languages.
     void translateText(const QString &text);
 
+    // 0 disables automatic translation while typing.
+    void setAutoTranslateDelay(int ms);
+
     // Shows a translation transferred from the popup: sets the languages and
     // both texts without starting a new request.
     void showTranslation(const TranslationRequest &request, const TranslationResult &result);
+
+    // Re-applies translatable texts after a language change.
+    void retranslateUi();
 
 signals:
     void translateRequested(const TranslationRequest &request);
@@ -62,6 +69,7 @@ signals:
 
 protected:
     void closeEvent(QCloseEvent *event) override;
+    void changeEvent(QEvent *event) override;
 
 private:
     void buildUi();
@@ -74,12 +82,15 @@ private:
     LanguageComboBox *m_sourceLang = nullptr;
     QToolButton *m_swapButton = nullptr;
     LanguageComboBox *m_targetLang = nullptr;
+    QLabel *m_serviceLabel = nullptr;
     QComboBox *m_service = nullptr;
     QPlainTextEdit *m_sourceEdit = nullptr;
     QPlainTextEdit *m_resultEdit = nullptr;
     QLabel *m_statusLabel = nullptr;
     QPushButton *m_translateButton = nullptr;
     QPushButton *m_copyButton = nullptr;
+    QTimer *m_autoTranslateTimer = nullptr;
+    int m_autoTranslateDelayMs = 0;
 
     QString m_detectedLang; // of the last translation; lets ⇄ work with "Auto-detect"
     bool m_closeHidesToTray = true;

@@ -96,6 +96,10 @@ private slots:
         dialog.findChild<QCheckBox *>(QStringLiteral("startMinimized"))->setChecked(false);
         dialog.findChild<QCheckBox *>(QStringLiteral("restoreClipboard"))->setChecked(false);
         dialog.findChild<QCheckBox *>(QStringLiteral("autoClosePopup"))->setChecked(false);
+        dialog.findChild<QComboBox *>(QStringLiteral("uiLanguage"))
+            ->setCurrentIndex(
+                dialog.findChild<QComboBox *>(QStringLiteral("uiLanguage"))
+                    ->findData(QStringLiteral("en")));
         dialog.findChild<QKeySequenceEdit *>(QStringLiteral("popupHotkey"))
             ->setKeySequence(QKeySequence(QStringLiteral("Ctrl+Alt+T")));
         dialog.findChild<QKeySequenceEdit *>(QStringLiteral("mainWindowHotkey"))
@@ -113,6 +117,7 @@ private slots:
         QVERIFY(result.general.autostart);
         QVERIFY(!result.general.startMinimized);
         QVERIFY(!result.general.restoreClipboard);
+        QCOMPARE(result.general.uiLanguage, QStringLiteral("en"));
         QVERIFY(!result.popup.autoCloseOnFocusLoss);
         QCOMPARE(result.hotkeys.popup, QKeySequence(QStringLiteral("Ctrl+Alt+T")));
         QVERIFY(result.hotkeys.mainWindow.isEmpty());

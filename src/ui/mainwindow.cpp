@@ -18,6 +18,7 @@
 #include <QSplitter>
 #include <QStatusBar>
 #include <QTextCursor>
+#include <QTimer>
 #include <QToolButton>
 #include <QVBoxLayout>
 
@@ -59,7 +60,9 @@ void MainWindow::buildUi()
     topBar->addWidget(m_swapButton);
     topBar->addWidget(m_targetLang);
     topBar->addStretch();
-    topBar->addWidget(new QLabel(tr("Service:"), central));
+    m_serviceLabel = new QLabel(tr("Service:"), central);
+    m_serviceLabel->setObjectName(QStringLiteral("serviceLabel"));
+    topBar->addWidget(m_serviceLabel);
     topBar->addWidget(m_service);
     layout->addLayout(topBar);
 
@@ -99,6 +102,18 @@ void MainWindow::buildUi()
     m_statusLabel->setObjectName(QStringLiteral("status"));
     m_statusLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     statusBar()->addWidget(m_statusLabel, 1);
+
+    m_autoTranslateTimer = new QTimer(this);
+    m_autoTranslateTimer->setSingleShot(true);
+    connect(m_autoTranslateTimer, &QTimer::timeout, this, &MainWindow::requestTranslation);
+    connect(m_sourceEdit, &QPlainTextEdit::textChanged, this, [this] {
+        if (m_autoTranslateDelayMs <= 0)
+            return;
+        if (m_sourceEdit->toPlainText().trimmed().isEmpty())
+            m_autoTranslateTimer->stop();
+        else
+            m_autoTranslateTimer->start(m_autoTranslateDelayMs);
+    });
 
     connect(m_translateButton, &QPushButton::clicked, this, &MainWindow::requestTranslation);
     for (const QKeySequence &keys : {QKeySequence(Qt::CTRL | Qt::Key_Return),
@@ -198,9 +213,38 @@ void MainWindow::translateText(const QString &text)
 {
     if (text.isEmpty())
         return;
+    const QSignalBlocker blocker(m_sourceEdit);
     m_sourceEdit->setPlainText(text);
     m_sourceEdit->moveCursor(QTextCursor::Start);
     requestTranslation();
+}
+
+void MainWindow::setAutoTranslateDelay(int ms)
+{
+    m_autoTranslateDelayMs = qMax(0, ms);
+    if (m_autoTranslateDelayMs == 0)
+        m_autoTranslateTimer->stop();
+}
+
+void MainWindow::retranslateUi()
+{
+    m_sourceLang->setToolTip(tr("Source language"));
+    m_sourceLang->setAccessibleName(m_sourceLang->toolTip());
+    m_swapButton->setToolTip(tr("Swap languages"));
+    m_swapButton->setAccessibleName(m_swapButton->toolTip());
+    m_targetLang->setToolTip(tr("Target language"));
+    m_targetLang->setAccessibleName(m_targetLang->toolTip());
+    m_serviceLabel->setText(tr("Service:"));
+    m_service->setAccessibleName(tr("Translation service"));
+    m_sourceEdit->setAccessibleName(tr("Source text"));
+    m_sourceEdit->setPlaceholderText(tr("Enter text to translate"));
+    m_resultEdit->setAccessibleName(tr("Translation"));
+    m_resultEdit->setPlaceholderText(tr("Translation"));
+    m_translateButton->setText(tr("Translate"));
+    m_translateButton->setToolTip(tr("Ctrl+Enter"));
+    m_copyButton->setText(tr("Copy"));
+    m_copyButton->setToolTip(tr("Copy the translation to the clipboard"));
+    updateSwapButton();
 }
 
 void MainWindow::showTranslation(const TranslationRequest &request,
@@ -211,6 +255,7 @@ void MainWindow::showTranslation(const TranslationRequest &request,
     if (m_targetLang->findData(request.targetLang) >= 0)
         m_targetLang->setCurrentCode(request.targetLang);
 
+    const QSignalBlocker blocker(m_sourceEdit);
     m_sourceEdit->setPlainText(request.text);
     m_sourceEdit->moveCursor(QTextCursor::Start);
     showResult(result);
@@ -226,8 +271,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QMainWindow::closeEvent(event);
 }
 
+void MainWindow::changeEvent(QEvent *event)
+{
+    QMainWindow::changeEvent(event);
+    if (event->type() == QEvent::LanguageChange)
+        retranslateUi();
+}
+
 void MainWindow::requestTranslation()
 {
+    if (m_autoTranslateTimer)
+        m_autoTranslateTimer->stop();
     emit translateRequested(TranslationRequest{m_sourceEdit->toPlainText(),
                                                m_sourceLang->currentCode(),
                                                m_targetLang->currentCode()});
@@ -247,6 +301,7 @@ void MainWindow::swapLanguages()
     // The translation becomes the new source text and is translated back.
     const QString translation = m_resultEdit->toPlainText();
     if (!translation.isEmpty()) {
+        const QSignalBlocker blocker(m_sourceEdit);
         m_sourceEdit->setPlainText(translation);
         requestTranslation();
     }

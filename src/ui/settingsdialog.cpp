@@ -52,6 +52,14 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     // General.
     auto *generalPage = new QWidget(m_tabs);
     auto *generalLayout = new QVBoxLayout(generalPage);
+    auto *generalForm = new QFormLayout;
+    m_uiLanguage = new QComboBox(generalPage);
+    m_uiLanguage->setObjectName(QStringLiteral("uiLanguage"));
+    m_uiLanguage->addItem(tr("System"), QStringLiteral("system"));
+    m_uiLanguage->addItem(QStringLiteral("English"), QStringLiteral("en"));
+    m_uiLanguage->addItem(QStringLiteral("Русский"), QStringLiteral("ru"));
+    generalForm->addRow(tr("Interface language:"), m_uiLanguage);
+    generalLayout->addLayout(generalForm);
     m_autostart = new QCheckBox(tr("Start qtranslate when Windows starts"), generalPage);
     m_autostart->setObjectName(QStringLiteral("autostart"));
     m_autostartHint = new QLabel(tr("Autostart is disabled in Windows Task Manager."),
@@ -280,6 +288,8 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_startMinimized->setChecked(settings.general.startMinimized);
     m_restoreClipboard->setChecked(settings.general.restoreClipboard);
     m_autoClosePopup->setChecked(settings.popup.autoCloseOnFocusLoss);
+    const int uiLanguage = m_uiLanguage->findData(settings.general.uiLanguage);
+    m_uiLanguage->setCurrentIndex(uiLanguage >= 0 ? uiLanguage : 0);
 
     auto updateAutostartHint = [this, autostartApproved] {
         m_autostartHint->setVisible(!autostartApproved && m_autostart->isChecked());
@@ -337,6 +347,7 @@ AppSettings SettingsDialog::settings() const
     result.general.autostart = m_autostart->isChecked();
     result.general.startMinimized = m_startMinimized->isChecked();
     result.general.restoreClipboard = m_restoreClipboard->isChecked();
+    result.general.uiLanguage = m_uiLanguage->currentData().toString();
     result.hotkeys.popup = m_popupHotkey->keySequence();
     result.hotkeys.mainWindow = m_mainWindowHotkey->keySequence();
     result.hotkeys.showMainWindow = m_showMainWindowHotkey->keySequence();

@@ -23,7 +23,9 @@
 #include <QCursor>
 #include <QDialog>
 #include <QElapsedTimer>
+#include <QEvent>
 #include <QSessionManager>
+#include <QTranslator>
 #include <QUrl>
 
 namespace {
@@ -67,12 +69,15 @@ void AppController::start()
 
     m_trayAvailable = TrayIcon::isAvailable();
 
+    applyUiLanguage(settings.general.uiLanguage);
+
     createTranslation();
     connect(m_translations, &TranslationManager::activeServiceChanged, this,
             &AppController::onActiveServiceChanged);
 
     m_mainWindow = std::make_unique<MainWindow>();
     m_mainWindow->setCloseHidesToTray(m_trayAvailable);
+    m_mainWindow->setAutoTranslateDelay(settings.translation.autoTranslateDelayMs);
     if (!settings.mainWindow.geometry.isEmpty())
         m_mainWindow->restoreGeometry(settings.mainWindow.geometry);
     if (!settings.mainWindow.state.isEmpty())
@@ -133,6 +138,8 @@ void AppController::createTranslation()
     m_network->applyProxy(toProxySettings(settings.network));
     m_translations = new TranslationManager(this);
     m_translations->setMaxLength(settings.translation.maxLength);
+    m_translations->setPrimaryLanguage(settings.translation.primaryLang);
+    m_translations->setSecondaryLanguage(settings.translation.secondaryLang);
 
     m_google = new GoogleTranslateService(m_network);
     m_deepl = new DeepLService(m_network);
@@ -211,6 +218,54 @@ void AppController::updateTrayToolTip()
     m_tray->setToolTip(keys.isEmpty()
                            ? AppInfo::name()
                            : tr("%1 — %2").arg(AppInfo::name(), keys.join(QStringLiteral(" / "))));
+}
+
+void AppController::applyUiLanguage(const QString &code)
+{
+    QString language = code;
+    if (language.isEmpty() || language == QStringLiteral("system")) {
+        language = Languages::systemLanguage() == QStringLiteral("ru")
+            ? QStringLiteral("ru")
+            : QStringLiteral("en");
+    }
+    if (language != QStringLiteral("ru"))
+        language = QStringLiteral("en");
+
+    if (m_translator) {
+        QApplication::removeTranslator(m_translator);
+        delete m_translator;
+        m_translator = nullptr;
+    }
+
+    if (language == QStringLiteral("ru")) {
+        auto *translator = new QTranslator(this);
+        if (translator->load(QStringLiteral(":/i18n/qtranslate_ru_RU.qm"))) {
+            m_translator = translator;
+            QApplication::installTranslator(translator);
+        } else {
+            qCWarning(lcApp) << "Cannot load the Russian translation";
+            delete translator;
+        }
+    }
+
+    // updateLanguageConfiguration() rebuilds the language lists with the new
+    // translations; top-level widgets get LanguageChange for their own labels.
+    QEvent languageChange(QEvent::LanguageChange);
+    const auto widgets = QApplication::topLevelWidgets();
+    for (QWidget *widget : widgets)
+        QCoreApplication::sendEvent(widget, &languageChange);
+
+    if (m_tray)
+        m_tray->retranslate();
+    if (m_mainWindow)
+        m_mainWindow->retranslateUi();
+    if (m_popup) {
+        m_popup->hide();
+        m_popup.reset();
+    }
+
+    updateLanguageConfiguration();
+    updateTrayToolTip();
 }
 
 void AppController::initMainWindowLanguages()
@@ -328,6 +383,11 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_grabber->setMaxLength(newSettings.translation.maxLength);
     }
 
+    if (oldSettings.translation.autoTranslateDelayMs
+        != newSettings.translation.autoTranslateDelayMs) {
+        m_mainWindow->setAutoTranslateDelay(newSettings.translation.autoTranslateDelayMs);
+    }
+
     if (oldSettings.network.timeoutMs != newSettings.network.timeoutMs)
         m_network->setTimeoutMs(newSettings.network.timeoutMs);
 
@@ -358,6 +418,10 @@ void AppController::applySettings(const AppSettings &oldSettings,
         || oldSettings.translation.sourceLang != newSettings.translation.sourceLang
         || oldSettings.translation.primaryLang != newSettings.translation.primaryLang
         || oldSettings.translation.secondaryLang != newSettings.translation.secondaryLang) {
+        if (oldSettings.translation.primaryLang != newSettings.translation.primaryLang)
+            m_translations->setPrimaryLanguage(newSettings.translation.primaryLang);
+        if (oldSettings.translation.secondaryLang != newSettings.translation.secondaryLang)
+            m_translations->setSecondaryLanguage(newSettings.translation.secondaryLang);
         updateLanguageConfiguration();
     }
 
@@ -379,6 +443,9 @@ void AppController::applySettings(const AppSettings &oldSettings,
             }
         }
     }
+
+    if (oldSettings.general.uiLanguage != newSettings.general.uiLanguage)
+        applyUiLanguage(newSettings.general.uiLanguage);
 }
 
 void AppController::showSettings()

@@ -3,11 +3,10 @@
 Fast and simple desktop translator for Windows. It lives in the system tray and translates
 the text selected in any application with a global hotkey.
 
-> **Status:** early development. The tray icon, single instance, translation in the main
-> window through Google Translate (free endpoint or Cloud API), **DeepL**, **Ctrl+W**, the
-> **Ctrl+Q** popup, settings (including configurable hotkeys and autostart), the portable INI
-> mode and proxy support work. Remaining work is polish (caching, auto-translation,
-> localization and packaging). See the [plan](doc/plan.md).
+> **Status:** release candidate. The tray translator, Google/DeepL services, Ctrl+Q/Ctrl+W,
+> settings, autostart, portable mode, proxy support, translation cache, smart language switching,
+> auto-translation, Russian/English UI, file logging and a self-contained build work. The final
+> manual checklist and clean-Windows packaging check remain. See the [plan](doc/plan.md).
 
 ## Features
 
@@ -34,11 +33,16 @@ Working now:
 - Proxy support: no proxy, the Windows system proxy, or a manual HTTP/SOCKS5 proxy with optional
   authentication. Proxy passwords are protected with DPAPI. “Test connection” checks the values
   before saving them.
+- In-memory translation cache (200 entries) and automatic switching to the additional language
+  when the detected text is already in the primary language.
+- Automatic translation while typing in the main window (configurable delay, 0 disables it).
+- Russian and English interface; the language can be changed in Settings.
+- `--verbose` writes detailed logs to `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
+- Self-contained `build/dist` (windeployqt) with the icon, Qt DLLs and the Schannel TLS plugin.
 
 Planned:
 
-- Translation cache, automatic translation while typing, UI localization and a packaged
-  distribution (stage 8).
+- Final manual checklist, clean-Windows verification and release packaging (stage 8).
 
 ## Building
 
@@ -75,6 +79,7 @@ qtranslate [--minimized]
 ```
 
 - `--minimized` starts hidden in the tray (used by autostart).
+- `--verbose` writes detailed logs to `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
 - Starting a second copy brings the window of the running one to the front.
 - Closing the window hides it to the tray; use **Quit** in the tray menu to exit.
 - Select text in any application and press **Ctrl+W**: the main window opens with the
@@ -88,11 +93,13 @@ qtranslate [--minimized]
 - In the main window, type or paste text and press **Translate** or **Ctrl+Enter**. The source
   language defaults to auto-detection, the target language to the system language. **⇄** swaps
   the languages and translates the translation back; **Copy** puts the translation on the
-  clipboard. The detected language and errors are shown in the status bar.
-- Open **Settings…** from the tray menu to change autostart, hotkey combinations, languages,
-  maximum text length, the auto-translate delay, and Google Cloud/DeepL API keys. Global hotkeys
-  are disabled while a key combination field is focused. Settings apply immediately and survive a
-  restart.
+  clipboard. The detected language and errors are shown in the status bar. Repeating a translation
+  is instant (in-memory cache), and the text is translated automatically after the configured
+  delay while typing.
+- Open **Settings…** from the tray menu to change autostart, hotkey combinations, languages, the
+  interface language (System/English/Русский), maximum text length, the auto-translate delay, and
+  Google Cloud/DeepL API keys. Global hotkeys are disabled while a key combination field is
+  focused. Settings apply immediately and survive a restart.
 - Select the active translation service in the main window or in the tray **Service** menu. Without
   a DeepL key, or with Google Cloud selected but no key, translation shows a clear “needs an API
   key” message.
