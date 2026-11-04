@@ -27,6 +27,7 @@ qtranslate_add_test(tst_googleparser)
 qtranslate_add_test(tst_googletranslateservice)
 qtranslate_add_test(tst_hotkeysequence)
 qtranslate_add_test(tst_languages)
+qtranslate_add_test(tst_networkmanager)
 qtranslate_add_test(tst_popupplacement)
 qtranslate_add_test(tst_popupwindow
     ${PROJECT_SOURCE_DIR}/src/ui/popupwindow.cpp

@@ -164,6 +164,7 @@ qtranslate/
     ├── tst_deeplparser.cpp
     ├── tst_deeplservice.cpp
     ├── tst_languages.cpp
+    ├── tst_networkmanager.cpp
     ├── tst_textchunker.cpp
     ├── tst_translationmanager.cpp
     ├── tst_hotkeysequence.cpp
@@ -180,11 +181,11 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (этап 6) |
+| Цель | Что входит сейчас (этап 7) |
 |---|---|
 | `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice` |
 | `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/hotkeymanager.h` + `*_win.cpp` (на других платформах — `*_stub.cpp`), `platform/selectiongrabber.h` + `*_win.cpp`/`*_stub.cpp`, `platform/autostart.h` + `autostart_win.cpp`/`_stub.cpp`, `platform/secretprotector.h` + `secretprotector_win.cpp`/`_stub.cpp`, `platform/windowactivation.h` + `windowactivation_win.cpp`/`_stub.cpp` |
-| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
+| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
 
 ### 3.3. Сборка
 
@@ -650,9 +651,12 @@ class NetworkManager : public QObject {
 public:
     QNetworkAccessManager *nam();
     void applyProxy(const ProxySettings &p);
-    QNetworkRequest makeRequest(const QUrl &url) const;   // таймаут, User-Agent, HTTP/2
+    const ProxySettings &proxySettings() const;
+    QNetworkRequest makeRequest(const QUrl &url) const;   // таймаут, User-Agent
     // Проверка прокси без сохранения: временный QNAM с заданными параметрами
-    void testProxy(const ProxySettings &p, std::function<void(bool ok, QString message)> cb);
+    void testProxy(const ProxySettings &p, const QUrl &url,
+                   std::function<void(bool ok, const QString &message)> cb);
+    QString describeNetworkError(QNetworkReply *reply, bool includeDetails = true) const;
 };
 ```
 
@@ -665,12 +669,17 @@ public:
 | HTTP | `QNetworkProxy::HttpProxy`; для https-адресов Qt сам делает туннель `CONNECT` |
 | SOCKS5 | `QNetworkProxy::Socks5Proxy`; DNS-имена резолвятся на стороне прокси |
 
-Логин и пароль задаются прямо в `QNetworkProxy`. Сигнал `proxyAuthenticationRequired` при
-неверных данных завершает запрос ошибкой `Network` с понятным текстом «прокси отклонил авторизацию»,
-а не показывает диалог.
+Логин и пароль задаются прямо в `QNetworkProxy`. `proxyAuthenticationRequired` не показывает
+диалог: при наличии данных они передаются один раз; повторный запрос завершается отказом. Ошибки
+прокси (`ProxyAuthenticationRequiredError`, `ProxyConnectionRefusedError`, `ProxyNotFoundError`,
+`ProxyTimeoutError` и т.п.) превращаются в короткие сообщения «Proxy authentication failed» /
+«Proxy connection failed» через `describeNetworkError`; остальные ошибки сохраняют текст Qt. Для
+Cloud-URL с ключом `includeDetails = false` оставляет только общий «Network error».
 
 После `applyProxy` вызывается `nam->clearConnectionCache()`, чтобы уже открытые keep-alive
-соединения не продолжали идти мимо нового прокси.
+соединения не продолжали идти мимо нового прокси. `testProxy` использует такой же временный QNAM,
+те же таймаут/User-Agent и считает успехом любой HTTP-ответ; в UI проверка идёт на
+`https://translate.googleapis.com/`.
 
 **О «HTTPS-прокси» (решение принято).** Под HTTPS-прокси в проекте понимается HTTP-прокси,
 через который идут https-запросы (туннель `CONNECT`). Отдельного типа для этого нет: тип `Http`
@@ -682,10 +691,9 @@ SOCKS4 Qt не поддерживает; в UI предлагается толь
 Общие параметры запросов: `setTransferTimeout(10 000 мс)` (настраивается), постоянный
 `User-Agent: qtranslate/<версия>`, только HTTPS.
 
-**Состояние на этапе 2.** Реализованы `nam()`, `makeRequest()` и `setTimeoutMs()` (таймаут из
-настроек подключается на этапе 5). Прокси не настраивается совсем: до этапа 7 запросы идут напрямую,
-системный прокси Windows не используется (Qt без `setUseSystemConfiguration(true)` его не читает,
-переменные окружения `HTTPS_PROXY` и т. п. на Windows тоже не учитываются).
+**Состояние на этапе 7.** Реализованы `applyProxy`, `testProxy`, обработка авторизации/ошибок
+прокси и `describeNetworkError`. Режимы `None`/`System`/`Manual`, типы HTTP/SOCKS5; после смены
+прокси кэш соединений сбрасывается. Прокси применяется при старте и при сохранении настроек.
 
 ### 4.11. Настройки — `AppSettings` и `SettingsStore`
 
@@ -905,8 +913,10 @@ namespace Autostart {
    (password echo), вариант английского, кнопка «Проверить ключ» с асинхронным результатом
    (`character_count`/`character_limit` или ошибка). Кнопка проверки не блокирует диалог; ключ
    берётся из поля ввода. Ключи сохраняются через DPAPI из этапа 5.
-5. **Сеть** — режим прокси, тип, хост, порт, авторизация, таймаут, кнопка «Проверить соединение»
-   (`NetworkManager::testProxy`). Добавляется на этапе 7.
+5. **Сеть** — режим (без прокси/системный/ручной), тип HTTP/SOCKS5, хост, порт, авторизация,
+   логин, пароль (password echo), таймаут, кнопка «Проверить соединение» с асинхронным результатом.
+   Поля включаются только для ручного режима; диалог испускает `proxyTestRequested()`, а
+   `AppController` проверяет ещё не сохранённые параметры через `NetworkManager::testProxy`.
 
 #### `AppIcon`
 
@@ -926,7 +936,7 @@ main
  ├─ SettingsStore: DPAPI SecretCodec, load()   (миграция, расшифровка секретов)
  ├─ установить QTranslator                     (этап 8)
  └─ AppController
-     ├─ NetworkManager (timeout), GoogleTranslateService + DeepLService → TranslationManager
+     ├─ NetworkManager (timeout, applyProxy), GoogleTranslateService + DeepLService → TranslationManager
      ├─ языки/сервис/maxLength/restoreClipboard из настроек
      ├─ MainWindow + восстановление геометрии; PopupWindow — лениво при первом Ctrl+Q
      ├─ TrayIcon.show()
@@ -982,7 +992,7 @@ SettingsDialog ──OK──► SettingsStore::save ──changed(old,new)─�
                                                                     ├─ языки/сервис      → MainWindow/PopupWindow + TranslationManager
                                                                     ├─ maxLength         → TranslationManager + SelectionGrabber
                                                                     ├─ restoreClipboard  → SelectionGrabber
-                                                                    ├─ timeoutMs         → NetworkManager
+                                                                    ├─ network           → NetworkManager.applyProxy / setTimeoutMs
                                                                     ├─ popup width/focus → PopupWindow
                                                                     └─ service/ключи     → service (этап 6)
                                                                        uiLanguage        → QTranslator (этап 8)
@@ -1052,6 +1062,7 @@ SettingsDialog ──OK──► SettingsStore::save ──changed(old,new)─�
 | `tst_deeplparser` | Разбор `translations[]`, почастный разбор, `/v2/usage`, коды ошибок → `TranslationError` |
 | `tst_deeplservice` | DeepL против локального HTTP-сервера: Authorization, массив `text`, варианты английского, Free/Pro хосты, ошибки, таймаут, проверка ключа |
 | `tst_languages` | Маппинг кодов в обе стороны, варианты `EN-US/EN-GB`, `PT-BR`, `closest` при смене сервиса, неизвестные коды |
+| `tst_networkmanager` | Типы прокси, HTTP-прокси с авторизацией и `CONNECT`, SOCKS5 с логином/паролем, `testProxy`, понятные ошибки и отсутствие пароля в тексте |
 | `tst_popupplacement` | Позиционирование окна Ctrl+Q: отражение у краёв, прижатие к экрану, второй монитор с отрицательными координатами |
 | `tst_popupwindow` | Состояния всплывающего окна (offscreen): запрос, результат, копирование, ошибка/«Повторить», смена языка, закрепление, автозакрытие подсказки |
 | `tst_textchunker` | Разбиение по абзацам/предложениям, слова длиннее лимита, суррогатные пары не разрываются |

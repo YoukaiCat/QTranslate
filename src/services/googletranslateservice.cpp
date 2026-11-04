@@ -165,10 +165,10 @@ void GoogleReply::onRequestFinished()
         return;
     }
     if (error != QNetworkReply::NoError) {
-        // In Cloud mode the URL contains the API key; do not leak it through
-        // QNetworkReply::errorString().
-        fail(TranslationError::Network,
-             m_cloud ? QStringLiteral("network error") : request->errorString());
+        const QString message = m_network
+            ? m_network->describeNetworkError(request, !m_cloud)
+            : (m_cloud ? QStringLiteral("network error") : request->errorString());
+        fail(TranslationError::Network, message);
         return;
     }
 

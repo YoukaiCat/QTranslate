@@ -193,6 +193,25 @@ private slots:
         QVERIFY(!error.isEmpty());
     }
 
+    void rejectsIncompleteManualProxy()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("en"), QStringLiteral("ru")}, true);
+        auto *mode = dialog.findChild<QComboBox *>(QStringLiteral("proxyMode"));
+        auto *host = dialog.findChild<QLineEdit *>(QStringLiteral("proxyHost"));
+        auto *port = dialog.findChild<QSpinBox *>(QStringLiteral("proxyPort"));
+        QVERIFY(mode && host && port);
+
+        mode->setCurrentIndex(mode->findData(QStringLiteral("manual")));
+        QString error;
+        QVERIFY(!dialog.validate(&error));
+        QVERIFY(!error.isEmpty());
+
+        host->setText(QStringLiteral("proxy.local"));
+        port->setValue(3128);
+        QVERIFY(dialog.validate(&error));
+    }
+
     void servicesTab()
     {
         AppSettings settings;
@@ -257,6 +276,83 @@ private slots:
         dialog.showDeepLKeyCheckResult(true, QStringLiteral("Used 10 of 500 characters."));
         QVERIFY(button->isEnabled());
         QVERIFY(status->text().contains(QStringLiteral("Used 10")));
+    }
+
+    void networkTab()
+    {
+        AppSettings settings;
+        settings.network.proxyMode = QStringLiteral("manual");
+        settings.network.proxyType = QStringLiteral("socks5");
+        settings.network.proxyHost = QStringLiteral("127.0.0.1");
+        settings.network.proxyPort = 1080;
+        settings.network.proxyAuth = true;
+        settings.network.proxyUser = QStringLiteral("proxy-user");
+        settings.network.proxyPassword = QStringLiteral("proxy-password");
+        settings.network.timeoutMs = 12000;
+
+        SettingsDialog dialog(settings, {QStringLiteral("en")}, {QStringLiteral("en")}, true);
+        auto *mode = dialog.findChild<QComboBox *>(QStringLiteral("proxyMode"));
+        auto *type = dialog.findChild<QComboBox *>(QStringLiteral("proxyType"));
+        auto *host = dialog.findChild<QLineEdit *>(QStringLiteral("proxyHost"));
+        auto *port = dialog.findChild<QSpinBox *>(QStringLiteral("proxyPort"));
+        auto *auth = dialog.findChild<QCheckBox *>(QStringLiteral("proxyAuth"));
+        auto *user = dialog.findChild<QLineEdit *>(QStringLiteral("proxyUser"));
+        auto *password = dialog.findChild<QLineEdit *>(QStringLiteral("proxyPassword"));
+        auto *timeout = dialog.findChild<QSpinBox *>(QStringLiteral("networkTimeout"));
+        QVERIFY(mode && type && host && port && auth && user && password && timeout);
+
+        QCOMPARE(mode->currentData().toString(), QStringLiteral("manual"));
+        QCOMPARE(type->currentData().toString(), QStringLiteral("socks5"));
+        QCOMPARE(host->text(), QStringLiteral("127.0.0.1"));
+        QCOMPARE(port->value(), 1080);
+        QVERIFY(auth->isChecked());
+        QCOMPARE(user->text(), QStringLiteral("proxy-user"));
+        QCOMPARE(password->text(), QStringLiteral("proxy-password"));
+        QCOMPARE(timeout->value(), 12000);
+        QVERIFY(host->isEnabled());
+        QVERIFY(user->isEnabled());
+
+        mode->setCurrentIndex(mode->findData(QStringLiteral("system")));
+        QVERIFY(!host->isEnabled());
+        QVERIFY(!auth->isEnabled());
+        QVERIFY(!user->isEnabled());
+
+        mode->setCurrentIndex(mode->findData(QStringLiteral("manual")));
+        auth->setChecked(false);
+        QVERIFY(!user->isEnabled());
+        host->setText(QStringLiteral("proxy.local"));
+        port->setValue(3128);
+        type->setCurrentIndex(type->findData(QStringLiteral("http")));
+
+        const AppSettings result = dialog.settings();
+        QCOMPARE(result.network.proxyMode, QStringLiteral("manual"));
+        QCOMPARE(result.network.proxyType, QStringLiteral("http"));
+        QCOMPARE(result.network.proxyHost, QStringLiteral("proxy.local"));
+        QCOMPARE(result.network.proxyPort, 3128);
+        QVERIFY(!result.network.proxyAuth);
+        QCOMPARE(result.network.proxyUser, QStringLiteral("proxy-user"));
+        QCOMPARE(result.network.proxyPassword, QStringLiteral("proxy-password"));
+        QCOMPARE(result.network.timeoutMs, 12000);
+    }
+
+    void proxyTest()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")}, {QStringLiteral("en")},
+                              true);
+        auto *button = dialog.findChild<QPushButton *>(QStringLiteral("testProxy"));
+        auto *status = dialog.findChild<QLabel *>(QStringLiteral("proxyTestStatus"));
+        QVERIFY(button);
+        QVERIFY(status);
+
+        QSignalSpy requested(&dialog, &SettingsDialog::proxyTestRequested);
+        button->click();
+        QCOMPARE(requested.size(), 1);
+        QVERIFY(!button->isEnabled());
+        QVERIFY(!status->text().isEmpty());
+
+        dialog.showProxyTestResult(false, QStringLiteral("Proxy authentication failed"));
+        QVERIFY(button->isEnabled());
+        QVERIFY(status->text().contains(QStringLiteral("authentication")));
     }
 
     void hotkeyEditingSignal()

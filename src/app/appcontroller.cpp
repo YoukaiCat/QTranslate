@@ -24,6 +24,28 @@
 #include <QDialog>
 #include <QElapsedTimer>
 #include <QSessionManager>
+#include <QUrl>
+
+namespace {
+
+ProxySettings toProxySettings(const NetworkSettings &network)
+{
+    ProxySettings settings;
+    settings.mode = network.proxyMode == QStringLiteral("none")
+        ? ProxyMode::None
+        : network.proxyMode == QStringLiteral("manual") ? ProxyMode::Manual
+                                                        : ProxyMode::System;
+    settings.type = network.proxyType == QStringLiteral("socks5") ? ProxyType::Socks5
+                                                                  : ProxyType::Http;
+    settings.host = network.proxyHost;
+    settings.port = quint16(network.proxyPort);
+    settings.authEnabled = network.proxyAuth;
+    settings.user = network.proxyUser;
+    settings.password = network.proxyPassword;
+    return settings;
+}
+
+} // namespace
 
 AppController::AppController(SingleInstance *instance, SettingsStore *settings,
                              const Options &options, QObject *parent)
@@ -108,6 +130,7 @@ void AppController::createTranslation()
 
     m_network = new NetworkManager(this);
     m_network->setTimeoutMs(settings.network.timeoutMs);
+    m_network->applyProxy(toProxySettings(settings.network));
     m_translations = new TranslationManager(this);
     m_translations->setMaxLength(settings.translation.maxLength);
 
@@ -308,6 +331,16 @@ void AppController::applySettings(const AppSettings &oldSettings,
     if (oldSettings.network.timeoutMs != newSettings.network.timeoutMs)
         m_network->setTimeoutMs(newSettings.network.timeoutMs);
 
+    if (oldSettings.network.proxyMode != newSettings.network.proxyMode
+        || oldSettings.network.proxyType != newSettings.network.proxyType
+        || oldSettings.network.proxyHost != newSettings.network.proxyHost
+        || oldSettings.network.proxyPort != newSettings.network.proxyPort
+        || oldSettings.network.proxyAuth != newSettings.network.proxyAuth
+        || oldSettings.network.proxyUser != newSettings.network.proxyUser
+        || oldSettings.network.proxyPassword != newSettings.network.proxyPassword) {
+        m_network->applyProxy(toProxySettings(newSettings.network));
+    }
+
     if (m_google)
         m_google->applySettings(newSettings);
     if (m_deepl)
@@ -378,6 +411,18 @@ void AppController::showSettings()
                         dialogGuard->showDeepLKeyCheckResult(ok, message);
                 });
             });
+
+    connect(&dialog, &SettingsDialog::proxyTestRequested, this, [this, dialogGuard] {
+        if (!dialogGuard)
+            return;
+        const NetworkSettings network = dialogGuard->settings().network;
+        m_network->testProxy(
+            toProxySettings(network), QUrl(QStringLiteral("https://translate.googleapis.com/")),
+            [dialogGuard](bool ok, const QString &message) {
+                if (dialogGuard)
+                    dialogGuard->showProxyTestResult(ok, message);
+            });
+    });
 
     if (dialog.exec() == QDialog::Accepted)
         m_settings->save(dialog.settings());

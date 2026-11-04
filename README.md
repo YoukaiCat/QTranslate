@@ -5,8 +5,9 @@ the text selected in any application with a global hotkey.
 
 > **Status:** early development. The tray icon, single instance, translation in the main
 > window through Google Translate (free endpoint or Cloud API), **DeepL**, **Ctrl+W**, the
-> **Ctrl+Q** popup, settings (including configurable hotkeys and autostart) and the portable
-> INI mode work; proxy support is not implemented yet. See the [plan](doc/plan.md).
+> **Ctrl+Q** popup, settings (including configurable hotkeys and autostart), the portable INI
+> mode and proxy support work. Remaining work is polish (caching, auto-translation,
+> localization and packaging). See the [plan](doc/plan.md).
 
 ## Features
 
@@ -30,10 +31,14 @@ Working now:
   checked with a button that shows the used character limit.
 - Language lists follow the selected service; an unsupported language is replaced with the
   closest one supported by that service.
+- Proxy support: no proxy, the Windows system proxy, or a manual HTTP/SOCKS5 proxy with optional
+  authentication. Proxy passwords are protected with DPAPI. “Test connection” checks the values
+  before saving them.
 
 Planned:
 
-- HTTP and SOCKS5 proxy support, with or without authentication, or the system proxy.
+- Translation cache, automatic translation while typing, UI localization and a packaged
+  distribution (stage 8).
 
 ## Building
 
@@ -91,6 +96,9 @@ qtranslate [--minimized]
 - Select the active translation service in the main window or in the tray **Service** menu. Without
   a DeepL key, or with Google Cloud selected but no key, translation shows a clear “needs an API
   key” message.
+- The **Network** tab configures no proxy, the system proxy, or a manual HTTP/SOCKS5 proxy with
+  optional authentication and a request timeout. “Test connection” checks the current fields
+  without saving.
 - Portable mode: put an empty `qtranslate.ini` next to `qtranslate.exe` and the application
   will use that file instead of `%APPDATA%\qtranslate\qtranslate.ini`.
 - With **Start qtranslate when Windows starts** enabled, the application is launched with

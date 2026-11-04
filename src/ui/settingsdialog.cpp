@@ -32,7 +32,7 @@ SettingsDialog::SettingsDialog(const AppSettings &settings,
 {
     setWindowTitle(tr("Settings"));
     setModal(true);
-    resize(560, 430);
+    resize(600, 600);
 
     buildUi(sourceLanguages);
     loadValues(settings, autostartApproved);
@@ -197,6 +197,73 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     servicesLayout->addStretch();
     m_tabs->addTab(servicesPage, tr("Services"));
 
+    // Network.
+    auto *networkPage = new QWidget(m_tabs);
+    auto *networkLayout = new QVBoxLayout(networkPage);
+    auto *networkForm = new QFormLayout;
+    m_proxyMode = new QComboBox(networkPage);
+    m_proxyMode->setObjectName(QStringLiteral("proxyMode"));
+    m_proxyMode->addItem(tr("No proxy"), QStringLiteral("none"));
+    m_proxyMode->addItem(tr("System proxy"), QStringLiteral("system"));
+    m_proxyMode->addItem(tr("Manual proxy"), QStringLiteral("manual"));
+    m_proxyType = new QComboBox(networkPage);
+    m_proxyType->setObjectName(QStringLiteral("proxyType"));
+    m_proxyType->addItem(tr("HTTP"), QStringLiteral("http"));
+    m_proxyType->addItem(tr("SOCKS5"), QStringLiteral("socks5"));
+    m_proxyHost = new QLineEdit(networkPage);
+    m_proxyHost->setObjectName(QStringLiteral("proxyHost"));
+    m_proxyHost->setPlaceholderText(tr("Proxy host"));
+    m_proxyPort = new QSpinBox(networkPage);
+    m_proxyPort->setObjectName(QStringLiteral("proxyPort"));
+    m_proxyPort->setRange(0, 65535);
+    m_proxyPort->setSpecialValueText(tr("Not set"));
+    m_proxyAuth = new QCheckBox(tr("The proxy requires authentication"), networkPage);
+    m_proxyAuth->setObjectName(QStringLiteral("proxyAuth"));
+    m_proxyUser = new QLineEdit(networkPage);
+    m_proxyUser->setObjectName(QStringLiteral("proxyUser"));
+    m_proxyUser->setPlaceholderText(tr("User name"));
+    m_proxyPassword = new QLineEdit(networkPage);
+    m_proxyPassword->setObjectName(QStringLiteral("proxyPassword"));
+    m_proxyPassword->setEchoMode(QLineEdit::Password);
+    m_proxyPassword->setPlaceholderText(tr("Password"));
+    m_networkTimeout = new QSpinBox(networkPage);
+    m_networkTimeout->setObjectName(QStringLiteral("networkTimeout"));
+    m_networkTimeout->setRange(1000, 120000);
+    m_networkTimeout->setSingleStep(1000);
+    m_networkTimeout->setSuffix(tr(" ms"));
+    m_testProxy = new QPushButton(tr("Test connection"), networkPage);
+    m_testProxy->setObjectName(QStringLiteral("testProxy"));
+    m_proxyTestStatus = new QLabel(networkPage);
+    m_proxyTestStatus->setObjectName(QStringLiteral("proxyTestStatus"));
+    m_proxyTestStatus->setWordWrap(true);
+    m_proxyTestStatus->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+    networkForm->addRow(tr("Proxy mode:"), m_proxyMode);
+    networkForm->addRow(tr("Proxy type:"), m_proxyType);
+    networkForm->addRow(tr("Host:"), m_proxyHost);
+    networkForm->addRow(tr("Port:"), m_proxyPort);
+    networkForm->addRow(m_proxyAuth);
+    networkForm->addRow(tr("User name:"), m_proxyUser);
+    networkForm->addRow(tr("Password:"), m_proxyPassword);
+    networkForm->addRow(tr("Request timeout:"), m_networkTimeout);
+    networkForm->addRow(m_testProxy);
+    networkForm->addRow(m_proxyTestStatus);
+    networkLayout->addLayout(networkForm);
+    networkLayout->addStretch();
+    m_tabs->addTab(networkPage, tr("Network"));
+
+    connect(m_proxyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &SettingsDialog::updateProxyControls);
+    connect(m_proxyType, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &SettingsDialog::updateProxyControls);
+    connect(m_proxyAuth, &QCheckBox::toggled, this, &SettingsDialog::updateProxyControls);
+    connect(m_testProxy, &QPushButton::clicked, this, [this] {
+        m_proxyTestStatus->setStyleSheet(QString());
+        m_proxyTestStatus->setText(tr("Checking…"));
+        m_testProxy->setEnabled(false);
+        emit proxyTestRequested();
+    });
+
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     buttons->setObjectName(QStringLiteral("settingsButtons"));
     connect(buttons, &QDialogButtonBox::accepted, this, &SettingsDialog::accept);
@@ -248,6 +315,20 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_deepLKeyStatus->clear();
     m_checkDeepLKey->setEnabled(true);
     updateGoogleControls();
+
+    const int proxyMode = m_proxyMode->findData(settings.network.proxyMode);
+    m_proxyMode->setCurrentIndex(proxyMode >= 0 ? proxyMode : 1);
+    const int proxyType = m_proxyType->findData(settings.network.proxyType);
+    m_proxyType->setCurrentIndex(proxyType >= 0 ? proxyType : 0);
+    m_proxyHost->setText(settings.network.proxyHost);
+    m_proxyPort->setValue(settings.network.proxyPort);
+    m_proxyAuth->setChecked(settings.network.proxyAuth);
+    m_proxyUser->setText(settings.network.proxyUser);
+    m_proxyPassword->setText(settings.network.proxyPassword);
+    m_networkTimeout->setValue(settings.network.timeoutMs);
+    m_proxyTestStatus->clear();
+    m_testProxy->setEnabled(true);
+    updateProxyControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -269,6 +350,14 @@ AppSettings SettingsDialog::settings() const
     result.google.apiKey = m_googleApiKey->text().trimmed();
     result.deepl.apiKey = m_deeplApiKey->text().trimmed();
     result.deepl.englishVariant = m_deeplEnglishVariant->currentData().toString();
+    result.network.proxyMode = m_proxyMode->currentData().toString();
+    result.network.proxyType = m_proxyType->currentData().toString();
+    result.network.proxyHost = m_proxyHost->text().trimmed();
+    result.network.proxyPort = m_proxyPort->value();
+    result.network.proxyAuth = m_proxyAuth->isChecked();
+    result.network.proxyUser = m_proxyUser->text();
+    result.network.proxyPassword = m_proxyPassword->text();
+    result.network.timeoutMs = m_networkTimeout->value();
     return result;
 }
 
@@ -280,10 +369,30 @@ void SettingsDialog::showDeepLKeyCheckResult(bool ok, const QString &message)
     m_checkDeepLKey->setEnabled(true);
 }
 
+void SettingsDialog::showProxyTestResult(bool ok, const QString &message)
+{
+    m_proxyTestStatus->setText(message);
+    m_proxyTestStatus->setStyleSheet(ok ? QStringLiteral("color: #2e7d32;")
+                                        : QStringLiteral("color: #d32f2f;"));
+    m_testProxy->setEnabled(true);
+}
+
 void SettingsDialog::updateGoogleControls()
 {
     m_googleApiKey->setEnabled(m_googleMode->currentData().toString()
                                == QStringLiteral("cloud"));
+}
+
+void SettingsDialog::updateProxyControls()
+{
+    const bool manual = m_proxyMode->currentData().toString() == QStringLiteral("manual");
+    m_proxyType->setEnabled(manual);
+    m_proxyHost->setEnabled(manual);
+    m_proxyPort->setEnabled(manual);
+    m_proxyAuth->setEnabled(manual);
+    const bool auth = manual && m_proxyAuth->isChecked();
+    m_proxyUser->setEnabled(auth);
+    m_proxyPassword->setEnabled(auth);
 }
 
 bool SettingsDialog::validate(QString *error) const
@@ -336,6 +445,13 @@ bool SettingsDialog::validate(QString *error) const
         && m_primaryLanguage->currentCode() == m_secondaryLanguage->currentCode()) {
         if (error)
             *error = tr("The primary and additional languages must differ.");
+        return false;
+    }
+
+    if (m_proxyMode->currentData().toString() == QStringLiteral("manual")
+        && (m_proxyHost->text().trimmed().isEmpty() || m_proxyPort->value() == 0)) {
+        if (error)
+            *error = tr("Enter the proxy host and port, or choose another proxy mode.");
         return false;
     }
     return true;

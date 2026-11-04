@@ -176,7 +176,8 @@ void DeepLReply::onFinished()
         return;
     }
     if (error != QNetworkReply::NoError) {
-        fail(TranslationError::Network, request->errorString());
+        fail(TranslationError::Network,
+             m_network ? m_network->describeNetworkError(request) : request->errorString());
         return;
     }
 
@@ -349,7 +350,8 @@ void DeepLService::checkKey(const QString &key, KeyCheckCallback callback)
                     callback(false, httpErrorMessage(DeepLParser::errorForHttpStatus(status),
                                                      status));
                 } else if (error != QNetworkReply::NoError) {
-                    callback(false, tr("Network error: %1").arg(reply->errorString()));
+                    callback(false, m_network ? m_network->describeNetworkError(reply)
+                                              : reply->errorString());
                 } else {
                     int used = 0;
                     int limit = 0;

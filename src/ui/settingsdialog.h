@@ -40,12 +40,16 @@ public:
 public slots:
     // Result of an asynchronous DeepL key check started by AppController.
     void showDeepLKeyCheckResult(bool ok, const QString &message);
+    // Result of an asynchronous proxy test started by AppController.
+    void showProxyTestResult(bool ok, const QString &message);
 
 signals:
     // While a QKeySequenceEdit has focus, global hotkeys must be suspended.
     void hotkeyEditingChanged(bool editing);
     // The user asked to verify the key currently typed in the DeepL field.
     void deepLKeyCheckRequested(const QString &key);
+    // The user asked to test the proxy fields without saving them.
+    void proxyTestRequested();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -57,6 +61,7 @@ private:
     void setHotkeyEditing(bool editing);
     bool anyHotkeyEditFocused() const;
     void updateGoogleControls();
+    void updateProxyControls();
 
     AppSettings m_initial;
     QStringList m_targetLanguages;
@@ -85,6 +90,17 @@ private:
     QComboBox *m_deeplEnglishVariant = nullptr;
     QPushButton *m_checkDeepLKey = nullptr;
     QLabel *m_deepLKeyStatus = nullptr;
+
+    QComboBox *m_proxyMode = nullptr;
+    QComboBox *m_proxyType = nullptr;
+    QLineEdit *m_proxyHost = nullptr;
+    QSpinBox *m_proxyPort = nullptr;
+    QCheckBox *m_proxyAuth = nullptr;
+    QLineEdit *m_proxyUser = nullptr;
+    QLineEdit *m_proxyPassword = nullptr;
+    QSpinBox *m_networkTimeout = nullptr;
+    QPushButton *m_testProxy = nullptr;
+    QLabel *m_proxyTestStatus = nullptr;
 
     bool m_hotkeyEditing = false;
 };
