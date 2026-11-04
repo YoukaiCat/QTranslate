@@ -5,8 +5,9 @@ the text selected in any application with a global hotkey.
 
 > **Status:** release candidate. The tray translator, Google/DeepL services, Ctrl+Q/Ctrl+W,
 > settings, autostart, portable mode, proxy support, translation cache, smart language switching,
-> auto-translation, Russian/English UI, file logging and a self-contained build work. The final
-> manual checklist and clean-Windows packaging check remain. See the [plan](doc/plan.md).
+> auto-translation, Russian/English UI, file logging and a self-contained build with the MSVC
+> runtime work. Word/VS Code, a second monitor and a real reboot were not available for the final
+> manual checks; see [architecture §9.2](doc/architecture.md).
 
 ## Features
 
@@ -38,11 +39,16 @@ Working now:
 - Automatic translation while typing in the main window (configurable delay, 0 disables it).
 - Russian and English interface; the language can be changed in Settings.
 - `--verbose` writes detailed logs to `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
-- Self-contained `build/dist` (windeployqt) with the icon, Qt DLLs and the Schannel TLS plugin.
+- Self-contained `build/dist` (windeployqt) with the icon, Qt DLLs, the Schannel TLS plugin and the
+  MSVC runtime, so it starts on Windows without Qt or the Visual C++ redistributable installed.
 
-Planned:
+Known limitations:
 
-- Final manual checklist, clean-Windows verification and release packaging (stage 8).
+- Selection capture does not work in windows of processes running as administrator.
+- The intermediate Ctrl+C used to grab the selection may still appear in the Windows clipboard
+  history (Win+V); the original clipboard contents are restored.
+- The free Google endpoint can temporarily answer `HTTP 429` when it rate-limits a client; wait or
+  use Google Cloud/DeepL with an API key.
 
 ## Building
 
@@ -66,7 +72,7 @@ in `PATH` for `ctest` to find the Qt DLLs.
 
 Unit tests are built by default; pass `-DQTRANSLATE_BUILD_TESTS=OFF` to skip them.
 
-To produce a self-contained folder with the Qt libraries:
+To produce a self-contained folder with the Qt libraries and the MSVC runtime:
 
 ```bat
 cmake --install build/release --prefix dist
@@ -111,10 +117,11 @@ qtranslate [--minimized]
 - With **Start qtranslate when Windows starts** enabled, the application is launched with
   `--minimized` and starts in the tray.
 
-The text you translate is sent to the selected online service (currently Google Translate).
+The text you translate is sent to the selected online service (Google Translate or DeepL).
 The application does not log the texts.
 
-Verbose logging: set `QT_LOGGING_RULES=qtranslate.*=true`.
+Verbose logging is enabled with `--verbose`; the log is written to
+`%LOCALAPPDATA%\qtranslate\qtranslate.log`.
 
 ## Documentation
 

@@ -117,6 +117,29 @@ qt_generate_deploy_app_script(
 )
 install(SCRIPT ${deploy_script})
 
+# windeployqt cannot find the compiler runtime when VCINSTALLDIR is not set
+# (e.g. cmake --install from a plain shell), so bundle the MSVC CRT explicitly.
+# A clean Windows without the Visual C++ redistributable otherwise fails to
+# start the portable build.
+if(MSVC)
+    get_filename_component(_msvc_compiler_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+    foreach(_level RANGE 1 6)
+        get_filename_component(_msvc_compiler_dir "${_msvc_compiler_dir}" DIRECTORY)
+    endforeach()
+    file(GLOB _msvc_crt_dirs
+        "${_msvc_compiler_dir}/Redist/MSVC/*/x64/Microsoft.VC143.CRT"
+    )
+    if(_msvc_crt_dirs)
+        list(SORT _msvc_crt_dirs)
+        list(GET _msvc_crt_dirs -1 _msvc_crt_dir)
+        file(GLOB _msvc_crt_dlls "${_msvc_crt_dir}/*.dll")
+        install(FILES ${_msvc_crt_dlls} DESTINATION ${CMAKE_INSTALL_BINDIR})
+        message(STATUS "Bundling the MSVC runtime from ${_msvc_crt_dir}")
+    else()
+        message(WARNING "MSVC runtime redistributables were not found")
+    endif()
+endif()
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------

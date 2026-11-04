@@ -1,5 +1,7 @@
 #include "net/networkmanager.h"
 
+#include "core/appinfo.h"
+
 #include <QHash>
 #include <QNetworkProxyFactory>
 #include <QNetworkReply>
@@ -240,6 +242,17 @@ private slots:
     void cleanup()
     {
         QNetworkProxyFactory::setUseSystemConfiguration(false);
+    }
+
+    void requestsUseHttp11()
+    {
+        NetworkManager manager;
+        const QNetworkRequest request =
+            manager.makeRequest(QUrl(QStringLiteral("https://example.invalid/")));
+        QCOMPARE(request.attribute(QNetworkRequest::Http2AllowedAttribute).toBool(), false);
+        QCOMPARE(request.transferTimeout(), NetworkManager::kDefaultTimeoutMs);
+        QCOMPARE(request.header(QNetworkRequest::UserAgentHeader).toString(),
+                 AppInfo::userAgent());
     }
 
     void appliesProxySettings()

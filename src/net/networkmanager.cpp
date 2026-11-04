@@ -55,6 +55,9 @@ QNetworkRequest NetworkManager::makeRequest(const QUrl &url) const
 {
     QNetworkRequest request(url);
     request.setTransferTimeout(m_timeoutMs);
+    // The free Google endpoint occasionally answers HTTP/2 requests with 429;
+    // HTTP/1.1 behaves like the browser extensions that use it.
+    request.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
     request.setHeader(QNetworkRequest::UserAgentHeader, AppInfo::userAgent());
     return request;
 }
