@@ -17,7 +17,7 @@ translation directly in the active input field.
 - **Ctrl+Shift+Q** translates the selected text and replaces the selection in the active input
   field, which is convenient for replying in chats.
 - **Ctrl+W** opens the main window with the selection translated.
-- Google Translate (free endpoint or Cloud API) and DeepL (Free/Pro).
+- Google Translate (free endpoint or Cloud API) and DeepL (Developer/Growth).
 - Automatic source language detection, smart switching to the additional language, in-memory
   translation cache and automatic translation while typing.
 - System/manual HTTP and SOCKS5 proxies with optional authentication.

@@ -622,9 +622,10 @@ Content-Type: application/json
 
 ### 4.7. `DeepLService`
 
-Требует API-ключ (бесплатный план DeepL API Free или платный Pro). Без ключа
-`isConfigured() == false`: в UI сервис помечен «требуется ключ», а при попытке перевода
-возвращается ошибка `Auth` с подсказкой открыть настройки.
+Требует API-ключ. У DeepL API Developer (ранее Free) — 1 000 000 символов **всего**, без
+ежемесячного сброса; после лимита нужен Growth/Pro. Без ключа `isConfigured() == false`: в UI
+сервис помечен «требуется ключ», а при попытке перевода возвращается ошибка `Auth` с подсказкой
+открыть настройки.
 
 ```
 POST https://api-free.deepl.com/v2/translate     ← ключ оканчивается на ":fx"
@@ -1279,7 +1280,7 @@ SettingsDialog ──OK──► SettingsStore::save ──changed(old,new)─�
 | `tst_googleparser` | Разбор ответов gtx и Cloud API по фикстурам: несколько предложений, определение языка, пустой/битый ответ, коды ошибок Cloud с телом |
 | `tst_googletranslateservice` | Сервис против локального HTTP-сервера: free/cloud режимы, тело/ключ, разбиение длинного текста и склейка, HTTP-ошибки, отказ в соединении, таймаут, отмена |
 | `tst_deeplparser` | Разбор `translations[]`, почастный разбор, `/v2/usage`, коды ошибок → `TranslationError` |
-| `tst_deeplservice` | DeepL против локального HTTP-сервера: Authorization, массив `text`, варианты английского, Free/Pro хосты, ошибки, таймаут, проверка ключа |
+| `tst_deeplservice` | DeepL против локального HTTP-сервера: Authorization, массив `text`, варианты английского, Developer/Growth хосты, ошибки, таймаут, проверка ключа |
 | `tst_languages` | Маппинг кодов в обе стороны, варианты `EN-US/EN-GB`, `PT-BR`, `closest` при смене сервиса, неизвестные коды |
 | `tst_networkmanager` | Типы прокси, HTTP-прокси с авторизацией и `CONNECT`, SOCKS5 с логином/паролем, `testProxy`, понятные ошибки и отсутствие пароля в тексте |
 | `tst_popupplacement` | Позиционирование окна Ctrl+Q: отражение у краёв, прижатие к экрану, второй монитор с отрицательными координатами |
@@ -1410,7 +1411,8 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 2. **Словарные статьи** — Google gtx отдаёт их при `dt=bd`: части речи, несколько значений,
    примеры и синонимы. Показывать для отдельных слов и коротких фраз под переводом; для длинных
    абзацев таких данных нет. Нужен отдельный парсер, модель и UI; формат недокументирован.
-3. Дополнительные сервисы (Yandex, Microsoft, LibreTranslate) — новый класс `TranslationService`.
+3. Дополнительные официальные сервисы (Microsoft Translator, Amazon Translate, Yandex,
+   PROMT, LibreTranslate) — новый класс `TranslationService`.
 4. Озвучивание текста (`QTextToSpeech`), история переводов.
 5. **Linux** — этап 11: X11-реализации `platform/*`, Wayland через портал `GlobalShortcuts` и
    CLI-fallback, пакеты `.deb`/AppImage (§4.14).
@@ -1420,6 +1422,9 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
    Переводы требуют выборочной проверки носителями перед публичным релизом.
 7. **Кодовая подпись** установщика ([`code-signing.md`](code-signing.md)) и автообновление поверх
    установленной версии.
+8. **Бесплатные веб-endpoints** — DeepL web, Yandex web, Bing web, Reverso, Mozhi, MyMemory:
+   экспериментальные сервисы без ключа, выключены по умолчанию, с rate limit и предупреждением
+   о неофициальности. Детали и приоритеты — [`free-endpoints.md`](free-endpoints.md).
 
 ---
 

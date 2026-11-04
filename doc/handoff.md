@@ -58,6 +58,23 @@
   «UIA → буфер обмена», ограничение UIPI/UIAccess; §9.2 — словарные статьи `dt=bd` (части речи,
   значения, примеры; только для коротких текстов).
 
+## Бесплатные веб-эндпоинты (этап 13)
+
+- `doc/free-endpoints.md`: исследование бесплатных эндпоинтов без ключа — DeepL web, Yandex web,
+  Bing web, Reverso, Mozhi, MyMemory. Код **не реализован**; этап 13 в плане.
+- DeepL web: `POST https://oneshot-free.www.deepl.com/v1/translate`, `Authorization: None`,
+  JSON; QTranslate использует его как fallback, 2 с между запросами, 5000 символов, `429`.
+  Endpoint проверен 2026-11-05: первый запрос дал `429`, второй — `200`.
+- Yandex web: `api.browser.yandex.com/instaserp/translate`, form-urlencoded; Bing web:
+  `www.bing.com/ttranslatev3` с токенами из HTML; Reverso: `cps.reverso.net/api2/TranslateText`;
+  Mozhi: `/api/translate` на публичном/своём инстансе; MyMemory: `api.mymemory.translated.net/get`,
+  ~500 байт на запрос, нужен исходный язык.
+- Все, кроме MyMemory и self-hosted Mozhi/LibreTranslate, — неофициальные: нет SLA, возможны
+  `429`, смена HTML/API и ограничения условий. Включать только как экспериментальные, выключенные
+  по умолчанию, с rate limit и fallback.
+- **DeepL API Developer** (ранее Free): 1 000 000 символов **всего**, без месячного сброса;
+  после лимита — Growth/Pro. Прежняя информация про 500 000 в месяц устарела.
+
 ## Размер дистрибутива
 
 Локальная сборка после локализации (Qt 6.12):
