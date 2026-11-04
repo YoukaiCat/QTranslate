@@ -18,8 +18,10 @@ translation directly in the active input field.
 - **Ctrl+Shift+Q** translates the selected text and replaces the selection in the active input
   field, which is convenient for replying in chats.
 - **Ctrl+W** opens the main window with the selection translated.
-- Google Translate (free endpoint or Cloud API), DeepL (Developer/Growth) and DeepL free web
-  (unofficial, no API key).
+- Google Translate (free endpoint or Cloud API), DeepL (Developer/Growth), DeepL free web
+  (unofficial, no API key) and OpenRouter or another OpenAI-compatible provider. OpenRouter offers
+  free models such as `openrouter/free`; any compatible endpoint works, including local Ollama,
+  LM Studio or llama.cpp. The server URL and model are configurable.
 - Automatic source language detection, smart switching to the additional language, in-memory
   translation cache and automatic translation while typing.
 - System/manual HTTP and SOCKS5 proxies with optional authentication.
@@ -128,6 +130,9 @@ ctest --test-dir build --output-on-failure
   Cloud/DeepL with an API key.
 - DeepL free web is an unofficial endpoint without an API key. It may be rate-limited, change or
   stop working; the official DeepL API is more reliable.
+- OpenRouter and other OpenAI-compatible providers need an API key and an available model. Quality,
+  speed and cost depend on the chosen model; free models have strict rate limits. The text is sent
+  to the selected provider.
 - The intermediate `Ctrl+C` used to grab a selection may appear in the Windows clipboard history
   (`Win+V`); the original clipboard contents are restored.
 - The installer is not code-signed yet.

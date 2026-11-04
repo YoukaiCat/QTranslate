@@ -1,1059 +1,1475 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
 <TS version="2.1" language="pt_BR">
-    <context>
-        <name>AppController</name>
-        <message>
-            <source>Autostart</source>
-            <translation>Início automático</translation>
-        </message>
-        <message>
-            <source>Could not update the autostart entry.</source>
-            <translation>Não foi possível atualizar a entrada de inicialização automática.</translation>
-        </message>
-        <message>
-            <source>Hotkey unavailable</source>
-            <translation>Tecla de atalho indisponível</translation>
-        </message>
-        <message>
-            <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
-            <translation>%1 já está sendo usado por outro programa. Feche esse programa ou escolha outra combinação nas configurações.</translation>
-        </message>
-        <message>
-            <source>%1 — %2</source>
-            <translation>%1 — %2</translation>
-        </message>
-        <message>
-            <source>DeepL is not available.</source>
-            <translation>DeepL não está disponível.</translation>
-        </message>
-        <message>
-            <source>Nothing is selected.</source>
-            <translation>Nada está selecionado.</translation>
-        </message>
-        <message>
-            <source>The active window changed; the translation was copied to the clipboard.</source>
-            <translation>A janela ativa mudou; a tradução foi copiada para a área de transferência.</translation>
-        </message>
-        <message>
-            <source>Could not paste automatically; the translation is on the clipboard.</source>
-            <translation>Não foi possível colar automaticamente; a tradução está na área de transferência.</translation>
-        </message>
-        <message>
-            <source>Translate and replace</source>
-            <translation>Traduzir e substituir</translation>
-        </message>
-    </context>
-    <context>
-        <name>DeepLService</name>
-        <message>
-            <source>DeepL needs an API key</source>
-            <translation>O DeepL precisa de uma chave API</translation>
-        </message>
-        <message>
-            <source>language "%1" is not supported</source>
-            <translation>idioma "%1" não é suportado</translation>
-        </message>
-        <message>
-            <source>Enter a DeepL API key.</source>
-            <translation>Insira uma chave API do DeepL.</translation>
-        </message>
-        <message>
-            <source>The network is not available.</source>
-            <translation>A rede não está disponível.</translation>
-        </message>
-        <message>
-            <source>DeepL did not respond in time (%1 s).</source>
-            <translation>DeepL não respondeu a tempo (%1 s).</translation>
-        </message>
-        <message>
-            <source>Used %1 of %2 characters.</source>
-            <translation>%1 usado de caracteres %2.</translation>
-        </message>
-        <message>
-            <source>DeepL returned an unexpected response.</source>
-            <translation>DeepL retornou uma resposta inesperada.</translation>
-        </message>
-    </context>
-    <context>
-        <name>HotkeyManager</name>
-        <message>
-            <source>The key combination is not supported.</source>
-            <translation>A combinação de teclas não é suportada.</translation>
-        </message>
-    </context>
-    <context>
-        <name>Languages</name>
-        <message>
-            <source>Afrikaans</source>
-            <translation>afrikaans</translation>
-        </message>
-        <message>
-            <source>Albanian</source>
-            <translation>albanês</translation>
-        </message>
-        <message>
-            <source>Amharic</source>
-            <translation>amárico</translation>
-        </message>
-        <message>
-            <source>Arabic</source>
-            <translation>árabe</translation>
-        </message>
-        <message>
-            <source>Armenian</source>
-            <translation>Armênio</translation>
-        </message>
-        <message>
-            <source>Azerbaijani</source>
-            <translation>Azerbaijano</translation>
-        </message>
-        <message>
-            <source>Basque</source>
-            <translation>Basco</translation>
-        </message>
-        <message>
-            <source>Belarusian</source>
-            <translation>Bielorrusso</translation>
-        </message>
-        <message>
-            <source>Bengali</source>
-            <translation>bengali</translation>
-        </message>
-        <message>
-            <source>Bosnian</source>
-            <translation>Bósnio</translation>
-        </message>
-        <message>
-            <source>Bulgarian</source>
-            <translation>búlgaro</translation>
-        </message>
-        <message>
-            <source>Catalan</source>
-            <translation>catalão</translation>
-        </message>
-        <message>
-            <source>Cebuano</source>
-            <translation>Cebuano</translation>
-        </message>
-        <message>
-            <source>Chichewa</source>
-            <translation>Chichewa</translation>
-        </message>
-        <message>
-            <source>Chinese (Simplified)</source>
-            <translation>Chinês (simplificado)</translation>
-        </message>
-        <message>
-            <source>Chinese (Traditional)</source>
-            <translation>Chinês (tradicional)</translation>
-        </message>
-        <message>
-            <source>Corsican</source>
-            <translation>Córsega</translation>
-        </message>
-        <message>
-            <source>Croatian</source>
-            <translation>croata</translation>
-        </message>
-        <message>
-            <source>Czech</source>
-            <translation>Tcheco</translation>
-        </message>
-        <message>
-            <source>Danish</source>
-            <translation>dinamarquês</translation>
-        </message>
-        <message>
-            <source>Dutch</source>
-            <translation>Holandês</translation>
-        </message>
-        <message>
-            <source>English</source>
-            <translation>Inglês</translation>
-        </message>
-        <message>
-            <source>Esperanto</source>
-            <translation>esperanto</translation>
-        </message>
-        <message>
-            <source>Estonian</source>
-            <translation>estoniano</translation>
-        </message>
-        <message>
-            <source>Filipino</source>
-            <translation>filipino</translation>
-        </message>
-        <message>
-            <source>Finnish</source>
-            <translation>finlandês</translation>
-        </message>
-        <message>
-            <source>French</source>
-            <translation>Francês</translation>
-        </message>
-        <message>
-            <source>Frisian</source>
-            <translation>Frísio</translation>
-        </message>
-        <message>
-            <source>Galician</source>
-            <translation>Galego</translation>
-        </message>
-        <message>
-            <source>Georgian</source>
-            <translation>Georgiano</translation>
-        </message>
-        <message>
-            <source>German</source>
-            <translation>Alemão</translation>
-        </message>
-        <message>
-            <source>Greek</source>
-            <translation>grego</translation>
-        </message>
-        <message>
-            <source>Gujarati</source>
-            <translation>Guzerate</translation>
-        </message>
-        <message>
-            <source>Haitian Creole</source>
-            <translation>crioulo haitiano</translation>
-        </message>
-        <message>
-            <source>Hausa</source>
-            <translation>Hauçá</translation>
-        </message>
-        <message>
-            <source>Hawaiian</source>
-            <translation>havaiano</translation>
-        </message>
-        <message>
-            <source>Hebrew</source>
-            <translation>hebraico</translation>
-        </message>
-        <message>
-            <source>Hindi</source>
-            <translation>hindi</translation>
-        </message>
-        <message>
-            <source>Hmong</source>
-            <translation>Hmong</translation>
-        </message>
-        <message>
-            <source>Hungarian</source>
-            <translation>húngaro</translation>
-        </message>
-        <message>
-            <source>Icelandic</source>
-            <translation>islandês</translation>
-        </message>
-        <message>
-            <source>Igbo</source>
-            <translation>Ibo</translation>
-        </message>
-        <message>
-            <source>Indonesian</source>
-            <translation>indonésio</translation>
-        </message>
-        <message>
-            <source>Irish</source>
-            <translation>irlandês</translation>
-        </message>
-        <message>
-            <source>Italian</source>
-            <translation>italiano</translation>
-        </message>
-        <message>
-            <source>Japanese</source>
-            <translation>japonês</translation>
-        </message>
-        <message>
-            <source>Javanese</source>
-            <translation>Javanês</translation>
-        </message>
-        <message>
-            <source>Kannada</source>
-            <translation>Kannada</translation>
-        </message>
-        <message>
-            <source>Kazakh</source>
-            <translation>Cazaque</translation>
-        </message>
-        <message>
-            <source>Khmer</source>
-            <translation>Khmer</translation>
-        </message>
-        <message>
-            <source>Kinyarwanda</source>
-            <translation>Kinyarwanda</translation>
-        </message>
-        <message>
-            <source>Korean</source>
-            <translation>coreano</translation>
-        </message>
-        <message>
-            <source>Kurdish (Kurmanji)</source>
-            <translation>Curdo (Kurmanji)</translation>
-        </message>
-        <message>
-            <source>Kyrgyz</source>
-            <translation>Quirguistão</translation>
-        </message>
-        <message>
-            <source>Lao</source>
-            <translation>Laos</translation>
-        </message>
-        <message>
-            <source>Latin</source>
-            <translation>Latim</translation>
-        </message>
-        <message>
-            <source>Latvian</source>
-            <translation>letão</translation>
-        </message>
-        <message>
-            <source>Lithuanian</source>
-            <translation>lituano</translation>
-        </message>
-        <message>
-            <source>Luxembourgish</source>
-            <translation>Luxemburguês</translation>
-        </message>
-        <message>
-            <source>Macedonian</source>
-            <translation>Macedônio</translation>
-        </message>
-        <message>
-            <source>Malagasy</source>
-            <translation>malgaxe</translation>
-        </message>
-        <message>
-            <source>Malay</source>
-            <translation>malaio</translation>
-        </message>
-        <message>
-            <source>Malayalam</source>
-            <translation>malaiala</translation>
-        </message>
-        <message>
-            <source>Maltese</source>
-            <translation>maltês</translation>
-        </message>
-        <message>
-            <source>Maori</source>
-            <translation>maori</translation>
-        </message>
-        <message>
-            <source>Marathi</source>
-            <translation>Marathi</translation>
-        </message>
-        <message>
-            <source>Mongolian</source>
-            <translation>mongol</translation>
-        </message>
-        <message>
-            <source>Myanmar (Burmese)</source>
-            <translation>Mianmar (birmanês)</translation>
-        </message>
-        <message>
-            <source>Nepali</source>
-            <translation>nepalês</translation>
-        </message>
-        <message>
-            <source>Norwegian</source>
-            <translation>norueguês</translation>
-        </message>
-        <message>
-            <source>Odia</source>
-            <translation>Odia</translation>
-        </message>
-        <message>
-            <source>Pashto</source>
-            <translation>pashto</translation>
-        </message>
-        <message>
-            <source>Persian</source>
-            <translation>persa</translation>
-        </message>
-        <message>
-            <source>Polish</source>
-            <translation>polonês</translation>
-        </message>
-        <message>
-            <source>Portuguese (Brazil)</source>
-            <translation>Português (Brasil)</translation>
-        </message>
-        <message>
-            <source>Portuguese (Portugal)</source>
-            <translation>Português (Portugal)</translation>
-        </message>
-        <message>
-            <source>Punjabi</source>
-            <translation>punjabi</translation>
-        </message>
-        <message>
-            <source>Romanian</source>
-            <translation>romeno</translation>
-        </message>
-        <message>
-            <source>Russian</source>
-            <translation>russo</translation>
-        </message>
-        <message>
-            <source>Samoan</source>
-            <translation>samoano</translation>
-        </message>
-        <message>
-            <source>Scots Gaelic</source>
-            <translation>Gaélico escocês</translation>
-        </message>
-        <message>
-            <source>Serbian</source>
-            <translation>sérvio</translation>
-        </message>
-        <message>
-            <source>Sesotho</source>
-            <translation>Sesoto</translation>
-        </message>
-        <message>
-            <source>Shona</source>
-            <translation>Shona</translation>
-        </message>
-        <message>
-            <source>Sindhi</source>
-            <translation>Sindi</translation>
-        </message>
-        <message>
-            <source>Sinhala</source>
-            <translation>Cingalês</translation>
-        </message>
-        <message>
-            <source>Slovak</source>
-            <translation>Eslovaco</translation>
-        </message>
-        <message>
-            <source>Slovenian</source>
-            <translation>esloveno</translation>
-        </message>
-        <message>
-            <source>Somali</source>
-            <translation>somali</translation>
-        </message>
-        <message>
-            <source>Spanish</source>
-            <translation>Espanhol</translation>
-        </message>
-        <message>
-            <source>Sundanese</source>
-            <translation>Sudanês</translation>
-        </message>
-        <message>
-            <source>Swahili</source>
-            <translation>suaíli</translation>
-        </message>
-        <message>
-            <source>Swedish</source>
-            <translation>sueco</translation>
-        </message>
-        <message>
-            <source>Tajik</source>
-            <translation>tadjique</translation>
-        </message>
-        <message>
-            <source>Tamil</source>
-            <translation>tâmil</translation>
-        </message>
-        <message>
-            <source>Tatar</source>
-            <translation>tártaro</translation>
-        </message>
-        <message>
-            <source>Telugu</source>
-            <translation>Telugu</translation>
-        </message>
-        <message>
-            <source>Thai</source>
-            <translation>Tailandês</translation>
-        </message>
-        <message>
-            <source>Turkish</source>
-            <translation>turco</translation>
-        </message>
-        <message>
-            <source>Turkmen</source>
-            <translation>turcomano</translation>
-        </message>
-        <message>
-            <source>Ukrainian</source>
-            <translation>ucraniano</translation>
-        </message>
-        <message>
-            <source>Urdu</source>
-            <translation>urdu</translation>
-        </message>
-        <message>
-            <source>Uyghur</source>
-            <translation>Uigur</translation>
-        </message>
-        <message>
-            <source>Uzbek</source>
-            <translation>Usbeque</translation>
-        </message>
-        <message>
-            <source>Vietnamese</source>
-            <translation>vietnamita</translation>
-        </message>
-        <message>
-            <source>Welsh</source>
-            <translation>galês</translation>
-        </message>
-        <message>
-            <source>Xhosa</source>
-            <translation>Xhosa</translation>
-        </message>
-        <message>
-            <source>Yiddish</source>
-            <translation>iídiche</translation>
-        </message>
-        <message>
-            <source>Yoruba</source>
-            <translation>Iorubá</translation>
-        </message>
-        <message>
-            <source>Zulu</source>
-            <translation>zulu</translation>
-        </message>
-        <message>
-            <source>Auto-detect</source>
-            <translation>Detecção automática</translation>
-        </message>
-    </context>
-    <context>
-        <name>MainWindow</name>
-        <message>
-            <source>Source language</source>
-            <translation>Idioma de origem</translation>
-        </message>
-        <message>
-            <source>Swap languages</source>
-            <translation>Inverter idiomas</translation>
-        </message>
-        <message>
-            <source>Target language</source>
-            <translation>Idioma de destino</translation>
-        </message>
-        <message>
-            <source>Translation service</source>
-            <translation>Serviço de tradução</translation>
-        </message>
-        <message>
-            <source>Service:</source>
-            <translation>Serviço:</translation>
-        </message>
-        <message>
-            <source>Source text</source>
-            <translation>Texto fonte</translation>
-        </message>
-        <message>
-            <source>Enter text to translate</source>
-            <translation>Digite o texto para traduzir</translation>
-        </message>
-        <message>
-            <source>Translation</source>
-            <translation>Tradução</translation>
-        </message>
-        <message>
-            <source>Translate</source>
-            <translation>Traduzir</translation>
-        </message>
-        <message>
-            <source>Ctrl+Enter</source>
-            <translation>Ctrl+Enter</translation>
-        </message>
-        <message>
-            <source>Copy</source>
-            <translation>Copiar</translation>
-        </message>
-        <message>
-            <source>Copy the translation to the clipboard</source>
-            <translation>Copiar a tradução para a área de transferência</translation>
-        </message>
-        <message>
-            <source>Translating…</source>
-            <translation>Traduzindo…</translation>
-        </message>
-        <message>
-            <source>Detected language: %1</source>
-            <translation>Idioma detectado: %1</translation>
-        </message>
-        <message>
-            <source>Translation copied to the clipboard</source>
-            <translation>Tradução copiada para a área de transferência</translation>
-        </message>
-    </context>
-    <context>
-        <name>NetworkManager</name>
-        <message>
-            <source>Proxy connection works (HTTP %1).</source>
-            <translation>A conexão proxy funciona (HTTP %1).</translation>
-        </message>
-        <message>
-            <source>The proxy test returned no HTTP response.</source>
-            <translation>O teste do proxy não retornou resposta HTTP.</translation>
-        </message>
-        <message>
-            <source>Network error</source>
-            <translation>Erro de rede</translation>
-        </message>
-        <message>
-            <source>Proxy authentication failed</source>
-            <translation>Falha na autenticação do proxy</translation>
-        </message>
-        <message>
-            <source>Proxy connection failed</source>
-            <translation>Falha na conexão com o proxy</translation>
-        </message>
-    </context>
-    <context>
-        <name>PopupWindow</name>
-        <message>
-            <source>Change the translation language</source>
-            <translation>Alterar o idioma de tradução</translation>
-        </message>
-        <message>
-            <source>Target language</source>
-            <translation>Idioma de destino</translation>
-        </message>
-        <message>
-            <source>Keep the window open when focus is lost</source>
-            <translation>Manter a janela aberta ao perder o foco</translation>
-        </message>
-        <message>
-            <source>Close (Esc)</source>
-            <translation>Fechar (Esc)</translation>
-        </message>
-        <message>
-            <source>Translating…</source>
-            <translation>Traduzindo…</translation>
-        </message>
-        <message>
-            <source>Translation</source>
-            <translation>Tradução</translation>
-        </message>
-        <message>
-            <source>Retry</source>
-            <translation>Tentar novamente</translation>
-        </message>
-        <message>
-            <source>Nothing is selected</source>
-            <translation>Nada está selecionado</translation>
-        </message>
-        <message>
-            <source>⧉ Copy</source>
-            <translation>⧉ Copiar</translation>
-        </message>
-        <message>
-            <source>⇄ Open in Main Window</source>
-            <translation>⇄ Abrir na janela principal</translation>
-        </message>
-        <message>
-            <source>Unpin (close the window when focus is lost)</source>
-            <translation>Desafixar (fechar a janela ao perder o foco)</translation>
-        </message>
-        <message>
-            <source>Auto</source>
-            <translation>Automático</translation>
-        </message>
-        <message>
-            <source>Language</source>
-            <translation>Idioma</translation>
-        </message>
-        <message>
-            <source>%1 → %2</source>
-            <translation>%1 → %2</translation>
-        </message>
-        <message>
-            <source>✓ Copied</source>
-            <translation>✓ Copiado</translation>
-        </message>
-    </context>
-    <context>
-        <name>QObject</name>
-        <message>
-            <source>The DeepL API key was rejected (HTTP %1).</source>
-            <translation>A chave API do DeepL foi rejeitada (HTTP %1).</translation>
-        </message>
-        <message>
-            <source>The DeepL character limit is exceeded (HTTP %1).</source>
-            <translation>O limite de caracteres DeepL foi excedido (HTTP %1).</translation>
-        </message>
-        <message>
-            <source>Too many DeepL requests; try again later (HTTP %1).</source>
-            <translation>Muitas solicitações DeepL; tente novamente mais tarde (HTTP %1).</translation>
-        </message>
-        <message>
-            <source>The DeepL request is too large (HTTP %1).</source>
-            <translation>A solicitação DeepL é muito grande (HTTP %1).</translation>
-        </message>
-        <message>
-            <source>DeepL is temporarily unavailable (HTTP %1).</source>
-            <translation>DeepL está temporariamente indisponível (HTTP %1).</translation>
-        </message>
-        <message>
-            <source>DeepL returned an unexpected response (HTTP %1).</source>
-            <translation>DeepL retornou uma resposta inesperada (HTTP %1).</translation>
-        </message>
-    </context>
-    <context>
-        <name>SettingsDialog</name>
-        <message>
-            <source>Settings</source>
-            <translation>Configurações</translation>
-        </message>
-        <message>
-            <source>System</source>
-            <translation>Sistema</translation>
-        </message>
-        <message>
-            <source>Interface language:</source>
-            <translation>Idioma da interface:</translation>
-        </message>
-        <message>
-            <source>Start qtranslate when Windows starts</source>
-            <translation>Iniciar o qtranslate quando o Windows iniciar</translation>
-        </message>
-        <message>
-            <source>Autostart is disabled in Windows Task Manager.</source>
-            <translation>A inicialização automática está desativada no Gerenciador de Tarefas do Windows.</translation>
-        </message>
-        <message>
-            <source>Start minimized in the system tray</source>
-            <translation>Iniciar minimizado na bandeja do sistema</translation>
-        </message>
-        <message>
-            <source>Restore clipboard after copying the selection</source>
-            <translation>Restaurar a área de transferência após copiar a seleção</translation>
-        </message>
-        <message>
-            <source>Close the popup when it loses focus</source>
-            <translation>Feche o pop-up quando ele perder o foco</translation>
-        </message>
-        <message>
-            <source>Translate in a popup:</source>
-            <translation>Traduzir em um pop-up:</translation>
-        </message>
-        <message>
-            <source>Replace the selected text with the translation:</source>
-            <translation>Substitua o texto selecionado pela tradução:</translation>
-        </message>
-        <message>
-            <source>Translate in the main window:</source>
-            <translation>Traduzir na janela principal:</translation>
-        </message>
-        <message>
-            <source>Show the main window:</source>
-            <translation>Mostrar a janela principal:</translation>
-        </message>
-        <message>
-            <source>Global hotkeys are disabled while a key combination field is focused. Leave a field empty to disable that action.</source>
-            <translation>As teclas de atalho globais são desativadas enquanto um campo de combinação de teclas está em foco. Deixe um campo vazio para desabilitar essa ação.</translation>
-        </message>
-        <message>
-            <source> characters</source>
-            <translation> caracteres</translation>
-        </message>
-        <message>
-            <source> ms</source>
-            <translation> ms</translation>
-        </message>
-        <message>
-            <source>Off</source>
-            <translation>Desligado</translation>
-        </message>
-        <message>
-            <source>Source language:</source>
-            <translation>Idioma de origem:</translation>
-        </message>
-        <message>
-            <source>Primary language:</source>
-            <translation>Idioma principal:</translation>
-        </message>
-        <message>
-            <source>Additional language:</source>
-            <translation>Idioma adicional:</translation>
-        </message>
-        <message>
-            <source>Maximum text length:</source>
-            <translation>Comprimento máximo do texto:</translation>
-        </message>
-        <message>
-            <source>Auto-translate delay:</source>
-            <translation>Atraso na tradução automática:</translation>
-        </message>
-        <message>
-            <source>The additional language is used automatically when the detected text is already in the primary language.</source>
-            <translation>O idioma adicional é usado automaticamente quando o texto detectado já está no idioma principal.</translation>
-        </message>
-        <message>
-            <source>General</source>
-            <translation>Em geral</translation>
-        </message>
-        <message>
-            <source>Hotkeys</source>
-            <translation>Teclas de atalho</translation>
-        </message>
-        <message>
-            <source>Translation</source>
-            <translation>Tradução</translation>
-        </message>
-        <message>
-            <source>Google Translate</source>
-            <translation>Google Tradutor</translation>
-        </message>
-        <message>
-            <source>Free endpoint (no key)</source>
-            <translation>Endpoint gratuito (sem chave)</translation>
-        </message>
-        <message>
-            <source>Cloud Translation API (key required)</source>
-            <translation>API Cloud Translation (chave necessária)</translation>
-        </message>
-        <message>
-            <source>Google Cloud API key</source>
-            <translation>Chave API do Google Cloud</translation>
-        </message>
-        <message>
-            <source>Mode:</source>
-            <translation>Modo:</translation>
-        </message>
-        <message>
-            <source>API key:</source>
-            <translation>Chave API:</translation>
-        </message>
-        <message>
-            <source>The free mode uses the public endpoint and needs no key. The Cloud API requires a key with the Translation API enabled.</source>
-            <translation>O modo gratuito usa o endpoint público e não precisa de chave. A Nuvem API requer uma chave com a Tradução API habilitada.</translation>
-        </message>
-        <message>
-            <source>DeepL</source>
-            <translation>DeepL</translation>
-        </message>
-        <message>
-            <source>DeepL API key (ends with :fx for Free)</source>
-            <translation>Chave API do DeepL (termina com :fx no Free)</translation>
-        </message>
-        <message>
-            <source>Check key</source>
-            <translation>Verificar chave</translation>
-        </message>
-        <message>
-            <source>English target:</source>
-            <translation>Alvo inglês:</translation>
-        </message>
-        <message>
-            <source>Checking…</source>
-            <translation>Verificando…</translation>
-        </message>
-        <message>
-            <source>DeepL (free web)</source>
-            <translation>DeepL (web grátis)</translation>
-        </message>
-        <message>
-            <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
-            <translation>Disponível sem chave de API. Este endpoint não oficial pode parar de funcionar, aplicar limites de taxa ou bloquear solicitações; o texto é enviado ao DeepL.</translation>
-        </message>
-        <message>
-            <source>Services</source>
-            <translation>Serviços</translation>
-        </message>
-        <message>
-            <source>No proxy</source>
-            <translation>Sem proxy</translation>
-        </message>
-        <message>
-            <source>System proxy</source>
-            <translation>Proxy do sistema</translation>
-        </message>
-        <message>
-            <source>Manual proxy</source>
-            <translation>Procuração manual</translation>
-        </message>
-        <message>
-            <source>HTTP</source>
-            <translation>HTTP</translation>
-        </message>
-        <message>
-            <source>SOCKS5</source>
-            <translation>SOCKS5</translation>
-        </message>
-        <message>
-            <source>Proxy host</source>
-            <translation>Anfitrião proxy</translation>
-        </message>
-        <message>
-            <source>Not set</source>
-            <translation>Não definido</translation>
-        </message>
-        <message>
-            <source>The proxy requires authentication</source>
-            <translation>O proxy requer autenticação</translation>
-        </message>
-        <message>
-            <source>User name</source>
-            <translation>Nome de usuário</translation>
-        </message>
-        <message>
-            <source>Password</source>
-            <translation>Senha</translation>
-        </message>
-        <message>
-            <source>Test connection</source>
-            <translation>Conexão de teste</translation>
-        </message>
-        <message>
-            <source>Proxy mode:</source>
-            <translation>Modo proxy:</translation>
-        </message>
-        <message>
-            <source>Proxy type:</source>
-            <translation>Tipo de proxy:</translation>
-        </message>
-        <message>
-            <source>Host:</source>
-            <translation>Hospedar:</translation>
-        </message>
-        <message>
-            <source>Port:</source>
-            <translation>Porta:</translation>
-        </message>
-        <message>
-            <source>User name:</source>
-            <translation>Nome de usuário:</translation>
-        </message>
-        <message>
-            <source>Password:</source>
-            <translation>Senha:</translation>
-        </message>
-        <message>
-            <source>Request timeout:</source>
-            <translation>Tempo limite da solicitação:</translation>
-        </message>
-        <message>
-            <source>Network</source>
-            <translation>Rede</translation>
-        </message>
-        <message>
-            <source>Translate in a popup</source>
-            <translation>Traduzir em um pop-up</translation>
-        </message>
-        <message>
-            <source>Replace the selected text with the translation</source>
-            <translation>Substitua o texto selecionado pela tradução</translation>
-        </message>
-        <message>
-            <source>Translate in the main window</source>
-            <translation>Traduzir na janela principal</translation>
-        </message>
-        <message>
-            <source>Show the main window</source>
-            <translation>Mostrar a janela principal</translation>
-        </message>
-        <message>
-            <source>"%1" uses more than one key combination. Global hotkeys support a single combination.</source>
-            <translation>"%1" usa mais de uma combinação de teclas. As teclas de atalho globais suportam uma única combinação.</translation>
-        </message>
-        <message>
-            <source>"%1" cannot be used as a global hotkey.</source>
-            <translation>"%1" não pode ser usado como tecla de atalho global.</translation>
-        </message>
-        <message>
-            <source>The same key combination is assigned more than once: %1.</source>
-            <translation>A mesma combinação de teclas é atribuída mais de uma vez: %1.</translation>
-        </message>
-        <message>
-            <source>The primary and additional languages must differ.</source>
-            <translation>Os idiomas principal e adicional devem ser diferentes.</translation>
-        </message>
-        <message>
-            <source>Enter the proxy host and port, or choose another proxy mode.</source>
-            <translation>Insira o host e a porta do proxy ou escolha outro modo de proxy.</translation>
-        </message>
-    </context>
-    <context>
-        <name>TranslationErrorText</name>
-        <message>
-            <source>Network error</source>
-            <translation>Erro de rede</translation>
-        </message>
-        <message>
-            <source>The translation service did not respond in time</source>
-            <translation>O serviço de tradução não respondeu a tempo</translation>
-        </message>
-        <message>
-            <source>The translation service rejected the API key</source>
-            <translation>O serviço de tradução rejeitou a chave API</translation>
-        </message>
-        <message>
-            <source>The translation quota is exceeded; try another service</source>
-            <translation>A cota de tradução foi excedida; tente outro serviço</translation>
-        </message>
-        <message>
-            <source>Too many requests; try again later or use another service</source>
-            <translation>Muitos pedidos; tente novamente mais tarde ou use outro serviço</translation>
-        </message>
-        <message>
-            <source>The text is too long</source>
-            <translation>O texto é muito longo</translation>
-        </message>
-        <message>
-            <source>The language is not supported by the translation service</source>
-            <translation>O idioma não é suportado pelo serviço de tradução</translation>
-        </message>
-        <message>
-            <source>The translation service returned an unexpected response</source>
-            <translation>O serviço de tradução retornou uma resposta inesperada</translation>
-        </message>
-        <message>
-            <source>Translation cancelled</source>
-            <translation>Tradução cancelada</translation>
-        </message>
-        <message>
-            <source>Nothing to translate</source>
-            <translation>Nada para traduzir</translation>
-        </message>
-    </context>
-    <context>
-        <name>TrayIcon</name>
-        <message>
-            <source>Show window</source>
-            <translation>Mostrar janela</translation>
-        </message>
-        <message>
-            <source>Service</source>
-            <translation>Serviço</translation>
-        </message>
-        <message>
-            <source>Settings…</source>
-            <translation>Configurações…</translation>
-        </message>
-        <message>
-            <source>Quit</source>
-            <translation>Sair</translation>
-        </message>
-    </context>
-    <context>
-        <name>main</name>
-        <message>
-            <source>Fast desktop translator.</source>
-            <translation>Tradutor de desktop rápido.</translation>
-        </message>
-        <message>
-            <source>Start hidden in the system tray.</source>
-            <translation>Iniciar oculto na bandeja do sistema.</translation>
-        </message>
-        <message>
-            <source>Write verbose logs to the application log file.</source>
-            <translation>Gravar logs detalhados no arquivo de log do aplicativo.</translation>
-        </message>
-    </context>
+<context>
+    <name>AppController</name>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="125"/>
+        <location filename="../src/app/appcontroller.cpp" line="497"/>
+        <source>Autostart</source>
+        <translation>Início automático</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="126"/>
+        <location filename="../src/app/appcontroller.cpp" line="498"/>
+        <source>Could not update the autostart entry.</source>
+        <translation>Não foi possível atualizar a entrada de inicialização automática.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="205"/>
+        <source>Hotkey unavailable</source>
+        <translation>Tecla de atalho indisponível</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="206"/>
+        <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
+        <translation>%1 já está sendo usado por outro programa. Feche esse programa ou escolha outra combinação nas configurações.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="240"/>
+        <source>%1 — %2</source>
+        <translation>%1 — %2</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="528"/>
+        <source>DeepL is not available.</source>
+        <translation>DeepL não está disponível.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="543"/>
+        <source>The OpenAI-compatible provider is not available.</source>
+        <translation>O provedor compatível com OpenAI não está disponível.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="709"/>
+        <source>Nothing is selected.</source>
+        <translation>Nada está selecionado.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="738"/>
+        <source>The active window changed; the translation was copied to the clipboard.</source>
+        <translation>A janela ativa mudou; a tradução foi copiada para a área de transferência.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="775"/>
+        <source>Could not paste automatically; the translation is on the clipboard.</source>
+        <translation>Não foi possível colar automaticamente; a tradução está na área de transferência.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="799"/>
+        <source>Translate and replace</source>
+        <translation>Traduzir e substituir</translation>
+    </message>
+</context>
+<context>
+    <name>DeepLService</name>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="289"/>
+        <source>DeepL needs an API key</source>
+        <translation>O DeepL precisa de uma chave API</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="306"/>
+        <source>language &quot;%1&quot; is not supported</source>
+        <translation>idioma &quot;%1&quot; não é suportado</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="322"/>
+        <source>Enter a DeepL API key.</source>
+        <translation>Insira uma chave API do DeepL.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="329"/>
+        <source>The network is not available.</source>
+        <translation>A rede não está disponível.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="347"/>
+        <source>DeepL did not respond in time (%1 s).</source>
+        <translation>DeepL não respondeu a tempo (%1 s).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="359"/>
+        <source>Used %1 of %2 characters.</source>
+        <translation>%1 usado de caracteres %2.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="361"/>
+        <source>DeepL returned an unexpected response.</source>
+        <translation>DeepL retornou uma resposta inesperada.</translation>
+    </message>
+</context>
+<context>
+    <name>HotkeyManager</name>
+    <message>
+        <location filename="../src/platform/hotkeymanager_win.cpp" line="54"/>
+        <source>The key combination is not supported.</source>
+        <translation>A combinação de teclas não é suportada.</translation>
+    </message>
+</context>
+<context>
+    <name>Languages</name>
+    <message>
+        <location filename="../src/core/languages.cpp" line="23"/>
+        <source>Afrikaans</source>
+        <translation>afrikaans</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="24"/>
+        <source>Albanian</source>
+        <translation>albanês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="25"/>
+        <source>Amharic</source>
+        <translation>amárico</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="26"/>
+        <source>Arabic</source>
+        <translation>árabe</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="27"/>
+        <source>Armenian</source>
+        <translation>Armênio</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="28"/>
+        <source>Azerbaijani</source>
+        <translation>Azerbaijano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="29"/>
+        <source>Basque</source>
+        <translation>Basco</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="30"/>
+        <source>Belarusian</source>
+        <translation>Bielorrusso</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="31"/>
+        <source>Bengali</source>
+        <translation>bengali</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="32"/>
+        <source>Bosnian</source>
+        <translation>Bósnio</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="33"/>
+        <source>Bulgarian</source>
+        <translation>búlgaro</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="34"/>
+        <source>Catalan</source>
+        <translation>catalão</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="35"/>
+        <source>Cebuano</source>
+        <translation>Cebuano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="36"/>
+        <source>Chichewa</source>
+        <translation>Chichewa</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="37"/>
+        <source>Chinese (Simplified)</source>
+        <translation>Chinês (simplificado)</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="38"/>
+        <source>Chinese (Traditional)</source>
+        <translation>Chinês (tradicional)</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="39"/>
+        <source>Corsican</source>
+        <translation>Córsega</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="40"/>
+        <source>Croatian</source>
+        <translation>croata</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="41"/>
+        <source>Czech</source>
+        <translation>Tcheco</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="42"/>
+        <source>Danish</source>
+        <translation>dinamarquês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="43"/>
+        <source>Dutch</source>
+        <translation>Holandês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="44"/>
+        <source>English</source>
+        <translation>Inglês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="45"/>
+        <source>Esperanto</source>
+        <translation>esperanto</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="46"/>
+        <source>Estonian</source>
+        <translation>estoniano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="47"/>
+        <source>Filipino</source>
+        <translation>filipino</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="48"/>
+        <source>Finnish</source>
+        <translation>finlandês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="49"/>
+        <source>French</source>
+        <translation>Francês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="50"/>
+        <source>Frisian</source>
+        <translation>Frísio</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="51"/>
+        <source>Galician</source>
+        <translation>Galego</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="52"/>
+        <source>Georgian</source>
+        <translation>Georgiano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="53"/>
+        <source>German</source>
+        <translation>Alemão</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="54"/>
+        <source>Greek</source>
+        <translation>grego</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="55"/>
+        <source>Gujarati</source>
+        <translation>Guzerate</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="56"/>
+        <source>Haitian Creole</source>
+        <translation>crioulo haitiano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="57"/>
+        <source>Hausa</source>
+        <translation>Hauçá</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="58"/>
+        <source>Hawaiian</source>
+        <translation>havaiano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="59"/>
+        <source>Hebrew</source>
+        <translation>hebraico</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="60"/>
+        <source>Hindi</source>
+        <translation>hindi</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="61"/>
+        <source>Hmong</source>
+        <translation>Hmong</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="62"/>
+        <source>Hungarian</source>
+        <translation>húngaro</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="63"/>
+        <source>Icelandic</source>
+        <translation>islandês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="64"/>
+        <source>Igbo</source>
+        <translation>Ibo</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="65"/>
+        <source>Indonesian</source>
+        <translation>indonésio</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="66"/>
+        <source>Irish</source>
+        <translation>irlandês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="67"/>
+        <source>Italian</source>
+        <translation>italiano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="68"/>
+        <source>Japanese</source>
+        <translation>japonês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="69"/>
+        <source>Javanese</source>
+        <translation>Javanês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="70"/>
+        <source>Kannada</source>
+        <translation>Kannada</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="71"/>
+        <source>Kazakh</source>
+        <translation>Cazaque</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="72"/>
+        <source>Khmer</source>
+        <translation>Khmer</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="73"/>
+        <source>Kinyarwanda</source>
+        <translation>Kinyarwanda</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="74"/>
+        <source>Korean</source>
+        <translation>coreano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="75"/>
+        <source>Kurdish (Kurmanji)</source>
+        <translation>Curdo (Kurmanji)</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="76"/>
+        <source>Kyrgyz</source>
+        <translation>Quirguistão</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="77"/>
+        <source>Lao</source>
+        <translation>Laos</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="78"/>
+        <source>Latin</source>
+        <translation>Latim</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="79"/>
+        <source>Latvian</source>
+        <translation>letão</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="80"/>
+        <source>Lithuanian</source>
+        <translation>lituano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="81"/>
+        <source>Luxembourgish</source>
+        <translation>Luxemburguês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="82"/>
+        <source>Macedonian</source>
+        <translation>Macedônio</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="83"/>
+        <source>Malagasy</source>
+        <translation>malgaxe</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="84"/>
+        <source>Malay</source>
+        <translation>malaio</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="85"/>
+        <source>Malayalam</source>
+        <translation>malaiala</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="86"/>
+        <source>Maltese</source>
+        <translation>maltês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="87"/>
+        <source>Maori</source>
+        <translation>maori</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="88"/>
+        <source>Marathi</source>
+        <translation>Marathi</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="89"/>
+        <source>Mongolian</source>
+        <translation>mongol</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="90"/>
+        <source>Myanmar (Burmese)</source>
+        <translation>Mianmar (birmanês)</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="91"/>
+        <source>Nepali</source>
+        <translation>nepalês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="92"/>
+        <source>Norwegian</source>
+        <translation>norueguês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="93"/>
+        <source>Odia</source>
+        <translation>Odia</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="94"/>
+        <source>Pashto</source>
+        <translation>pashto</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="95"/>
+        <source>Persian</source>
+        <translation>persa</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="96"/>
+        <source>Polish</source>
+        <translation>polonês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="97"/>
+        <source>Portuguese (Brazil)</source>
+        <translation>Português (Brasil)</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="98"/>
+        <source>Portuguese (Portugal)</source>
+        <translation>Português (Portugal)</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="99"/>
+        <source>Punjabi</source>
+        <translation>punjabi</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="100"/>
+        <source>Romanian</source>
+        <translation>romeno</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="101"/>
+        <source>Russian</source>
+        <translation>russo</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="102"/>
+        <source>Samoan</source>
+        <translation>samoano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="103"/>
+        <source>Scots Gaelic</source>
+        <translation>Gaélico escocês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="104"/>
+        <source>Serbian</source>
+        <translation>sérvio</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="105"/>
+        <source>Sesotho</source>
+        <translation>Sesoto</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="106"/>
+        <source>Shona</source>
+        <translation>Shona</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="107"/>
+        <source>Sindhi</source>
+        <translation>Sindi</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="108"/>
+        <source>Sinhala</source>
+        <translation>Cingalês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="109"/>
+        <source>Slovak</source>
+        <translation>Eslovaco</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="110"/>
+        <source>Slovenian</source>
+        <translation>esloveno</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="111"/>
+        <source>Somali</source>
+        <translation>somali</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="112"/>
+        <source>Spanish</source>
+        <translation>Espanhol</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="113"/>
+        <source>Sundanese</source>
+        <translation>Sudanês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="114"/>
+        <source>Swahili</source>
+        <translation>suaíli</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="115"/>
+        <source>Swedish</source>
+        <translation>sueco</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="116"/>
+        <source>Tajik</source>
+        <translation>tadjique</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="117"/>
+        <source>Tamil</source>
+        <translation>tâmil</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="118"/>
+        <source>Tatar</source>
+        <translation>tártaro</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="119"/>
+        <source>Telugu</source>
+        <translation>Telugu</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="120"/>
+        <source>Thai</source>
+        <translation>Tailandês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="121"/>
+        <source>Turkish</source>
+        <translation>turco</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="122"/>
+        <source>Turkmen</source>
+        <translation>turcomano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="123"/>
+        <source>Ukrainian</source>
+        <translation>ucraniano</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="124"/>
+        <source>Urdu</source>
+        <translation>urdu</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="125"/>
+        <source>Uyghur</source>
+        <translation>Uigur</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="126"/>
+        <source>Uzbek</source>
+        <translation>Usbeque</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="127"/>
+        <source>Vietnamese</source>
+        <translation>vietnamita</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="128"/>
+        <source>Welsh</source>
+        <translation>galês</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="129"/>
+        <source>Xhosa</source>
+        <translation>Xhosa</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="130"/>
+        <source>Yiddish</source>
+        <translation>iídiche</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="131"/>
+        <source>Yoruba</source>
+        <translation>Iorubá</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="132"/>
+        <source>Zulu</source>
+        <translation>zulu</translation>
+    </message>
+    <message>
+        <location filename="../src/core/languages.cpp" line="211"/>
+        <source>Auto-detect</source>
+        <translation>Detecção automática</translation>
+    </message>
+</context>
+<context>
+    <name>MainWindow</name>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="42"/>
+        <location filename="../src/ui/mainwindow.cpp" line="231"/>
+        <source>Source language</source>
+        <translation>Idioma de origem</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="47"/>
+        <location filename="../src/ui/mainwindow.cpp" line="233"/>
+        <source>Swap languages</source>
+        <translation>Inverter idiomas</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="51"/>
+        <location filename="../src/ui/mainwindow.cpp" line="235"/>
+        <source>Target language</source>
+        <translation>Idioma de destino</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="55"/>
+        <location filename="../src/ui/mainwindow.cpp" line="238"/>
+        <source>Translation service</source>
+        <translation>Serviço de tradução</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="63"/>
+        <location filename="../src/ui/mainwindow.cpp" line="237"/>
+        <source>Service:</source>
+        <translation>Serviço:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="73"/>
+        <location filename="../src/ui/mainwindow.cpp" line="239"/>
+        <source>Source text</source>
+        <translation>Texto fonte</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="74"/>
+        <location filename="../src/ui/mainwindow.cpp" line="240"/>
+        <source>Enter text to translate</source>
+        <translation>Digite o texto para traduzir</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="77"/>
+        <location filename="../src/ui/mainwindow.cpp" line="79"/>
+        <location filename="../src/ui/mainwindow.cpp" line="241"/>
+        <location filename="../src/ui/mainwindow.cpp" line="242"/>
+        <source>Translation</source>
+        <translation>Tradução</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="87"/>
+        <location filename="../src/ui/mainwindow.cpp" line="243"/>
+        <source>Translate</source>
+        <translation>Traduzir</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="89"/>
+        <location filename="../src/ui/mainwindow.cpp" line="244"/>
+        <source>Ctrl+Enter</source>
+        <translation>Ctrl+Enter</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="90"/>
+        <location filename="../src/ui/mainwindow.cpp" line="245"/>
+        <source>Copy</source>
+        <translation>Copiar</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="92"/>
+        <location filename="../src/ui/mainwindow.cpp" line="246"/>
+        <source>Copy the translation to the clipboard</source>
+        <translation>Copiar a tradução para a área de transferência</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="187"/>
+        <source>Translating…</source>
+        <translation>Traduzindo…</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="206"/>
+        <source>Detected language: %1</source>
+        <translation>Idioma detectado: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="316"/>
+        <source>Translation copied to the clipboard</source>
+        <translation>Tradução copiada para a área de transferência</translation>
+    </message>
+</context>
+<context>
+    <name>NetworkManager</name>
+    <message>
+        <location filename="../src/net/networkmanager.cpp" line="98"/>
+        <source>Proxy connection works (HTTP %1).</source>
+        <translation>A conexão proxy funciona (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/net/networkmanager.cpp" line="100"/>
+        <source>The proxy test returned no HTTP response.</source>
+        <translation>O teste do proxy não retornou resposta HTTP.</translation>
+    </message>
+    <message>
+        <location filename="../src/net/networkmanager.cpp" line="115"/>
+        <location filename="../src/net/networkmanager.cpp" line="125"/>
+        <source>Network error</source>
+        <translation>Erro de rede</translation>
+    </message>
+    <message>
+        <location filename="../src/net/networkmanager.cpp" line="118"/>
+        <source>Proxy authentication failed</source>
+        <translation>Falha na autenticação do proxy</translation>
+    </message>
+    <message>
+        <location filename="../src/net/networkmanager.cpp" line="123"/>
+        <source>Proxy connection failed</source>
+        <translation>Falha na conexão com o proxy</translation>
+    </message>
+</context>
+<context>
+    <name>OpenAiCompatibleService</name>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="139"/>
+        <source>The provider rejected the API key (HTTP %1).</source>
+        <translation>O provedor rejeitou a chave de API (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="141"/>
+        <source>The provider has no available credits or the key limit is exceeded (HTTP %1).</source>
+        <translation>O provedor não tem créditos disponíveis ou o limite da chave foi excedido (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="145"/>
+        <source>Too many requests; try again later (HTTP %1).</source>
+        <translation>Muitas solicitações; tente novamente mais tarde (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="147"/>
+        <source>The request is too large for the provider (HTTP %1).</source>
+        <translation>A solicitação é grande demais para o provedor (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="149"/>
+        <source>The provider did not respond in time (HTTP %1).</source>
+        <translation>O provedor não respondeu a tempo (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="151"/>
+        <source>The provider is temporarily unavailable (HTTP %1).</source>
+        <translation>O provedor está temporariamente indisponível (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="153"/>
+        <source>The provider returned an unexpected response (HTTP %1).</source>
+        <translation>O provedor retornou uma resposta inesperada (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="254"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="539"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="582"/>
+        <source>The provider did not respond in time (%1 s).</source>
+        <translation>O provedor não respondeu em %1 s.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="345"/>
+        <source>Local LLM</source>
+        <translation>LLM local</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="358"/>
+        <source>The provider needs a model.</source>
+        <translation>O provedor precisa de um modelo.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="359"/>
+        <source>The provider needs a valid server URL.</source>
+        <translation>O provedor precisa de uma URL de servidor válida.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="410"/>
+        <source>The provider needs an API key.</source>
+        <translation>O provedor precisa de uma chave de API.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="495"/>
+        <source>The network is not available.</source>
+        <translation>A rede não está disponível.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="503"/>
+        <source>Enter an API key.</source>
+        <translation>Insira uma chave de API.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="601"/>
+        <source>The provider returned an unexpected response.</source>
+        <translation>O provedor retornou uma resposta inesperada.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="606"/>
+        <source>Loaded %1 models.</source>
+        <translation>%1 modelos carregados.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="607"/>
+        <source>API key is valid. Loaded %1 models.</source>
+        <translation>A chave de API é válida. %1 modelos carregados.</translation>
+    </message>
+</context>
+<context>
+    <name>PopupWindow</name>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="153"/>
+        <source>Change the translation language</source>
+        <translation>Alterar o idioma de tradução</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="154"/>
+        <source>Target language</source>
+        <translation>Idioma de destino</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="176"/>
+        <location filename="../src/ui/popupwindow.cpp" line="340"/>
+        <source>Keep the window open when focus is lost</source>
+        <translation>Manter a janela aberta ao perder o foco</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="183"/>
+        <source>Close (Esc)</source>
+        <translation>Fechar (Esc)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="202"/>
+        <source>Translating…</source>
+        <translation>Traduzindo…</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="213"/>
+        <source>Translation</source>
+        <translation>Tradução</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="227"/>
+        <source>Retry</source>
+        <translation>Tentar novamente</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="240"/>
+        <source>Nothing is selected</source>
+        <translation>Nada está selecionado</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="256"/>
+        <location filename="../src/ui/popupwindow.cpp" line="404"/>
+        <location filename="../src/ui/popupwindow.cpp" line="480"/>
+        <source>⧉ Copy</source>
+        <translation>⧉ Copiar</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="260"/>
+        <source>⇄ Open in Main Window</source>
+        <translation>⇄ Abrir na janela principal</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="339"/>
+        <source>Unpin (close the window when focus is lost)</source>
+        <translation>Desafixar (fechar a janela ao perder o foco)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="444"/>
+        <source>Auto</source>
+        <translation>Automático</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="450"/>
+        <source>Language</source>
+        <translation>Idioma</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="453"/>
+        <source>%1 → %2</source>
+        <translation>%1 → %2</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/popupwindow.cpp" line="479"/>
+        <source>✓ Copied</source>
+        <translation>✓ Copiado</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="59"/>
+        <source>The DeepL API key was rejected (HTTP %1).</source>
+        <translation>A chave API do DeepL foi rejeitada (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="61"/>
+        <source>The DeepL character limit is exceeded (HTTP %1).</source>
+        <translation>O limite de caracteres DeepL foi excedido (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="63"/>
+        <source>Too many DeepL requests; try again later (HTTP %1).</source>
+        <translation>Muitas solicitações DeepL; tente novamente mais tarde (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="65"/>
+        <source>The DeepL request is too large (HTTP %1).</source>
+        <translation>A solicitação DeepL é muito grande (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="67"/>
+        <source>DeepL is temporarily unavailable (HTTP %1).</source>
+        <translation>DeepL está temporariamente indisponível (HTTP %1).</translation>
+    </message>
+    <message>
+        <location filename="../src/services/deeplservice.cpp" line="69"/>
+        <source>DeepL returned an unexpected response (HTTP %1).</source>
+        <translation>DeepL retornou uma resposta inesperada (HTTP %1).</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsDialog</name>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="35"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
+        <source>Settings</source>
+        <translation>Configurações</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="60"/>
+        <source>System</source>
+        <translation>Sistema</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="63"/>
+        <source>Interface language:</source>
+        <translation>Idioma da interface:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="65"/>
+        <source>Start qtranslate when Windows starts</source>
+        <translation>Iniciar o qtranslate quando o Windows iniciar</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="67"/>
+        <source>Autostart is disabled in Windows Task Manager.</source>
+        <translation>A inicialização automática está desativada no Gerenciador de Tarefas do Windows.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="72"/>
+        <source>Start minimized in the system tray</source>
+        <translation>Iniciar minimizado na bandeja do sistema</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="75"/>
+        <source>Restore clipboard after copying the selection</source>
+        <translation>Restaurar a área de transferência após copiar a seleção</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="78"/>
+        <source>Close the popup when it loses focus</source>
+        <translation>Feche o pop-up quando ele perder o foco</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="100"/>
+        <source>Translate in a popup:</source>
+        <translation>Traduzir em um pop-up:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="101"/>
+        <source>Replace the selected text with the translation:</source>
+        <translation>Substitua o texto selecionado pela tradução:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="103"/>
+        <source>Translate in the main window:</source>
+        <translation>Traduzir na janela principal:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="104"/>
+        <source>Show the main window:</source>
+        <translation>Mostrar a janela principal:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="106"/>
+        <source>Global hotkeys are disabled while a key combination field is focused. Leave a field empty to disable that action.</source>
+        <translation>As teclas de atalho globais são desativadas enquanto um campo de combinação de teclas está em foco. Deixe um campo vazio para desabilitar essa ação.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="131"/>
+        <source> characters</source>
+        <translation> caracteres</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="136"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="304"/>
+        <source> ms</source>
+        <translation> ms</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="137"/>
+        <source>Off</source>
+        <translation>Desligado</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="139"/>
+        <source>Source language:</source>
+        <translation>Idioma de origem:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="140"/>
+        <source>Primary language:</source>
+        <translation>Idioma principal:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="141"/>
+        <source>Additional language:</source>
+        <translation>Idioma adicional:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="142"/>
+        <source>Maximum text length:</source>
+        <translation>Comprimento máximo do texto:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="143"/>
+        <source>Auto-translate delay:</source>
+        <translation>Atraso na tradução automática:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="145"/>
+        <source>The additional language is used automatically when the detected text is already in the primary language.</source>
+        <translation>O idioma adicional é usado automaticamente quando o texto detectado já está no idioma principal.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="153"/>
+        <source>General</source>
+        <translation>Em geral</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="154"/>
+        <source>Hotkeys</source>
+        <translation>Teclas de atalho</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="155"/>
+        <source>Translation</source>
+        <translation>Tradução</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="160"/>
+        <source>Google Translate</source>
+        <translation>Google Tradutor</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="164"/>
+        <source>Free endpoint (no key)</source>
+        <translation>Endpoint gratuito (sem chave)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="165"/>
+        <source>Cloud Translation API (key required)</source>
+        <translation>API Cloud Translation (chave necessária)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="170"/>
+        <source>Google Cloud API key</source>
+        <translation>Chave API do Google Cloud</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="171"/>
+        <source>Mode:</source>
+        <translation>Modo:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="172"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="198"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="244"/>
+        <source>API key:</source>
+        <translation>Chave API:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="174"/>
+        <source>The free mode uses the public endpoint and needs no key. The Cloud API requires a key with the Translation API enabled.</source>
+        <translation>O modo gratuito usa o endpoint público e não precisa de chave. A Nuvem API requer uma chave com a Tradução API habilitada.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="182"/>
+        <source>DeepL</source>
+        <translation>DeepL</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="187"/>
+        <source>DeepL API key (ends with :fx for Free)</source>
+        <translation>Chave API do DeepL (termina com :fx no Free)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="192"/>
+        <source>Check key</source>
+        <translation>Verificar chave</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="199"/>
+        <source>English target:</source>
+        <translation>Alvo inglês:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="204"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="259"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
+        <source>Checking…</source>
+        <translation>Verificando…</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="209"/>
+        <source>DeepL (free web)</source>
+        <translation>DeepL (web grátis)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="212"/>
+        <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
+        <translation>Disponível sem chave de API. Este endpoint não oficial pode parar de funcionar, aplicar limites de taxa ou bloquear solicitações; o texto é enviado ao DeepL.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="219"/>
+        <source>OpenAI-compatible provider</source>
+        <translation>Provedor compatível com OpenAI</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="227"/>
+        <source>API key</source>
+        <translation>Chave de API</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="235"/>
+        <source>Model ID, for example openai/gpt-4o-mini</source>
+        <translation>ID do modelo, por exemplo openai/gpt-4o-mini</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="237"/>
+        <source>Load models</source>
+        <translation>Carregar modelos</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="243"/>
+        <source>Server URL:</source>
+        <translation>URL do servidor:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="245"/>
+        <source>Model:</source>
+        <translation>Modelo:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="249"/>
+        <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key. The text is sent to the selected provider.</source>
+        <translation>Usa a API Chat Completions compatível com OpenAI. O servidor padrão é o OpenRouter; a URL pode apontar para outro endpoint compatível, como OpenAI, Ollama, llama.cpp ou TeamRouter. O modelo precisa estar disponível para a sua chave. O texto é enviado ao provedor selecionado.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="269"/>
+        <source>Services</source>
+        <translation>Serviços</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="277"/>
+        <source>No proxy</source>
+        <translation>Sem proxy</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="278"/>
+        <source>System proxy</source>
+        <translation>Proxy do sistema</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="279"/>
+        <source>Manual proxy</source>
+        <translation>Procuração manual</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="282"/>
+        <source>HTTP</source>
+        <translation>HTTP</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="283"/>
+        <source>SOCKS5</source>
+        <translation>SOCKS5</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="286"/>
+        <source>Proxy host</source>
+        <translation>Anfitrião proxy</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="290"/>
+        <source>Not set</source>
+        <translation>Não definido</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="291"/>
+        <source>The proxy requires authentication</source>
+        <translation>O proxy requer autenticação</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="295"/>
+        <source>User name</source>
+        <translation>Nome de usuário</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
+        <source>Password</source>
+        <translation>Senha</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="305"/>
+        <source>Test connection</source>
+        <translation>Conexão de teste</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="312"/>
+        <source>Proxy mode:</source>
+        <translation>Modo proxy:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="313"/>
+        <source>Proxy type:</source>
+        <translation>Tipo de proxy:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="314"/>
+        <source>Host:</source>
+        <translation>Hospedar:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="315"/>
+        <source>Port:</source>
+        <translation>Porta:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
+        <source>User name:</source>
+        <translation>Nome de usuário:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="318"/>
+        <source>Password:</source>
+        <translation>Senha:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="319"/>
+        <source>Request timeout:</source>
+        <translation>Tempo limite da solicitação:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="324"/>
+        <source>Network</source>
+        <translation>Rede</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="512"/>
+        <source>Translate in a popup</source>
+        <translation>Traduzir em um pop-up</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
+        <source>Replace the selected text with the translation</source>
+        <translation>Substitua o texto selecionado pela tradução</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="515"/>
+        <source>Translate in the main window</source>
+        <translation>Traduzir na janela principal</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="516"/>
+        <source>Show the main window</source>
+        <translation>Mostrar a janela principal</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="524"/>
+        <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
+        <translation>&quot;%1&quot; usa mais de uma combinação de teclas. As teclas de atalho globais suportam uma única combinação.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="532"/>
+        <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
+        <translation>&quot;%1&quot; não pode ser usado como tecla de atalho global.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
+        <source>The same key combination is assigned more than once: %1.</source>
+        <translation>A mesma combinação de teclas é atribuída mais de uma vez: %1.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="556"/>
+        <source>The primary and additional languages must differ.</source>
+        <translation>Os idiomas principal e adicional devem ser diferentes.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="563"/>
+        <source>Enter the proxy host and port, or choose another proxy mode.</source>
+        <translation>Insira o host e a porta do proxy ou escolha outro modo de proxy.</translation>
+    </message>
+</context>
+<context>
+    <name>TranslationErrorText</name>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="14"/>
+        <source>Network error</source>
+        <translation>Erro de rede</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="16"/>
+        <source>The translation service did not respond in time</source>
+        <translation>O serviço de tradução não respondeu a tempo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="19"/>
+        <source>The translation service rejected the API key</source>
+        <translation>O serviço de tradução rejeitou a chave API</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="22"/>
+        <source>The translation quota is exceeded; try another service</source>
+        <translation>A cota de tradução foi excedida; tente outro serviço</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="25"/>
+        <source>Too many requests; try again later or use another service</source>
+        <translation>Muitos pedidos; tente novamente mais tarde ou use outro serviço</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="28"/>
+        <source>The text is too long</source>
+        <translation>O texto é muito longo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="30"/>
+        <source>The language is not supported by the translation service</source>
+        <translation>O idioma não é suportado pelo serviço de tradução</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="33"/>
+        <source>The translation service returned an unexpected response</source>
+        <translation>O serviço de tradução retornou uma resposta inesperada</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="36"/>
+        <source>Translation cancelled</source>
+        <translation>Tradução cancelada</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="38"/>
+        <source>Nothing to translate</source>
+        <translation>Nada para traduzir</translation>
+    </message>
+</context>
+<context>
+    <name>TrayIcon</name>
+    <message>
+        <location filename="../src/ui/trayicon.cpp" line="14"/>
+        <location filename="../src/ui/trayicon.cpp" line="87"/>
+        <source>Show window</source>
+        <translation>Mostrar janela</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/trayicon.cpp" line="19"/>
+        <location filename="../src/ui/trayicon.cpp" line="89"/>
+        <source>Service</source>
+        <translation>Serviço</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/trayicon.cpp" line="24"/>
+        <location filename="../src/ui/trayicon.cpp" line="91"/>
+        <source>Settings…</source>
+        <translation>Configurações…</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/trayicon.cpp" line="27"/>
+        <location filename="../src/ui/trayicon.cpp" line="93"/>
+        <source>Quit</source>
+        <translation>Sair</translation>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <location filename="../src/main.cpp" line="40"/>
+        <source>Fast desktop translator.</source>
+        <translation>Tradutor de desktop rápido.</translation>
+    </message>
+    <message>
+        <location filename="../src/main.cpp" line="45"/>
+        <source>Start hidden in the system tray.</source>
+        <translation>Iniciar oculto na bandeja do sistema.</translation>
+    </message>
+    <message>
+        <location filename="../src/main.cpp" line="49"/>
+        <source>Write verbose logs to the application log file.</source>
+        <translation>Gravar logs detalhados no arquivo de log do aplicativo.</translation>
+    </message>
+</context>
 </TS>

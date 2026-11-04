@@ -1,6 +1,8 @@
 # LLM-действия: перевод, проверка, суммаризация, рерайтинг
 
-Дата: 2026-11-05. Статус: **задача на будущее, код не реализован**.
+Дата: 2026-11-05. Статус: **перевод через OpenAI-совместимый провайдер реализован;
+остальные действия и словарь запланированы**. Словарь вынесен в отдельный дизайн —
+[`dictionary.md`](dictionary.md).
 
 ## 1. Цель
 
@@ -21,7 +23,8 @@ LLM не заменяет DeepL/Google/LanguageTool, а дополняет их 
 - `LlmProvider` — OpenAI-совместимый клиент:
   - облако: OpenAI, Gemini (OpenAI-compatible endpoint), OpenRouter, Groq и др.;
   - локально: Ollama, LM Studio, llama.cpp server;
-  - настройки base URL, модели, ключа, таймаута.
+  - настройки base URL, модели, ключа, таймаута. **Уже реализовано** для перевода:
+    сервис `llm` и транспорт `src/ai/openaichat.*`.
 - `AiAction` — действие с собственным промптом, ограничениями и валидацией результата:
   - `translate`;
   - `proofread`;
@@ -41,6 +44,8 @@ LLM не заменяет DeepL/Google/LanguageTool, а дополняет их 
 - Замена DeepL/Google по умолчанию.
 - Единая модель «на всё»: пользователь выбирает модель и провайдера.
 - Собственный training/fine-tuning моделей.
+- Словарь и глоссарии — отдельный `DictionaryService`, а не действие перевода
+  ([`dictionary.md`](dictionary.md)).
 
 ## 4. Провайдеры
 
@@ -55,6 +60,43 @@ LLM не заменяет DeepL/Google/LanguageTool, а дополняет их 
 Для MVP достаточно одного OpenAI-совместимого клиента: он покрывает облако и локальные серверы.
 
 ## 5. Архитектура
+
+Реализованный транспорт (`src/ai/openaichat.h`):
+
+```cpp
+namespace OpenAiChat {
+struct Message { QString role; QString content; };
+struct Request {
+    QUrl endpoint;        // .../chat/completions
+    QString apiKey;       // пусто для локального сервера
+    QString model;
+    QList<Message> messages;
+    double temperature = 0.2;
+    int maxTokens = 0;
+    QString referer;      // OpenRouter attribution, необязательно
+    QString title;
+};
+struct Response {
+    QString text;
+    QString model;
+    QString finishReason;
+    int promptTokens = 0;
+    int completionTokens = 0;
+    TranslationError error = TranslationError::None;
+    QString errorMessage;
+};
+QByteArray serialize(const Request &);
+Response parse(const QByteArray &);
+QUrl chatCompletionsUrl(const QString &baseUrl);
+QUrl modelsUrl(const QString &baseUrl);
+}
+```
+
+`OpenAiCompatibleService` (`src/services/openaicompatibleservice.*`) реализует
+`TranslationService` поверх этого транспорта. Он же будет основой `LlmProvider`; отдельный
+класс на каждого провайдера не нужен. OpenRouter — только адрес по умолчанию; локальные Ollama,
+LM Studio и llama.cpp работают через тот же `/v1/chat/completions` и не требуют ключа. Для
+будущих действий предлагается:
 
 ```cpp
 struct LlmRequest
@@ -97,22 +139,18 @@ public:
 - Для `rewrite` — стиль/тон/аудитория.
 - Для `explain` — ответ в чат/панель, без замены текста.
 
-Настройки:
+Настройки (уже используются переводом):
 
 ```ini
 [llm]
-enabled=false
-provider=openai-compatible
-baseUrl=https://api.openai.com/v1
-model=
-apiKey=            ; DPAPI
-temperature=0.2
-maxTokens=2048
-timeoutMs=30000
-local=false
+baseUrl=https://openrouter.ai/api/v1   ; или OpenAI/Ollama/llama.cpp/TeamRouter
+model=openrouter/free
+apiKey=                                 ; DPAPI; пусто для локального сервера
 ```
 
-Ключи — через DPAPI, как у DeepL/Google. В лог не писать текст, ключи и полные ответы модели.
+`temperature` и `maxTokens` пока заданы в коде перевода (0.2, без max_tokens); для AI-действий
+они станут отдельными настройками. Ключи — через DPAPI, как у DeepL/Google. В лог не писать текст,
+ключи и полные ответы модели. Смена `baseUrl`/`model` очищает кэш переводов.
 
 ## 6. UI
 
@@ -147,28 +185,32 @@ local=false
 
 ## 9. Тесты
 
-- mock OpenAI-совместимого сервера: успех, 401/429/5xx, таймаут, отмена;
-- парсинг JSON-правок и fallback diff;
+- `tst_openaichat`: сериализация запроса, разбор обычного/массивного content, ошибки,
+  `finish_reason`, список моделей, построение URL;
+- `tst_openaicompatibleservice`: mock OpenAI-совместимого сервера, JSON/plain fallback,
+  сохранение краевых пробелов, 401/402/429/413/5xx, таймаут, отмена, загрузка моделей,
+  локальный сервер без ключа, `openrouter/free`;
+- `tst_settings`/`tst_settingsdialog`: DPAPI, base URL, модель, кнопка «Загрузить модели»;
 - проверка промптов на «верни только перевод»;
-- настройки: DPAPI, base URL, модель, проверка соединения;
-- UI (offscreen): меню действий, предпросмотр, замена/копирование, отмена;
 - ручной smoke: облако + Ollama/llama.cpp, разные модели.
 
 ## 10. Приоритеты
 
-1. OpenAI-совместимый провайдер + настройки + `translate`/`summarize`/`rewrite`.
-2. `proofread` через LLM (дополнительно к LanguageTool).
-3. `explain`/`pronounce`.
-4. Локальный llama.cpp/Ollama как полноценный провайдер.
-5. Стриминг ответа и отмена (если понадобится).
+1. ~~OpenAI-совместимый провайдер + настройки + `translate`~~ — сделано.
+2. `summarize`/`rewrite`/`explain`/`pronounce` на том же транспорте.
+3. `proofread` через LLM (дополнительно к LanguageTool).
+4. Локальный llama.cpp/Ollama как полноценный провайдер (транспорт уже готов).
+5. Словарь — отдельный `DictionaryService` ([`dictionary.md`](dictionary.md)).
+6. Стриминг ответа и отмена (если понадобится).
 
 ## 11. Критерии готовности
 
-- [ ] Работает облачный OpenAI-совместимый провайдер с ключом и моделью.
-- [ ] Работает локальный OpenAI-совместимый сервер (Ollama/LM Studio/llama.cpp).
+- [x] Работает облачный OpenAI-совместимый провайдер с ключом и моделью (OpenRouter).
+- [x] Работает настраиваемый base URL и загрузка моделей; локальный сервер проверен тестами,
+      живой smoke — после появления локального сервера.
 - [ ] Есть отдельная вкладка «AI» и независимые настройки.
-- [ ] Действия «перевести», «сократить», «переписать», «объяснить» дают результат и не меняют
-      текст без подтверждения.
+- [ ] Действия «сократить», «переписать», «объяснить» дают результат и не меняют текст без
+      подтверждения.
 - [ ] `proofread` возвращает структурированные правки или diff.
-- [ ] Ошибки ключей/лимитов/сети/модели понятны, приложение не зависает.
-- [ ] Ключи DPAPI, тексты не логируются, тесты и документация обновлены.
+- [x] Ошибки ключей/лимитов/сети/модели понятны, приложение не зависает.
+- [x] Ключи DPAPI, тексты не логируются, тесты и документация обновлены (для перевода).

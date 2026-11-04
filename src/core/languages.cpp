@@ -153,6 +153,7 @@ constexpr Synonym kSynonyms[] = {
 constexpr QLatin1String kGoogle("google");
 constexpr QLatin1String kDeepL("deepl");
 constexpr QLatin1String kDeepLWeb("deepl-web");
+constexpr QLatin1String kLlm("llm");
 
 const LanguageInfo *findInfo(const QString &code)
 {
@@ -170,6 +171,9 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
         return info.google;
     if (serviceId == kDeepL || serviceId == kDeepLWeb)
         return d == Languages::Direction::Source ? info.deeplSource : info.deeplTarget;
+    // LLMs accept the internal codes; the catalogue is the same as Google's.
+    if (serviceId == kLlm)
+        return info.google ? info.code : nullptr;
     return nullptr;
 }
 
@@ -208,6 +212,12 @@ QString displayName(const QString &code)
     if (const LanguageInfo *info = findInfo(code))
         return QCoreApplication::translate("Languages", info->englishName);
     return code;
+}
+
+QString englishName(const QString &code)
+{
+    const LanguageInfo *info = findInfo(code);
+    return info ? QString::fromUtf8(info->englishName) : code;
 }
 
 QString nativeName(const QString &code)

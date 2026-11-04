@@ -40,6 +40,8 @@ public:
 public slots:
     // Result of an asynchronous DeepL key check started by AppController.
     void showDeepLKeyCheckResult(bool ok, const QString &message);
+    // Result of an asynchronous provider key check/model load.
+    void showLlmModels(bool ok, const QString &message, const QStringList &models);
     // Result of an asynchronous proxy test started by AppController.
     void showProxyTestResult(bool ok, const QString &message);
 
@@ -48,6 +50,8 @@ signals:
     void hotkeyEditingChanged(bool editing);
     // The user asked to verify the key currently typed in the DeepL field.
     void deepLKeyCheckRequested(const QString &key);
+    // The user asked to check the provider key and load its model list.
+    void llmModelsRequested(const QString &baseUrl, const QString &key);
     // The user asked to test the proxy fields without saving them.
     void proxyTestRequested();
 
@@ -92,6 +96,12 @@ private:
     QComboBox *m_deeplEnglishVariant = nullptr;
     QPushButton *m_checkDeepLKey = nullptr;
     QLabel *m_deepLKeyStatus = nullptr;
+
+    QLineEdit *m_llmBaseUrl = nullptr;
+    QLineEdit *m_llmApiKey = nullptr;
+    QComboBox *m_llmModel = nullptr;
+    QPushButton *m_loadLlmModels = nullptr;
+    QLabel *m_llmStatus = nullptr;
 
     QComboBox *m_proxyMode = nullptr;
     QComboBox *m_proxyType = nullptr;

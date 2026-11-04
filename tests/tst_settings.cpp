@@ -70,6 +70,9 @@ private slots:
 
         QCOMPARE(settings.google.mode, QStringLiteral("free"));
         QCOMPARE(settings.deepl.englishVariant, QStringLiteral("EN-US"));
+        QCOMPARE(settings.llm.baseUrl, QStringLiteral("https://openrouter.ai/api/v1"));
+        QVERIFY(settings.llm.apiKey.isEmpty());
+        QCOMPARE(settings.llm.model, QStringLiteral("openrouter/free"));
         QCOMPARE(settings.network.proxyMode, QStringLiteral("system"));
         QCOMPARE(settings.network.timeoutMs, 10000);
         QCOMPARE(settings.popup.width, 460);
@@ -106,6 +109,9 @@ private slots:
         settings.google.apiKey = QStringLiteral("google-secret");
         settings.deepl.apiKey = QStringLiteral("deepl-secret");
         settings.deepl.englishVariant = QStringLiteral("EN-GB");
+        settings.llm.baseUrl = QStringLiteral("http://127.0.0.1:11434/v1");
+        settings.llm.apiKey = QStringLiteral("llm-secret");
+        settings.llm.model = QStringLiteral("local-model");
 
         settings.network.proxyMode = QStringLiteral("manual");
         settings.network.proxyType = QStringLiteral("socks5");
@@ -153,6 +159,9 @@ private slots:
         QCOMPARE(result.google.apiKey, QStringLiteral("google-secret"));
         QCOMPARE(result.deepl.apiKey, QStringLiteral("deepl-secret"));
         QCOMPARE(result.deepl.englishVariant, QStringLiteral("EN-GB"));
+        QCOMPARE(result.llm.baseUrl, QStringLiteral("http://127.0.0.1:11434/v1"));
+        QCOMPARE(result.llm.apiKey, QStringLiteral("llm-secret"));
+        QCOMPARE(result.llm.model, QStringLiteral("local-model"));
 
         QCOMPARE(result.network.proxyMode, QStringLiteral("manual"));
         QCOMPARE(result.network.proxyType, QStringLiteral("socks5"));
@@ -174,6 +183,7 @@ private slots:
         QVERIFY(!ini.isEmpty());
         QVERIFY(!ini.contains("google-secret"));
         QVERIFY(!ini.contains("deepl-secret"));
+        QVERIFY(!ini.contains("llm-secret"));
         QVERIFY(!ini.contains("proxy-secret"));
     }
 

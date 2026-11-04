@@ -58,6 +58,8 @@ public:
     virtual QString id() const = 0; // "google", "deepl"
     virtual QString displayName() const = 0;
     virtual bool isConfigured() const = 0;           // e.g. DeepL without an API key: false
+    // Optional user-facing hint when isConfigured() is false.
+    virtual QString configurationError() const { return {}; }
     virtual QStringList sourceLanguages() const = 0; // internal codes, without "auto"
     virtual QStringList targetLanguages() const = 0;
 

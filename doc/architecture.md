@@ -520,9 +520,10 @@ protected:
 class TranslationService : public QObject {
     Q_OBJECT
 public:
-    virtual QString id() const = 0;            // "google", "deepl"
+    virtual QString id() const = 0;            // "google", "deepl", "llm"
     virtual QString displayName() const = 0;
     virtual bool isConfigured() const = 0;     // DeepL без ключа — false
+    virtual QString configurationError() const { return {}; } // подсказка, если не настроен
     virtual QStringList sourceLanguages() const = 0;  // внутренние коды, без "auto"
     virtual QStringList targetLanguages() const = 0;
     virtual void applySettings(const AppSettings &s) = 0;   // ключи, режим, вариант
@@ -536,8 +537,11 @@ public:
 - `finished()` не испускается внутри `translate()`, даже если ответ известен сразу (неподдерживаемый
   язык, пустой текст): вызывающий должен успеть подключиться. Для этого есть `createFinished()`.
 - Вызывающий может удалить ответ и до `finished()` — это отменяет запрос без сигнала.
-- `applySettings()` применяет ключи, режим Google и вариант английского DeepL без пересоздания
-  сервисов.
+- `applySettings()` применяет ключи, режим Google, вариант английского DeepL и настройки
+  OpenAI-совместимого провайдера без пересоздания сервисов.
+- `configurationError()` возвращает конкретную подсказку, если `isConfigured() == false`
+  (например, «провайдеру нужна модель»); `TranslationManager` показывает её вместо общего
+  сообщения про API-ключ.
 
 Каждый сервис получает указатель на `NetworkManager` (общий `QNetworkAccessManager` и
 `makeRequest()` с таймаутом и `User-Agent`) и не создаёт свой менеджер — так прокси
@@ -681,6 +685,44 @@ Content-Type: application/json
 - Тесты — `tst_deeplwebparser` и `tst_deeplwebservice` на локальном HTTP-сервере; живые запросы
   выполняются только как ручной smoke, потому что эндпоинт нестабилен и имеет лимиты.
 
+### 4.7.2. `OpenAiCompatibleService` — перевод через OpenAI-совместимый API
+
+Сервис `llm` с настраиваемым именем: для `openrouter.ai` показывается **OpenRouter**, для
+`api.openai.com` — **OpenAI**, для локального адреса — **Local LLM**, для остальных хостов —
+сам хост. Это один адаптер, а не отдельный класс на каждого провайдера: OpenRouter, OpenAI,
+TeamRouter, Ollama, LM Studio, llama.cpp и другие реализации `POST /chat/completions` используют
+один протокол.
+
+```
+POST <baseUrl>/chat/completions
+Authorization: Bearer <KEY>          ← не отправляется для локального адреса без ключа
+Content-Type: application/json
+HTTP-Referer: https://github.com/youkaicat/qtranslate
+X-Title: qtranslate
+```
+
+- `baseUrl` по умолчанию — `https://openrouter.ai/api/v1`. `OpenAiChat::chatCompletionsUrl()`
+  принимает и полный `.../v1/chat/completions`, и базу без `/v1` (для Ollama/llama.cpp).
+  OpenRouter даёт бесплатные модели (`openrouter/free`), но лимиты и качество зависят от модели.
+- Модель задаётся строкой; для OpenRouter по умолчанию `openrouter/free`, кнопка «Загрузить
+  модели» проверяет ключ через `GET /key` (только OpenRouter) и заполняет список из `GET /models`.
+  Для локального сервера ключ необязателен, `/key` не запрашивается.
+- Запрос: `messages` из системного и пользовательского сообщения, `temperature=0.2`,
+  `stream=false`; текст пользователя передаётся как данные, не как инструкции.
+- При `auto` модель просят вернуть JSON `{"detected_language":"en","translation":"..."}`;
+  при явном исходном языке detected берётся из запроса. Markdown-обёртки и обычный текст
+  поддерживаются как fallback, поэтому слабые модели не ломают перевод.
+- Пробелы на краях исходного текста сохраняются; сам текст и ответ не пишутся в лог.
+- Ошибки: 401/403 → `Auth`, 402 → `QuotaExceeded`, 429 → `RateLimited`, 413 → `TooLong`,
+  5xx → `Network`, 4xx → `BadResponse`; `finish_reason=length` → `TooLong`.
+- В `AppSettings` группа `[llm]`: `baseUrl`, `apiKey` (DPAPI), `model`. При смене базового URL
+  или модели кэш `TranslationManager` очищается.
+- Запросы идут через общий `NetworkManager`, поэтому системный/ручной HTTP/SOCKS5-прокси и
+  таймаут применяются как у остальных сервисов. Кнопка «Загрузить модели» использует временный
+  менеджер с прокси/таймаутом из ещё не сохранённых полей диалога.
+- Транспорт `src/ai/openaichat.*` не зависит от `TranslationService`: его же будут использовать
+  будущие AI-действия и словарь.
+
 ### 4.8. Языки — `languages`
 
 Внутри программы используются собственные коды языков (`en`, `ru`, `de`, `pt-BR`, `zh-Hans`…).
@@ -709,9 +751,12 @@ Content-Type: application/json
 - `closest(serviceId, code, direction)` — ближайший поддерживаемый код: точный, затем язык той же
   основы (`pt-BR`/`pt-PT`, `zh-Hans`/`zh-Hant`), системный, `en`, первый доступный;
 - `displayName(code)` — название для UI, помечено `QT_TRANSLATE_NOOP` (контекст `Languages`) под
-  локализацию этапа 8; `nativeName(code)` — самоназвание (подсказка в списке);
+  локализацию этапа 8; `englishName(code)` — стабильное английское имя для промптов LLM, не
+  зависящее от языка интерфейса; `nativeName(code)` — самоназвание (подсказка в списке);
 - `autoCode()` — `"auto"`; `forLocale(QLocale)` / `systemLanguage()` — язык системы с учётом
   письменности и региона (`zh-Hans`/`zh-Hant`, `pt-BR`/`pt-PT`, нюнорск → `nb`), иначе `en`.
+- Для сервиса `llm` используются внутренние коды языка и весь каталог Google: LLM не требует
+  отдельной таблицы кодов, а `englishName()` даёт модели однозначное название языка.
 
 Списки языков у сервисов разные (у DeepL их меньше). `LanguageComboBox` показывает только
 поддерживаемые выбранным сервисом; при смене сервиса `AppController` заменяет текущий язык через
@@ -843,7 +888,7 @@ SOCKS4 Qt не поддерживает; в UI предлагается толь
 ### 4.11. Настройки — `AppSettings` и `SettingsStore`
 
 `AppSettings` — обычная структура-значение со всеми параметрами (вложенные группы `general`,
-`hotkeys`, `translation`, `google`, `deepl`, `network`, `popup`, `mainWindow` и
+`hotkeys`, `translation`, `google`, `deepl`, `llm`, `network`, `popup`, `mainWindow` и
 `settingsVersion`). `SettingsStore` загружает и сохраняет её и сообщает об изменениях:
 
 ```cpp
@@ -909,6 +954,9 @@ signals:
 | `google/apiKey` | секрет | пусто |
 | `deepl/apiKey` | секрет | пусто |
 | `deepl/englishVariant` | `EN-US` \| `EN-GB` | `EN-US` |
+| `llm/baseUrl` | string | `https://openrouter.ai/api/v1` |
+| `llm/apiKey` | секрет | пусто |
+| `llm/model` | string | `openrouter/free` |
 | `network/proxyMode` | `none` \| `system` \| `manual` | `system` |
 | `network/proxyType` | `http` \| `socks5` | `http` |
 | `network/proxyHost`, `proxyPort` | string, int | — |
@@ -1163,17 +1211,24 @@ Wayland. Портал `GlobalShortcuts` поддерживается не все
 - Текст не логируется; публичные API имеют лимиты, для регулярного использования — свой
   LanguageTool-сервер.
 
-### 4.16. LLM-действия (план)
+### 4.16. LLM-действия и словарь (частично реализовано)
 
-Задача на будущее: необязательный LLM-слой для текстовых действий. Полный дизайн, провайдеры и
-критерии — [`llm-actions.md`](llm-actions.md).
+Перевод через OpenAI-совместимый провайдер уже реализован (§4.7.2): сервис `llm`, настройки
+`[llm]`, транспорт `src/ai/openaichat.*`. Остальные действия — задача на будущее; полный дизайн,
+провайдеры и критерии — [`llm-actions.md`](llm-actions.md).
 
-- `LlmProvider` — OpenAI-совместимый клиент: облако (OpenAI, OpenRouter, Gemini-compatible) или
-  локально (Ollama, LM Studio, llama.cpp server).
+- `LlmProvider` — тот же OpenAI-совместимый транспорт для облака (OpenAI, OpenRouter,
+  Gemini-compatible) и локальных серверов (Ollama, LM Studio, llama.cpp).
 - `AiAction`/`AiActionRegistry` — действия `translate`, `proofread`, `summarize`, `rewrite`,
   `explain`, `pronounce`; промпты с фиксированной ролью, низкой температурой и валидацией.
+  `translate` уже работает как обычный `TranslationService`, остальные появятся в отдельной
+  панели с предпросмотром.
+- Словарь — отдельный `DictionaryService`, не `TranslationService`; источники: LLM (JSON-схема),
+  Google `dt=bd` для коротких текстов, локальный CSV-глоссарий, Wiktionary. Дизайн —
+  [`dictionary.md`](dictionary.md).
 - Настройки — отдельная вкладка «AI»: base URL, модель, ключ (DPAPI), таймаут, проверка
-  соединения; ключи `llm/*`.
+  соединения; ключи `llm/*`. Словарь использует те же `[llm]` настройки, но имеет собственный
+  кэш и не влияет на перевод.
 - Результат показывается в предпросмотре/diff; замена текста — только по подтверждению.
 - LLM не заменяет DeepL/Google/LanguageTool по умолчанию; ASR/TTS/OCR — отдельные будущие задачи.
 
@@ -1494,9 +1549,10 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 
 1. **Захват через UI Automation** без использования буфера обмена (§4.4): цепочка «UIA →
    буфер обмена», TextPattern/GetSelection, fallback для программ без UIA.
-2. **Словарные статьи** — Google gtx отдаёт их при `dt=bd`: части речи, несколько значений,
-   примеры и синонимы. Показывать для отдельных слов и коротких фраз под переводом; для длинных
-   абзацев таких данных нет. Нужен отдельный парсер, модель и UI; формат недокументирован.
+2. **Словарные статьи** — отдельный сервис/панель, не часть перевода: LLM по JSON-схеме,
+   Google gtx `dt=bd` для коротких текстов, локальный CSV-глоссарий и Wiktionary. Показывать
+   части речи, значения, примеры, синонимы и транскрипцию для отдельных слов и коротких фраз.
+   Дизайн — [`dictionary.md`](dictionary.md); формат Google недокументирован.
 3. Дополнительные официальные сервисы (Microsoft Translator, Amazon Translate, Yandex,
    PROMT, LibreTranslate) — новый класс `TranslationService`.
 4. Озвучивание текста (`QTextToSpeech`), история переводов.
@@ -1516,8 +1572,10 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
    кнопке, pivot через английский, fallback на облако. Детали и PoC — [`local-translation.md`](local-translation.md).
 10. **Проверка орфографии, грамматики и пунктуации** — отдельная вкладка, LanguageTool/Hunspell/
     Yandex Speller, замена текста исправленным. Детали — [`proofreading.md`](proofreading.md), §4.15.
-11. **LLM-действия** — перевод, проверка, суммаризация, рерайтинг, объяснение, произношение через
-    OpenAI-совместимый провайдер (облако или локально). Детали — [`llm-actions.md`](llm-actions.md), §4.16.
+11. **LLM-действия** — перевод уже работает через OpenAI-совместимый провайдер (OpenRouter по
+    умолчанию, облако или локально); проверка, суммаризация, рерайтинг, объяснение и произношение
+    запланированы. Словарь — отдельный `DictionaryService` ([`dictionary.md`](dictionary.md)).
+    Детали — [`llm-actions.md`](llm-actions.md), §4.16.
 
 ---
 

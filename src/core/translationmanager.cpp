@@ -198,9 +198,11 @@ TranslationReply *TranslationManager::translate(const TranslationRequest &reques
                                       .arg(request.text.size())
                                       .arg(m_maxLength));
     } else if (!m_active->isConfigured()) {
+        const QString hint = m_active->configurationError();
         reply = finishedWithError(
             serviceId, TranslationError::Auth,
-            QStringLiteral("%1 needs an API key").arg(m_active->displayName()));
+            hint.isEmpty() ? QStringLiteral("%1 needs an API key").arg(m_active->displayName())
+                           : hint);
     } else {
         const QString key = cacheKey(serviceId, request);
         TranslationResult cachedResult;

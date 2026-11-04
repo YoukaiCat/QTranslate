@@ -46,6 +46,13 @@ struct DeepLSettings
     QString englishVariant = QStringLiteral("EN-US");
 };
 
+struct LlmSettings
+{
+    QString baseUrl = QStringLiteral("https://openrouter.ai/api/v1");
+    QString apiKey;
+    QString model = QStringLiteral("openrouter/free");
+};
+
 struct NetworkSettings
 {
     QString proxyMode = QStringLiteral("system"); // none | system | manual
@@ -81,6 +88,7 @@ struct AppSettings
     TranslationSettings translation;
     GoogleSettings google;
     DeepLSettings deepl;
+    LlmSettings llm;
     NetworkSettings network;
     PopupSettings popup;
     MainWindowSettings mainWindow;

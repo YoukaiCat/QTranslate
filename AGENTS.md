@@ -4,8 +4,8 @@
 
 - qtranslate is a Windows tray translator: C++17, Qt 6 Widgets, CMake/Ninja, MSVC. The Linux port is
   planned; `src/platform/*_stub.cpp` are stubs, so do not claim Linux hotkeys/capture/autostart work.
-- `qtranslate_core` (`src/core`, `src/net`, `src/services`) has no Qt Widgets or WinAPI and is shared
-  by the app and tests. `qtranslate` adds `src/app`, `src/ui` and `src/platform`.
+- `qtranslate_core` (`src/core`, `src/net`, `src/services`, `src/ai`) has no Qt Widgets or WinAPI and
+  is shared by the app and tests. `qtranslate` adds `src/app`, `src/ui` and `src/platform`.
 - `AppController` is the only class that wires modules together. Keep network/translation logic in
   `TranslationManager`/services and UI logic in the widgets.
 - Design docs are Russian and authoritative: `doc/architecture.md` and `doc/plan.md`. Keep both in
@@ -24,7 +24,7 @@
   Run everything: `ctest --test-dir build/cli-Release --output-on-failure`.
 - CI sets `QT_QPA_PLATFORM=offscreen`; use it for headless GUI tests. `tst_popupwindow` and
   `tst_settingsdialog` also set offscreen themselves.
-- Both Debug and Release must build without MSVC `/W4` warnings, and all 19 tests must pass.
+- Both Debug and Release must build without MSVC `/W4` warnings, and all 23 tests must pass.
   The project requires Qt 6.5+; local development uses Qt 6.12.
 - Tests use local `QTcpServer` and fixtures; no real Google/DeepL keys or internet are required.
   `tst_hotkeymanager`, `tst_autostart` and `tst_secretprotector` are Windows-only.

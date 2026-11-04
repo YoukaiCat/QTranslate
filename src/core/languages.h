@@ -23,6 +23,10 @@ bool isKnown(const QString &code);
 // autoCode(); the code itself for an unknown code.
 QString displayName(const QString &code);
 
+// Stable English name for prompts and logs, unaffected by the UI language.
+// The code itself for an unknown code.
+QString englishName(const QString &code);
+
 // Name of the language in that language, e.g. "Deutsch". Empty if unknown.
 QString nativeName(const QString &code);
 

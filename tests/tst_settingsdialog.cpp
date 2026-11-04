@@ -245,6 +245,9 @@ private slots:
         settings.google.apiKey = QStringLiteral("google-key");
         settings.deepl.apiKey = QStringLiteral("deepl-key");
         settings.deepl.englishVariant = QStringLiteral("EN-GB");
+        settings.llm.baseUrl = QStringLiteral("https://openrouter.ai/api/v1");
+        settings.llm.apiKey = QStringLiteral("llm-key");
+        settings.llm.model = QStringLiteral("openai/gpt-4o-mini");
 
         SettingsDialog dialog(settings, {QStringLiteral("en"), QStringLiteral("ru")},
                               {QStringLiteral("de"), QStringLiteral("en")}, true);
@@ -254,16 +257,25 @@ private slots:
         auto *deepLKey = dialog.findChild<QLineEdit *>(QStringLiteral("deepLApiKey"));
         auto *variant =
             dialog.findChild<QComboBox *>(QStringLiteral("deeplEnglishVariant"));
+        auto *llmUrl = dialog.findChild<QLineEdit *>(QStringLiteral("llmBaseUrl"));
+        auto *llmKey = dialog.findChild<QLineEdit *>(QStringLiteral("llmApiKey"));
+        auto *llmModel = dialog.findChild<QComboBox *>(QStringLiteral("llmModel"));
         QVERIFY(googleMode);
         QVERIFY(googleKey);
         QVERIFY(deepLKey);
         QVERIFY(variant);
+        QVERIFY(llmUrl);
+        QVERIFY(llmKey);
+        QVERIFY(llmModel);
 
         QCOMPARE(googleMode->currentData().toString(), QStringLiteral("cloud"));
         QCOMPARE(googleKey->text(), QStringLiteral("google-key"));
         QVERIFY(googleKey->isEnabled());
         QCOMPARE(deepLKey->text(), QStringLiteral("deepl-key"));
         QCOMPARE(variant->currentData().toString(), QStringLiteral("EN-GB"));
+        QCOMPARE(llmUrl->text(), QStringLiteral("https://openrouter.ai/api/v1"));
+        QCOMPARE(llmKey->text(), QStringLiteral("llm-key"));
+        QCOMPARE(llmModel->currentText(), QStringLiteral("openai/gpt-4o-mini"));
 
         googleMode->setCurrentIndex(googleMode->findData(QStringLiteral("free")));
         QVERIFY(!googleKey->isEnabled());
@@ -273,12 +285,55 @@ private slots:
         googleKey->setText(QStringLiteral("new-google-key"));
         deepLKey->setText(QStringLiteral("new-deepl-key"));
         variant->setCurrentIndex(variant->findData(QStringLiteral("EN-US")));
+        llmUrl->setText(QStringLiteral("http://127.0.0.1:11434/v1"));
+        llmKey->setText(QStringLiteral("new-llm-key"));
+        llmModel->setCurrentText(QStringLiteral("local-model"));
 
         const AppSettings result = dialog.settings();
         QCOMPARE(result.google.mode, QStringLiteral("cloud"));
         QCOMPARE(result.google.apiKey, QStringLiteral("new-google-key"));
         QCOMPARE(result.deepl.apiKey, QStringLiteral("new-deepl-key"));
         QCOMPARE(result.deepl.englishVariant, QStringLiteral("EN-US"));
+        QCOMPARE(result.llm.baseUrl, QStringLiteral("http://127.0.0.1:11434/v1"));
+        QCOMPARE(result.llm.apiKey, QStringLiteral("new-llm-key"));
+        QCOMPARE(result.llm.model, QStringLiteral("local-model"));
+    }
+
+    void llmModels()
+    {
+        AppSettings settings;
+        settings.llm.model.clear();
+        SettingsDialog dialog(settings, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *key = dialog.findChild<QLineEdit *>(QStringLiteral("llmApiKey"));
+        auto *model = dialog.findChild<QComboBox *>(QStringLiteral("llmModel"));
+        auto *button = dialog.findChild<QPushButton *>(QStringLiteral("loadLlmModels"));
+        auto *status = dialog.findChild<QLabel *>(QStringLiteral("llmStatus"));
+        QVERIFY(key);
+        QVERIFY(model);
+        QVERIFY(button);
+        QVERIFY(status);
+
+        key->setText(QStringLiteral("typed-key"));
+        QString requestedBase;
+        QString requestedKey;
+        connect(&dialog, &SettingsDialog::llmModelsRequested, this,
+                [&requestedBase, &requestedKey](const QString &baseUrl, const QString &key) {
+                    requestedBase = baseUrl;
+                    requestedKey = key;
+                });
+        button->click();
+        QCOMPARE(requestedBase, QStringLiteral("https://openrouter.ai/api/v1"));
+        QCOMPARE(requestedKey, QStringLiteral("typed-key"));
+        QVERIFY(!button->isEnabled());
+
+        dialog.showLlmModels(true, QStringLiteral("API key is valid. Loaded 2 models."),
+                             {QStringLiteral("openai/gpt-4o-mini"),
+                              QStringLiteral("deepseek/deepseek-chat")});
+        QVERIFY(button->isEnabled());
+        QVERIFY(status->text().contains(QStringLiteral("Loaded 2")));
+        QCOMPARE(model->count(), 2);
+        QCOMPARE(model->currentText(), QStringLiteral("openai/gpt-4o-mini"));
     }
 
     void deepLWebHint()

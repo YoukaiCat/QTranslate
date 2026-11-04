@@ -17,6 +17,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSignalBlocker>
 #include <QSpinBox>
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -215,9 +216,56 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     deepLWebHint->setWordWrap(true);
     deepLWebLayout->addWidget(deepLWebHint);
 
+    auto *llmGroup = new QGroupBox(tr("OpenAI-compatible provider"), servicesPage);
+    auto *llmForm = new QFormLayout(llmGroup);
+    m_llmBaseUrl = new QLineEdit(llmGroup);
+    m_llmBaseUrl->setObjectName(QStringLiteral("llmBaseUrl"));
+    m_llmBaseUrl->setPlaceholderText(QStringLiteral("https://openrouter.ai/api/v1"));
+    m_llmApiKey = new QLineEdit(llmGroup);
+    m_llmApiKey->setObjectName(QStringLiteral("llmApiKey"));
+    m_llmApiKey->setEchoMode(QLineEdit::Password);
+    m_llmApiKey->setPlaceholderText(tr("API key"));
+    m_llmModel = new QComboBox(llmGroup);
+    m_llmModel->setObjectName(QStringLiteral("llmModel"));
+    m_llmModel->setEditable(true);
+    m_llmModel->setInsertPolicy(QComboBox::NoInsert);
+    m_llmModel->setMaxVisibleItems(30);
+    if (m_llmModel->lineEdit()) {
+        m_llmModel->lineEdit()->setPlaceholderText(
+            tr("Model ID, for example openai/gpt-4o-mini"));
+    }
+    m_loadLlmModels = new QPushButton(tr("Load models"), llmGroup);
+    m_loadLlmModels->setObjectName(QStringLiteral("loadLlmModels"));
+    m_llmStatus = new QLabel(llmGroup);
+    m_llmStatus->setObjectName(QStringLiteral("llmStatus"));
+    m_llmStatus->setWordWrap(true);
+    m_llmStatus->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    llmForm->addRow(tr("Server URL:"), m_llmBaseUrl);
+    llmForm->addRow(tr("API key:"), m_llmApiKey);
+    llmForm->addRow(tr("Model:"), m_llmModel);
+    llmForm->addRow(m_loadLlmModels);
+    llmForm->addRow(m_llmStatus);
+    auto *llmHint = new QLabel(
+        tr("Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; "
+           "the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp "
+           "or TeamRouter. The model must be available to your key. The text is sent to the "
+           "selected provider."),
+        llmGroup);
+    llmHint->setObjectName(QStringLiteral("llmHint"));
+    llmHint->setWordWrap(true);
+    llmForm->addRow(llmHint);
+    connect(m_loadLlmModels, &QPushButton::clicked, this, [this] {
+        m_llmStatus->setStyleSheet(QString());
+        m_llmStatus->setText(tr("Checking…"));
+        m_loadLlmModels->setEnabled(false);
+        emit llmModelsRequested(m_llmBaseUrl->text().trimmed(),
+                                m_llmApiKey->text().trimmed());
+    });
+
     servicesLayout->addWidget(googleGroup);
     servicesLayout->addWidget(deepLGroup);
     servicesLayout->addWidget(deepLWebGroup);
+    servicesLayout->addWidget(llmGroup);
     servicesLayout->addStretch();
     m_tabs->addTab(servicesPage, tr("Services"));
 
@@ -341,6 +389,12 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_deeplEnglishVariant->setCurrentIndex(englishVariant >= 0 ? englishVariant : 0);
     m_deepLKeyStatus->clear();
     m_checkDeepLKey->setEnabled(true);
+
+    m_llmBaseUrl->setText(settings.llm.baseUrl);
+    m_llmApiKey->setText(settings.llm.apiKey);
+    m_llmModel->setCurrentText(settings.llm.model);
+    m_llmStatus->clear();
+    m_loadLlmModels->setEnabled(true);
     updateGoogleControls();
 
     const int proxyMode = m_proxyMode->findData(settings.network.proxyMode);
@@ -379,6 +433,9 @@ AppSettings SettingsDialog::settings() const
     result.google.apiKey = m_googleApiKey->text().trimmed();
     result.deepl.apiKey = m_deeplApiKey->text().trimmed();
     result.deepl.englishVariant = m_deeplEnglishVariant->currentData().toString();
+    result.llm.baseUrl = m_llmBaseUrl->text().trimmed();
+    result.llm.apiKey = m_llmApiKey->text().trimmed();
+    result.llm.model = m_llmModel->currentText().trimmed();
     result.network.proxyMode = m_proxyMode->currentData().toString();
     result.network.proxyType = m_proxyType->currentData().toString();
     result.network.proxyHost = m_proxyHost->text().trimmed();
@@ -396,6 +453,29 @@ void SettingsDialog::showDeepLKeyCheckResult(bool ok, const QString &message)
     m_deepLKeyStatus->setStyleSheet(ok ? QStringLiteral("color: #2e7d32;")
                                        : QStringLiteral("color: #d32f2f;"));
     m_checkDeepLKey->setEnabled(true);
+}
+
+void SettingsDialog::showLlmModels(bool ok, const QString &message,
+                                          const QStringList &models)
+{
+    m_llmStatus->setText(message);
+    m_llmStatus->setStyleSheet(ok ? QStringLiteral("color: #2e7d32;")
+                                        : QStringLiteral("color: #d32f2f;"));
+    m_loadLlmModels->setEnabled(true);
+
+    if (!ok || models.isEmpty())
+        return;
+
+    const QString current = m_llmModel->currentText().trimmed();
+    const QSignalBlocker blocker(m_llmModel);
+    m_llmModel->clear();
+    for (const QString &model : models)
+        m_llmModel->addItem(model, model);
+    const int currentIndex = m_llmModel->findText(current);
+    if (currentIndex >= 0)
+        m_llmModel->setCurrentIndex(currentIndex);
+    else if (m_llmModel->count() > 0)
+        m_llmModel->setCurrentIndex(0);
 }
 
 void SettingsDialog::showProxyTestResult(bool ok, const QString &message)

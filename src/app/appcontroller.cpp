@@ -16,6 +16,7 @@
 #include "services/deeplservice.h"
 #include "services/deeplwebservice.h"
 #include "services/googletranslateservice.h"
+#include "services/openaicompatibleservice.h"
 #include "ui/appicon.h"
 #include "ui/mainwindow.h"
 #include "ui/popupwindow.h"
@@ -153,12 +154,15 @@ void AppController::createTranslation()
     m_google = new GoogleTranslateService(m_network);
     m_deepl = new DeepLService(m_network);
     m_deeplWeb = new DeepLWebService(m_network);
+    m_llm = new OpenAiCompatibleService(m_network);
     m_google->applySettings(settings);
     m_deepl->applySettings(settings);
     m_deeplWeb->applySettings(settings);
+    m_llm->applySettings(settings);
     m_translations->registerService(m_google);
     m_translations->registerService(m_deepl);
     m_translations->registerService(m_deeplWeb);
+    m_translations->registerService(m_llm);
 
     if (m_translations->service(settings.translation.service))
         m_translations->setActiveService(settings.translation.service);
@@ -449,6 +453,14 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_deepl->applySettings(newSettings);
     if (m_deeplWeb)
         m_deeplWeb->applySettings(newSettings);
+    if (m_llm)
+        m_llm->applySettings(newSettings);
+
+    if (oldSettings.llm.model != newSettings.llm.model
+        || oldSettings.llm.baseUrl != newSettings.llm.baseUrl) {
+        m_translations->clearCache();
+        updateServiceSelectors();
+    }
 
     if (oldSettings.translation.service != newSettings.translation.service) {
         if (m_translations->service(newSettings.translation.service))
@@ -521,6 +533,36 @@ void AppController::showSettings()
                     if (dialogGuard)
                         dialogGuard->showDeepLKeyCheckResult(ok, message);
                 });
+            });
+
+    connect(&dialog, &SettingsDialog::llmModelsRequested, this,
+            [this, dialogGuard](const QString &baseUrl, const QString &key) {
+                if (!m_llm) {
+                    if (dialogGuard)
+                        dialogGuard->showLlmModels(
+                            false, tr("The OpenAI-compatible provider is not available."), {});
+                    return;
+                }
+
+                // The dialog values have not been saved yet, so use a temporary
+                // network manager: Load models must honor the edited proxy and
+                // timeout without disturbing an in-flight translation.
+                const AppSettings current = m_settings ? m_settings->current() : AppSettings{};
+                const NetworkSettings networkSettings =
+                    dialogGuard ? dialogGuard->settings().network : current.network;
+                auto *network = new NetworkManager(this);
+                network->setTimeoutMs(networkSettings.timeoutMs);
+                network->applyProxy(toProxySettings(networkSettings));
+                auto *service = new OpenAiCompatibleService(network, network);
+                service->loadModels(
+                    baseUrl, key,
+                    [dialogGuard, service, network](bool ok, const QString &message,
+                                                    const QStringList &models) {
+                        if (dialogGuard)
+                            dialogGuard->showLlmModels(ok, message, models);
+                        service->deleteLater();
+                        network->deleteLater();
+                    });
             });
 
     connect(&dialog, &SettingsDialog::proxyTestRequested, this, [this, dialogGuard] {

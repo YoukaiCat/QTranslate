@@ -293,6 +293,15 @@ void SettingsStore::load()
             .toString();
     settings.endGroup();
 
+    settings.beginGroup(QStringLiteral("llm"));
+    loaded.llm.baseUrl =
+        settings.value(QStringLiteral("baseUrl"), loaded.llm.baseUrl).toString();
+    loaded.llm.apiKey =
+        readSecret(settings, QStringLiteral("apiKey"), m_codec);
+    loaded.llm.model =
+        settings.value(QStringLiteral("model"), loaded.llm.model).toString();
+    settings.endGroup();
+
     settings.beginGroup(QStringLiteral("network"));
     loaded.network.proxyMode =
         settings.value(QStringLiteral("proxyMode"), loaded.network.proxyMode).toString();
@@ -401,6 +410,12 @@ void SettingsStore::save(const AppSettings &settings)
     out.beginGroup(QStringLiteral("deepl"));
     writeSecret(out, QStringLiteral("apiKey"), normalized.deepl.apiKey, m_codec);
     out.setValue(QStringLiteral("englishVariant"), normalized.deepl.englishVariant);
+    out.endGroup();
+
+    out.beginGroup(QStringLiteral("llm"));
+    out.setValue(QStringLiteral("baseUrl"), normalized.llm.baseUrl);
+    writeSecret(out, QStringLiteral("apiKey"), normalized.llm.apiKey, m_codec);
+    out.setValue(QStringLiteral("model"), normalized.llm.model);
     out.endGroup();
 
     out.beginGroup(QStringLiteral("network"));

@@ -55,6 +55,9 @@ public:
     void cancel(Channel channel);
     void cancelAll();
 
+    // Drops successful results cached for the current service configuration.
+    void clearCache();
+
 signals:
     void activeServiceChanged(const QString &id);
 
@@ -65,7 +68,6 @@ private:
     QString cacheKey(const QString &serviceId, const TranslationRequest &request) const;
     bool cached(const QString &key, TranslationResult *result);
     void storeCached(const QString &key, const TranslationResult &result);
-    void clearCache();
 
     QList<TranslationService *> m_services;
     TranslationService *m_active = nullptr;

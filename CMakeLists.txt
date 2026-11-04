@@ -20,6 +20,7 @@ endfunction()
 # qtranslate_core: UI- and WinAPI-free logic shared by the app and the tests.
 # ---------------------------------------------------------------------------
 qt_add_library(qtranslate_core STATIC
+    src/ai/openaichat.cpp                   src/ai/openaichat.h
     src/core/appinfo.cpp                    src/core/appinfo.h
     src/core/hotkeysequence.cpp             src/core/hotkeysequence.h
     src/core/languages.cpp                  src/core/languages.h
@@ -37,6 +38,7 @@ qt_add_library(qtranslate_core STATIC
     src/services/deeplwebservice.cpp        src/services/deeplwebservice.h
     src/services/googleparser.cpp           src/services/googleparser.h
     src/services/googletranslateservice.cpp src/services/googletranslateservice.h
+    src/services/openaicompatibleservice.cpp src/services/openaicompatibleservice.h
 )
 
 target_include_directories(qtranslate_core PUBLIC src)

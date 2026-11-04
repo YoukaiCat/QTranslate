@@ -11,6 +11,7 @@ namespace {
 const QString google = QStringLiteral("google");
 const QString deepl = QStringLiteral("deepl");
 const QString deeplWeb = QStringLiteral("deepl-web");
+const QString llm = QStringLiteral("llm");
 } // namespace
 
 class TestLanguages : public QObject
@@ -35,6 +36,9 @@ private slots:
         QCOMPARE(Languages::displayName(QStringLiteral("de")), QStringLiteral("German"));
         QCOMPARE(Languages::nativeName(QStringLiteral("de")), QStringLiteral("Deutsch"));
         QCOMPARE(Languages::nativeName(QStringLiteral("ru")), QStringLiteral("Русский"));
+        QCOMPARE(Languages::englishName(QStringLiteral("de")), QStringLiteral("German"));
+        QCOMPARE(Languages::englishName(QStringLiteral("pt-BR")),
+                 QStringLiteral("Portuguese (Brazil)"));
         QCOMPARE(Languages::displayName(Languages::autoCode()), QStringLiteral("Auto-detect"));
         QCOMPARE(Languages::displayName(QStringLiteral("xx")), QStringLiteral("xx"));
         QVERIFY(Languages::nativeName(QStringLiteral("xx")).isEmpty());
@@ -67,6 +71,8 @@ private slots:
                                                   << "PT-BR";
         QTest::newRow("deepl web zh-Hans target") << deeplWeb << "zh-Hans" << Direction::Target
                                                     << "ZH-HANS";
+        QTest::newRow("llm pt-BR") << llm << "pt-BR" << Direction::Target << "pt-BR";
+        QTest::newRow("llm zh-Hans") << llm << "zh-Hans" << Direction::Source << "zh-Hans";
         QTest::newRow("unknown code") << google << "xx" << Direction::Target << "";
         QTest::newRow("auto is not a language") << google << "auto" << Direction::Source << "";
         QTest::newRow("unknown service") << "yandex" << "en" << Direction::Target << "";
@@ -111,6 +117,8 @@ private slots:
         QTest::newRow("deepl web EN-US") << deeplWeb << "EN-US" << Direction::Target << "en";
         QTest::newRow("deepl web ZH-HANS") << deeplWeb << "ZH-HANS" << Direction::Target
                                             << "zh-Hans";
+        QTest::newRow("llm en") << llm << "EN" << Direction::Source << "en";
+        QTest::newRow("llm pt-BR") << llm << "pt-BR" << Direction::Target << "pt-BR";
         QTest::newRow("unknown") << google << "xx-unknown" << Direction::Source << "";
         QTest::newRow("empty") << google << "" << Direction::Source << "";
         QTest::newRow("google code for deepl") << deepl << "iw" << Direction::Source << "";
@@ -129,7 +137,7 @@ private slots:
     {
         // Every supported language maps to a service code and back to itself,
         // except where several internal codes share a service code (DeepL "PT", "ZH").
-        for (const QString &service : {google, deepl, deeplWeb}) {
+        for (const QString &service : {google, deepl, deeplWeb, llm}) {
             for (Direction direction : {Direction::Source, Direction::Target}) {
                 for (const QString &code : Languages::supported(service, direction)) {
                     const QString serviceCode = Languages::toServiceCode(service, code, direction);
@@ -157,6 +165,8 @@ private slots:
         QCOMPARE(Languages::supported(deeplWeb, Direction::Target), deeplTargets);
         QCOMPARE(Languages::supported(deeplWeb, Direction::Source),
                  Languages::supported(deepl, Direction::Source));
+        QCOMPARE(Languages::supported(llm, Direction::Target), googleTargets);
+        QCOMPARE(Languages::supported(llm, Direction::Source), googleTargets);
         for (const QString &code : deeplTargets)
             QVERIFY2(googleTargets.contains(code), qPrintable(code));
         QVERIFY(Languages::supported(QStringLiteral("yandex"), Direction::Target).isEmpty());
