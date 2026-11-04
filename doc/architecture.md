@@ -258,7 +258,8 @@ qtranslate/
 упаковки; CI использует полный путь.
 
 **CI.** `.github/workflows/build.yml` на `windows-latest`:
-1. `install-qt-action` ставит Qt 6.12.0 MSVC 2022 x64;
+1. `install-qt-action` ставит Qt 6.8.3 LTS MSVC 2022 x64 (aqtinstall пока не поддерживает
+   раскладку репозитория Qt 6.12; локальная разработка ведётся на 6.12, проект требует 6.5+);
 2. CMake (Visual Studio 2022 generator) собирает Release;
 3. `ctest` запускает 17 тестов с `QT_QPA_PLATFORM=offscreen`;
 4. Chocolatey ставит Inno Setup, `package.ps1` собирает артефакты;

@@ -115,8 +115,9 @@ The output goes to `build/artifacts`:
 - `SHA256SUMS.txt` — SHA-256 checksums.
 
 The CI workflow [`.github/workflows/build.yml`](.github/workflows/build.yml) runs the same steps on
-`windows-latest` for every push and pull request. Pushing a tag such as `v0.9.0` publishes a GitHub
-release with these artifacts; the tag must match the version in `CMakeLists.txt`.
+`windows-latest` with Qt 6.8.3 LTS for every push and pull request. Pushing a tag such as `v0.9.0`
+publishes a GitHub release with these artifacts; the tag must match the version in
+`CMakeLists.txt`.
 
 ## Usage
 

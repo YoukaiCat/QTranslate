@@ -1130,8 +1130,9 @@ GitHub Actions по тегу, а не вручную.
 - Проверка: скрипт запускается локально и в CI, оба артефакта создаются.
 
 **10.4. GitHub Actions.**
-- `.github/workflows/build.yml`: `windows-latest`, Qt 6.12.0 MSVC 2022 x64, Release-сборка,
-  `ctest`, упаковка, загрузка артефактов на каждый push/PR и вручную.
+- `.github/workflows/build.yml`: `windows-latest`, Qt 6.8.3 LTS MSVC 2022 x64 (aqtinstall не
+  поддерживает раскладку Qt 6.12), Release-сборка, `ctest`, упаковка, загрузка артефактов на
+  каждый push/PR и вручную.
 - Для тега `v*` — отдельная job, которая публикует GitHub Release с установщиком, zip и
   `SHA256SUMS.txt`; заметки берутся из `doc/releases/<версия>.md`.
 - Проверка: workflow зелёный на push в `main`, артефакты скачиваются; тег создаёт релиз.
