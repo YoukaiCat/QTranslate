@@ -114,6 +114,13 @@ qt_generate_deploy_app_script(
     TARGET qtranslate
     OUTPUT_SCRIPT deploy_script
     NO_UNSUPPORTED_PLATFORM_ERROR
+    # The installer bundles the MSVC CRT explicitly below. windeployqt would
+    # otherwise add the 18 MB vc_redist.x64.exe when VCINSTALLDIR is set.
+    NO_COMPILER_RUNTIME
+    # qtranslate uses Qt Widgets, not Direct3D 12; skip the D3D/DXC compilers.
+    DEPLOY_TOOL_OPTIONS
+        --no-system-d3d-compiler
+        --no-system-dxc-compiler
 )
 install(SCRIPT ${deploy_script})
 
