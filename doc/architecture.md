@@ -1307,8 +1307,13 @@ SOCKS5-прокси с авторизацией; автозапуск после
 Артефакты CI (Qt 6.8.3 LTS, `windows-latest`) скачаны и проверены отдельно: zip 22,5 МБ,
 установщик 16,4 МБ; установка, запуск без Qt в `PATH`, удаление и контрольные суммы — в порядке.
 CI: workflow `.github/workflows/build.yml` собирает и тестирует Release на `windows-latest`,
-затем повторяет упаковку; по тегу `v0.9.0` публикует релиз. Результат прогона и ссылка на релиз
-фиксируются в `doc/plan.md` (этап 10).
+затем повторяет упаковку; по тегу `v0.9.0` публикует релиз.
+
+- workflow: https://github.com/youkaicat/qtranslate/actions/workflows/build.yml
+- успешный прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41897455346
+- релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.9.0
+
+Файлы, скачанные из релиза, совпали с `SHA256SUMS.txt`.
 
 ---
 
