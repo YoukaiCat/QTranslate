@@ -1129,6 +1129,20 @@ Wayland. Портал `GlobalShortcuts` поддерживается не все
 - Текст не логируется; публичные API имеют лимиты, для регулярного использования — свой
   LanguageTool-сервер.
 
+### 4.16. LLM-действия (план)
+
+Задача на будущее: необязательный LLM-слой для текстовых действий. Полный дизайн, провайдеры и
+критерии — [`llm-actions.md`](llm-actions.md).
+
+- `LlmProvider` — OpenAI-совместимый клиент: облако (OpenAI, OpenRouter, Gemini-compatible) или
+  локально (Ollama, LM Studio, llama.cpp server).
+- `AiAction`/`AiActionRegistry` — действия `translate`, `proofread`, `summarize`, `rewrite`,
+  `explain`, `pronounce`; промпты с фиксированной ролью, низкой температурой и валидацией.
+- Настройки — отдельная вкладка «AI»: base URL, модель, ключ (DPAPI), таймаут, проверка
+  соединения; ключи `llm/*`.
+- Результат показывается в предпросмотре/diff; замена текста — только по подтверждению.
+- LLM не заменяет DeepL/Google/LanguageTool по умолчанию; ASR/TTS/OCR — отдельные будущие задачи.
+
 ---
 
 ## 5. Основные сценарии
@@ -1445,6 +1459,8 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
    кнопке, pivot через английский, fallback на облако. Детали и PoC — [`local-translation.md`](local-translation.md).
 10. **Проверка орфографии, грамматики и пунктуации** — отдельная вкладка, LanguageTool/Hunspell/
     Yandex Speller, замена текста исправленным. Детали — [`proofreading.md`](proofreading.md), §4.15.
+11. **LLM-действия** — перевод, проверка, суммаризация, рерайтинг, объяснение, произношение через
+    OpenAI-совместимый провайдер (облако или локально). Детали — [`llm-actions.md`](llm-actions.md), §4.16.
 
 ---
 
