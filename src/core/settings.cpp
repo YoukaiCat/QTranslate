@@ -107,9 +107,12 @@ void normalize(AppSettings &settings)
 
     settings.settingsVersion = AppSettings::kCurrentVersion;
 
-    if (settings.general.uiLanguage.isEmpty()
-        || !UiLanguages::isSupported(settings.general.uiLanguage)) {
+    if (settings.general.uiLanguage.isEmpty()) {
         settings.general.uiLanguage = defaults.general.uiLanguage;
+    } else if (settings.general.uiLanguage != QStringLiteral("system")) {
+        const QString canonical = UiLanguages::canonical(settings.general.uiLanguage);
+        settings.general.uiLanguage =
+            canonical.isEmpty() ? defaults.general.uiLanguage : canonical;
     }
 
     settings.translation.service =

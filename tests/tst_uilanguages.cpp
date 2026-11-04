@@ -24,6 +24,10 @@ void TestUiLanguages::normalizesLanguageTags()
     QCOMPARE(UiLanguages::normalize(QStringLiteral("zh-Hans")), QStringLiteral("zh-Hans"));
     QCOMPARE(UiLanguages::normalize(QStringLiteral("zh-Hant")), QStringLiteral("en"));
     QCOMPARE(UiLanguages::normalize(QStringLiteral("xx")), QStringLiteral("en"));
+    QCOMPARE(UiLanguages::canonical(QStringLiteral("de-DE")), QStringLiteral("de"));
+    QCOMPARE(UiLanguages::canonical(QStringLiteral("pt-PT")), QStringLiteral("pt-BR"));
+    QVERIFY(UiLanguages::canonical(QStringLiteral("zh-Hant")).isEmpty());
+    QVERIFY(UiLanguages::canonical(QStringLiteral("xx")).isEmpty());
 }
 
 void TestUiLanguages::resolvesSystemLocales()

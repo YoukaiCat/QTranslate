@@ -21,6 +21,10 @@ const QVector<Info> &all();
 // to a supported UI language. Unsupported languages fall back to English.
 QString normalize(const QString &code);
 
+// Returns the supported canonical code for an alias such as de-DE or pt-PT,
+// or an empty string when the code is unknown or explicitly unsupported.
+QString canonical(const QString &code);
+
 // Empty for English, which is the source language and needs no translator.
 QString resourceFor(const QString &code);
 

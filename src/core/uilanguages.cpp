@@ -56,12 +56,22 @@ QString normalize(const QString &code)
     if (value.isEmpty() || value == QStringLiteral("system"))
         value = Languages::systemLanguage();
 
+    const QString result = canonical(value);
+    return result.isEmpty() ? QStringLiteral("en") : result;
+}
+
+QString canonical(const QString &code)
+{
+    const QString value = code.trimmed();
+    if (value.isEmpty() || value == QStringLiteral("system"))
+        return {};
+
     // Traditional Chinese is not translated yet; do not show Simplified
     // Chinese to users who explicitly selected a Traditional locale.
     if (value.startsWith(QStringLiteral("zh-Hant"), Qt::CaseInsensitive)
         || value.startsWith(QStringLiteral("zh-TW"), Qt::CaseInsensitive)
         || value.startsWith(QStringLiteral("zh-HK"), Qt::CaseInsensitive)) {
-        return QStringLiteral("en");
+        return {};
     }
     if (value.startsWith(QStringLiteral("zh"), Qt::CaseInsensitive))
         return QStringLiteral("zh-Hans");
@@ -76,7 +86,7 @@ QString normalize(const QString &code)
             return language.code;
         }
     }
-    return QStringLiteral("en");
+    return {};
 }
 
 QString resourceFor(const QString &code)
