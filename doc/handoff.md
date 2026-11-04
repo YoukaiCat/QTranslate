@@ -10,6 +10,7 @@
   - `99ffdf4` — уменьшение дистрибутива (без `opengl32sw.dll`, только `en/ru` переводы Qt);
   - `aaa340a` — первый handoff;
   - `7a26d4d` — локализация на 13 языков, `doc/code-signing.md`, UI Automation в архитектуре;
+  - `cd8d20a` — нормализация алиасов языка (`de-DE`, `pt-PT`) перед сохранением настроек;
   - коммит с этим handoff.
 - Рабочее дерево после коммита handoff должно быть чистым; процесс `qtranslate` не запущен.
 
@@ -31,7 +32,8 @@
 - Все `.ts` лежат в `i18n/`, по 253 сообщения, включены в `QTRANSLATE_TS_FILES` в
   `CMakeLists.txt`; `.qm` встраиваются в `:/i18n`.
 - `src/core/uilanguages.*`: коды, родные названия, ресурсы; `normalize()` понимает `system`,
-  региональные теги, `pt-PT` → `pt-BR`, `zh-CN`/`zh-Hans` → `zh-Hans`, `zh-Hant` → английский.
+  региональные теги, `pt-PT` → `pt-BR`, `zh-CN`/`zh-Hans` → `zh-Hans`, `zh-Hant` → английский;
+  `canonical()` сохраняет алиасы (`de-DE` → `de`, `pt-PT` → `pt-BR`) в настройках.
 - `SettingsDialog` показывает 15 языков; `AppController::applyUiLanguage()` загружает нужный
   `QTranslator`, для арабского включает RTL и рассылает `LanguageChange` без перезапуска.
 - `LanguageComboBox` переведён на `AdjustToContents`, иначе немецкое «Automatische Erkennung»
