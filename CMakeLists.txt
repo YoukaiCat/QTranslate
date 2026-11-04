@@ -23,6 +23,7 @@ qt_add_library(qtranslate_core STATIC
     src/core/appinfo.cpp                    src/core/appinfo.h
     src/core/hotkeysequence.cpp             src/core/hotkeysequence.h
     src/core/languages.cpp                  src/core/languages.h
+    src/core/popupplacement.cpp             src/core/popupplacement.h
     src/core/textchunker.cpp                src/core/textchunker.h
     src/core/translationmanager.cpp         src/core/translationmanager.h
     src/core/translationservice.cpp         src/core/translationservice.h
@@ -54,6 +55,7 @@ qt_add_executable(qtranslate
     src/ui/appicon.cpp              src/ui/appicon.h
     src/ui/languagecombobox.cpp     src/ui/languagecombobox.h
     src/ui/mainwindow.cpp           src/ui/mainwindow.h
+    src/ui/popupwindow.cpp          src/ui/popupwindow.h
     src/ui/translationerrortext.cpp src/ui/translationerrortext.h
     src/ui/trayicon.cpp             src/ui/trayicon.h
 )

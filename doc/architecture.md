@@ -123,6 +123,7 @@ qtranslate/
 │   │   ├── translationservice.h/.cpp интерфейс сервиса + TranslationReply
 │   │   ├── translationmanager.h/.cpp реестр сервисов, кэш, логика языков, отмена
 │   │   ├── languages.h/.cpp          справочник языков и маппинг кодов
+│   │   ├── popupplacement.h/.cpp     позиционирование popup у курсора
 │   │   ├── textchunker.h/.cpp        разбиение длинного текста на части
 │   │   ├── settings.h/.cpp           AppSettings + SettingsStore
 │   │   └── hotkeysequence.h/.cpp     разбор/сериализация сочетаний
@@ -165,6 +166,8 @@ qtranslate/
     ├── tst_textchunker.cpp
     ├── tst_translationmanager.cpp
     ├── tst_hotkeysequence.cpp
+    ├── tst_popupplacement.cpp
+    ├── tst_popupwindow.cpp
     └── tst_settings.cpp
 ```
 
@@ -173,11 +176,11 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (этап 3) |
+| Цель | Что входит сейчас (этап 4) |
 |---|---|
-| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice` |
-| `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `translationerrortext`, `trayicon`), `platform/hotkeymanager.h` + `*_win.cpp` (на других платформах — `*_stub.cpp`), `platform/selectiongrabber.h` + `*_win.cpp`/`*_stub.cpp`, `platform/windowactivation.h` + `windowactivation_win.cpp`/`_stub.cpp` |
-| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
+| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice` |
+| `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `popupwindow`, `translationerrortext`, `trayicon`), `platform/hotkeymanager.h` + `*_win.cpp` (на других платформах — `*_stub.cpp`), `platform/selectiongrabber.h` + `*_win.cpp`/`*_stub.cpp`, `platform/windowactivation.h` + `windowactivation_win.cpp`/`_stub.cpp` |
+| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_popupplacement`, `tst_popupwindow` (offscreen, с исходниками `popupwindow`/`translationerrortext`), `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
 
 ### 3.3. Сборка
 
@@ -278,8 +281,8 @@ signals:
 - Идентификатор регистрации — `1 + int(action)` (диапазон `RegisterHotKey` 0x0001–0xBFFF).
   `setSuspended(true)` снимает регистрацию, но запоминает сочетания; `setSuspended(false)`
   регистрирует их заново и сообщает об ошибках через тот же сигнал.
-- На этапе 3 регистрируется только Ctrl+W. Ctrl+Q появится на этапе 4 вместе со сценарием
-  всплывающего окна, иначе программа перехватывала бы его без действия.
+- С этапа 4 при старте регистрируются оба сочетания по умолчанию: Ctrl+Q (`TranslateToPopup`) и
+  Ctrl+W (`TranslateToMainWindow`). `ShowMainWindow` пока не назначено.
 
 Настройки по умолчанию:
 
@@ -789,15 +792,28 @@ namespace Autostart {
 ```
 
 - Флаги: `Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint` — без кнопки на панели задач.
-- Создаётся один раз и переиспользуется, чтобы появляться без задержки.
+- Создаётся лениво при первом Ctrl+Q и переиспользуется, чтобы появляться без задержки.
 - Позиция: у курсора в момент нажатия клавиши (точка запоминается до захвата выделения), с
-  ограничением рамками `QScreen::availableGeometry()` того монитора, где курсор. Высота подстраивается
-  под текст до предела, дальше прокрутка.
-- Состояния: «загрузка» (спиннер, показ сразу), «результат», «ошибка» (текст и кнопка «Повторить»),
-  «нет выделения» (короткая подсказка, закрывается через 1,5 с).
-- Закрытие: Esc, ✕, потеря фокуса (если не закреплено 📌 и включена настройка).
-- Клик по «EN → RU» меняет язык перевода и сразу переводит заново.
-- «В главное окно» переносит исходный текст и перевод в `MainWindow`.
+  ограничением рамками `QScreen::availableGeometry()` того монитора, где курсор. Чистая геометрия
+  вынесена в `core/popupplacement`: окно сначала ставится справа-снизу, у края отражается
+  влево/вверх, затем прижимается к экрану.
+- Ширина 460 логических пикселей (настройка — этап 5). Высота подстраивается под текст результата
+  до предела `min(600, 70% рабочей области)`; дальше прокрутка.
+- Состояния: «загрузка» (анимированный спиннер, показ сразу после захвата выделения), «результат»,
+  «ошибка» (текст и кнопка «Повторить»), «нет выделения» (короткая подсказка, закрывается через
+  1,5 с).
+- Закрытие: Esc и ✕ всегда; потеря фокуса — если не закреплено 📌. Закрепление действует в пределах
+  одного вызова и сбрасывается при новом Ctrl+Q. Меню языка — временный popup: пока приложение
+  остаётся активным и другое наше окно не стало активным, закрытие меню не закрывает окно; клик в
+  другой программе или в главном окне закрывает. Настройка `popup/autoCloseOnFocusLoss` появится на
+  этапе 5, пока поведение включено.
+- Клик по «Auto → Русский ▾» открывает меню целевых языков; выбор сразу переводит сохранённый
+  исходный текст заново. После результата в строке показывается определённый язык.
+- «Копировать» кладёт перевод в буфер. «В главное окно» испускает
+  `openInMainWindowRequested(request, result)`; `AppController` передаёт оба текста в
+  `MainWindow::showTranslation()` без нового запроса и показывает главное окно.
+- Скрытие испускает `closed()`; `AppController` отменяет незавершённый запрос канала `Popup`, чтобы
+  поздний ответ не показался поверх следующего. Новый Ctrl+Q заменяет старый запрос того же канала.
 - Активация: Windows разрешает процессу, получившему `WM_HOTKEY`, вывести окно на передний план,
   поэтому `activateWindow()` после горячей клавиши срабатывает.
 
@@ -828,6 +844,8 @@ namespace Autostart {
   `showResult(result)`; результат показывается, только если это текущий запрос окна.
 - `translateText(text)` подставляет текст, полученный сценарием Ctrl+W, в поле исходного текста,
   ставит курсор в начало и запускает перевод.
+- `showTranslation(request, result)` показывает перевод, переданный из всплывающего окна: выставляет
+  языки, оба текста и статус, но не запускает новый запрос.
 - `closeEvent` скрывает окно в трей; выход — только из меню трея.
 - Геометрия сохраняется в настройках.
 
@@ -981,6 +999,8 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 | `tst_googletranslateservice` | Сервис против локального HTTP-сервера: тело запроса, разбиение длинного текста и склейка, HTTP-ошибки, отказ в соединении, таймаут, отмена |
 | `tst_deeplparser` | Разбор `translations[]`, коды ошибок → `TranslationError` |
 | `tst_languages` | Маппинг кодов в обе стороны, варианты `EN-US/EN-GB`, `PT-BR`, неизвестные коды |
+| `tst_popupplacement` | Позиционирование окна Ctrl+Q: отражение у краёв, прижатие к экрану, второй монитор с отрицательными координатами |
+| `tst_popupwindow` | Состояния всплывающего окна (offscreen): запрос, результат, копирование, ошибка/«Повторить», смена языка, закрепление, автозакрытие подсказки |
 | `tst_textchunker` | Разбиение по абзацам/предложениям, слова длиннее лимита, суррогатные пары не разрываются |
 | `tst_hotkeysequence` | `QKeySequence` ↔ `(MOD, VK)`, неподдерживаемые клавиши |
 | `tst_hotkeymanager` | `RegisterHotKey`: конфликт сочетаний, `setSuspended`, отложенная регистрация (Windows; собирается вместе с `platform/hotkeymanager_win.cpp`) |
@@ -993,8 +1013,8 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 
 Ручной чек-лист перед релизом: захват выделения в Блокноте, браузере, Word, VS Code, Telegram;
 окно в администраторском процессе (ожидаемо не работает); буфер обмена после перевода совпадает с
-исходным; работа через HTTP- и SOCKS5-прокси с авторизацией; автозапуск после перезагрузки;
-два монитора с разным масштабом.
+исходным; Ctrl+Q у краёв экрана и на двух мониторах с разным масштабом; работа через HTTP- и
+SOCKS5-прокси с авторизацией; автозапуск после перезагрузки.
 
 ---
 
@@ -1007,6 +1027,7 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 | Ctrl+Q / Ctrl+W перехватываются у всех программ | Оставить по умолчанию, без предупреждений; меняются в настройках (§4.3) |
 | HTTPS-прокси | HTTP-прокси с туннелем `CONNECT`; TLS до прокси не поддерживается (§4.10) |
 | Окна процессов, запущенных от администратора | Захват выделения в них не работает — это известное ограничение, его не обходим (§4.4) |
+| Закрепление 📌 во всплывающем окне | Действует до закрытия окна; новый Ctrl+Q начинает с незакреплённого состояния (§4.13) |
 | Запись в журнале Win+V при захвате | Промежуточный Ctrl+C может оставить запись; exclusion-форматы защищают только восстановление буфера. Полный обход — стратегия через UI Automation (§9.2), принята как будущее развитие |
 
 ### 9.2. Возможное развитие

@@ -25,6 +25,15 @@ qtranslate_add_test(tst_googleparser)
 qtranslate_add_test(tst_googletranslateservice)
 qtranslate_add_test(tst_hotkeysequence)
 qtranslate_add_test(tst_languages)
+qtranslate_add_test(tst_popupplacement)
+qtranslate_add_test(tst_popupwindow
+    ${PROJECT_SOURCE_DIR}/src/ui/popupwindow.cpp
+    ${PROJECT_SOURCE_DIR}/src/ui/popupwindow.h
+    ${PROJECT_SOURCE_DIR}/src/ui/translationerrortext.cpp
+    ${PROJECT_SOURCE_DIR}/src/ui/translationerrortext.h
+)
+target_link_libraries(tst_popupwindow PRIVATE Qt::Widgets)
+set_tests_properties(tst_popupwindow PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 qtranslate_add_test(tst_textchunker)
 qtranslate_add_test(tst_translationmanager)
 

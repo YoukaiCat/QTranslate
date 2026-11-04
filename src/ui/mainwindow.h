@@ -52,6 +52,10 @@ public:
     // starts a translation with the current languages.
     void translateText(const QString &text);
 
+    // Shows a translation transferred from the popup: sets the languages and
+    // both texts without starting a new request.
+    void showTranslation(const TranslationRequest &request, const TranslationResult &result);
+
 signals:
     void translateRequested(const TranslationRequest &request);
 

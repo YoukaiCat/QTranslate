@@ -193,6 +193,19 @@ void MainWindow::translateText(const QString &text)
     requestTranslation();
 }
 
+void MainWindow::showTranslation(const TranslationRequest &request,
+                                 const TranslationResult &result)
+{
+    if (m_sourceLang->findData(request.sourceLang) >= 0)
+        m_sourceLang->setCurrentCode(request.sourceLang);
+    if (m_targetLang->findData(request.targetLang) >= 0)
+        m_targetLang->setCurrentCode(request.targetLang);
+
+    m_sourceEdit->setPlainText(request.text);
+    m_sourceEdit->moveCursor(QTextCursor::Start);
+    showResult(result);
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (m_closeHidesToTray) {
