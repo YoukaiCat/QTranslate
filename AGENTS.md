@@ -10,6 +10,7 @@
   `TranslationManager`/services and UI logic in the widgets.
 - Design docs are Russian and authoritative: `doc/architecture.md` and `doc/plan.md`. Keep both in
   sync with behavior changes. `README.md` (English) and `README.ru.md` (Russian) must stay in sync.
+- Current work state and release handoff: `doc/handoff.md`. Update it at the end of a session.
 
 ## Build and test
 
