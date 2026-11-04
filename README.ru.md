@@ -2,9 +2,11 @@
 
 [![build](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml)
 
-Быстрый и простой переводчик для Windows, живущий в системном трее.
+Быстрый и простой переводчик для Windows. Живёт в системном трее, переводит выделенный текст в
+любой программе по глобальной горячей клавише и умеет сразу заменять выделение переводом в
+активном поле ввода.
 
-> **Статус:** 0.9.0, release candidate. Доступны установщик для Windows и портативный ZIP.
+> **Статус:** 0.9.0, release candidate. Доступны установщик для Windows и портативный архив.
 > Поддержка Linux в разработке.
 
 [English](README.md) | **Русский**
@@ -16,12 +18,12 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/popup-translation.png" alt="Перевод во всплывающем окне по Ctrl+Q" width="460">
+  <img src="docs/screenshots/popup-translation.png" alt="Перевод во всплывающем окне по Ctrl+Q" width="560">
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/settings-translation.png" alt="Настройки перевода" width="48%">
-  <img src="docs/screenshots/settings-hotkeys.png" alt="Настройки горячих клавиш" width="48%">
+  <img src="docs/screenshots/settings-translation.png" alt="Настройки перевода" width="49%">
+  <img src="docs/screenshots/settings-hotkeys.png" alt="Настройки горячих клавиш" width="49%">
 </p>
 
 ## Основные возможности
@@ -36,23 +38,49 @@
 - Системный или ручной HTTP/SOCKS5-прокси с необязательной авторизацией.
 - Русский и английский интерфейс, автозагрузка, портативный INI-режим, `--verbose`-логирование.
 
-## Скачивание
+## Скачивание и установка
 
-- [Установщик для Windows](https://github.com/youkaicat/qtranslate/releases/download/v0.9.0/qtranslate-0.9.0-win64-setup.exe)
-  — установка для текущего пользователя без прав администратора, ярлык в меню «Пуск» и
-  деинсталлятор.
-- [Портативный ZIP](https://github.com/youkaicat/qtranslate/releases/download/v0.9.0/qtranslate-0.9.0-win64.zip)
-  — распакуйте и запустите `bin\qtranslate.exe`; установка не требуется.
-- [Контрольные суммы SHA-256](https://github.com/youkaicat/qtranslate/releases/download/v0.9.0/SHA256SUMS.txt)
+Последняя сборка — на странице [Releases](https://github.com/youkaicat/qtranslate/releases/latest):
 
-Настройки и горячие клавиши находятся в меню трея. Для портативного режима положите пустой
-`qtranslate.ini` рядом с `qtranslate.exe`.
+- **Установщик** — `qtranslate-0.9.0-win64-setup.exe`. Устанавливает qtranslate для текущего
+  пользователя без прав администратора, создаёт ярлыки в меню «Пуск» и, по желанию, на рабочем
+  столе, добавляет деинсталлятор. При удалении настройки в `%APPDATA%\qtranslate` сохраняются.
+- **Портативный архив** — `qtranslate-0.9.0-win64.zip`. Распакуйте и запустите
+  `bin\qtranslate.exe`; установка и права администратора не нужны. Архив самодостаточен: Qt и
+  runtime MSVC уже включены.
+- **`SHA256SUMS.txt`** — контрольные суммы SHA-256 обоих файлов.
+
+Установщик пока не подписан кодом, поэтому Windows SmartScreen может показать предупреждение.
+
+## Использование
+
+```
+qtranslate [--minimized] [--verbose]
+```
+
+- `Ctrl+Q` — перевести выделение во всплывающем окне рядом с курсором.
+- `Ctrl+Shift+Q` — перевести выделение и заменить им текст в активном поле ввода.
+- `Ctrl+W` — открыть главное окно с переведённым выделением.
+- `Ctrl+Enter` — перевести текст в главном окне.
+- Настройки, выбор сервиса, «Показать окно» и «Выход» доступны в меню трея. Горячие клавиши,
+  языки, прокси, автозагрузка и ключи API настраиваются в **Настройках**.
+- `--minimized` запускает программу скрытой в трее; `--verbose` пишет подробный лог в
+  `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
+- Портативный режим: положите пустой `qtranslate.ini` рядом с `qtranslate.exe`, и программа будет
+  использовать его вместо `%APPDATA%\qtranslate\qtranslate.ini`.
 
 ## Сборка
 
 ### Windows
 
-Требуются Windows 10/11 x64, Qt 6.5 или новее, CMake 3.19 или новее и Visual Studio 2022.
+Требования:
+
+- Windows 10/11, 64-бит
+- Qt 6.5 или новее (разработка ведётся на Qt 6.12) с MSVC 2022 x64
+- CMake 3.19 или новее
+- Visual Studio 2022 (MSVC)
+
+Откройте `CMakeLists.txt` в Qt Creator или соберите из *x64 Native Tools Command Prompt*:
 
 ```bat
 cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:/Qt/6.12.0/msvc2022_64
@@ -60,8 +88,11 @@ cmake --build build/release
 ctest --test-dir build/release --output-on-failure
 ```
 
-Чтобы собрать портативный ZIP и установщик, установите [Inno Setup 6.3+](https://jrsoftware.org/isinfo.php)
-и выполните:
+С CMake старше 3.22 каталог Qt `bin` должен быть в `PATH`, чтобы `ctest` нашёл DLL Qt. Тесты
+собираются по умолчанию; `-DQTRANSLATE_BUILD_TESTS=OFF` отключает их.
+
+Чтобы собрать артефакты релиза (портативный ZIP, установщик для текущего пользователя и
+`SHA256SUMS.txt`), установите [Inno Setup 6.3+](https://jrsoftware.org/isinfo.php) и выполните:
 
 ```powershell
 ./packaging/windows/package.ps1 -BuildDir build/release
@@ -69,19 +100,33 @@ ctest --test-dir build/release --output-on-failure
 
 Результат — в `build/artifacts`. Workflow CI
 [`.github/workflows/build.yml`](.github/workflows/build.yml) запускает те же шаги на
-`windows-latest` с Qt 6.8.3 LTS.
+`windows-latest` с Qt 6.8.3 LTS. Пуш тега вроде `v0.9.0` публикует GitHub Release с этими
+файлами; версия тега должна совпадать с версией в `CMakeLists.txt`.
 
 ### Linux (в разработке)
 
 Порт под Linux пока не завершён. Ядро, сетевой слой и интерфейс на Qt Widgets спроектированы
 переносимыми, но платформенные модули сейчас — заглушки: глобальные горячие клавиши, захват
-выделения, вставка в активное окно и автозагрузка не реализованы.
+выделения, вставка в активное окно и автозагрузка не реализованы. Полноценный порт запланирован
+на следующий релиз; CI пока собирает только Windows.
+
+Чтобы собрать текущее дерево под Linux для разработки:
 
 ```bash
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/path/to/Qt/6.8.3/gcc_64
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
+
+## Известные ограничения
+
+- Захват выделения не работает в окнах процессов, запущенных от имени администратора.
+- Бесплатный Google может ответить `HTTP 429`, если ограничит частоту запросов; подождите или
+  используйте Google Cloud/DeepL с ключом.
+- Промежуточный `Ctrl+C` при захвате выделения может попасть в историю буфера обмена Windows
+  (`Win+V`); исходное содержимое буфера восстанавливается.
+- Установщик пока не подписан кодом.
+- Поддержка Linux ещё не готова; см. раздел сборки.
 
 Переводимый текст отправляется в выбранный онлайн-сервис (Google или DeepL). qtranslate не
 записывает тексты в лог.
