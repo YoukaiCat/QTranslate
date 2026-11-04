@@ -2,7 +2,7 @@
 
 [![build](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml)
 
-Быстрый и простой переводчик для Windows. Живёт в системном трее, переводит выделенный текст в
+Быстрый и простой переводчик. Живёт в системном трее, переводит выделенный текст в
 любой программе по глобальной горячей клавише и умеет сразу заменять выделение переводом в
 активном поле ввода.
 
