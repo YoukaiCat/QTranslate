@@ -22,6 +22,7 @@ public:
     static bool isAvailable();
 
     void show();
+    void showMessage(const QString &title, const QString &message);
 
 signals:
     void showWindowRequested();

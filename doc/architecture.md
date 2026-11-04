@@ -136,8 +136,10 @@ qtranslate/
 │   ├── platform/
 │   │   ├── hotkeymanager.h           платформонезависимый интерфейс
 │   │   ├── hotkeymanager_win.cpp
+│   │   ├── hotkeymanager_stub.cpp    заглушка для не-Windows сборок
 │   │   ├── selectiongrabber.h
 │   │   ├── selectiongrabber_win.cpp
+│   │   ├── selectiongrabber_stub.cpp заглушка для не-Windows сборок
 │   │   ├── autostart.h
 │   │   ├── autostart_win.cpp
 │   │   ├── secretprotector.h
@@ -171,20 +173,22 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (этап 2) |
+| Цель | Что входит сейчас (этап 3) |
 |---|---|
-| `qtranslate_core` | `core/`: `appinfo`, `languages`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice` |
-| `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `translationerrortext`, `trayicon`), `platform/windowactivation.h` + `windowactivation_win.cpp` (на не-Windows — `windowactivation_stub.cpp`) |
-| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_googleparser`, `tst_googletranslateservice`, `tst_languages`, `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
+| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice` |
+| `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `translationerrortext`, `trayicon`), `platform/hotkeymanager.h` + `*_win.cpp` (на других платформах — `*_stub.cpp`), `platform/selectiongrabber.h` + `*_win.cpp`/`*_stub.cpp`, `platform/windowactivation.h` + `windowactivation_win.cpp`/`_stub.cpp` |
+| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
 
 ### 3.3. Сборка
 
-- `qtranslate_core` — `STATIC`-библиотека из `core/`, `net/`, `services/`; зависит только от
-  `Qt::Core` и `Qt::Network`. С ней линкуются и приложение, и тесты.
+- `qtranslate_core` — `STATIC`-библиотека из `core/`, `net/`, `services/`; зависит от `Qt::Core`,
+  `Qt::Gui` (из-за `QKeySequence` в `hotkeysequence`) и `Qt::Network`, но не от `Qt::Widgets` и не
+  использует WinAPI. С ней линкуются и приложение, и тесты.
 - `qtranslate` — исполняемый файл (`WIN32`): `app/`, `platform/`, `ui/`, ресурсы; линкуется с
   `qtranslate_core`, `Qt::Widgets`, `user32`, `crypt32`.
-- Платформенные файлы подключаются условием `if(WIN32)`. Заголовки в `platform/` не содержат
-  `<windows.h>` — WinAPI виден только в `*_win.cpp`.
+- Платформенные файлы подключаются условием `if(WIN32)`; для остальных платформ у каждого модуля
+  есть заглушка, чтобы цели собирались. Заголовки в `platform/` не содержат `<windows.h>` —
+  WinAPI виден только в `*_win.cpp`.
 - Перевод интерфейса: `qt_add_translations(qtranslate TS_FILES i18n/qtranslate_ru_RU.ts)`,
   `.qm` встраиваются в ресурсы.
 - `enable_testing()` + `add_subdirectory(tests)`, каждый тест — отдельный `qt_add_executable` и `add_test`.
@@ -250,8 +254,13 @@ public:
     void unregisterAll();
     // Временно отключить всё (пока пользователь вводит новое сочетание в настройках)
     void setSuspended(bool suspended);
+    bool isSuspended() const;
+    QKeySequence hotkey(HotkeyAction action) const;
 signals:
     void activated(HotkeyAction action);
+    // Причина — текст WinAPI (например, «Hot key is already registered»)
+    void registrationFailed(HotkeyAction action, const QKeySequence &seq,
+                            const QString &reason);
 };
 ```
 
@@ -264,7 +273,13 @@ signals:
 - Перевод `QKeySequence` → `(MOD_*, VK_*)` — в `core/hotkeysequence` (чистая функция, покрыта
   тестами): буквы и цифры совпадают с ASCII, `F1–F24`, `Insert`, `Pause` и т.п. — по таблице.
 - Если `RegisterHotKey` вернул ошибку (`ERROR_HOTKEY_ALREADY_REGISTERED`), метод возвращает `false`,
-  а `AppController` показывает уведомление в трее с предложением сменить сочетание.
+  испускает `registrationFailed` с текстом ошибки, а `AppController` показывает уведомление в трее с
+  предложением сменить сочетание.
+- Идентификатор регистрации — `1 + int(action)` (диапазон `RegisterHotKey` 0x0001–0xBFFF).
+  `setSuspended(true)` снимает регистрацию, но запоминает сочетания; `setSuspended(false)`
+  регистрирует их заново и сообщает об ошибках через тот же сигнал.
+- На этапе 3 регистрируется только Ctrl+W. Ctrl+Q появится на этапе 4 вместе со сценарием
+  всплывающего окна, иначе программа перехватывала бы его без действия.
 
 Настройки по умолчанию:
 
@@ -292,31 +307,41 @@ public:
     using Callback = std::function<void(const QString &text)>; // пустая строка — ничего не выделено
     void grab(Callback cb);       // асинхронно; повторный вызов во время захвата игнорируется
     bool isBusy() const;
+    void cancel();                // остановить захват и восстановить буфер
+    void setMaxLength(int length);
+    void setRestoreClipboard(bool restore);
 };
 ```
 
 Алгоритм (конечный автомат на `QTimer`, без блокировок):
 
-1. **Ожидание отпускания клавиш.** Пользователь ещё держит Ctrl и Q. Опрашиваем `GetAsyncKeyState`
-   каждые 10 мс, пока не отпущены клавиши сочетания, но не дольше 300 мс. Если Alt/Shift/Win всё ещё
+1. **Ожидание отпускания клавиш.** Пользователь ещё держит Ctrl и W. Опрашиваем `GetAsyncKeyState`
+   каждые 10 мс, пока не отпущены модификаторы, но не дольше 300 мс. Если Alt/Shift/Win всё ещё
    нажаты, отправляем для них синтетическое отпускание, иначе приложение получит Ctrl+Alt+C и т.п.
-2. **Снимок буфера.** Копируем все форматы текущего `QMimeData` (только если включена настройка
-   «восстанавливать буфер обмена», по умолчанию включена). Запоминаем `GetClipboardSequenceNumber()`.
+2. **Снимок буфера.** Копируем все форматы текущего `QMimeData` (только если включено
+   «восстанавливать буфер обмена», по умолчанию включено). Запоминаем
+   `GetClipboardSequenceNumber()`.
 3. **Ctrl+C.** `SendInput` с последовательностью Ctrl↓ C↓ C↑ Ctrl↑.
 4. **Ожидание изменения.** Каждые 10 мс сравниваем `GetClipboardSequenceNumber()` с запомненным,
    максимум 400 мс. Не изменился — выделения нет, `cb("")`.
-5. **Чтение.** `QGuiApplication::clipboard()->text()`, обрезка пробелов по краям, ограничение длины
-   (настройка `translation/maxLength`, по умолчанию 20 000 символов).
+5. **Чтение.** `CF_UNICODETEXT` читается напрямую через WinAPI, а не через `QClipboard`: после
+   смены sequence number кэш Qt может ещё хранить старые данные. Текст обрезается по краям и
+   ограничивается длиной (`translation/maxLength`, по умолчанию 20 000 символов; разрез не рвёт
+   суррогатную пару).
 6. **Восстановление.** Возвращаем сохранённый снимок. К восстановленным данным добавляем форматы
    `ExcludeClipboardContentFromMonitorProcessing` и `CanIncludeInClipboardHistory = 0`, чтобы
-   не засорять журнал буфера (Win+V) и менеджеры буфера обмена.
-7. `cb(text)`.
+   восстановление не засоряло журнал буфера (Win+V) и менеджеры буфера обмена.
+7. `cb(text)` ровно один раз.
 
 Ограничения (описать в справке):
 
 - **UIPI.** Обычный процесс не может отправить ввод в окно процесса, запущенного от администратора.
   Выделение в таких окнах не захватывается; `SendInput` при этом молча ничего не делает.
 - Программы, где Ctrl+C означает другое (терминалы — прерывание), или где копирование отключено.
+- Промежуточный Ctrl+C выполняет сама source-программа, без exclusion-форматов, поэтому запись в
+  журнале Win+V может появиться. Форматы на шаге 6 защищают только восстановление буфера. Полностью
+  избежать этого позволяет стратегия через UI Automation (§9.2); до неё ограничение считается
+  принятым.
 
 Возможное развитие: стратегия через UI Automation (`IUIAutomationTextPattern::GetSelection`),
 которая не трогает буфер обмена. Интерфейс `grab()` не изменится: внутри появится цепочка стратегий
@@ -801,6 +826,8 @@ namespace Autostart {
 - Окно не знает о сервисах и сети: испускает `translateRequested(request)`, а `AppController`
   вызывает `TranslationManager` и возвращает итог через `showTranslationStarted()` /
   `showResult(result)`; результат показывается, только если это текущий запрос окна.
+- `translateText(text)` подставляет текст, полученный сценарием Ctrl+W, в поле исходного текста,
+  ставит курсор в начало и запускает перевод.
 - `closeEvent` скрывает окно в трей; выход — только из меню трея.
 - Геометрия сохраняется в настройках.
 
@@ -881,10 +908,15 @@ main
 
 Отличается от Ctrl+Q:
 
-- результат выводится в `MainWindow` (исходный текст подставляется в левое поле, перевод — в правое);
-- окно показывается и активируется сразу, не дожидаясь перевода;
-- если выделения нет, окно просто открывается с фокусом в поле ввода — это удобный способ
+- `AppController` сначала запускает `SelectionGrabber::grab()`, **не показывая окно**: если показать
+  и активировать его раньше, Ctrl+C уйдёт в собственное окно, а не в программу с выделением.
+- После колбэка окно показывается и активируется, исходный текст подставляется в левое поле,
+  перевод — в правое. Перевод стартует сразу, не дожидаясь показа: окно появляется ещё до ответа
+  сервиса.
+- Если выделения нет, окно просто открывается с фокусом в поле ввода — это удобный способ
   «вызвать переводчик и набрать текст».
+- Повторное срабатывание Ctrl+W во время захвата игнорируется, чтобы не перехватить фокус у
+  source-программы.
 
 ### 5.4. Применение настроек
 
@@ -940,7 +972,8 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 
 ## 8. Тестирование
 
-Модульные тесты (Qt Test, библиотека `qtranslate_core`, без сети и без WinAPI):
+Модульные тесты (Qt Test; логика берётся из `qtranslate_core`, платформенные модули
+подключаются к отдельным тестовым целям):
 
 | Тест | Что проверяет |
 |---|---|
@@ -950,6 +983,7 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 | `tst_languages` | Маппинг кодов в обе стороны, варианты `EN-US/EN-GB`, `PT-BR`, неизвестные коды |
 | `tst_textchunker` | Разбиение по абзацам/предложениям, слова длиннее лимита, суррогатные пары не разрываются |
 | `tst_hotkeysequence` | `QKeySequence` ↔ `(MOD, VK)`, неподдерживаемые клавиши |
+| `tst_hotkeymanager` | `RegisterHotKey`: конфликт сочетаний, `setSuspended`, отложенная регистрация (Windows; собирается вместе с `platform/hotkeymanager_win.cpp`) |
 | `tst_settings` | Значения по умолчанию, запись/чтение, миграция версий |
 | `tst_translationmanager` | Отмена запросов в канале, кэш, повтор на дополнительный язык — на фейковом сервисе |
 
@@ -973,6 +1007,7 @@ SettingsDialog ──save(copy)──► SettingsStore ──changed(old,new)─
 | Ctrl+Q / Ctrl+W перехватываются у всех программ | Оставить по умолчанию, без предупреждений; меняются в настройках (§4.3) |
 | HTTPS-прокси | HTTP-прокси с туннелем `CONNECT`; TLS до прокси не поддерживается (§4.10) |
 | Окна процессов, запущенных от администратора | Захват выделения в них не работает — это известное ограничение, его не обходим (§4.4) |
+| Запись в журнале Win+V при захвате | Промежуточный Ctrl+C может оставить запись; exclusion-форматы защищают только восстановление буфера. Полный обход — стратегия через UI Automation (§9.2), принята как будущее развитие |
 
 ### 9.2. Возможное развитие
 

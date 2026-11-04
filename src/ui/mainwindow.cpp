@@ -16,6 +16,7 @@
 #include <QShortcut>
 #include <QSplitter>
 #include <QStatusBar>
+#include <QTextCursor>
 #include <QToolButton>
 #include <QVBoxLayout>
 
@@ -181,6 +182,15 @@ void MainWindow::showResult(const TranslationResult &result)
     else
         setStatus(QString());
     updateSwapButton();
+}
+
+void MainWindow::translateText(const QString &text)
+{
+    if (text.isEmpty())
+        return;
+    m_sourceEdit->setPlainText(text);
+    m_sourceEdit->moveCursor(QTextCursor::Start);
+    requestTranslation();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

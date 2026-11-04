@@ -6,6 +6,8 @@
 #include "core/translationmanager.h"
 #include "core/translationservice.h"
 #include "net/networkmanager.h"
+#include "platform/hotkeymanager.h"
+#include "platform/selectiongrabber.h"
 #include "services/googletranslateservice.h"
 #include "ui/appicon.h"
 #include "ui/mainwindow.h"
@@ -50,6 +52,8 @@ void AppController::start()
         QApplication::setQuitOnLastWindowClosed(true);
     }
 
+    createHotkeys();
+
     connect(m_instance, &SingleInstance::activateRequested, this, &AppController::showMainWindow);
 
     // Let the window close for real when the app quits or the session ends.
@@ -66,6 +70,35 @@ void AppController::createTranslation()
     m_network = new NetworkManager(this);
     m_translations = new TranslationManager(this);
     m_translations->registerService(new GoogleTranslateService(m_network));
+}
+
+void AppController::createHotkeys()
+{
+    m_hotkeys = new HotkeyManager(this);
+    m_grabber = new SelectionGrabber(this);
+    m_grabber->setMaxLength(m_translations->maxLength());
+
+    connect(m_hotkeys, &HotkeyManager::activated, this, [this](HotkeyAction action) {
+        if (action == HotkeyAction::TranslateToMainWindow)
+            translateSelectionInMainWindow();
+    });
+
+    connect(m_hotkeys, &HotkeyManager::registrationFailed, this,
+            [this](HotkeyAction, const QKeySequence &sequence, const QString &reason) {
+                const QString keys = sequence.toString(QKeySequence::NativeText);
+                qCWarning(lcApp) << "Hotkey" << keys << "is unavailable:" << reason;
+                if (m_tray) {
+                    m_tray->showMessage(tr("Hotkey unavailable"),
+                                        tr("%1 is already used by another program. "
+                                           "Close that program or choose another combination "
+                                           "in the settings.")
+                                            .arg(keys));
+                }
+            });
+
+    // Ctrl+Q is registered in stage 4 together with the popup scenario.
+    m_hotkeys->registerHotkey(HotkeyAction::TranslateToMainWindow,
+                              QKeySequence(Qt::CTRL | Qt::Key_W));
 }
 
 void AppController::initMainWindowLanguages()
@@ -103,6 +136,24 @@ void AppController::translateInMainWindow(const TranslationRequest &request)
     });
 }
 
+void AppController::translateSelectionInMainWindow()
+{
+    if (m_grabber->isBusy()) {
+        // Showing or activating the window now would steal the focus from the
+        // application whose selection is still being copied.
+        qCDebug(lcApp) << "Ctrl+W ignored: a selection grab is already in progress";
+        return;
+    }
+
+    // The window is shown only after the selection has been copied: showing it
+    // earlier would move the focus and Ctrl+C would go to our own window.
+    m_grabber->grab([this](const QString &text) {
+        showMainWindow();
+        if (!text.isEmpty())
+            m_mainWindow->translateText(text);
+    });
+}
+
 void AppController::showMainWindow()
 {
     m_mainWindow->showAndActivate();
@@ -124,6 +175,10 @@ void AppController::quit()
 
 void AppController::prepareForQuit()
 {
+    if (m_hotkeys)
+        m_hotkeys->unregisterAll();
+    if (m_grabber)
+        m_grabber->cancel();
     if (m_translations)
         m_translations->cancelAll();
     if (m_mainWindow)

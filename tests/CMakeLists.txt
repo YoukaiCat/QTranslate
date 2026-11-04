@@ -4,7 +4,7 @@ find_package(Qt6 REQUIRED COMPONENTS Test)
 # and registers it with CTest. Saved service responses are in tests/fixtures,
 # available to the test as QTRANSLATE_FIXTURES_DIR.
 function(qtranslate_add_test name)
-    qt_add_executable(${name} ${name}.cpp)
+    qt_add_executable(${name} ${name}.cpp ${ARGN})
     target_link_libraries(${name} PRIVATE qtranslate_core Qt::Test)
     target_compile_definitions(${name} PRIVATE
         QTRANSLATE_FIXTURES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
@@ -23,6 +23,15 @@ endfunction()
 qtranslate_add_test(tst_appinfo)
 qtranslate_add_test(tst_googleparser)
 qtranslate_add_test(tst_googletranslateservice)
+qtranslate_add_test(tst_hotkeysequence)
 qtranslate_add_test(tst_languages)
 qtranslate_add_test(tst_textchunker)
 qtranslate_add_test(tst_translationmanager)
+
+if(WIN32)
+    qtranslate_add_test(tst_hotkeymanager
+        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager.h
+        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager_win.cpp
+    )
+    target_link_libraries(tst_hotkeymanager PRIVATE user32)
+endif()

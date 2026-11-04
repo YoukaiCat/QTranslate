@@ -45,6 +45,11 @@ void TrayIcon::show()
     m_tray->show();
 }
 
+void TrayIcon::showMessage(const QString &title, const QString &message)
+{
+    m_tray->showMessage(title, message, QSystemTrayIcon::Information, 5000);
+}
+
 void TrayIcon::onActivated(QSystemTrayIcon::ActivationReason reason)
 {
     if (reason == QSystemTrayIcon::Trigger)

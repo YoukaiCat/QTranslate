@@ -48,6 +48,10 @@ public:
     void showTranslationStarted();
     void showResult(const TranslationResult &result);
 
+    // Puts the text grabbed by the Ctrl+W scenario into the source field and
+    // starts a translation with the current languages.
+    void translateText(const QString &text);
+
 signals:
     void translateRequested(const TranslationRequest &request);
 

@@ -3,9 +3,10 @@
 Fast and simple desktop translator for Windows. It lives in the system tray and translates
 the text selected in any application with a global hotkey.
 
-> **Status:** early development. The tray icon, single instance and translation in the main
-> window through Google Translate (free endpoint) work; global hotkeys, the popup window and
-> settings are not implemented yet. See the [plan](doc/plan.md).
+> **Status:** early development. The tray icon, single instance, translation in the main
+> window through Google Translate (free endpoint) and the **Ctrl+W** scenario (translate the
+> selected text in the main window) work; the popup window, settings and global hotkey
+> configuration are not implemented yet. See the [plan](doc/plan.md).
 
 ## Features
 
@@ -14,12 +15,13 @@ Working now:
 - Lives in the system tray (`--minimized` starts hidden), one instance per user.
 - Main window translation with automatic source language detection; long texts are split
   into parts and translated completely.
+- **Ctrl+W** translates the text selected in any application in the main window. The
+  clipboard contents (text, image or files) are restored after the selection is copied.
 
 Planned:
 
 - Optional autostart with Windows.
 - **Ctrl+Q** translates the selected text in a popup next to the cursor.
-- **Ctrl+W** translates the selected text in the main window.
 - Hotkeys are configurable.
 - Translation services: Google Translate (free endpoint or Cloud API key) and DeepL (API key).
 - HTTP and SOCKS5 proxy support, with or without authentication, or the system proxy.
@@ -61,6 +63,9 @@ qtranslate [--minimized]
 - `--minimized` starts hidden in the tray (used by autostart).
 - Starting a second copy brings the window of the running one to the front.
 - Closing the window hides it to the tray; use **Quit** in the tray menu to exit.
+- Select text in any application and press **Ctrl+W**: the main window opens with the
+  selection translated. The clipboard contents are restored afterwards. Without a selection
+  it just opens the main window with the focus in the source field.
 - In the main window, type or paste text and press **Translate** or **Ctrl+Enter**. The source
   language defaults to auto-detection, the target language to the system language. **⇄** swaps
   the languages and translates the translation back; **Copy** puts the translation on the

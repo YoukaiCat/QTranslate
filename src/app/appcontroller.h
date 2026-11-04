@@ -5,8 +5,10 @@
 
 #include <memory>
 
+class HotkeyManager;
 class MainWindow;
 class NetworkManager;
+class SelectionGrabber;
 class SingleInstance;
 class TranslationManager;
 class TranslationReply;
@@ -33,8 +35,10 @@ public:
 
 private:
     void createTranslation();
+    void createHotkeys();
     void initMainWindowLanguages();
     void translateInMainWindow(const TranslationRequest &request);
+    void translateSelectionInMainWindow();
     void showMainWindow();
     void toggleMainWindow();
     void quit();
@@ -50,4 +54,6 @@ private:
 
     std::unique_ptr<MainWindow> m_mainWindow;
     TrayIcon *m_tray = nullptr;
+    HotkeyManager *m_hotkeys = nullptr;
+    SelectionGrabber *m_grabber = nullptr;
 };

@@ -21,6 +21,7 @@ endfunction()
 # ---------------------------------------------------------------------------
 qt_add_library(qtranslate_core STATIC
     src/core/appinfo.cpp                    src/core/appinfo.h
+    src/core/hotkeysequence.cpp             src/core/hotkeysequence.h
     src/core/languages.cpp                  src/core/languages.h
     src/core/textchunker.cpp                src/core/textchunker.h
     src/core/translationmanager.cpp         src/core/translationmanager.h
@@ -32,7 +33,7 @@ qt_add_library(qtranslate_core STATIC
 )
 
 target_include_directories(qtranslate_core PUBLIC src)
-target_link_libraries(qtranslate_core PUBLIC Qt::Core Qt::Network)
+target_link_libraries(qtranslate_core PUBLIC Qt::Core Qt::Gui Qt::Network)
 set_source_files_properties(src/core/appinfo.cpp PROPERTIES
     COMPILE_DEFINITIONS QTRANSLATE_VERSION="${PROJECT_VERSION}"
 )
@@ -47,6 +48,8 @@ qt_add_executable(qtranslate
     src/app/appcontroller.cpp       src/app/appcontroller.h
     src/app/logging.cpp             src/app/logging.h
     src/app/singleinstance.cpp      src/app/singleinstance.h
+    src/platform/hotkeymanager.h
+    src/platform/selectiongrabber.h
     src/platform/windowactivation.h
     src/ui/appicon.cpp              src/ui/appicon.h
     src/ui/languagecombobox.cpp     src/ui/languagecombobox.h
@@ -57,10 +60,14 @@ qt_add_executable(qtranslate
 
 if(WIN32)
     target_sources(qtranslate PRIVATE
+        src/platform/hotkeymanager_win.cpp
+        src/platform/selectiongrabber_win.cpp
         src/platform/windowactivation_win.cpp
     )
 else()
     target_sources(qtranslate PRIVATE
+        src/platform/hotkeymanager_stub.cpp
+        src/platform/selectiongrabber_stub.cpp
         src/platform/windowactivation_stub.cpp
     )
 endif()
