@@ -10,7 +10,7 @@ LanguageComboBox::LanguageComboBox(QWidget *parent)
     : QComboBox(parent)
 {
     setMinimumContentsLength(14);
-    setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    setSizeAdjustPolicy(QComboBox::AdjustToContents);
     setMaxVisibleItems(20);
     connect(this, &QComboBox::currentIndexChanged, this,
             [this] { emit currentCodeChanged(currentCode()); });

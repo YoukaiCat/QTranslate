@@ -2,6 +2,7 @@
 
 #include "core/hotkeysequence.h"
 #include "core/languages.h"
+#include "core/uilanguages.h"
 #include "ui/languagecombobox.h"
 
 #include <QApplication>
@@ -56,8 +57,8 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_uiLanguage = new QComboBox(generalPage);
     m_uiLanguage->setObjectName(QStringLiteral("uiLanguage"));
     m_uiLanguage->addItem(tr("System"), QStringLiteral("system"));
-    m_uiLanguage->addItem(QStringLiteral("English"), QStringLiteral("en"));
-    m_uiLanguage->addItem(QStringLiteral("Русский"), QStringLiteral("ru"));
+    for (const UiLanguages::Info &language : UiLanguages::all())
+        m_uiLanguage->addItem(language.nativeName, language.code);
     generalForm->addRow(tr("Interface language:"), m_uiLanguage);
     generalLayout->addLayout(generalForm);
     m_autostart = new QCheckBox(tr("Start qtranslate when Windows starts"), generalPage);

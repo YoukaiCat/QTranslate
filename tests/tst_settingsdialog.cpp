@@ -19,6 +19,17 @@ class TestSettingsDialog : public QObject
     Q_OBJECT
 
 private slots:
+    void offersAllUiLanguages()
+    {
+        SettingsDialog dialog(AppSettings{}, QStringList{}, QStringList{}, false);
+        auto *combo = dialog.findChild<QComboBox *>(QStringLiteral("uiLanguage"));
+        QVERIFY(combo);
+        for (const char *code : {"system", "en", "ru", "es", "de", "fr", "pt-BR", "it", "pl",
+                                 "uk", "tr", "zh-Hans", "ja", "ko", "ar", "hi"}) {
+            QVERIFY2(combo->findData(QString::fromLatin1(code)) >= 0, code);
+        }
+    }
+
     void showsCurrentValues()
     {
         AppSettings settings;

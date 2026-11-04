@@ -20,7 +20,7 @@
         </message>
         <message>
             <source>%1 — %2</source>
-            <translation type="unfinished" />
+            <translation>%1 — %2</translation>
         </message>
         <message>
             <source>DeepL is not available.</source>
@@ -568,7 +568,7 @@
         </message>
         <message>
             <source>Ctrl+Enter</source>
-            <translation type="unfinished" />
+            <translation>Ctrl+Enter</translation>
         </message>
         <message>
             <source>Copy</source>
@@ -670,7 +670,7 @@
         </message>
         <message>
             <source>%1 → %2</source>
-            <translation type="unfinished" />
+            <translation>%1 → %2</translation>
         </message>
         <message>
             <source>✓ Copied</source>
@@ -808,7 +808,7 @@
         </message>
         <message>
             <source>Google Translate</source>
-            <translation type="unfinished" />
+            <translation>Google Translate</translation>
         </message>
         <message>
             <source>Free endpoint (no key)</source>
@@ -836,7 +836,7 @@
         </message>
         <message>
             <source>DeepL</source>
-            <translation type="unfinished" />
+            <translation>DeepL</translation>
         </message>
         <message>
             <source>DeepL API key (ends with :fx for Free)</source>
@@ -872,11 +872,11 @@
         </message>
         <message>
             <source>HTTP</source>
-            <translation type="unfinished" />
+            <translation>HTTP</translation>
         </message>
         <message>
             <source>SOCKS5</source>
-            <translation type="unfinished" />
+            <translation>SOCKS5</translation>
         </message>
         <message>
             <source>Proxy host</source>

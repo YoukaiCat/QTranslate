@@ -8,6 +8,7 @@ function(qtranslate_add_test name)
     target_link_libraries(${name} PRIVATE qtranslate_core Qt::Test)
     target_compile_definitions(${name} PRIVATE
         QTRANSLATE_FIXTURES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
+        QTRANSLATE_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
     )
     qtranslate_set_compile_options(${name})
     add_test(NAME ${name} COMMAND ${name})
@@ -48,6 +49,8 @@ target_link_libraries(tst_settingsdialog PRIVATE Qt::Widgets)
 set_tests_properties(tst_settingsdialog PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 qtranslate_add_test(tst_textchunker)
 qtranslate_add_test(tst_translationmanager)
+qtranslate_add_test(tst_translations)
+qtranslate_add_test(tst_uilanguages)
 
 if(WIN32)
     qtranslate_add_test(tst_hotkeymanager

@@ -24,7 +24,7 @@
   Run everything: `ctest --test-dir build/cli-Release --output-on-failure`.
 - CI sets `QT_QPA_PLATFORM=offscreen`; use it for headless GUI tests. `tst_popupwindow` and
   `tst_settingsdialog` also set offscreen themselves.
-- Both Debug and Release must build without MSVC `/W4` warnings, and all 17 tests must pass.
+- Both Debug and Release must build without MSVC `/W4` warnings, and all 19 tests must pass.
   The project requires Qt 6.5+; local development uses Qt 6.12.
 - Tests use local `QTcpServer` and fixtures; no real Google/DeepL keys or internet are required.
   `tst_hotkeymanager`, `tst_autostart` and `tst_secretprotector` are Windows-only.
@@ -51,6 +51,8 @@
 - Never move or rewrite an existing release tag; ship fixes as a new patch tag.
 - `doc/releases/<version>.md` supplies GitHub release notes. Keep release artifacts CI-built:
   local packaging uses Qt 6.12, CI uses Qt 6.8.3 LTS.
+- Code signing is not implemented. Options, SignPath Foundation requirements and integration notes
+  are in `doc/code-signing.md`; do not claim releases are signed until CI verifies the signature.
 - CI uses Qt 6.8.3 LTS because aqtinstall 3.3.0 cannot install Qt 6.12. Do not switch CI to 6.12
   without checking aqt support.
 - `package.ps1` cleans `build/dist`, validates Qt/MSVC CRT/plugin files, then writes the ZIP,

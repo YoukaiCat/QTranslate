@@ -1,6 +1,7 @@
 #include "core/settings.h"
 
 #include "core/languages.h"
+#include "core/uilanguages.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -106,8 +107,10 @@ void normalize(AppSettings &settings)
 
     settings.settingsVersion = AppSettings::kCurrentVersion;
 
-    if (settings.general.uiLanguage.isEmpty())
+    if (settings.general.uiLanguage.isEmpty()
+        || !UiLanguages::isSupported(settings.general.uiLanguage)) {
         settings.general.uiLanguage = defaults.general.uiLanguage;
+    }
 
     settings.translation.service =
         settings.translation.service.isEmpty() ? defaults.translation.service

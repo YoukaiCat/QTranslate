@@ -7,6 +7,7 @@
 #include "core/settings.h"
 #include "core/translationmanager.h"
 #include "core/translationservice.h"
+#include "core/uilanguages.h"
 #include "net/networkmanager.h"
 #include "platform/autostart.h"
 #include "platform/hotkeymanager.h"
@@ -231,14 +232,7 @@ void AppController::updateTrayToolTip()
 
 void AppController::applyUiLanguage(const QString &code)
 {
-    QString language = code;
-    if (language.isEmpty() || language == QStringLiteral("system")) {
-        language = Languages::systemLanguage() == QStringLiteral("ru")
-            ? QStringLiteral("ru")
-            : QStringLiteral("en");
-    }
-    if (language != QStringLiteral("ru"))
-        language = QStringLiteral("en");
+    const QString language = UiLanguages::normalize(code);
 
     if (m_translator) {
         QApplication::removeTranslator(m_translator);
@@ -246,16 +240,21 @@ void AppController::applyUiLanguage(const QString &code)
         m_translator = nullptr;
     }
 
-    if (language == QStringLiteral("ru")) {
+    const QString resource = UiLanguages::resourceFor(language);
+    if (!resource.isEmpty()) {
         auto *translator = new QTranslator(this);
-        if (translator->load(QStringLiteral(":/i18n/qtranslate_ru_RU.qm"))) {
+        if (translator->load(resource)) {
             m_translator = translator;
             QApplication::installTranslator(translator);
         } else {
-            qCWarning(lcApp) << "Cannot load the Russian translation";
+            qCWarning(lcApp) << "Cannot load the UI translation" << language;
             delete translator;
         }
     }
+
+    QApplication::setLayoutDirection(language == QStringLiteral("ar")
+                                         ? Qt::RightToLeft
+                                         : Qt::LeftToRight);
 
     // updateLanguageConfiguration() rebuilds the language lists with the new
     // translations; top-level widgets get LanguageChange for their own labels.

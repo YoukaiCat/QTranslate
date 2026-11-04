@@ -216,6 +216,7 @@ private slots:
         {
             QSettings raw(path, QSettings::IniFormat);
             raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("app/uiLanguage"), QStringLiteral("xx"));
             raw.setValue(QStringLiteral("translation/maxLength"), -5);
             raw.setValue(QStringLiteral("translation/autoTranslateDelayMs"), 999999);
             raw.setValue(QStringLiteral("translation/primaryLang"), QString());
@@ -230,6 +231,7 @@ private slots:
         SettingsStore store(path, fakeCodec());
         store.load();
         const AppSettings &result = store.current();
+        QCOMPARE(result.general.uiLanguage, QStringLiteral("system"));
         QCOMPARE(result.translation.maxLength, 20000);
         QCOMPARE(result.translation.autoTranslateDelayMs, 700);
         QCOMPARE(result.translation.primaryLang, Languages::systemLanguage());

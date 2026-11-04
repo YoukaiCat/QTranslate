@@ -21,7 +21,9 @@ translation directly in the active input field.
 - Automatic source language detection, smart switching to the additional language, in-memory
   translation cache and automatic translation while typing.
 - System/manual HTTP and SOCKS5 proxies with optional authentication.
-- English and Russian interface, autostart, portable INI mode, `--verbose` logging.
+- Interface in 15 languages (English, Russian, Spanish, German, French, Portuguese, Italian,
+  Polish, Ukrainian, Turkish, Chinese, Japanese, Korean, Arabic, Hindi), autostart, portable INI
+  mode, `--verbose` logging.
 
 ## Screenshots
 

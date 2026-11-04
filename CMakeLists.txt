@@ -29,6 +29,7 @@ qt_add_library(qtranslate_core STATIC
     src/core/translationmanager.cpp         src/core/translationmanager.h
     src/core/translationservice.cpp         src/core/translationservice.h
     src/core/translationtypes.h
+    src/core/uilanguages.cpp                src/core/uilanguages.h
     src/net/networkmanager.cpp              src/net/networkmanager.h
     src/services/deeplparser.cpp            src/services/deeplparser.h
     src/services/deeplservice.cpp           src/services/deeplservice.h
@@ -101,8 +102,25 @@ endif()
 
 qtranslate_set_compile_options(qtranslate)
 
+set(QTRANSLATE_TS_FILES
+    i18n/qtranslate_ru_RU.ts
+    i18n/qtranslate_es.ts
+    i18n/qtranslate_de.ts
+    i18n/qtranslate_fr.ts
+    i18n/qtranslate_pt_BR.ts
+    i18n/qtranslate_it.ts
+    i18n/qtranslate_pl.ts
+    i18n/qtranslate_uk.ts
+    i18n/qtranslate_tr.ts
+    i18n/qtranslate_zh_CN.ts
+    i18n/qtranslate_ja.ts
+    i18n/qtranslate_ko.ts
+    i18n/qtranslate_ar.ts
+    i18n/qtranslate_hi.ts
+)
+
 qt_add_translations(qtranslate
-    TS_FILES i18n/qtranslate_ru_RU.ts
+    TS_FILES ${QTRANSLATE_TS_FILES}
     RESOURCE_PREFIX "/i18n"
 )
 
