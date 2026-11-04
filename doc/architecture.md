@@ -162,6 +162,7 @@ qtranslate/
     ├── tst_googleparser.cpp
     ├── tst_googletranslateservice.cpp  сервис против локального HTTP-сервера
     ├── tst_deeplparser.cpp
+    ├── tst_deeplservice.cpp
     ├── tst_languages.cpp
     ├── tst_textchunker.cpp
     ├── tst_translationmanager.cpp
@@ -179,11 +180,11 @@ qtranslate/
 Структура §3.1 — целевая: каталоги и файлы появляются и добавляются в цели по мере реализации
 этапов. Сейчас:
 
-| Цель | Что входит сейчас (этап 5) |
+| Цель | Что входит сейчас (этап 6) |
 |---|---|
-| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice` |
+| `qtranslate_core` | `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager`; `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice` |
 | `qtranslate` | `main.cpp`, `app/*`, `ui/*` (`appicon`, `languagecombobox`, `mainwindow`, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/hotkeymanager.h` + `*_win.cpp` (на других платформах — `*_stub.cpp`), `platform/selectiongrabber.h` + `*_win.cpp`/`*_stub.cpp`, `platform/autostart.h` + `autostart_win.cpp`/`_stub.cpp`, `platform/secretprotector.h` + `secretprotector_win.cpp`/`_stub.cpp`, `platform/windowactivation.h` + `windowactivation_win.cpp`/`_stub.cpp` |
-| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
+| тесты (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager`; каждый тест подключается функцией `qtranslate_add_test(<имя>)`, линкуется с `qtranslate_core` и получает путь к `tests/fixtures` в макросе `QTRANSLATE_FIXTURES_DIR` |
 
 ### 3.3. Сборка
 
@@ -417,7 +418,7 @@ public:
     virtual bool isConfigured() const = 0;     // DeepL без ключа — false
     virtual QStringList sourceLanguages() const = 0;  // внутренние коды, без "auto"
     virtual QStringList targetLanguages() const = 0;
-    virtual void applySettings(const AppSettings &s) = 0;   // появится на этапе 5
+    virtual void applySettings(const AppSettings &s) = 0;   // ключи, режим, вариант
     // Возвращает объект ответа; владеет им вызывающий (deleteLater после finished)
     virtual TranslationReply *translate(const TranslationRequest &req) = 0;
 };
@@ -428,7 +429,8 @@ public:
 - `finished()` не испускается внутри `translate()`, даже если ответ известен сразу (неподдерживаемый
   язык, пустой текст): вызывающий должен успеть подключиться. Для этого есть `createFinished()`.
 - Вызывающий может удалить ответ и до `finished()` — это отменяет запрос без сигнала.
-- `applySettings()` в интерфейсе пока нет: метод добавляется вместе с `AppSettings` на этапе 5.
+- `applySettings()` применяет ключи, режим Google и вариант английского DeepL без пересоздания
+  сервисов.
 
 Каждый сервис получает указатель на `NetworkManager` (общий `QNetworkAccessManager` и
 `makeRequest()` с таймаутом и `User-Agent`) и не создаёт свой менеджер — так прокси
@@ -494,7 +496,7 @@ Cloud API (ключ в `?key=`) этот текст нельзя показыв�
 POST https://translation.googleapis.com/language/translate/v2?key=<KEY>
 Content-Type: application/json
 
-{"q": ["…"], "target": "ru", "source": "en", "format": "text"}
+{"q": "…", "target": "ru", "source": "en", "format": "text"}
 ```
 
 Ответ: `data.translations[].translatedText` и `detectedSourceLanguage`. `source` не передаётся,
@@ -506,6 +508,12 @@ Content-Type: application/json
 ошибке любой части запрос завершается с этой ошибкой. Пробелы и переводы строк на краях каждой
 части в запрос не попадают и возвращаются на место при склейке — сервис может их не сохранить, а на
 стыках частей это сломало бы форматирование. Определённый язык берётся из первой части, где он есть.
+
+Ошибки Cloud API: 401/403 → `Auth`, 429 → `RateLimited`, 413 → `TooLong`, 5xx → `Network`, прочее
+→ `BadResponse`. Google отвечает на неверный ключ кодом 400 с текстом «API key not valid», поэтому
+`errorForCloudResponse(status, body)` проверяет тело и относит такой 400 к `Auth`; `quotaExceeded` и
+`rateLimitExceeded` в теле 400/403 дают соответствующие ошибки. В `errorMessage` попадает только
+`HTTP <код>`, без URL и ключа. Для тестов адрес подменяется `setCloudEndpoint()`.
 
 ### 4.7. `DeepLService`
 
@@ -524,12 +532,16 @@ Content-Type: application/json
 
 - Хост выбирается автоматически по суффиксу ключа `:fx`.
 - Авторизация только заголовком; передача ключа в теле/URL у DeepL устарела.
-- `source_lang` не передаётся при «auto».
+- `source_lang` не передаётся при «auto»; target `en` заменяется на вариант из настроек
+  (`EN-US`/`EN-GB`).
 - Ответ: `translations[].text`, `translations[].detected_source_language`.
-- Коды ошибок: 403 → `Auth`, 456 → `QuotaExceeded`, 429 → `RateLimited`, 413 → `TooLong`.
-- Лимит тела запроса — 128 КиБ; длинный текст режется `TextChunker` и отправляется массивом `text`.
-- В настройках кнопка «Проверить ключ» вызывает `GET /v2/usage` и показывает израсходованный лимит
-  символов.
+- Коды ошибок: 403 → `Auth`, 456 → `QuotaExceeded`, 429 → `RateLimited`, 413 → `TooLong`, 5xx →
+  `Network`; в `errorMessage` — только `HTTP <код>`.
+- Лимит тела запроса — 128 КиБ; длинный текст режется `TextChunker` и отправляется **одним**
+  запросом массивом `text`. Пробелы на краях частей не отправляются и восстанавливаются при
+  склейке ответа по порядку.
+- В настройках кнопка «Проверить ключ» вызывает `GET /v2/usage` с ключом из поля ввода и показывает
+  `character_count`/`character_limit` или понятную ошибку. Ошибки проверки не содержат ключ.
 
 ### 4.8. Языки — `languages`
 
@@ -556,14 +568,17 @@ Content-Type: application/json
   (Google `he`/`jv`/`zh`, DeepL `EN-GB`); неизвестный код — пустая строка. Обратное
   преобразование нужно для `detectedSourceLang`;
 - `supported(serviceId, direction)` — списки языков для сервисов и `LanguageComboBox`;
+- `closest(serviceId, code, direction)` — ближайший поддерживаемый код: точный, затем язык той же
+  основы (`pt-BR`/`pt-PT`, `zh-Hans`/`zh-Hant`), системный, `en`, первый доступный;
 - `displayName(code)` — название для UI, помечено `QT_TRANSLATE_NOOP` (контекст `Languages`) под
   локализацию этапа 8; `nativeName(code)` — самоназвание (подсказка в списке);
 - `autoCode()` — `"auto"`; `forLocale(QLocale)` / `systemLanguage()` — язык системы с учётом
   письменности и региона (`zh-Hans`/`zh-Hant`, `pt-BR`/`pt-PT`, нюнорск → `nb`), иначе `en`.
 
 Списки языков у сервисов разные (у DeepL их меньше). `LanguageComboBox` показывает только
-поддерживаемые выбранным сервисом; если при смене сервиса текущий язык не поддерживается,
-выбирается ближайший (например, `pt` → `pt-BR`), иначе — язык по умолчанию.
+поддерживаемые выбранным сервисом; при смене сервиса `AppController` заменяет текущий язык через
+`Languages::closest` (например, `pt` → `pt-BR`, `fil` → системный/`en`). «Auto-detect» остаётся
+исходным языком всегда.
 
 ### 4.9. `TranslationManager`
 
@@ -886,8 +901,10 @@ namespace Autostart {
    `AppController` приостанавливает глобальные клавиши; после ухода фокуса/закрытия — возобновляет.
 3. **Перевод** — исходный язык (с «Auto-detect»), основной и дополнительный языки, максимальная
    длина, задержка автоперевода. Дополнительный язык зарезервирован под этап 8.
-4. **Сервисы** — Google: режим (бесплатный/Cloud API), ключ. DeepL: ключ, вариант английского,
-   кнопка «Проверить ключ» (показывает остаток лимита). Добавляется на этапе 6.
+4. **Сервисы** — Google: режим (бесплатный/Cloud API), ключ (password echo). DeepL: ключ
+   (password echo), вариант английского, кнопка «Проверить ключ» с асинхронным результатом
+   (`character_count`/`character_limit` или ошибка). Кнопка проверки не блокирует диалог; ключ
+   берётся из поля ввода. Ключи сохраняются через DPAPI из этапа 5.
 5. **Сеть** — режим прокси, тип, хост, порт, авторизация, таймаут, кнопка «Проверить соединение»
    (`NetworkManager::testProxy`). Добавляется на этапе 7.
 
@@ -909,7 +926,7 @@ main
  ├─ SettingsStore: DPAPI SecretCodec, load()   (миграция, расшифровка секретов)
  ├─ установить QTranslator                     (этап 8)
  └─ AppController
-     ├─ NetworkManager (timeout), GoogleTranslateService → TranslationManager
+     ├─ NetworkManager (timeout), GoogleTranslateService + DeepLService → TranslationManager
      ├─ языки/сервис/maxLength/restoreClipboard из настроек
      ├─ MainWindow + восстановление геометрии; PopupWindow — лениво при первом Ctrl+Q
      ├─ TrayIcon.show()
@@ -976,6 +993,11 @@ SettingsDialog ──OK──► SettingsStore::save ──changed(old,new)─�
 (`HotkeyManager::setSuspended`). После ухода фокуса или закрытия диалога регистрация
 восстанавливается.
 
+Смена сервиса в трее или главном окне вызывает `TranslationManager::setActiveService()`.
+`activeServiceChanged` → `AppController::updateLanguageConfiguration()`: списки языков обоих окон
+обновляются, неподдерживаемый язык заменяется через `Languages::closest`; выбор сохраняется в
+`translation/service` через `SettingsStore::save()`.
+
 ### 5.5. Завершение
 
 «Выход» в трее → `AppController::prepareForQuit()`: флаг завершения (чтобы `closeEvent` не прятал
@@ -1025,17 +1047,18 @@ SettingsDialog ──OK──► SettingsStore::save ──changed(old,new)─�
 
 | Тест | Что проверяет |
 |---|---|
-| `tst_googleparser` | Разбор ответов gtx и Cloud API по фикстурам: несколько предложений, определение языка, пустой/битый ответ |
-| `tst_googletranslateservice` | Сервис против локального HTTP-сервера: тело запроса, разбиение длинного текста и склейка, HTTP-ошибки, отказ в соединении, таймаут, отмена |
-| `tst_deeplparser` | Разбор `translations[]`, коды ошибок → `TranslationError` |
-| `tst_languages` | Маппинг кодов в обе стороны, варианты `EN-US/EN-GB`, `PT-BR`, неизвестные коды |
+| `tst_googleparser` | Разбор ответов gtx и Cloud API по фикстурам: несколько предложений, определение языка, пустой/битый ответ, коды ошибок Cloud с телом |
+| `tst_googletranslateservice` | Сервис против локального HTTP-сервера: free/cloud режимы, тело/ключ, разбиение длинного текста и склейка, HTTP-ошибки, отказ в соединении, таймаут, отмена |
+| `tst_deeplparser` | Разбор `translations[]`, почастный разбор, `/v2/usage`, коды ошибок → `TranslationError` |
+| `tst_deeplservice` | DeepL против локального HTTP-сервера: Authorization, массив `text`, варианты английского, Free/Pro хосты, ошибки, таймаут, проверка ключа |
+| `tst_languages` | Маппинг кодов в обе стороны, варианты `EN-US/EN-GB`, `PT-BR`, `closest` при смене сервиса, неизвестные коды |
 | `tst_popupplacement` | Позиционирование окна Ctrl+Q: отражение у краёв, прижатие к экрану, второй монитор с отрицательными координатами |
 | `tst_popupwindow` | Состояния всплывающего окна (offscreen): запрос, результат, копирование, ошибка/«Повторить», смена языка, закрепление, автозакрытие подсказки |
 | `tst_textchunker` | Разбиение по абзацам/предложениям, слова длиннее лимита, суррогатные пары не разрываются |
 | `tst_hotkeysequence` | `QKeySequence` ↔ `(MOD, VK)`, неподдерживаемые клавиши |
 | `tst_hotkeymanager` | `RegisterHotKey`: конфликт сочетаний, `setSuspended`, отложенная регистрация (Windows; собирается вместе с `platform/hotkeymanager_win.cpp`) |
 | `tst_settings` | Значения по умолчанию, запись/чтение, миграция версий, портативный путь, DPAPI-совместимое шифрование секретов |
-| `tst_settingsdialog` | Заполнение вкладок, возврат изменённой копии, проверка сочетаний и языков, приостановка глобальных клавиш (offscreen) |
+| `tst_settingsdialog` | Заполнение вкладок (включая ключи/режим/вариант), возврат изменённой копии, проверка сочетаний и языков, приостановка глобальных клавиш, запрос проверки ключа (offscreen) |
 | `tst_secretprotector` | DPAPI: round-trip, пустые и испорченные данные |
 | `tst_autostart` | Формат команды автозагрузки |
 | `tst_translationmanager` | Отмена запросов в канале, кэш, повтор на дополнительный язык — на фейковом сервисе |

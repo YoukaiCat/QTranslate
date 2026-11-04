@@ -44,6 +44,7 @@ public:
     bool isConfigured() const override { return m_configured; }
     QStringList sourceLanguages() const override { return {QStringLiteral("en")}; }
     QStringList targetLanguages() const override { return {QStringLiteral("ru")}; }
+    void applySettings(const AppSettings &) override {}
 
     TranslationReply *translate(const TranslationRequest &request) override
     {

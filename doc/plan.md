@@ -24,7 +24,7 @@
 | 3 | Горячие клавиши, захват выделения, Ctrl+W | готов: код и автотесты; вручную осталось проверить Word/VS Code/Telegram, уведомление и Win+V |
 | 4 | Всплывающее окно, Ctrl+Q | готов: код и автотесты; вручную проверено всё, кроме реального второго монитора |
 | 5 | Настройки и автозагрузка | готов: код и автотесты; автозапуск после реальной перезагрузки не проверен |
-| 6 | DeepL и Google Cloud API | не начат |
+| 6 | DeepL и Google Cloud API | готов: код и автотесты; реальные успешные ключи DeepL/Google Cloud не проверены |
 | 7 | Прокси | не начат |
 | 8 | Доводка и выпуск | не начат |
 
@@ -683,12 +683,123 @@
 - Подменю «Сервис» в трее, выбор сервиса в главном окне; списки языков меняются под сервис.
 - Ошибка «нужен ключ» со ссылкой на настройки.
 
+### Что учтено до начала этапа
+
+- Реальных ключей DeepL/Google Cloud в проекте нет, поэтому сервисы и парсеры проверяются на
+  локальном HTTP-сервере и сохранённых ответах. Ручная проверка с настоящими ключами остаётся
+  отдельным пунктом; без неё этап нельзя считать полностью закрытым.
+- `TranslationService` получает `applySettings(const AppSettings &)`: ключи и режимы применяются без
+  пересоздания сервисов. `isConfigured()` для DeepL/Cloud Google без ключа возвращает `false`, и
+  `TranslationManager` до сети отдаёт `Auth`.
+- Ключи уже хранятся через `SecretCodec` (DPAPI) из этапа 5; вкладка «Сервисы» только заполняет
+  `AppSettings`.
+- При смене сервиса списки языков меняются. Неподдерживаемый язык заменяется ближайшим
+  (`Languages::closest`): точный код → язык той же основы (`pt-BR`/`pt-PT`, `zh-Hans`/`zh-Hant`) →
+  системный → `en` → первый доступный. Исходный «auto» остаётся всегда.
+- DeepL отправляет все части одного перевода массивом `text` в одном запросе (лимит тела 128 КиБ,
+  наши 20 000 символов помещаются). Google Cloud, как и бесплатный режим, отправляет части
+  последовательно; ключ не попадает в текст ошибок и лог.
+- Проверка ключа DeepL (`GET /v2/usage`) асинхронная и получает ключ из поля ввода, а не только из
+  сохранённых настроек; диалог показывает «Checking…», затем остаток лимита или ошибку.
+- В трее появляется подменю «Сервис», в главном окне включается выбор сервиса. Выбор сохраняется в
+  настройках и сразу применяется ко всем окнам.
+
+### Шаги
+
+**6.1. Google Cloud API.**
+- `GoogleParser::parseCloudResponse(body)` (`data.translations[]`, `translatedText`,
+  `detectedSourceLanguage`) и `errorForCloudHttpStatus(status)`: 401/403 → `Auth`, 429 →
+  `RateLimited`, 413 → `TooLong`, 5xx → `Network`, остальное → `BadResponse`. Фикстуры в
+  `tests/fixtures/google/cloud-*.json`.
+- `GoogleTranslateService`: `applySettings` (режим free/cloud, ключ), `isConfigured` (cloud без ключа
+  — false), `setCloudEndpoint` для тестов, JSON-тело `q/target/source/format`, ключ в `?key=`,
+  последовательные части `TextChunker`. Ошибки сети в cloud-режиме не показывают URL с ключом.
+- Проверка: `tst_googleparser` (успех, определение языка, пустой/битый ответ), дополнения в
+  `tst_googletranslateservice` (режим, заголовки/тело, ключ в URL, HTTP-ошибки, отсутствие ключа в
+  сообщении).
+
+**6.2. `services/deeplparser` и `tst_deeplparser`.**
+- `parseResponse(body)` → `TranslationResult`: `translations[]`, склейка `text`, первый
+  `detected_source_language`; ошибки формата — `BadResponse`.
+- `parseUsage(body, &used, &limit)` → bool.
+- `errorForHttpStatus(status)`: 403 → `Auth`, 456 → `QuotaExceeded`, 429 → `RateLimited`, 413 →
+  `TooLong`, 5xx → `Network`, остальное → `BadResponse`.
+- Проверка: фикстуры успешного перевода, нескольких translations, detected language, usage, ошибок,
+  битого JSON.
+
+**6.3. `services/deeplservice` и `tst_deeplservice`.**
+- `id() = "deepl"`, `displayName() = "DeepL"`, языки из `Languages::supported("deepl", ...)`.
+- `applySettings`: ключ, вариант английского (`EN-US`/`EN-GB`), выбор хоста по суффиксу `:fx`.
+  `isConfigured()` — ключ непустой.
+- `translate`: коды через `Languages`; target `en` заменяется вариантом; все части `TextChunker` в
+  массиве `text`; пробелы на краях частей сохраняются; ответ склеивается по порядку; ошибки — через
+  парсер. Заголовок `Authorization: DeepL-Auth-Key`, JSON-тело. `setEndpoint` для тестов.
+- `checkKey(key, callback)`: GET `/v2/usage` тем же ключом, парсер usage; ошибки — понятный текст без
+  ключа. Асинхронно, безопасно при закрытом диалоге.
+- Проверка: локальный HTTP-сервер — заголовок, тело (массив частей), английский вариант, успех,
+  403/456/429/413, отказ соединения, таймаут, usage success/error.
+
+**6.4. Языки — `Languages::closest` и `tst_languages`.**
+- `closest(serviceId, code, direction)` по правилам из «учтено». Используется при смене сервиса и
+  при загрузке настроек.
+- Проверка: точный язык, `pt-*`/`zh-*`, отсутствующий `fil`, пустой список, системный fallback.
+
+**6.5. `AppController`: оба сервиса, переключение, настройки.**
+- Создать `GoogleTranslateService` и `DeepLService`, применить настройки, зарегистрировать оба,
+  активный — из `translation/service`. Подключить `activeServiceChanged`.
+- `updateServiceSelectors()`: список сервисов в `MainWindow` и подменю трея; `serviceSelected`/
+  `serviceChanged` → `selectService(id)`, сохранение в настройках.
+- `applySettings`: пробросить `google/deepl` в сервисы; при смене сервиса/языков обновить языки
+  через `closest`; остальные группы — как на этапе 5.
+- Проверка: переключение Google ↔ DeepL в трее и главном окне, сохранение выбора, замена
+  неподдерживаемого языка, «нужен ключ» при пустом ключе.
+
+**6.6. Вкладка «Сервисы» в `SettingsDialog`.**
+- Google: режим free/cloud, поле ключа (password echo), подсказка про Cloud.
+- DeepL: поле ключа (password echo), вариант английского, «Проверить ключ», строка результата.
+- Диалог не знает о сети: сигнал `deepLKeyCheckRequested(key)`, слот
+  `showDeepLKeyCheckResult(ok, message)`; `AppController` связывает с `DeepLService::checkKey`.
+- Проверка: `tst_settingsdialog` (заполнение, возврат, режим, вариант, сигнал проверки, отображение
+  результата), ручная проверка ключей (если появятся).
+
+**6.7. Проверка этапа.**
+- Debug/Release, `ctest`, ручные проверки с реальными ключами (если доступны), переключение сервисов.
+- Обновить `architecture.md`, README и статус этапа.
+
 **Критерии готовности:**
 - [ ] Перевод через DeepL Free и Pro (если есть ключ) и Google Cloud.
-- [ ] «Проверить ключ» показывает остаток лимита DeepL или понятную ошибку.
-- [ ] Неверный ключ, исчерпанная квота, частые запросы дают понятные сообщения.
-- [ ] Ключи в INI не хранятся открытым текстом.
-- [ ] При смене сервиса неподдерживаемый язык заменяется ближайшим.
+      *(запросы, ответы и ошибки проверены на локальном HTTP-сервере; выбор хоста Free/Pro —
+      `tst_deeplservice`; реальных действующих ключей в среде нет, успешный платный перевод не
+      проверен)*
+- [x] «Проверить ключ» показывает остаток лимита DeepL или понятную ошибку.
+      *(реальный запрос `GET /v2/usage`: пустой ключ → «Enter a DeepL API key.», неверный ключ →
+      «The DeepL API key was rejected (HTTP 403).»; успешный usage с `character_count`/
+      `character_limit` покрыт `tst_deeplservice`)*
+- [x] Неверный ключ, исчерпанная квота, частые запросы дают понятные сообщения.
+      *(реальный Google Cloud с неверным ключом → «The translation service rejected the API key
+      (HTTP 400)»; DeepL 403 — аналогично; 456/429/413/5xx и тела quota/rate покрыты
+      `tst_deeplservice`/`tst_googleparser`)*
+- [x] Ключи в INI не хранятся открытым текстом.
+      *(после ввода Google Cloud и DeepL ключей в диалоге INI содержит только DPAPI-base64;
+      строк ключей в файле нет; `tst_settings`/`tst_secretprotector`)*
+- [x] При смене сервиса неподдерживаемый язык заменяется ближайшим.
+      *(Google + армянский target → переключение на DeepL через трей → target стал русским;
+      `Languages::closest` и `tst_languages`)*
+
+### Что проверено автоматически
+
+- `tst_deeplparser` — ответы перевода (один/несколько), почастный разбор, usage, ошибки, HTTP-коды.
+- `tst_deeplservice` — Authorization, JSON-массив `text`, порядок/пробелы, EN-US/EN-GB, Free/Pro
+  хосты, 403/456/429/413/5xx, отказ соединения, таймаут, проверка ключа (успех/ошибка/пустой).
+- `tst_googleparser` — Cloud-ответы и коды, включая неверный ключ в теле 400 и quota/rate.
+- `tst_googletranslateservice` — free/cloud режимы, JSON и ключ в URL, ошибки, отсутствие ключа в
+  сообщении.
+- `tst_languages` — `closest` на `pt`/`zh`/`fil`; `tst_settingsdialog` — вкладка «Сервисы», ключи,
+  режим, вариант, сигнал проверки ключа.
+- Debug и Release: 16/16 тестов.
+
+Не проверено вручную: успешный перевод с действующими ключами DeepL Free/Pro и Google Cloud
+(в среде нет ключей).
 
 ---
 

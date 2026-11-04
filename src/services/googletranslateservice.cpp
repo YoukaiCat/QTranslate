@@ -1,11 +1,14 @@
 #include "services/googletranslateservice.h"
 
 #include "core/languages.h"
+#include "core/settings.h"
 #include "core/textchunker.h"
 #include "net/networkmanager.h"
 #include "services/googleparser.h"
 
 #include <QElapsedTimer>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLoggingCategory>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -24,10 +27,14 @@ const QString kServiceId = QStringLiteral("google");
 class GoogleReply : public TranslationReply
 {
 public:
-    GoogleReply(NetworkManager *network, QUrl url, QStringList parts)
+    GoogleReply(NetworkManager *network, QUrl url, QStringList parts, QString source,
+                QString target, bool cloud)
         : m_network(network)
         , m_url(std::move(url))
         , m_parts(std::move(parts))
+        , m_source(std::move(source))
+        , m_target(std::move(target))
+        , m_cloud(cloud)
     {
     }
 
@@ -57,6 +64,9 @@ private:
     QPointer<NetworkManager> m_network;
     QUrl m_url;
     QStringList m_parts;
+    QString m_source;
+    QString m_target;
+    bool m_cloud = false;
     qsizetype m_index = 0;
     QString m_trailing; // trailing whitespace of the part being translated, kept out of the request
     TranslationResult m_result;
@@ -93,9 +103,22 @@ void GoogleReply::sendNext()
         m_trailing = part.mid(end);
 
         QNetworkRequest request = m_network->makeRequest(m_url);
-        request.setHeader(QNetworkRequest::ContentTypeHeader,
-                          QStringLiteral("application/x-www-form-urlencoded;charset=UTF-8"));
-        const QByteArray body = "q=" + QUrl::toPercentEncoding(part.mid(begin, end - begin));
+        QByteArray body;
+        if (m_cloud) {
+            request.setHeader(QNetworkRequest::ContentTypeHeader,
+                              QStringLiteral("application/json;charset=UTF-8"));
+            QJsonObject object;
+            object.insert(QStringLiteral("q"), part.mid(begin, end - begin));
+            object.insert(QStringLiteral("target"), m_target);
+            object.insert(QStringLiteral("format"), QStringLiteral("text"));
+            if (m_source != Languages::autoCode())
+                object.insert(QStringLiteral("source"), m_source);
+            body = QJsonDocument(object).toJson(QJsonDocument::Compact);
+        } else {
+            request.setHeader(QNetworkRequest::ContentTypeHeader,
+                              QStringLiteral("application/x-www-form-urlencoded;charset=UTF-8"));
+            body = "q=" + QUrl::toPercentEncoding(part.mid(begin, end - begin));
+        }
 
         m_requestElapsed.start();
         m_request = m_network->nam()->post(request, body);
@@ -124,6 +147,8 @@ void GoogleReply::onRequestFinished()
     qCDebug(lcGoogle) << "Part" << m_index + 1 << "of" << m_parts.size() << ": HTTP" << status
                       << error << "in" << m_requestElapsed.elapsed() << "ms";
 
+    const QByteArray responseBody = request->readAll();
+
     // abort() finishes the reply before stopping the request, so a cancelled
     // request here means the transfer timeout fired.
     if (error == QNetworkReply::OperationCanceledError || error == QNetworkReply::TimeoutError) {
@@ -134,15 +159,22 @@ void GoogleReply::onRequestFinished()
         return;
     }
     if (status != 0 && (status < 200 || status >= 300)) {
-        fail(GoogleParser::errorForFreeHttpStatus(status), QStringLiteral("HTTP %1").arg(status));
+        fail(m_cloud ? GoogleParser::errorForCloudResponse(status, responseBody)
+                     : GoogleParser::errorForFreeHttpStatus(status),
+             QStringLiteral("HTTP %1").arg(status));
         return;
     }
     if (error != QNetworkReply::NoError) {
-        fail(TranslationError::Network, request->errorString());
+        // In Cloud mode the URL contains the API key; do not leak it through
+        // QNetworkReply::errorString().
+        fail(TranslationError::Network,
+             m_cloud ? QStringLiteral("network error") : request->errorString());
         return;
     }
 
-    const TranslationResult part = GoogleParser::parseFreeResponse(request->readAll());
+    const TranslationResult part = m_cloud
+        ? GoogleParser::parseCloudResponse(responseBody)
+        : GoogleParser::parseFreeResponse(responseBody);
     if (!part.ok()) {
         fail(part.error, part.errorMessage);
         return;
@@ -190,6 +222,8 @@ GoogleTranslateService::GoogleTranslateService(NetworkManager *network, QObject 
     : TranslationService(parent)
     , m_network(network)
     , m_endpoint(QStringLiteral("https://translate.googleapis.com/translate_a/single"))
+    , m_cloudEndpoint(
+          QStringLiteral("https://translation.googleapis.com/language/translate/v2"))
 {
 }
 
@@ -205,7 +239,13 @@ QString GoogleTranslateService::displayName() const
 
 bool GoogleTranslateService::isConfigured() const
 {
-    return true; // the free endpoint needs no key
+    return m_mode == Mode::Free || !m_apiKey.isEmpty();
+}
+
+void GoogleTranslateService::applySettings(const AppSettings &settings)
+{
+    m_mode = settings.google.mode == QStringLiteral("cloud") ? Mode::Cloud : Mode::Free;
+    m_apiKey = settings.google.apiKey;
 }
 
 QStringList GoogleTranslateService::sourceLanguages() const
@@ -220,6 +260,11 @@ QStringList GoogleTranslateService::targetLanguages() const
 
 TranslationReply *GoogleTranslateService::translate(const TranslationRequest &request)
 {
+    if (m_mode == Mode::Cloud && m_apiKey.isEmpty()) {
+        return finishedWithError(TranslationError::Auth,
+                                 QStringLiteral("Google Cloud needs an API key"));
+    }
+
     const QString source = request.sourceLang == Languages::autoCode()
                                ? Languages::autoCode()
                                : Languages::toServiceCode(kServiceId, request.sourceLang,
@@ -232,19 +277,29 @@ TranslationReply *GoogleTranslateService::translate(const TranslationRequest &re
                                  QStringLiteral("language \"%1\" is not supported").arg(code));
     }
 
-    QUrl url = m_endpoint;
-    QUrlQuery query;
-    query.addQueryItem(QStringLiteral("client"), QStringLiteral("gtx"));
-    query.addQueryItem(QStringLiteral("sl"), source);
-    query.addQueryItem(QStringLiteral("tl"), target);
-    query.addQueryItem(QStringLiteral("dt"), QStringLiteral("t"));
-    url.setQuery(query);
+    QUrl url;
+    if (m_mode == Mode::Cloud) {
+        url = m_cloudEndpoint;
+        QUrlQuery query;
+        query.addQueryItem(QStringLiteral("key"), m_apiKey);
+        url.setQuery(query);
+    } else {
+        url = m_endpoint;
+        QUrlQuery query;
+        query.addQueryItem(QStringLiteral("client"), QStringLiteral("gtx"));
+        query.addQueryItem(QStringLiteral("sl"), source);
+        query.addQueryItem(QStringLiteral("tl"), target);
+        query.addQueryItem(QStringLiteral("dt"), QStringLiteral("t"));
+        url.setQuery(query);
+    }
 
     const QStringList parts = TextChunker::split(request.text, kMaxChunkLength);
     qCDebug(lcGoogle) << "Translating" << request.text.size() << "chars in" << parts.size()
-                      << "part(s)," << source << "->" << target;
+                      << "part(s)," << source << "->" << target
+                      << (m_mode == Mode::Cloud ? "cloud" : "free");
 
-    auto *reply = new GoogleReply(m_network, url, parts);
+    auto *reply = new GoogleReply(m_network, url, parts, source, target,
+                                  m_mode == Mode::Cloud);
     reply->start();
     return reply;
 }
@@ -252,4 +307,9 @@ TranslationReply *GoogleTranslateService::translate(const TranslationRequest &re
 void GoogleTranslateService::setEndpoint(const QUrl &url)
 {
     m_endpoint = url;
+}
+
+void GoogleTranslateService::setCloudEndpoint(const QUrl &url)
+{
+    m_cloudEndpoint = url;
 }

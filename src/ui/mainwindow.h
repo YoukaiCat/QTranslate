@@ -58,6 +58,7 @@ public:
 
 signals:
     void translateRequested(const TranslationRequest &request);
+    void serviceChanged(const QString &id);
 
 protected:
     void closeEvent(QCloseEvent *event) override;

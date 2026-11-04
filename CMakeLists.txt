@@ -30,6 +30,8 @@ qt_add_library(qtranslate_core STATIC
     src/core/translationservice.cpp         src/core/translationservice.h
     src/core/translationtypes.h
     src/net/networkmanager.cpp              src/net/networkmanager.h
+    src/services/deeplparser.cpp            src/services/deeplparser.h
+    src/services/deeplservice.cpp           src/services/deeplservice.h
     src/services/googleparser.cpp           src/services/googleparser.h
     src/services/googletranslateservice.cpp src/services/googletranslateservice.h
 )

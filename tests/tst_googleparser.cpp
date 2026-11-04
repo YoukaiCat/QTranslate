@@ -8,6 +8,7 @@
 // sentences_en_ja, detected_iw, transliteration_row (dt=t&dt=rm).
 // Synthetic: sparse_legacy (old format without nulls), html_error, empty_array,
 // object_root, no_translation, detected_in_ld_result, unknown_language.
+// Cloud API: cloud_hello, cloud_multiple, cloud_empty.
 
 Q_DECLARE_METATYPE(TranslationError)
 
@@ -119,6 +120,80 @@ private slots:
         QFETCH(int, status);
         QFETCH(TranslationError, error);
         QCOMPARE(GoogleParser::errorForFreeHttpStatus(status), error);
+    }
+
+    void cloudResponse()
+    {
+        const TranslationResult result =
+            GoogleParser::parseCloudResponse(fixture(QStringLiteral("cloud_hello.json")));
+        QVERIFY2(result.ok(), qPrintable(result.errorMessage));
+        QCOMPARE(result.translatedText, QStringLiteral("Привет, мир!"));
+        QCOMPARE(result.detectedSourceLang, QStringLiteral("en"));
+        QVERIFY(result.serviceId.isEmpty());
+    }
+
+    void cloudResponseJoinsTranslations()
+    {
+        const TranslationResult result =
+            GoogleParser::parseCloudResponse(fixture(QStringLiteral("cloud_multiple.json")));
+        QVERIFY2(result.ok(), qPrintable(result.errorMessage));
+        QCOMPARE(result.translatedText,
+                 QStringLiteral("Das Wetter ist heute schön. Wir gehen im Park spazieren."));
+        QCOMPARE(result.detectedSourceLang, QStringLiteral("en"));
+    }
+
+    void cloudBadResponses_data()
+    {
+        QTest::addColumn<QByteArray>("body");
+        QTest::newRow("empty fixture") << fixture(QStringLiteral("cloud_empty.json"));
+        QTest::newRow("empty body") << QByteArray();
+        QTest::newRow("no data") << QByteArray(R"({"translations": []})");
+        QTest::newRow("array root") << QByteArray("[]");
+        QTest::newRow("translations object") << QByteArray(R"({"data":{"translations":{}}})");
+    }
+
+    void cloudBadResponses()
+    {
+        QFETCH(QByteArray, body);
+        const TranslationResult result = GoogleParser::parseCloudResponse(body);
+        QCOMPARE(result.error, TranslationError::BadResponse);
+        QVERIFY(!result.errorMessage.isEmpty());
+        QVERIFY(result.translatedText.isEmpty());
+    }
+
+    void cloudHttpStatus_data()
+    {
+        QTest::addColumn<int>("status");
+        QTest::addColumn<TranslationError>("error");
+
+        QTest::newRow("400") << 400 << TranslationError::BadResponse;
+        QTest::newRow("401") << 401 << TranslationError::Auth;
+        QTest::newRow("403") << 403 << TranslationError::Auth;
+        QTest::newRow("413") << 413 << TranslationError::TooLong;
+        QTest::newRow("429") << 429 << TranslationError::RateLimited;
+        QTest::newRow("500") << 500 << TranslationError::Network;
+        QTest::newRow("503") << 503 << TranslationError::Network;
+        QTest::newRow("404") << 404 << TranslationError::BadResponse;
+    }
+
+    void cloudHttpStatus()
+    {
+        QFETCH(int, status);
+        QFETCH(TranslationError, error);
+        QCOMPARE(GoogleParser::errorForCloudResponse(status, QByteArray()), error);
+    }
+
+    void cloudErrorBodyIsUsed()
+    {
+        QCOMPARE(GoogleParser::errorForCloudResponse(
+                     400, R"({"error":{"message":"API key not valid."}})"),
+                 TranslationError::Auth);
+        QCOMPARE(GoogleParser::errorForCloudResponse(
+                     403, R"({"error":{"errors":[{"reason":"quotaExceeded"}]}})"),
+                 TranslationError::QuotaExceeded);
+        QCOMPARE(GoogleParser::errorForCloudResponse(
+                     403, R"({"error":{"errors":[{"reason":"rateLimitExceeded"}]}})"),
+                 TranslationError::RateLimited);
     }
 };
 

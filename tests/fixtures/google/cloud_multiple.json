@@ -1,0 +1,13 @@
+{
+  "data": {
+    "translations": [
+      {
+        "translatedText": "Das Wetter ist heute schön. ",
+        "detectedSourceLanguage": "en"
+      },
+      {
+        "translatedText": "Wir gehen im Park spazieren."
+      }
+    ]
+  }
+}

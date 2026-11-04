@@ -150,6 +150,39 @@ private slots:
         QVERIFY(Languages::supported(QStringLiteral("yandex"), Direction::Target).isEmpty());
     }
 
+    void closest_data()
+    {
+        QTest::addColumn<QString>("service");
+        QTest::addColumn<QString>("code");
+        QTest::addColumn<Direction>("direction");
+        QTest::addColumn<QString>("expected");
+
+        QTest::newRow("exact") << deepl << "de" << Direction::Target << "de";
+        QTest::newRow("same base pt") << deepl << "pt" << Direction::Target << "pt-BR";
+        QTest::newRow("same base zh") << deepl << "zh" << Direction::Target << "zh-Hans";
+        QTest::newRow("google keeps fil") << google << "fil" << Direction::Target << "fil";
+        QTest::newRow("auto") << deepl << Languages::autoCode() << Direction::Source
+                              << Languages::autoCode();
+        QTest::newRow("unknown service") << "yandex" << "en" << Direction::Target << "";
+    }
+
+    void closest()
+    {
+        QFETCH(QString, service);
+        QFETCH(QString, code);
+        QFETCH(Direction, direction);
+        QFETCH(QString, expected);
+        QCOMPARE(Languages::closest(service, code, direction), expected);
+    }
+
+    void closestFallsBackToSupported()
+    {
+        const QString result = Languages::closest(deepl, QStringLiteral("fil"),
+                                                  Direction::Target);
+        QVERIFY(!result.isEmpty());
+        QVERIFY(Languages::supported(deepl, Direction::Target).contains(result));
+    }
+
     void forLocale_data()
     {
         QTest::addColumn<QString>("locale");

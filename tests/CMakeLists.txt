@@ -21,6 +21,8 @@ function(qtranslate_add_test name)
 endfunction()
 
 qtranslate_add_test(tst_appinfo)
+qtranslate_add_test(tst_deeplparser)
+qtranslate_add_test(tst_deeplservice)
 qtranslate_add_test(tst_googleparser)
 qtranslate_add_test(tst_googletranslateservice)
 qtranslate_add_test(tst_hotkeysequence)

@@ -4,10 +4,9 @@ Fast and simple desktop translator for Windows. It lives in the system tray and 
 the text selected in any application with a global hotkey.
 
 > **Status:** early development. The tray icon, single instance, translation in the main
-> window through Google Translate (free endpoint), **Ctrl+W**, the **Ctrl+Q** popup,
-> settings (including configurable hotkeys and autostart) and the portable INI mode work;
-> additional services and proxy support are not implemented yet. See the
-> [plan](doc/plan.md).
+> window through Google Translate (free endpoint or Cloud API), **DeepL**, **Ctrl+W**, the
+> **Ctrl+Q** popup, settings (including configurable hotkeys and autostart) and the portable
+> INI mode work; proxy support is not implemented yet. See the [plan](doc/plan.md).
 
 ## Features
 
@@ -26,10 +25,14 @@ Working now:
   auto-translate delay.
 - Settings are stored in `%APPDATA%\qtranslate\qtranslate.ini`; a `qtranslate.ini` next to the
   executable switches to portable mode. API keys and proxy passwords are protected with DPAPI.
+- Translation services: Google Translate (free endpoint or Cloud API key) and DeepL (Free/Pro
+  API key), switchable in the main window or from the tray “Service” menu. DeepL keys can be
+  checked with a button that shows the used character limit.
+- Language lists follow the selected service; an unsupported language is replaced with the
+  closest one supported by that service.
 
 Planned:
 
-- Translation services: Google Translate Cloud API and DeepL (API keys).
 - HTTP and SOCKS5 proxy support, with or without authentication, or the system proxy.
 
 ## Building
@@ -82,8 +85,12 @@ qtranslate [--minimized]
   the languages and translates the translation back; **Copy** puts the translation on the
   clipboard. The detected language and errors are shown in the status bar.
 - Open **Settings…** from the tray menu to change autostart, hotkey combinations, languages,
-  maximum text length and the auto-translate delay. Global hotkeys are disabled while a key
-  combination field is focused. Settings apply immediately and survive a restart.
+  maximum text length, the auto-translate delay, and Google Cloud/DeepL API keys. Global hotkeys
+  are disabled while a key combination field is focused. Settings apply immediately and survive a
+  restart.
+- Select the active translation service in the main window or in the tray **Service** menu. Without
+  a DeepL key, or with Google Cloud selected but no key, translation shows a clear “needs an API
+  key” message.
 - Portable mode: put an empty `qtranslate.ini` next to `qtranslate.exe` and the application
   will use that file instead of `%APPDATA%\qtranslate\qtranslate.ini`.
 - With **Start qtranslate when Windows starts** enabled, the application is launched with

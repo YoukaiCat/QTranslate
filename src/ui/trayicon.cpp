@@ -15,10 +15,13 @@ TrayIcon::TrayIcon(const QIcon &icon, QObject *parent)
     connect(showAction, &QAction::triggered, this, &TrayIcon::showWindowRequested);
     m_menu->setDefaultAction(showAction);
 
-    m_settingsAction = m_menu->addAction(tr("Settings…"));
-    connect(m_settingsAction, &QAction::triggered, this, &TrayIcon::settingsRequested);
+    m_serviceMenu = m_menu->addMenu(tr("Service"));
+    m_serviceMenu->setObjectName(QStringLiteral("serviceMenu"));
 
     m_menu->addSeparator();
+
+    m_settingsAction = m_menu->addAction(tr("Settings…"));
+    connect(m_settingsAction, &QAction::triggered, this, &TrayIcon::settingsRequested);
 
     QAction *quitAction = m_menu->addAction(tr("Quit"));
     connect(quitAction, &QAction::triggered, this, &TrayIcon::quitRequested);
@@ -52,6 +55,28 @@ void TrayIcon::showMessage(const QString &title, const QString &message)
 void TrayIcon::setToolTip(const QString &text)
 {
     m_tray->setToolTip(text);
+}
+
+void TrayIcon::setServices(const QList<ServiceEntry> &services, const QString &activeId)
+{
+    if (!m_serviceMenu)
+        return;
+
+    const QList<QAction *> oldActions = m_serviceMenu->actions();
+    for (QAction *action : oldActions) {
+        m_serviceMenu->removeAction(action);
+        action->deleteLater();
+    }
+
+    for (const ServiceEntry &service : services) {
+        QAction *action = m_serviceMenu->addAction(service.name);
+        action->setCheckable(true);
+        action->setChecked(service.id == activeId);
+        action->setData(service.id);
+        connect(action, &QAction::triggered, this,
+                [this, id = service.id] { emit serviceSelected(id); });
+    }
+    m_serviceMenu->setEnabled(!services.isEmpty());
 }
 
 void TrayIcon::onActivated(QSystemTrayIcon::ActivationReason reason)

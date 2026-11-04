@@ -7,11 +7,15 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QCloseEvent>
+#include <QComboBox>
 #include <QDialogButtonBox>
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QKeySequenceEdit>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSpinBox>
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -136,6 +140,63 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_tabs->addTab(hotkeysPage, tr("Hotkeys"));
     m_tabs->addTab(translationPage, tr("Translation"));
 
+    // Services.
+    auto *servicesPage = new QWidget(m_tabs);
+    auto *servicesLayout = new QVBoxLayout(servicesPage);
+    auto *googleGroup = new QGroupBox(tr("Google Translate"), servicesPage);
+    auto *googleForm = new QFormLayout(googleGroup);
+    m_googleMode = new QComboBox(googleGroup);
+    m_googleMode->setObjectName(QStringLiteral("googleMode"));
+    m_googleMode->addItem(tr("Free endpoint (no key)"), QStringLiteral("free"));
+    m_googleMode->addItem(tr("Cloud Translation API (key required)"),
+                          QStringLiteral("cloud"));
+    m_googleApiKey = new QLineEdit(googleGroup);
+    m_googleApiKey->setObjectName(QStringLiteral("googleApiKey"));
+    m_googleApiKey->setEchoMode(QLineEdit::Password);
+    m_googleApiKey->setPlaceholderText(tr("Google Cloud API key"));
+    googleForm->addRow(tr("Mode:"), m_googleMode);
+    googleForm->addRow(tr("API key:"), m_googleApiKey);
+    auto *googleHint = new QLabel(
+        tr("The free mode uses the public endpoint and needs no key. The Cloud API "
+           "requires a key with the Translation API enabled."),
+        googleGroup);
+    googleHint->setWordWrap(true);
+    googleForm->addRow(googleHint);
+    connect(m_googleMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &SettingsDialog::updateGoogleControls);
+
+    auto *deepLGroup = new QGroupBox(tr("DeepL"), servicesPage);
+    auto *deepLForm = new QFormLayout(deepLGroup);
+    m_deeplApiKey = new QLineEdit(deepLGroup);
+    m_deeplApiKey->setObjectName(QStringLiteral("deepLApiKey"));
+    m_deeplApiKey->setEchoMode(QLineEdit::Password);
+    m_deeplApiKey->setPlaceholderText(tr("DeepL API key (ends with :fx for Free)"));
+    m_deeplEnglishVariant = new QComboBox(deepLGroup);
+    m_deeplEnglishVariant->setObjectName(QStringLiteral("deeplEnglishVariant"));
+    m_deeplEnglishVariant->addItem(QStringLiteral("EN-US"), QStringLiteral("EN-US"));
+    m_deeplEnglishVariant->addItem(QStringLiteral("EN-GB"), QStringLiteral("EN-GB"));
+    m_checkDeepLKey = new QPushButton(tr("Check key"), deepLGroup);
+    m_checkDeepLKey->setObjectName(QStringLiteral("checkDeepLKey"));
+    m_deepLKeyStatus = new QLabel(deepLGroup);
+    m_deepLKeyStatus->setObjectName(QStringLiteral("deeplKeyStatus"));
+    m_deepLKeyStatus->setWordWrap(true);
+    m_deepLKeyStatus->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    deepLForm->addRow(tr("API key:"), m_deeplApiKey);
+    deepLForm->addRow(tr("English target:"), m_deeplEnglishVariant);
+    deepLForm->addRow(m_checkDeepLKey);
+    deepLForm->addRow(m_deepLKeyStatus);
+    connect(m_checkDeepLKey, &QPushButton::clicked, this, [this] {
+        m_deepLKeyStatus->setStyleSheet(QString());
+        m_deepLKeyStatus->setText(tr("Checking…"));
+        m_checkDeepLKey->setEnabled(false);
+        emit deepLKeyCheckRequested(m_deeplApiKey->text().trimmed());
+    });
+
+    servicesLayout->addWidget(googleGroup);
+    servicesLayout->addWidget(deepLGroup);
+    servicesLayout->addStretch();
+    m_tabs->addTab(servicesPage, tr("Services"));
+
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     buttons->setObjectName(QStringLiteral("settingsButtons"));
     connect(buttons, &QDialogButtonBox::accepted, this, &SettingsDialog::accept);
@@ -176,6 +237,17 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
 
     m_maxLength->setValue(settings.translation.maxLength);
     m_autoTranslateDelay->setValue(settings.translation.autoTranslateDelayMs);
+
+    const int googleMode = m_googleMode->findData(settings.google.mode);
+    m_googleMode->setCurrentIndex(googleMode >= 0 ? googleMode : 0);
+    m_googleApiKey->setText(settings.google.apiKey);
+
+    m_deeplApiKey->setText(settings.deepl.apiKey);
+    const int englishVariant = m_deeplEnglishVariant->findData(settings.deepl.englishVariant);
+    m_deeplEnglishVariant->setCurrentIndex(englishVariant >= 0 ? englishVariant : 0);
+    m_deepLKeyStatus->clear();
+    m_checkDeepLKey->setEnabled(true);
+    updateGoogleControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -193,7 +265,25 @@ AppSettings SettingsDialog::settings() const
     result.translation.maxLength = m_maxLength->value();
     result.translation.autoTranslateDelayMs = m_autoTranslateDelay->value();
     result.popup.autoCloseOnFocusLoss = m_autoClosePopup->isChecked();
+    result.google.mode = m_googleMode->currentData().toString();
+    result.google.apiKey = m_googleApiKey->text().trimmed();
+    result.deepl.apiKey = m_deeplApiKey->text().trimmed();
+    result.deepl.englishVariant = m_deeplEnglishVariant->currentData().toString();
     return result;
+}
+
+void SettingsDialog::showDeepLKeyCheckResult(bool ok, const QString &message)
+{
+    m_deepLKeyStatus->setText(message);
+    m_deepLKeyStatus->setStyleSheet(ok ? QStringLiteral("color: #2e7d32;")
+                                       : QStringLiteral("color: #d32f2f;"));
+    m_checkDeepLKey->setEnabled(true);
+}
+
+void SettingsDialog::updateGoogleControls()
+{
+    m_googleApiKey->setEnabled(m_googleMode->currentData().toString()
+                               == QStringLiteral("cloud"));
 }
 
 bool SettingsDialog::validate(QString *error) const

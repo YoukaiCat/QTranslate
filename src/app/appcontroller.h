@@ -17,6 +17,8 @@ class SingleInstance;
 class TranslationManager;
 class TranslationReply;
 class TrayIcon;
+class DeepLService;
+class GoogleTranslateService;
 struct AppSettings;
 struct TranslationRequest;
 struct TranslationResult;
@@ -45,6 +47,9 @@ private:
     void createHotkeys();
     void initMainWindowLanguages();
     void updateLanguageConfiguration();
+    void updateServiceSelectors();
+    void onActiveServiceChanged(const QString &id);
+    void selectService(const QString &id);
     void updateTrayToolTip();
     void applySettings(const AppSettings &oldSettings, const AppSettings &newSettings);
     void showSettings();
@@ -68,6 +73,8 @@ private:
 
     NetworkManager *m_network = nullptr;
     TranslationManager *m_translations = nullptr;
+    GoogleTranslateService *m_google = nullptr;
+    DeepLService *m_deepl = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for
     QPointer<TranslationReply> m_popupReply;      // the request the popup waits for
 

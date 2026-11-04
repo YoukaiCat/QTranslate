@@ -257,6 +257,31 @@ QStringList supported(const QString &serviceId, Direction direction)
     return codes;
 }
 
+QString closest(const QString &serviceId, const QString &code, Direction direction)
+{
+    if (code == autoCode())
+        return code;
+
+    const QStringList codes = supported(serviceId, direction);
+    if (codes.isEmpty())
+        return {};
+    if (codes.contains(code))
+        return code;
+
+    const QString base = code.section(QLatin1Char('-'), 0, 0);
+    for (const QString &candidate : codes) {
+        if (candidate.section(QLatin1Char('-'), 0, 0) == base)
+            return candidate;
+    }
+
+    const QString system = systemLanguage();
+    if (codes.contains(system))
+        return system;
+    if (codes.contains(QStringLiteral("en")))
+        return QStringLiteral("en");
+    return codes.first();
+}
+
 QString forLocale(const QLocale &locale)
 {
     switch (locale.language()) {

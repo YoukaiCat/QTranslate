@@ -1,3 +1,4 @@
+#include "core/settings.h"
 #include "core/textchunker.h"
 #include "net/networkmanager.h"
 #include "services/googletranslateservice.h"
@@ -5,6 +6,7 @@
 #include <QHash>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QSignalSpy>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -26,6 +28,7 @@ public:
         QByteArray method;
         QUrl url;
         QHash<QByteArray, QByteArray> headers; // lower-case names
+        QByteArray body;
         QString text;                          // decoded "q" form field
     };
     struct Response
@@ -46,6 +49,8 @@ public:
     {
         return QUrl(QStringLiteral("http://127.0.0.1:%1/translate_a/single").arg(m_server.serverPort()));
     }
+
+    quint16 port() const { return m_server.serverPort(); }
 
     std::function<Response(const Request &)> handler;
     QList<Request> requests;
@@ -83,6 +88,7 @@ private:
             return;
         const QByteArray body = buffer.mid(headerEnd + 4, length);
         m_buffers.remove(socket);
+        request.body = body;
         if (body.startsWith("q="))
             request.text = QUrl::fromPercentEncoding(body.mid(2));
 
@@ -119,6 +125,27 @@ FakeHttpServer::Response bracketed(const FakeHttpServer::Request &request)
 FakeHttpServer::Response identity(const FakeHttpServer::Request &request)
 {
     return {200, gtxResponse(request.text, request.text), true};
+}
+
+QByteArray cloudResponse(const QString &translation, const QString &detected = QStringLiteral("en"))
+{
+    QJsonObject item;
+    item.insert(QStringLiteral("translatedText"), translation);
+    if (!detected.isEmpty())
+        item.insert(QStringLiteral("detectedSourceLanguage"), detected);
+    QJsonObject data;
+    data.insert(QStringLiteral("translations"), QJsonArray{item});
+    QJsonObject root;
+    root.insert(QStringLiteral("data"), data);
+    return QJsonDocument(root).toJson(QJsonDocument::Compact);
+}
+
+FakeHttpServer::Response cloudIdentity(const FakeHttpServer::Request &request)
+{
+    const QJsonObject object = QJsonDocument::fromJson(request.body).object();
+    return {200, cloudResponse(QLatin1Char('[') + object.value(QStringLiteral("q")).toString()
+                                   + QLatin1Char(']')),
+            true};
 }
 
 // About 12 000 characters of paragraphs and sentences: three parts.
@@ -373,6 +400,99 @@ private slots:
         QVERIFY(reply->result().ok());
         QCOMPARE(reply->result().translatedText, QStringLiteral(" \n "));
         QVERIFY(m_server->requests.isEmpty());
+    }
+
+    void cloudModeSendsJsonAndKey()
+    {
+        AppSettings settings;
+        settings.google.mode = QStringLiteral("cloud");
+        settings.google.apiKey = QStringLiteral("test-cloud-key");
+        m_service->applySettings(settings);
+        QVERIFY(m_service->isConfigured());
+        m_service->setCloudEndpoint(
+            QUrl(QStringLiteral("http://127.0.0.1:%1/language/translate/v2")
+                     .arg(m_server->port())));
+        m_server->handler = cloudIdentity;
+
+        std::unique_ptr<TranslationReply> reply(m_service->translate(
+            {QStringLiteral("Hello & goodbye"), QStringLiteral("en"), QStringLiteral("ru")}));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(5000));
+        QVERIFY2(reply->result().ok(), qPrintable(reply->result().errorMessage));
+        QCOMPARE(reply->result().translatedText, QStringLiteral("[Hello & goodbye]"));
+        QCOMPARE(reply->result().detectedSourceLang, QStringLiteral("en"));
+
+        QCOMPARE(m_server->requests.size(), 1);
+        const FakeHttpServer::Request &request = m_server->requests.first();
+        QCOMPARE(request.method, QByteArray("POST"));
+        QCOMPARE(request.url.path(), QStringLiteral("/language/translate/v2"));
+        QCOMPARE(QUrlQuery(request.url).queryItemValue(QStringLiteral("key")),
+                 QStringLiteral("test-cloud-key"));
+        QVERIFY(request.headers.value("content-type").startsWith("application/json"));
+        const QJsonObject body = QJsonDocument::fromJson(request.body).object();
+        QCOMPARE(body.value(QStringLiteral("q")).toString(), QStringLiteral("Hello & goodbye"));
+        QCOMPARE(body.value(QStringLiteral("target")).toString(), QStringLiteral("ru"));
+        QCOMPARE(body.value(QStringLiteral("source")).toString(), QStringLiteral("en"));
+        QCOMPARE(body.value(QStringLiteral("format")).toString(), QStringLiteral("text"));
+    }
+
+    void cloudModeWithoutKeyIsNotConfigured()
+    {
+        AppSettings settings;
+        settings.google.mode = QStringLiteral("cloud");
+        settings.google.apiKey.clear();
+        m_service->applySettings(settings);
+        QVERIFY(!m_service->isConfigured());
+
+        std::unique_ptr<TranslationReply> reply(m_service->translate(
+            {QStringLiteral("Hello"), QStringLiteral("auto"), QStringLiteral("ru")}));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(1000));
+        QCOMPARE(reply->result().error, TranslationError::Auth);
+        QVERIFY(m_server->requests.isEmpty());
+    }
+
+    void cloudHttpError()
+    {
+        AppSettings settings;
+        settings.google.mode = QStringLiteral("cloud");
+        settings.google.apiKey = QStringLiteral("bad-key");
+        m_service->applySettings(settings);
+        m_service->setCloudEndpoint(
+            QUrl(QStringLiteral("http://127.0.0.1:%1/language/translate/v2")
+                     .arg(m_server->port())));
+        m_server->handler = [](const FakeHttpServer::Request &) {
+            return FakeHttpServer::Response{
+                400, R"({"error":{"message":"API key not valid."}})", true};
+        };
+
+        std::unique_ptr<TranslationReply> reply(m_service->translate(
+            {QStringLiteral("Hello"), QStringLiteral("auto"), QStringLiteral("ru")}));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(5000));
+        QCOMPARE(reply->result().error, TranslationError::Auth);
+        QCOMPARE(reply->result().errorMessage, QStringLiteral("HTTP 400"));
+    }
+
+    void cloudNetworkErrorHidesTheKey()
+    {
+        AppSettings settings;
+        settings.google.mode = QStringLiteral("cloud");
+        settings.google.apiKey = QStringLiteral("secret-cloud-key");
+        m_service->applySettings(settings);
+        QTcpServer probe;
+        QVERIFY(probe.listen(QHostAddress::LocalHost));
+        const quint16 port = probe.serverPort();
+        probe.close();
+        m_service->setCloudEndpoint(
+            QUrl(QStringLiteral("http://127.0.0.1:%1/language/translate/v2").arg(port)));
+
+        std::unique_ptr<TranslationReply> reply(m_service->translate(
+            {QStringLiteral("Hello"), QStringLiteral("auto"), QStringLiteral("ru")}));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(10000));
+        QCOMPARE(reply->result().error, TranslationError::Network);
+        QVERIFY(!reply->result().errorMessage.contains(QStringLiteral("secret-cloud-key")));
     }
 
 private:

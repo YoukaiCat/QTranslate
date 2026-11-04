@@ -5,7 +5,11 @@
 
 #include <QApplication>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QKeySequenceEdit>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QSignalSpy>
 #include <QSpinBox>
 #include <QTest>
@@ -187,6 +191,72 @@ private slots:
         QString error;
         QVERIFY(!dialog.validate(&error));
         QVERIFY(!error.isEmpty());
+    }
+
+    void servicesTab()
+    {
+        AppSettings settings;
+        settings.google.mode = QStringLiteral("cloud");
+        settings.google.apiKey = QStringLiteral("google-key");
+        settings.deepl.apiKey = QStringLiteral("deepl-key");
+        settings.deepl.englishVariant = QStringLiteral("EN-GB");
+
+        SettingsDialog dialog(settings, {QStringLiteral("en"), QStringLiteral("ru")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+
+        auto *googleMode = dialog.findChild<QComboBox *>(QStringLiteral("googleMode"));
+        auto *googleKey = dialog.findChild<QLineEdit *>(QStringLiteral("googleApiKey"));
+        auto *deepLKey = dialog.findChild<QLineEdit *>(QStringLiteral("deepLApiKey"));
+        auto *variant =
+            dialog.findChild<QComboBox *>(QStringLiteral("deeplEnglishVariant"));
+        QVERIFY(googleMode);
+        QVERIFY(googleKey);
+        QVERIFY(deepLKey);
+        QVERIFY(variant);
+
+        QCOMPARE(googleMode->currentData().toString(), QStringLiteral("cloud"));
+        QCOMPARE(googleKey->text(), QStringLiteral("google-key"));
+        QVERIFY(googleKey->isEnabled());
+        QCOMPARE(deepLKey->text(), QStringLiteral("deepl-key"));
+        QCOMPARE(variant->currentData().toString(), QStringLiteral("EN-GB"));
+
+        googleMode->setCurrentIndex(googleMode->findData(QStringLiteral("free")));
+        QVERIFY(!googleKey->isEnabled());
+        googleMode->setCurrentIndex(googleMode->findData(QStringLiteral("cloud")));
+        QVERIFY(googleKey->isEnabled());
+
+        googleKey->setText(QStringLiteral("new-google-key"));
+        deepLKey->setText(QStringLiteral("new-deepl-key"));
+        variant->setCurrentIndex(variant->findData(QStringLiteral("EN-US")));
+
+        const AppSettings result = dialog.settings();
+        QCOMPARE(result.google.mode, QStringLiteral("cloud"));
+        QCOMPARE(result.google.apiKey, QStringLiteral("new-google-key"));
+        QCOMPARE(result.deepl.apiKey, QStringLiteral("new-deepl-key"));
+        QCOMPARE(result.deepl.englishVariant, QStringLiteral("EN-US"));
+    }
+
+    void deepLKeyCheck()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en"), QStringLiteral("ru")},
+                              {QStringLiteral("en"), QStringLiteral("ru")}, true);
+        auto *key = dialog.findChild<QLineEdit *>(QStringLiteral("deepLApiKey"));
+        auto *button = dialog.findChild<QPushButton *>(QStringLiteral("checkDeepLKey"));
+        auto *status = dialog.findChild<QLabel *>(QStringLiteral("deeplKeyStatus"));
+        QVERIFY(key);
+        QVERIFY(button);
+        QVERIFY(status);
+        key->setText(QStringLiteral("typed-key:fx"));
+
+        QSignalSpy requested(&dialog, &SettingsDialog::deepLKeyCheckRequested);
+        button->click();
+        QCOMPARE(requested.size(), 1);
+        QCOMPARE(requested.first().first().toString(), QStringLiteral("typed-key:fx"));
+        QVERIFY(!button->isEnabled());
+
+        dialog.showDeepLKeyCheckResult(true, QStringLiteral("Used 10 of 500 characters."));
+        QVERIFY(button->isEnabled());
+        QVERIFY(status->text().contains(QStringLiteral("Used 10")));
     }
 
     void hotkeyEditingSignal()

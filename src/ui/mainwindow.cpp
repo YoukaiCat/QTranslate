@@ -14,6 +14,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QShortcut>
+#include <QSignalBlocker>
 #include <QSplitter>
 #include <QStatusBar>
 #include <QTextCursor>
@@ -107,6 +108,14 @@ void MainWindow::buildUi()
     }
     connect(m_swapButton, &QToolButton::clicked, this, &MainWindow::swapLanguages);
     connect(m_copyButton, &QPushButton::clicked, this, &MainWindow::copyResult);
+    connect(m_service, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            [this](int) {
+                if (!m_service->isEnabled())
+                    return;
+                const QString id = m_service->currentData().toString();
+                if (!id.isEmpty())
+                    emit serviceChanged(id);
+            });
     connect(m_sourceLang, &LanguageComboBox::currentCodeChanged, this,
             &MainWindow::updateSwapButton);
     connect(m_targetLang, &LanguageComboBox::currentCodeChanged, this,
@@ -146,6 +155,7 @@ void MainWindow::setTargetLanguage(const QString &code)
 
 void MainWindow::setServices(const QList<ServiceEntry> &services, const QString &activeId)
 {
+    const QSignalBlocker blocker(m_service);
     m_service->clear();
     for (const ServiceEntry &service : services)
         m_service->addItem(service.name, service.id);

@@ -11,6 +11,7 @@
 #include "platform/autostart.h"
 #include "platform/hotkeymanager.h"
 #include "platform/selectiongrabber.h"
+#include "services/deeplservice.h"
 #include "services/googletranslateservice.h"
 #include "ui/appicon.h"
 #include "ui/mainwindow.h"
@@ -45,6 +46,8 @@ void AppController::start()
     m_trayAvailable = TrayIcon::isAvailable();
 
     createTranslation();
+    connect(m_translations, &TranslationManager::activeServiceChanged, this,
+            &AppController::onActiveServiceChanged);
 
     m_mainWindow = std::make_unique<MainWindow>();
     m_mainWindow->setCloseHidesToTray(m_trayAvailable);
@@ -55,11 +58,14 @@ void AppController::start()
     initMainWindowLanguages();
     connect(m_mainWindow.get(), &MainWindow::translateRequested, this,
             &AppController::translateInMainWindow);
+    connect(m_mainWindow.get(), &MainWindow::serviceChanged, this,
+            &AppController::selectService);
 
     if (m_trayAvailable) {
         m_tray = new TrayIcon(icon, this);
         connect(m_tray, &TrayIcon::showWindowRequested, this, &AppController::showMainWindow);
         connect(m_tray, &TrayIcon::toggleWindowRequested, this, &AppController::toggleMainWindow);
+        connect(m_tray, &TrayIcon::serviceSelected, this, &AppController::selectService);
         connect(m_tray, &TrayIcon::settingsRequested, this, &AppController::showSettings);
         connect(m_tray, &TrayIcon::quitRequested, this, &AppController::quit);
         m_tray->show();
@@ -70,6 +76,7 @@ void AppController::start()
     }
 
     createHotkeys();
+    updateServiceSelectors();
 
     if (m_settings) {
         connect(m_settings, &SettingsStore::changed, this, &AppController::applySettings);
@@ -103,15 +110,19 @@ void AppController::createTranslation()
     m_network->setTimeoutMs(settings.network.timeoutMs);
     m_translations = new TranslationManager(this);
     m_translations->setMaxLength(settings.translation.maxLength);
-    m_translations->registerService(new GoogleTranslateService(m_network));
 
-    if (!settings.translation.service.isEmpty()) {
-        if (m_translations->service(settings.translation.service))
-            m_translations->setActiveService(settings.translation.service);
-        else
-            qCWarning(lcApp) << "Configured service is not available:"
-                             << settings.translation.service;
-    }
+    m_google = new GoogleTranslateService(m_network);
+    m_deepl = new DeepLService(m_network);
+    m_google->applySettings(settings);
+    m_deepl->applySettings(settings);
+    m_translations->registerService(m_google);
+    m_translations->registerService(m_deepl);
+
+    if (m_translations->service(settings.translation.service))
+        m_translations->setActiveService(settings.translation.service);
+    else if (!settings.translation.service.isEmpty())
+        qCWarning(lcApp) << "Configured service is not available:"
+                         << settings.translation.service;
 }
 
 void AppController::createHotkeys()
@@ -198,24 +209,12 @@ void AppController::updateLanguageConfiguration()
     if (source != Languages::autoCode() && !sourceLanguages.contains(source))
         source = Languages::autoCode();
 
-    QString target = settings.translation.primaryLang;
-    if (!m_targetLanguages.contains(target)) {
-        const QString systemLanguage = Languages::systemLanguage();
-        if (m_targetLanguages.contains(systemLanguage))
-            target = systemLanguage;
-        else if (m_targetLanguages.contains(QStringLiteral("en")))
-            target = QStringLiteral("en");
-        else
-            target = m_targetLanguages.value(0);
-    }
+    QString target = Languages::closest(service->id(), settings.translation.primaryLang,
+                                        Languages::Direction::Target);
 
     m_sourceLanguage = source;
     m_targetLanguage = target;
 
-    QList<MainWindow::ServiceEntry> services;
-    for (const TranslationService *s : m_translations->services())
-        services.append({s->id(), s->displayName()});
-    m_mainWindow->setServices(services, service->id());
     m_mainWindow->setLanguages(sourceLanguages, m_targetLanguages);
     m_mainWindow->setSourceLanguage(m_sourceLanguage);
     m_mainWindow->setTargetLanguage(m_targetLanguage);
@@ -227,6 +226,51 @@ void AppController::updateLanguageConfiguration()
         m_popup->setPreferredWidth(settings.popup.width);
         m_popup->setAutoCloseOnFocusLoss(settings.popup.autoCloseOnFocusLoss);
     }
+
+    updateServiceSelectors();
+}
+
+void AppController::updateServiceSelectors()
+{
+    if (!m_translations)
+        return;
+
+    const TranslationService *active = m_translations->activeService();
+    const QString activeId = active ? active->id() : QString();
+
+    QList<MainWindow::ServiceEntry> mainWindowServices;
+    QList<TrayIcon::ServiceEntry> trayServices;
+    for (const TranslationService *service : m_translations->services()) {
+        mainWindowServices.append({service->id(), service->displayName()});
+        trayServices.append({service->id(), service->displayName()});
+    }
+
+    if (m_mainWindow)
+        m_mainWindow->setServices(mainWindowServices, activeId);
+    if (m_tray)
+        m_tray->setServices(trayServices, activeId);
+}
+
+void AppController::onActiveServiceChanged(const QString &)
+{
+    updateLanguageConfiguration();
+}
+
+void AppController::selectService(const QString &id)
+{
+    if (!m_translations || !m_translations->service(id))
+        return;
+
+    const TranslationService *active = m_translations->activeService();
+    if (active && active->id() != id)
+        m_translations->setActiveService(id);
+
+    if (m_settings && m_settings->current().translation.service != id) {
+        AppSettings settings = m_settings->current();
+        settings.translation.service = id;
+        m_settings->save(settings);
+    }
+    updateServiceSelectors();
 }
 
 void AppController::applySettings(const AppSettings &oldSettings,
@@ -263,6 +307,11 @@ void AppController::applySettings(const AppSettings &oldSettings,
 
     if (oldSettings.network.timeoutMs != newSettings.network.timeoutMs)
         m_network->setTimeoutMs(newSettings.network.timeoutMs);
+
+    if (m_google)
+        m_google->applySettings(newSettings);
+    if (m_deepl)
+        m_deepl->applySettings(newSettings);
 
     if (oldSettings.translation.service != newSettings.translation.service) {
         if (m_translations->service(newSettings.translation.service))
@@ -313,6 +362,22 @@ void AppController::showSettings()
         connect(&dialog, &SettingsDialog::hotkeyEditingChanged, m_hotkeys,
                 &HotkeyManager::setSuspended);
     }
+
+    QPointer<SettingsDialog> dialogGuard(&dialog);
+    connect(&dialog, &SettingsDialog::deepLKeyCheckRequested, this,
+            [this, dialogGuard](const QString &key) {
+                if (!m_deepl) {
+                    if (dialogGuard) {
+                        dialogGuard->showDeepLKeyCheckResult(
+                            false, tr("DeepL is not available."));
+                    }
+                    return;
+                }
+                m_deepl->checkKey(key, [dialogGuard](bool ok, const QString &message) {
+                    if (dialogGuard)
+                        dialogGuard->showDeepLKeyCheckResult(ok, message);
+                });
+            });
 
     if (dialog.exec() == QDialog::Accepted)
         m_settings->save(dialog.settings());

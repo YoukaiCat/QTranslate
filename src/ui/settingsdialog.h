@@ -7,8 +7,11 @@
 
 class QCheckBox;
 class QCloseEvent;
+class QComboBox;
 class QLabel;
 class QKeySequenceEdit;
+class QLineEdit;
+class QPushButton;
 class QSpinBox;
 class QTabWidget;
 class LanguageComboBox;
@@ -34,9 +37,15 @@ public:
 
     void accept() override;
 
+public slots:
+    // Result of an asynchronous DeepL key check started by AppController.
+    void showDeepLKeyCheckResult(bool ok, const QString &message);
+
 signals:
     // While a QKeySequenceEdit has focus, global hotkeys must be suspended.
     void hotkeyEditingChanged(bool editing);
+    // The user asked to verify the key currently typed in the DeepL field.
+    void deepLKeyCheckRequested(const QString &key);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -47,6 +56,7 @@ private:
     void updateHotkeyEditing();
     void setHotkeyEditing(bool editing);
     bool anyHotkeyEditFocused() const;
+    void updateGoogleControls();
 
     AppSettings m_initial;
     QStringList m_targetLanguages;
@@ -68,6 +78,13 @@ private:
     LanguageComboBox *m_secondaryLanguage = nullptr;
     QSpinBox *m_maxLength = nullptr;
     QSpinBox *m_autoTranslateDelay = nullptr;
+
+    QComboBox *m_googleMode = nullptr;
+    QLineEdit *m_googleApiKey = nullptr;
+    QLineEdit *m_deeplApiKey = nullptr;
+    QComboBox *m_deeplEnglishVariant = nullptr;
+    QPushButton *m_checkDeepLKey = nullptr;
+    QLabel *m_deepLKeyStatus = nullptr;
 
     bool m_hotkeyEditing = false;
 };
