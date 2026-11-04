@@ -25,7 +25,7 @@
 - Системный или ручной HTTP/SOCKS5-прокси с необязательной авторизацией.
 - Интерфейс на 15 языках (русский, английский, испанский, немецкий, французский, португальский,
   итальянский, польский, украинский, турецкий, китайский, японский, корейский, арабский, хинди),
-  автозагрузка, портативный INI-режим, `--verbose`-логирование.
+  автозагрузка и портативный INI-режим.
 
 ## Скриншоты
 
@@ -53,8 +53,6 @@
 - **[`qtranslate-0.10.0-win64.zip`](https://github.com/youkaicat/qtranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64.zip)**. Распакуйте и запустите
   `bin\qtranslate.exe`; установка и права администратора не нужны. Архив самодостаточен: Qt и
   runtime MSVC уже включены.
-- **[`SHA256SUMS.txt`](https://github.com/youkaicat/qtranslate/releases/download/v0.10.0/SHA256SUMS.txt)** — контрольные суммы SHA-256 обоих файлов.
-
 Установщик пока не подписан кодом, поэтому Windows SmartScreen может показать предупреждение.
 
 ## Использование
@@ -96,8 +94,8 @@ ctest --test-dir build/release --output-on-failure
 С CMake старше 3.22 каталог Qt `bin` должен быть в `PATH`, чтобы `ctest` нашёл DLL Qt. Тесты
 собираются по умолчанию; `-DQTRANSLATE_BUILD_TESTS=OFF` отключает их.
 
-Чтобы собрать артефакты релиза (портативный ZIP, установщик для текущего пользователя и
-`SHA256SUMS.txt`), установите [Inno Setup 6.3+](https://jrsoftware.org/isinfo.php) и выполните:
+Чтобы собрать артефакты релиза (портативный ZIP и установщик для текущего пользователя),
+установите [Inno Setup 6.3+](https://jrsoftware.org/isinfo.php) и выполните:
 
 ```powershell
 ./packaging/windows/package.ps1 -BuildDir build/release

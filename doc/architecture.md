@@ -127,7 +127,7 @@ qtranslate/
 ├── packaging/
 │   └── windows/
 │       ├── qtranslate.iss      установщик Inno Setup
-│       └── package.ps1         dist + zip + setup + SHA256SUMS
+│       └── package.ps1         dist + zip + setup
 ├── doc/
 │   ├── architecture.md
 │   ├── plan.md
@@ -268,9 +268,8 @@ English и Русский. Задачи установщика:
 пользователь согласится.
 
 **Скрипт.** `packaging/windows/package.ps1` делает `cmake --install`, проверяет наличие
-`qtranslate.exe`, Qt DLL, `qwindows.dll`, `qschannelbackend.dll` и CRT, собирает zip и установщик,
-затем пишет `SHA256SUMS.txt`. Параметры `-SkipInstall` и `-SkipInstaller` нужны для отладки
-упаковки; CI использует полный путь.
+`qtranslate.exe`, Qt DLL, `qwindows.dll`, `qschannelbackend.dll` и CRT, собирает zip и установщик.
+Параметры `-SkipInstall` и `-SkipInstaller` нужны для отладки упаковки; CI использует полный путь.
 
 **CI.** `.github/workflows/build.yml` на `windows-latest`:
 1. `install-qt-action` ставит Qt 6.8.3 LTS MSVC 2022 x64 (aqtinstall пока не поддерживает
@@ -281,9 +280,9 @@ English и Русский. Задачи установщика:
 5. `upload-artifact` сохраняет `build/artifacts/*`.
 
 Workflow запускается на push в `main`, pull request и вручную. По тегу `v*` отдельная job с
-`contents: write` скачивает артефакты и создаёт/обновляет GitHub Release, прикладывая установщик,
-zip и `SHA256SUMS.txt`; заметки берутся из `doc/releases/<версия>.md`. Повторный запуск
-перезаписывает файлы релиза (`gh release upload --clobber`).
+`contents: write` скачивает артефакты и создаёт/обновляет GitHub Release, прикладывая установщик и
+zip; заметки берутся из `doc/releases/<версия>.md`. Повторный запуск перезаписывает файлы релиза
+(`gh release upload --clobber`).
 
 **Подпись.** Кодовой подписи пока нет: сертификата в проекте нет, SmartScreen может показать
 предупреждение. Добавление подписи не меняет формат артефактов и CI-шагов (нужен секрет с
@@ -1435,16 +1434,16 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 Локальная проверка (Windows 11, Qt 6.12.0 MSVC 2022 x64):
 
 - Debug и Release: сборка без предупреждений `/W4`, **21/21 тест**;
-- `package.ps1` собрал `qtranslate-0.10.0-win64-setup.exe` (11,51 МБ),
-  `qtranslate-0.10.0-win64.zip` (14,58 МБ) и `SHA256SUMS.txt`; обе контрольные суммы совпали;
+- `package.ps1` собрал `qtranslate-0.10.0-win64-setup.exe` (11,51 МБ) и
+  `qtranslate-0.10.0-win64.zip` (14,58 МБ); оба файла проверены;
 - `build/dist` — 35,0 МБ; в ZIP 41 запись, 13 Qt-переводов, `opengl32sw.dll` отсутствует;
 - установщик: тихая установка во временный каталог, `FileVersion`/`ProductVersion` = 0.10.0,
   запуск `bin\qtranslate.exe` без Qt в `PATH`, удаление; `%APPDATA%\qtranslate\qtranslate.ini`
   и `HKCU\...\Run` восстановлены после проверки;
 - живой smoke DeepL free web через собранный сервис: `Hello, world` → `Hallo, Welt`,
   `detected_source_language=en`;
-- CI (Qt 6.8.3 LTS): setup 10,63 МБ, ZIP 13,12 МБ; хэши совпали с `SHA256SUMS.txt`;
-  CI-установщик проверен тихой установкой, запуском и удалением;
+- CI (Qt 6.8.3 LTS): setup 10,63 МБ, ZIP 13,12 МБ; CI-установщик проверен тихой установкой,
+  запуском и удалением;
 - CI-прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41930568365
 - релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.10.0
 - старые теги `v0.9.0`/`v0.9.1` не изменяются.
@@ -1466,7 +1465,8 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 | Перевод с заменой выделения | Отдельное действие Ctrl+Shift+Q, не меняет Ctrl+Q. Вставка только если исходное окно всё ещё активно; иначе перевод копируется в буфер и показывается уведомление (§5.4) |
 | Установщик | Inno Setup 6.3+/7, установка **для текущего пользователя** без UAC в `%LOCALAPPDATA%\Programs\qtranslate`; задачи «меню Пуск» (вкл.), «рабочий стол» (выкл.) и «автозагрузка» (вкл.); автозагрузка синхронизируется с настройкой приложения; настройки при удалении сохраняются (§3.4) |
 | Портативная сборка | Остаётся вторым артефактом релиза: zip с `bin/`, `plugins/`, `translations/`; нужна пользователям без прав установки (§3.4) |
-| CI и релизы | GitHub Actions на `windows-latest`; push/PR собирают и тестируют, тег `v*` публикует установщик, zip и `SHA256SUMS.txt`; версия тега сверяется с CMake (§3.4) |
+| CI и релизы | GitHub Actions на `windows-latest`; push/PR собирают и тестируют, тег `v*` публикует только установщик и zip; версия тега сверяется с CMake (§3.4) |
+| Контрольные суммы | Не публикуются: `SHA256SUMS.txt` не генерируется и не прикладывается к релизу; при необходимости пользователь считает хэш сам |
 | Linux | Отдельный этап 11 после перехода на Linux-машину: X11 — полноценный таргет, Wayland — портал/CLI-fallback с явными ограничениями; macOS не планируется (§4.14) |
 | Запись в журнале Win+V при захвате | Промежуточный Ctrl+C может оставить запись; exclusion-форматы защищают только восстановление буфера. Полный обход — стратегия через UI Automation (§4.4, §9.2), принята как будущее развитие |
 

@@ -1,5 +1,5 @@
 # Builds the Windows release artifacts: the portable ZIP and, unless
-# -SkipInstaller is passed, the Inno Setup installer and SHA256SUMS.txt.
+# -SkipInstaller is passed, the Inno Setup installer.
 #
 # The script expects a Release build (or -SkipInstall with an existing dist):
 #
@@ -182,14 +182,6 @@ if (-not $SkipInstaller) {
     }
     $artifacts += $setupPath
 }
-
-$hashLines = foreach ($file in $artifacts) {
-    $hash = (Get-FileHash -Algorithm SHA256 $file).Hash.ToLowerInvariant()
-    "$hash  $(Split-Path -Leaf $file)"
-}
-$sumsPath = Join-Path $outputPath "SHA256SUMS.txt"
-Set-Content -Path $sumsPath -Value $hashLines -Encoding ascii
-$artifacts += $sumsPath
 
 Write-Host ""
 Write-Host "Release artifacts:"

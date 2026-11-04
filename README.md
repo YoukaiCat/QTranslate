@@ -24,8 +24,8 @@ translation directly in the active input field.
   translation cache and automatic translation while typing.
 - System/manual HTTP and SOCKS5 proxies with optional authentication.
 - Interface in 15 languages (English, Russian, Spanish, German, French, Portuguese, Italian,
-  Polish, Ukrainian, Turkish, Chinese, Japanese, Korean, Arabic, Hindi), autostart, portable INI
-  mode, `--verbose` logging.
+  Polish, Ukrainian, Turkish, Chinese, Japanese, Korean, Arabic, Hindi), autostart and portable
+  INI mode.
 
 ## Screenshots
 
@@ -53,8 +53,6 @@ The latest build is on the [Releases](https://github.com/youkaicat/qtranslate/re
 - **[`qtranslate-0.10.0-win64.zip`](https://github.com/youkaicat/qtranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64.zip)**. Extract it and run `bin\qtranslate.exe`;
   no installation or administrator rights are needed. The archive is self-contained: Qt and the
   MSVC runtime are included.
-- **[`SHA256SUMS.txt`](https://github.com/youkaicat/qtranslate/releases/download/v0.10.0/SHA256SUMS.txt)** - SHA-256 checksums of both files.
-
 The installer is not code-signed yet, so Windows SmartScreen may show a warning.
 
 ## Usage
@@ -96,7 +94,7 @@ ctest --test-dir build/release --output-on-failure
 With CMake older than 3.22, the Qt `bin` directory must be in `PATH` for `ctest` to find the Qt
 DLLs. Unit tests are built by default; pass `-DQTRANSLATE_BUILD_TESTS=OFF` to skip them.
 
-To build the release artifacts (portable ZIP, per-user installer and `SHA256SUMS.txt`), install
+To build the release artifacts (portable ZIP and per-user installer), install
 [Inno Setup 6.3+](https://jrsoftware.org/isinfo.php) and run:
 
 ```powershell
