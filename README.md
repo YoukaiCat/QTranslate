@@ -2,15 +2,49 @@
 
 [![build](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml)
 
-Fast and simple desktop translator for Windows. It lives in the system tray and translates
-the text selected in any application with a global hotkey.
+Fast and simple desktop translator for Windows. It lives in the system tray, translates the text
+selected in any application with a global hotkey, and can replace the selection with the
+translation directly in the active input field.
 
-> **Status:** 0.9.0 release candidate. The tray translator, Google/DeepL services,
-> Ctrl+Q/Ctrl+Shift+Q/Ctrl+W, settings, autostart, portable mode, proxy support, translation
-> cache, smart language switching, auto-translation, Russian/English UI, file logging and a
-> self-contained build with the MSVC runtime work. Linux support is planned for a later stage;
-> see [architecture §4.14](doc/architecture.md). Word/VS Code, a second monitor and a real reboot
-> were not available for the final manual checks; see [architecture §9.2](doc/architecture.md).
+> **Status:** 0.9.0 release candidate. The Windows installer and the portable archive are
+> available. Linux support is in development.
+
+**English** | [Русский](README.ru.md)
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/main-window.png" alt="Main translator window" width="820">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/popup-translation.png" alt="Popup translation with Ctrl+Q" width="560">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/settings-translation.png" alt="Translation settings" width="49%">
+  <img src="docs/screenshots/settings-hotkeys.png" alt="Hotkey settings" width="49%">
+</p>
+
+## Main features
+
+- **Popup translation — `Ctrl+Q`.** Select text in any application and get the translation in a
+  small window next to the cursor. You can change the target language, copy the result, or open
+  it in the main window.
+- **Translate and replace — `Ctrl+Shift+Q`.** Select your reply in a chat, browser or editor; the
+  translation replaces the selection in place. Nothing is pasted if you switch to another window
+  while the request is in flight — the translation is copied to the clipboard instead.
+- **Full translator window — `Ctrl+W`.** Opens with the selected text already translated, and
+  works as a regular translator: source language auto-detection, language swap, copy, long-text
+  splitting, translation cache and auto-translation while typing.
+- **Google Translate and DeepL.** The free Google endpoint without a key, Google Cloud API with a
+  key, and DeepL Free/Pro.
+- **Proxy support.** The Windows system proxy or a manual HTTP/SOCKS5 proxy with optional
+  authentication.
+- **Tray and autostart.** Starts minimized in the tray, one instance per user, optional autostart
+  with Windows. Closing the window hides it to the tray.
+- **English and Russian UI**, portable mode with a local INI, and API keys/proxy passwords
+  protected with Windows DPAPI.
 
 ## Download and install
 
@@ -19,70 +53,42 @@ The latest build is on the [Releases](https://github.com/youkaicat/qtranslate/re
 - **Installer** — `qtranslate-0.9.0-win64-setup.exe`. Installs qtranslate for the current user
   without administrator rights, creates Start menu and optional desktop shortcuts, and adds an
   uninstaller. Uninstalling keeps the settings in `%APPDATA%\qtranslate`.
-- **Portable archive** — `qtranslate-0.9.0-win64.zip`. Extract it and run
-  `bin\qtranslate.exe`; no installation or administrator rights are needed. The archive is
-  self-contained (Qt and the MSVC runtime are included).
+- **Portable archive** — `qtranslate-0.9.0-win64.zip`. Extract it and run `bin\qtranslate.exe`;
+  no installation or administrator rights are needed. The archive is self-contained: Qt and the
+  MSVC runtime are included.
 - **`SHA256SUMS.txt`** — SHA-256 checksums of both files.
 
 The installer is not code-signed yet, so Windows SmartScreen may show a warning.
 
-## Features
+## Usage
 
-Working now:
+```
+qtranslate [--minimized] [--verbose]
+```
 
-- Windows installer and portable ZIP with the same self-contained application.
-- Lives in the system tray (`--minimized` starts hidden), one instance per user.
-- Main window translation with automatic source language detection; long texts are split
-  into parts and translated completely.
-- **Ctrl+W** translates the text selected in any application in the main window. The
-  clipboard contents (text, image or files) are restored after the selection is copied.
-- **Ctrl+Q** translates the selected text in a compact window next to the cursor. The window
-  has a loading indicator, error and retry states, a target-language menu, Copy, “Open in
-  Main Window”, and a pin that keeps it open when focus is lost.
-- **Ctrl+Shift+Q** translates the selected text and replaces the selection with the translation
-  directly in the active input field, without a popup or manual copy/paste. This is intended for
-  chatting: select your reply, press the hotkey, and the translated text takes its place. If the
-  active window changes while the request is in flight, nothing is pasted; the translation is
-  copied to the clipboard and a tray notification is shown.
-- Settings dialog: autostart with Windows, start minimized, clipboard restore, popup focus
-  behavior, hotkeys for all scenarios, source/target languages, maximum text length and the
-  auto-translate delay.
-- Settings are stored in `%APPDATA%\qtranslate\qtranslate.ini`; a `qtranslate.ini` next to the
-  executable switches to portable mode. API keys and proxy passwords are protected with DPAPI.
-- Translation services: Google Translate (free endpoint or Cloud API key) and DeepL (Free/Pro
-  API key), switchable in the main window or from the tray “Service” menu. DeepL keys can be
-  checked with a button that shows the used character limit.
-- Language lists follow the selected service; an unsupported language is replaced with the
-  closest one supported by that service.
-- Proxy support: no proxy, the Windows system proxy, or a manual HTTP/SOCKS5 proxy with optional
-  authentication. Proxy passwords are protected with DPAPI. “Test connection” checks the values
-  before saving them.
-- In-memory translation cache (200 entries) and automatic switching to the additional language
-  when the detected text is already in the primary language.
-- Automatic translation while typing in the main window (configurable delay, 0 disables it).
-- Russian and English interface; the language can be changed in Settings.
-- `--verbose` writes detailed logs to `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
-- Self-contained `build/dist` (windeployqt) with the icon, Qt DLLs, the Schannel TLS plugin and the
-  MSVC runtime, so it starts on Windows without Qt or the Visual C++ redistributable installed.
+- `Ctrl+Q` — translate the selection in a popup next to the cursor.
+- `Ctrl+Shift+Q` — translate the selection and replace it in the active input field.
+- `Ctrl+W` — open the main window with the selection translated.
+- `Ctrl+Enter` — translate in the main window.
+- Settings, service selection, **Show window** and **Quit** are available from the tray menu.
+  Hotkeys, languages, proxy, autostart and API keys are configured in **Settings**.
+- `--minimized` starts hidden in the tray; `--verbose` writes a detailed log to
+  `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
+- Portable mode: put an empty `qtranslate.ini` next to `qtranslate.exe` and the application will
+  use it instead of `%APPDATA%\qtranslate\qtranslate.ini`.
 
-Known limitations:
+## Build
 
-- Selection capture does not work in windows of processes running as administrator.
-- The intermediate Ctrl+C used to grab the selection may still appear in the Windows clipboard
-  history (Win+V); the original clipboard contents are restored.
-- The free Google endpoint can temporarily answer `HTTP 429` when it rate-limits a client; wait or
-  use Google Cloud/DeepL with an API key.
-
-## Building
+### Windows
 
 Requirements:
 
-- Windows 10/11
+- Windows 10/11, 64-bit
 - Qt 6.5 or newer (developed with Qt 6.12) with the MSVC 2022 x64 kit
 - CMake 3.19 or newer
 - Visual Studio 2022 (MSVC)
 
-Open `CMakeLists.txt` in Qt Creator, or build from a *x64 Native Tools Command Prompt*:
+Open `CMakeLists.txt` in Qt Creator, or build from an *x64 Native Tools Command Prompt*:
 
 ```bat
 cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:/Qt/6.12.0/msvc2022_64
@@ -90,88 +96,45 @@ cmake --build build/release
 ctest --test-dir build/release --output-on-failure
 ```
 
-With CMake older than 3.22, the Qt `bin` directory (e.g. `C:\Qt\6.12.0\msvc2022_64\bin`) must be
-in `PATH` for `ctest` to find the Qt DLLs.
+With CMake older than 3.22, the Qt `bin` directory must be in `PATH` for `ctest` to find the Qt
+DLLs. Unit tests are built by default; pass `-DQTRANSLATE_BUILD_TESTS=OFF` to skip them.
 
-Unit tests are built by default; pass `-DQTRANSLATE_BUILD_TESTS=OFF` to skip them.
-
-To produce a self-contained folder with the Qt libraries and the MSVC runtime:
-
-```bat
-cmake --install build/release --prefix dist
-```
-
-To build both release artifacts (portable ZIP, per-user installer and `SHA256SUMS.txt`), install
-[Inno Setup 6.3+](https://jrsoftware.org/isinfo.php) and run from the repository root:
+To build the release artifacts (portable ZIP, per-user installer and `SHA256SUMS.txt`), install
+[Inno Setup 6.3+](https://jrsoftware.org/isinfo.php) and run:
 
 ```powershell
 ./packaging/windows/package.ps1 -BuildDir build/release
 ```
 
-The output goes to `build/artifacts`:
+The output goes to `build/artifacts`. The CI workflow
+[`.github/workflows/build.yml`](.github/workflows/build.yml) runs the same steps on
+`windows-latest` with Qt 6.8.3 LTS. Pushing a tag such as `v0.9.0` publishes a GitHub release with
+these artifacts; the tag must match the version in `CMakeLists.txt`.
 
-- `qtranslate-0.9.0-win64.zip` — portable archive;
-- `qtranslate-0.9.0-win64-setup.exe` — per-user installer;
-- `SHA256SUMS.txt` — SHA-256 checksums.
+### Linux (in progress)
 
-The CI workflow [`.github/workflows/build.yml`](.github/workflows/build.yml) runs the same steps on
-`windows-latest` with Qt 6.8.3 LTS for every push and pull request. Pushing a tag such as `v0.9.0`
-publishes a GitHub release with these artifacts; the tag must match the version in
-`CMakeLists.txt`.
+The Linux port is not finished yet. The core, network layer and Qt Widgets UI are designed to be
+portable, but the platform modules are currently stubs: global hotkeys, selection capture, paste
+into the active window and autostart are not implemented. A full Linux port is planned for a later
+release; CI currently builds Windows only.
 
-## Usage
+To build the current Linux tree for development:
 
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/path/to/Qt/6.8.3/gcc_64
+cmake --build build
+ctest --test-dir build --output-on-failure
 ```
-qtranslate [--minimized]
-```
 
-- `--minimized` starts hidden in the tray (used by autostart).
-- `--verbose` writes detailed logs to `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
-- Starting a second copy brings the window of the running one to the front.
-- Closing the window hides it to the tray; use **Quit** in the tray menu to exit.
-- Select text in any application and press **Ctrl+W**: the main window opens with the
-  selection translated. The clipboard contents are restored afterwards. Without a selection
-  it just opens the main window with the focus in the source field.
-- Select text and press **Ctrl+Q**: a translation appears next to the cursor. Click
-  “Auto → …” to change the target language and translate again, use **Copy**, or send the
-  source and the translation to the main window. **Esc**, the ✕ button or a click outside
-  closes the window; 📌 keeps it open when focus is lost. The selection is copied through the
-  clipboard and the previous clipboard contents are restored.
-- Select the text you want to send (for example, your reply in a chat input field) and press
-  **Ctrl+Shift+Q**: the translation replaces the selection in place. The source window must stay
-  active until the answer arrives; otherwise the translation is only copied to the clipboard.
-  The previous clipboard contents are restored after the paste.
-- In the main window, type or paste text and press **Translate** or **Ctrl+Enter**. The source
-  language defaults to auto-detection, the target language to the system language. **⇄** swaps
-  the languages and translates the translation back; **Copy** puts the translation on the
-  clipboard. The detected language and errors are shown in the status bar. Repeating a translation
-  is instant (in-memory cache), and the text is translated automatically after the configured
-  delay while typing.
-- Open **Settings…** from the tray menu to change autostart, hotkey combinations (popup,
-  replace-selection, main window, show window), languages, the interface language
-  (System/English/Русский), maximum text length, the auto-translate delay, and Google
-  Cloud/DeepL API keys. Global hotkeys are disabled while a key combination field is focused.
-  Settings apply immediately and survive a restart.
-- Select the active translation service in the main window or in the tray **Service** menu. Without
-  a DeepL key, or with Google Cloud selected but no key, translation shows a clear “needs an API
-  key” message.
-- The **Network** tab configures no proxy, the system proxy, or a manual HTTP/SOCKS5 proxy with
-  optional authentication and a request timeout. “Test connection” checks the current fields
-  without saving.
-- Portable mode: put an empty `qtranslate.ini` next to `qtranslate.exe` and the application
-  will use that file instead of `%APPDATA%\qtranslate\qtranslate.ini`.
-- With **Start qtranslate when Windows starts** enabled, the application is launched with
-  `--minimized` and starts in the tray.
+## Known limitations
 
-The text you translate is sent to the selected online service (Google Translate or DeepL).
-The application does not log the texts.
+- Selection capture does not work in windows of processes started as administrator.
+- The free Google endpoint can answer `HTTP 429` when it rate-limits a client; wait or use Google
+  Cloud/DeepL with an API key.
+- The intermediate `Ctrl+C` used to grab a selection may appear in the Windows clipboard history
+  (`Win+V`); the original clipboard contents are restored.
+- The installer is not code-signed yet.
+- Linux support is not ready yet; see the build section above.
 
-Verbose logging is enabled with `--verbose`; the log is written to
-`%LOCALAPPDATA%\qtranslate\qtranslate.log`.
-
-## Documentation
-
-Design documents are in Russian:
-
-- [doc/architecture.md](doc/architecture.md) — architecture
-- [doc/plan.md](doc/plan.md) — implementation plan
+The text being translated is sent to the selected online service (Google or DeepL). qtranslate
+does not write the texts to its log.

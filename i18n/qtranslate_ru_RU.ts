@@ -791,8 +791,8 @@
             <translation>Задержка автоперевода:</translation>
         </message>
         <message>
-            <source>The additional language is reserved for automatic language switching and is not used yet.</source>
-            <translation>Дополнительный язык зарезервирован для автоматического переключения языка и пока не используется.</translation>
+            <source>The additional language is used automatically when the detected text is already in the primary language.</source>
+            <translation>Дополнительный язык используется автоматически, если текст уже на основном языке.</translation>
         </message>
         <message>
             <source>General</source>

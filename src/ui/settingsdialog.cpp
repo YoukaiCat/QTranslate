@@ -140,8 +140,8 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     translationForm->addRow(tr("Maximum text length:"), m_maxLength);
     translationForm->addRow(tr("Auto-translate delay:"), m_autoTranslateDelay);
     auto *translationHint = new QLabel(
-        tr("The additional language is reserved for automatic language switching "
-           "and is not used yet."),
+        tr("The additional language is used automatically when the detected text is already "
+           "in the primary language."),
         translationPage);
     translationHint->setWordWrap(true);
     translationLayout->addLayout(translationForm);
