@@ -46,9 +46,10 @@
   rejects a tag that does not match the CMake version.
 - Release flow (only after explicit user approval): test Debug and Release, run
   `packaging/windows/package.ps1 -BuildDir build/cli-Release`, commit locally, push the release
-  commit and new annotated tag `vX.Y.Z`, then let CI publish the installer and portable ZIP.
-- Do **not** generate, attach or link `SHA256SUMS.txt` or any checksum file. Release assets are only
-  the installer and the portable ZIP; users who need hashes can compute them themselves.
+  commit and new annotated tag `vX.Y.Z`, then let CI publish the installer, portable ZIP and
+  `SHA256SUMS.txt`.
+- Do **not** list `SHA256SUMS.txt` or any checksum file in README Download sections or release
+  notes Downloads. Keep `SHA256SUMS.txt` as an unlisted release asset for users who need hashes.
 - Never move or rewrite an existing release tag; ship fixes as a new patch tag.
 - `doc/releases/<version>.md` supplies GitHub release notes. Keep release artifacts CI-built:
   local packaging uses Qt 6.12, CI uses Qt 6.8.3 LTS.
@@ -56,8 +57,8 @@
   are in `doc/code-signing.md`; do not claim releases are signed until CI verifies the signature.
 - CI uses Qt 6.8.3 LTS because aqtinstall 3.3.0 cannot install Qt 6.12. Do not switch CI to 6.12
   without checking aqt support.
-- `package.ps1` cleans `build/dist`, validates Qt/MSVC CRT/plugin files, then writes the ZIP and
-  installer. Inno Setup 6.3+/7 is required. No checksum file is produced.
+- `package.ps1` cleans `build/dist`, validates Qt/MSVC CRT/plugin files, then writes the ZIP,
+  installer and `SHA256SUMS.txt`. Inno Setup 6.3+/7 is required.
 
 ## Installer gotchas
 
