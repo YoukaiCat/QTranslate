@@ -28,14 +28,24 @@
 - Tests use local `QTcpServer` and fixtures; no real Google/DeepL keys or internet are required.
   `tst_hotkeymanager`, `tst_autostart` and `tst_secretprotector` are Windows-only.
 
+## Git and release approval
+
+- Do **not** push every commit: GitHub Actions load matters. Make local commits and push only when
+  the user explicitly asks, or when publishing an already approved release.
+- Never create/push a release tag, publish a GitHub release or replace release assets without
+  explicit user approval. Agree on the release version and scope first.
+- Do not modify old releases or old tags. Fixes and improvements go into the next release/tag.
+- Do not push automatically after changing READMEs, docs, installer options or code; batch changes
+  locally until the user asks for a push.
+
 ## Versioning and release
 
 - Version source of truth: `project(qtranslate VERSION x.y.z)` in `CMakeLists.txt`. Mirror it in
   `resources/qtranslate.rc` (`FileVersion`/`ProductVersion`). Release tag must be `vX.Y.Z`; CI
   rejects a tag that does not match the CMake version.
-- Release flow: test Debug and Release, run
-  `packaging/windows/package.ps1 -BuildDir build/cli-Release`, commit/push, create a new annotated
-  tag `vX.Y.Z`, push the tag. CI builds and publishes the installer, portable ZIP and
+- Release flow (only after explicit user approval): test Debug and Release, run
+  `packaging/windows/package.ps1 -BuildDir build/cli-Release`, commit locally, push the release
+  commit and new annotated tag `vX.Y.Z`, then let CI publish the installer, portable ZIP and
   `SHA256SUMS.txt`.
 - Never move or rewrite an existing release tag; ship fixes as a new patch tag.
 - `doc/releases/<version>.md` supplies GitHub release notes. Keep release artifacts CI-built:

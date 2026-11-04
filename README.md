@@ -42,14 +42,14 @@ translation directly in the active input field.
 
 The latest build is on the [Releases](https://github.com/youkaicat/qtranslate/releases/latest) page:
 
-- **Installer** — `qtranslate-0.9.1-win64-setup.exe`. Installs qtranslate for the current user
+- **[`qtranslate-0.9.1-win64-setup.exe`](https://github.com/youkaicat/qtranslate/releases/download/v0.9.1/qtranslate-0.9.1-win64-setup.exe)**. Installs qtranslate for the current user
   without administrator rights; by default it creates a Start menu shortcut and enables autostart,
   with an optional desktop shortcut. It also adds an uninstaller. Uninstalling keeps the settings
   in `%APPDATA%\qtranslate`.
-- **Portable archive** — `qtranslate-0.9.1-win64.zip`. Extract it and run `bin\qtranslate.exe`;
+- **[`qtranslate-0.9.1-win64.zip`](https://github.com/youkaicat/qtranslate/releases/download/v0.9.1/qtranslate-0.9.1-win64.zip)**. Extract it and run `bin\qtranslate.exe`;
   no installation or administrator rights are needed. The archive is self-contained: Qt and the
   MSVC runtime are included.
-- **`SHA256SUMS.txt`** — SHA-256 checksums of both files.
+- **[`SHA256SUMS.txt`](https://github.com/youkaicat/qtranslate/releases/download/v0.9.1/SHA256SUMS.txt)** - SHA-256 checksums of both files.
 
 The installer is not code-signed yet, so Windows SmartScreen may show a warning.
 

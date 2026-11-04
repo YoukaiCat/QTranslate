@@ -1333,7 +1333,7 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 затем повторяет упаковку; по тегу `v0.9.1` публикует релиз.
 
 - workflow: https://github.com/youkaicat/qtranslate/actions/workflows/build.yml
-- успешный прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41897455346
+- успешный прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41908976474
 - релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.9.1
 
 Файлы, скачанные из релиза, совпали с `SHA256SUMS.txt`.

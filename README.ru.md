@@ -42,14 +42,14 @@
 
 Последняя сборка — на странице [Releases](https://github.com/youkaicat/qtranslate/releases/latest):
 
-- **Установщик** — `qtranslate-0.9.1-win64-setup.exe`. Устанавливает qtranslate для текущего
+- **[`qtranslate-0.9.1-win64-setup.exe`](https://github.com/youkaicat/qtranslate/releases/download/v0.9.1/qtranslate-0.9.1-win64-setup.exe)**. Устанавливает qtranslate для текущего
   пользователя без прав администратора; по умолчанию создаёт ярлык в меню «Пуск» и включает
   автозагрузку, ярлык на рабочем столе — по желанию. Добавляет деинсталлятор. При удалении
   настройки в `%APPDATA%\qtranslate` сохраняются.
-- **Портативный архив** — `qtranslate-0.9.1-win64.zip`. Распакуйте и запустите
+- **[`qtranslate-0.9.1-win64.zip`](https://github.com/youkaicat/qtranslate/releases/download/v0.9.1/qtranslate-0.9.1-win64.zip)**. Распакуйте и запустите
   `bin\qtranslate.exe`; установка и права администратора не нужны. Архив самодостаточен: Qt и
   runtime MSVC уже включены.
-- **`SHA256SUMS.txt`** — контрольные суммы SHA-256 обоих файлов.
+- **[`SHA256SUMS.txt`](https://github.com/youkaicat/qtranslate/releases/download/v0.9.1/SHA256SUMS.txt)** — контрольные суммы SHA-256 обоих файлов.
 
 Установщик пока не подписан кодом, поэтому Windows SmartScreen может показать предупреждение.
 

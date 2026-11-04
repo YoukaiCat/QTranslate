@@ -1188,7 +1188,7 @@ GitHub Actions по тегу, а не вручную.
 CI и релиз:
 
 - workflow `build`: https://github.com/youkaicat/qtranslate/actions/workflows/build.yml
-- успешный прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41897455346
+- успешный прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41908976474
 - релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.9.1
 - артефакты: `qtranslate-0.9.1-win64-setup.exe` (16,4 МБ),
   `qtranslate-0.9.1-win64.zip` (22,5 МБ), `SHA256SUMS.txt`; скачанные из релиза файлы
