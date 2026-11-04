@@ -43,8 +43,9 @@ translation directly in the active input field.
 The latest build is on the [Releases](https://github.com/youkaicat/qtranslate/releases/latest) page:
 
 - **Installer** — `qtranslate-0.9.0-win64-setup.exe`. Installs qtranslate for the current user
-  without administrator rights, creates Start menu and optional desktop shortcuts, and adds an
-  uninstaller. Uninstalling keeps the settings in `%APPDATA%\qtranslate`.
+  without administrator rights; by default it creates a Start menu shortcut and enables autostart,
+  with an optional desktop shortcut. It also adds an uninstaller. Uninstalling keeps the settings
+  in `%APPDATA%\qtranslate`.
 - **Portable archive** — `qtranslate-0.9.0-win64.zip`. Extract it and run `bin\qtranslate.exe`;
   no installation or administrator rights are needed. The archive is self-contained: Qt and the
   MSVC runtime are included.
