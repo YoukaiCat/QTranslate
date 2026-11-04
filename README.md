@@ -2,7 +2,7 @@
 
 [![build](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml)
 
-Fast and simple desktop translator. It lives in the system tray, translates the text
+Lightweight desktop translator. It lives in the system tray, translates the text
 selected in any application with a global hotkey, and can replace the selection with the
 translation directly in the active input field.
 
