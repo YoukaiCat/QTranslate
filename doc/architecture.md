@@ -1425,6 +1425,8 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 8. **Бесплатные веб-endpoints** — DeepL web, Yandex web, Bing web, Reverso, Mozhi, MyMemory:
    экспериментальные сервисы без ключа, выключены по умолчанию, с rate limit и предупреждением
    о неофициальности. Детали и приоритеты — [`free-endpoints.md`](free-endpoints.md).
+9. **Локальный offline-перевод** — Argos-модели + CTranslate2 без Python: загрузка моделей по
+   кнопке, pivot через английский, fallback на облако. Детали и PoC — [`local-translation.md`](local-translation.md).
 
 ---
 

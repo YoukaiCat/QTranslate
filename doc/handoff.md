@@ -76,6 +76,22 @@
 - **DeepL API Developer** (ранее Free): 1 000 000 символов **всего**, без месячного сброса;
   после лимита — Growth/Pro. Прежняя информация про 500 000 в месяц устарела.
 
+## Локальный offline-перевод (этап 14, вариант)
+
+- `doc/local-translation.md`: вариант Argos-моделей + CTranslate2 без Python. Код **не реализован**;
+  этап 14 в плане.
+- Argos Translate — Python-библиотека, `pip install argostranslate` / `argospm install`; модели
+  `.argosmodel` — zip с CTranslate2-моделью, `sentencepiece.model` и `metadata.json`. Подходит для
+  прототипа, но не для поставки: нужен Python + spaCy/Stanza.
+- Для продукта предпочтителен native-путь CTranslate2 с моделями `.argosmodel`; пример — MetalTranslate
+  (MIT, экспериментальный). Нужны менеджер моделей, SHA-256, безопасная распаковка, сегментация
+  предложений, pivot через английский и fallback на облако.
+- Ограничения: качество ниже DeepL/Google, индекс Argos в основном `X ↔ en`, размер моделей
+  десятки–сотни МБ, лицензии моделей проверять отдельно. NLLB/Seamless — CC-BY-NC, не для
+  коммерческого распространения без проверки.
+- Следующий шаг: PoC на Python-Argos (en↔ru, en↔de, pivot ru→de), замер качества/скорости/RAM;
+  если приемлемо — native CTranslate2 runner.
+
 ## Размер дистрибутива
 
 Локальная сборка после локализации (Qt 6.12):
