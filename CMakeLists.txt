@@ -121,6 +121,13 @@ qt_generate_deploy_app_script(
     DEPLOY_TOOL_OPTIONS
         --no-system-d3d-compiler
         --no-system-dxc-compiler
+        # Qt Widgets renders with the raster engine; the 20 MB software OpenGL
+        # rasterizer is not used by qtranslate.
+        --no-opengl-sw
+        # Only English and Russian Qt translations are needed; the application
+        # translation is embedded in the executable.
+        --translations
+        en,ru
 )
 install(SCRIPT ${deploy_script})
 

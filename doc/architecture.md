@@ -231,9 +231,11 @@ qtranslate/
   `tls/qschannelbackend.dll` и MSVC CRT (`vcruntime140*.dll`, `msvcp140*.dll`, `concrt140.dll`):
   `windeployqt` не находит runtime без `VCINSTALLDIR`, поэтому CMake копирует его сам. Это нужно
   для запуска на Windows без установленного Visual C++ Redistributable. Сам `windeployqt`
-  вызывается с `NO_COMPILER_RUNTIME` и `--no-system-d3d-compiler`/`--no-system-dxc-compiler`:
-  иначе при заданном `VCINSTALLDIR` он добавляет `vc_redist.x64.exe` (~18 МБ) и компиляторы
-  Direct3D/DXC, которые Qt Widgets не использует.
+  вызывается с `NO_COMPILER_RUNTIME`, `--no-system-d3d-compiler`/`--no-system-dxc-compiler`,
+  `--no-opengl-sw` и `--translations en,ru`: иначе при заданном `VCINSTALLDIR` он добавляет
+  `vc_redist.x64.exe` (~18 МБ), компиляторы Direct3D/DXC и software-OpenGL `opengl32sw.dll`
+  (~20 МБ), которые Qt Widgets не использует. Qt-переводы ограничены английским и русским;
+  перевод интерфейса qtranslate встроен в exe.
 
 ### 3.4. Упаковка, CI и выпуск
 
