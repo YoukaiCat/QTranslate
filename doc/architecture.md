@@ -1113,6 +1113,22 @@ Wayland. Портал `GlobalShortcuts` поддерживается не все
 таргетом, а Wayland — ограниченным: Ctrl+Q с копированием вручную, CLI-команды и явные
 предупреждения в интерфейсе. macOS не планируется.
 
+### 4.15. Проверка орфографии, грамматики и пунктуации (план)
+
+Задача на будущее: отдельный режим проверки текста, не связанный с переводом. Полный дизайн,
+провайдеры и критерии — [`proofreading.md`](proofreading.md).
+
+- Отдельный `ProofreadingService` и `ProofreadingIssue` с `offset`/`length` в UTF-16,
+  `message`, `replacements`, `ruleId`, `category`, `severity`.
+- Провайдеры: LanguageTool (HTTP/self-hosted, грамматика и пунктуация), Hunspell/Nuspell
+  (только орфография), Yandex Speller (орфография ru/uk/en), LLM (опционально, через diff).
+- Отдельная вкладка настроек «Проверка текста», независимые ключи `proofreading/*`; ключи API —
+  DPAPI. `checkBeforeTranslation=false` и `autoReplace=false` по умолчанию.
+- Замена в главном окне — через `QTextDocument` с undo; во внешнем приложении — через механизм
+  Ctrl+Shift+Q с проверкой активного окна и подтверждением.
+- Текст не логируется; публичные API имеют лимиты, для регулярного использования — свой
+  LanguageTool-сервер.
+
 ---
 
 ## 5. Основные сценарии
@@ -1427,6 +1443,8 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
    о неофициальности. Детали и приоритеты — [`free-endpoints.md`](free-endpoints.md).
 9. **Локальный offline-перевод** — Argos-модели + CTranslate2 без Python: загрузка моделей по
    кнопке, pivot через английский, fallback на облако. Детали и PoC — [`local-translation.md`](local-translation.md).
+10. **Проверка орфографии, грамматики и пунктуации** — отдельная вкладка, LanguageTool/Hunspell/
+    Yandex Speller, замена текста исправленным. Детали — [`proofreading.md`](proofreading.md), §4.15.
 
 ---
 

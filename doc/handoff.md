@@ -96,6 +96,18 @@
 - Следующий шаг: PoC на Python-Argos (en↔ru, en↔de, pivot ru→de), замер качества/скорости/RAM;
   если приемлемо — native CTranslate2 runner.
 
+## Проверка текста (этап 15, запланирован)
+
+- `doc/proofreading.md`: отдельный режим проверки орфографии, грамматики и пунктуации; код не
+  реализован.
+- Отдельная вкладка настроек «Проверка текста» и независимые ключи `proofreading/*`; проверка не
+  должна быть частью `TranslationService`.
+- Провайдеры: LanguageTool (облако/self-hosted, грамматика/пунктуация), Hunspell/Nuspell
+  (орфография), Yandex Speller (орфография ru/uk/en), LLM — опционально через diff.
+- `ProofreadingIssue` с UTF-16 `offset`/`length`, `replacements`, `ruleId`, `category`,
+  `severity`; замена в главном окне с undo, во внешнем приложении — с подтверждением.
+- `checkBeforeTranslation` и `autoReplace` по умолчанию `false`; текст проверки не логируется.
+
 ## Размер дистрибутива
 
 Локальная сборка после локализации (Qt 6.12):
