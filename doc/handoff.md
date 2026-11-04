@@ -5,15 +5,19 @@
 ## Git
 
 - `origin/main` = `8322b06` «Add AGENTS.md with project-specific guidance».
-- Локально не запушены:
+- Локально не запушены 17 коммитов:
   - `676d918` — правила Git/релизов + прямые ссылки на файлы в README;
   - `99ffdf4` — уменьшение дистрибутива (без `opengl32sw.dll`, только `en/ru` переводы Qt);
-  в `7a26d4d` Qt-переводы возвращены для поддерживаемых языков;
-  - `aaa340a` — первый handoff;
+  - `aaa340a`, `8d80ede`, `707fd7b`, `28dbd12` — handoff-коммиты;
   - `7a26d4d` — локализация на 13 языков, `doc/code-signing.md`, UI Automation в архитектуре;
   - `cd8d20a` — нормализация алиасов языка (`de-DE`, `pt-PT`) перед сохранением настроек;
   - `7ac5678` — возврат Qt-переводов для стандартных диалогов и обновление размеров;
-  - `80feeb5` — исследование бесплатных веб-эндпоинтов и лимит DeepL Developer;
+  - `80feeb5`, `4ae5df6` — исследование бесплатных веб-эндпоинтов и лимит DeepL Developer;
+  - `f35074a` — Argos как вариант локального offline-перевода;
+  - `80cbf96` — сравнение ONNX Runtime GenAI и llama.cpp;
+  - `1fc2dd5` — задача проверки орфографии/грамматики/пунктуации;
+  - `e210cc3` — план LLM-действий;
+  - `07d5e33` — DeepL free web: сервис `deepl-web`, парсер, тесты, документация;
   - коммит с этим handoff.
 - Рабочее дерево после коммита handoff должно быть чистым; процесс `qtranslate` не запущен.
 
@@ -74,7 +78,9 @@
 - Коды языков: базовые в нижнем регистре (`DE` → `de`), региональные — `pt-BR`, `en-US`,
   `zh-Hans`. Верхний регистр базового кода эндпоинт молча возвращает без перевода, поэтому
   приведение обязательно. `DE`, `PT-BR`, `EN-US`, `zh-Hans` проверены живыми запросами.
-- `tst_deeplwebparser` и `tst_deeplwebservice`; Debug: 21/21 тестов.
+- `tst_deeplwebparser` и `tst_deeplwebservice`; Debug и Release: 21/21 тестов.
+- Живой smoke через собранный `DeepLWebService`: `Hello, world` → `Hallo, Welt`,
+  `detected_source_language=en`, ошибок нет.
 - Yandex web: `api.browser.yandex.com/instaserp/translate`, form-urlencoded; Bing web:
   `www.bing.com/ttranslatev3` с токенами из HTML; Reverso: `cps.reverso.net/api2/TranslateText`;
   Mozhi: `/api/translate` на публичном/своём инстансе; MyMemory: `api.mymemory.translated.net/get`,
