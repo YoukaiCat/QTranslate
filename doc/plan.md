@@ -1001,6 +1001,10 @@
 
 ### Состояние на момент приостановки (2026-11-04)
 
+Коммит: `eee4f9f` (этап 8, WIP). Рабочее дерево чистое; Debug и Release — 17/17 тестов.
+Дистрибутив `build/dist` и zip `build/qtranslate-0.1.0-win64.zip` пересобраны после последних
+изменений; запуск `build/dist/bin/qtranslate.exe` без Qt в `PATH` проверен.
+
 Готово:
 
 - `TranslationManager`: LRU-кэш на 200 записей, ключ `serviceId|src|dst|text`, кэшируются только
