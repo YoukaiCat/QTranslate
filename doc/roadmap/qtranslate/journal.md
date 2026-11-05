@@ -2,7 +2,13 @@
 
 ## Where we left off
 
-Current node: `02-linux` (stage, `in-progress`, `base: e379812`). The user installed the missing Qt 6 packages; `cmake` now configures and 20 of 20 Linux tests pass. The app target still fails on one missing include in `src/platform/selectiongrabber_stub.cpp` (`QMimeData` incomplete). The planner is splitting the stage into tasks; the first task should fix the Linux build baseline. Target correction: Debian 13 (trixie, Qt 6.8.2) is the primary `.deb`/CI target, Qt 6.5+ stays, and Astra Linux (Qt 6.10.2) is a mandatory verification target. Stage `01-documentation-migration` is `done` (`ec2e89c`); stage `04-local-offline-translation` is `blocked` by user decision (design-only, Argos/CTranslate2 not being implemented now; LLM providers cover the need); the root map stays `in-progress`. No question is waiting for the user; all commits stay local (no push). Windows Debug/Release remain unavailable here and are not claimed.
+Current node: `02-linux/01-linux-build-baseline` (task, `todo`, `detailed: true`) — **not started**. The session stopped at the 200k context threshold after committing the Linux stage plan (`9f3422b`). Next session: run a coordinator for this task, then continue stage 2 in order.
+
+Stage `02-linux` is `in-progress`, `base: e379812`; it has seven children: `01-linux-build-baseline` (task), `02-global-hotkeys` (stage with `01-x11-xgrabkey` and `02-wayland-globalshortcuts`), `03-x11-selection-and-inplace`, `04-xdg-autostart-and-secrets`, `05-cli-and-desktop-integration`, `06-packaging-and-ci`, and `07-verification`.
+
+Environment facts: Linux/Astra, host Qt 6.10.2, CMake 3.31.6, Ninja, GCC 12.2, Docker; `cmake` configures and 20 of 20 tests pass on the host. The app target fails only at `src/platform/selectiongrabber_stub.cpp` (`QMimeData` incomplete). Debian 13 (trixie) ships Qt 6.8.2 (checked in `debian:trixie`); `xvfb-run`/Xvfb and X11/XTest/libsecret are installed.
+
+Decisions: Debian 13 (trixie) is the primary `.deb`/CI target; Qt 6.5+ stays and is not lowered; Astra Linux (Qt 6.10.2) is mandatory for build, launch, and `.deb` checks; Ubuntu is not a target. Wayland is limited: `GlobalShortcuts` portal where available, manual copying, CLI commands, and warnings; no `ydotool`/`wtype` or other synthetic input. Packaging: `.deb` primary, `tar.gz` portable, AppImage optional; no Flatpak/Snap now. Stage `04-local-offline-translation` is `blocked` (design-only; Argos/CTranslate2 is not being implemented now, LLM providers cover the need). Documentation-only work is edited by the lead directly; code goes through a coordinator. No push; all commits are local. Working tree is clean after this commit.
 
 ## Journal
 
