@@ -4,59 +4,59 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="125"/>
-        <location filename="../src/app/appcontroller.cpp" line="497"/>
+        <location filename="../src/app/appcontroller.cpp" line="124"/>
+        <location filename="../src/app/appcontroller.cpp" line="491"/>
         <source>Autostart</source>
         <translation>自动启动</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="126"/>
-        <location filename="../src/app/appcontroller.cpp" line="498"/>
+        <location filename="../src/app/appcontroller.cpp" line="125"/>
+        <location filename="../src/app/appcontroller.cpp" line="492"/>
         <source>Could not update the autostart entry.</source>
         <translation>无法更新自动启动条目。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="205"/>
+        <location filename="../src/app/appcontroller.cpp" line="201"/>
         <source>Hotkey unavailable</source>
         <translation>热键不可用</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="206"/>
+        <location filename="../src/app/appcontroller.cpp" line="202"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 已被另一个程序使用。关闭该程序或在设置中选择其他组合。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="240"/>
+        <location filename="../src/app/appcontroller.cpp" line="236"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="528"/>
+        <location filename="../src/app/appcontroller.cpp" line="522"/>
         <source>DeepL is not available.</source>
         <translation>DeepL 不可用。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="543"/>
+        <location filename="../src/app/appcontroller.cpp" line="537"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI 兼容提供程序不可用。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="709"/>
+        <location filename="../src/app/appcontroller.cpp" line="717"/>
         <source>Nothing is selected.</source>
         <translation>未选择任何内容。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="738"/>
+        <location filename="../src/app/appcontroller.cpp" line="746"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>活动窗口发生变化；翻译已复制到剪贴板。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="775"/>
+        <location filename="../src/app/appcontroller.cpp" line="783"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>无法自动粘贴；翻译在剪贴板上。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="799"/>
+        <location filename="../src/app/appcontroller.cpp" line="807"/>
         <source>Translate and replace</source>
         <translation>翻译和替换</translation>
     </message>
@@ -64,37 +64,37 @@
 <context>
     <name>DeepLService</name>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="289"/>
-        <source>DeepL needs an API key</source>
-        <translation>DeepL 需要 API 密钥</translation>
+        <location filename="../src/services/deeplservice.cpp" line="270"/>
+        <source>DeepL needs an API key.</source>
+        <translation>DeepL 需要 API 密钥。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="306"/>
+        <location filename="../src/services/deeplservice.cpp" line="322"/>
         <source>language &quot;%1&quot; is not supported</source>
         <translation>不支持语言“%1”</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="322"/>
+        <location filename="../src/services/deeplservice.cpp" line="338"/>
         <source>Enter a DeepL API key.</source>
         <translation>请输入 DeepL API 密钥。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="329"/>
+        <location filename="../src/services/deeplservice.cpp" line="345"/>
         <source>The network is not available.</source>
         <translation>网络不可用。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="347"/>
+        <location filename="../src/services/deeplservice.cpp" line="363"/>
         <source>DeepL did not respond in time (%1 s).</source>
         <translation>DeepL 未及时响应（%1 s）。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="359"/>
+        <location filename="../src/services/deeplservice.cpp" line="375"/>
         <source>Used %1 of %2 characters.</source>
         <translation>使用 %1 或 %2 字符。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="361"/>
+        <location filename="../src/services/deeplservice.cpp" line="377"/>
         <source>DeepL returned an unexpected response.</source>
         <translation>DeepL 返回意外响应。</translation>
     </message>
@@ -760,28 +760,28 @@
 <context>
     <name>NetworkManager</name>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="98"/>
+        <location filename="../src/net/networkmanager.cpp" line="101"/>
         <source>Proxy connection works (HTTP %1).</source>
         <translation>代理连接有效（HTTP %1）。</translation>
     </message>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="100"/>
+        <location filename="../src/net/networkmanager.cpp" line="105"/>
         <source>The proxy test returned no HTTP response.</source>
         <translation>代理测试未返回 HTTP 响应。</translation>
     </message>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="115"/>
-        <location filename="../src/net/networkmanager.cpp" line="125"/>
+        <location filename="../src/net/networkmanager.cpp" line="120"/>
+        <location filename="../src/net/networkmanager.cpp" line="130"/>
         <source>Network error</source>
         <translation>网络错误</translation>
     </message>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="118"/>
+        <location filename="../src/net/networkmanager.cpp" line="123"/>
         <source>Proxy authentication failed</source>
         <translation>代理认证失败</translation>
     </message>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="123"/>
+        <location filename="../src/net/networkmanager.cpp" line="128"/>
         <source>Proxy connection failed</source>
         <translation>代理连接失败</translation>
     </message>
@@ -825,8 +825,8 @@
     </message>
     <message>
         <location filename="../src/services/openaicompatibleservice.cpp" line="254"/>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="539"/>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="582"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="562"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="606"/>
         <source>The provider did not respond in time (%1 s).</source>
         <translation>提供程序未在 %1 秒内响应。</translation>
     </message>
@@ -842,36 +842,37 @@
     </message>
     <message>
         <location filename="../src/services/openaicompatibleservice.cpp" line="359"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="509"/>
         <source>The provider needs a valid server URL.</source>
         <translation>提供程序需要有效的服务器 URL。</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="410"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="408"/>
         <source>The provider needs an API key.</source>
         <translation>提供程序需要 API 密钥。</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="495"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="494"/>
         <source>The network is not available.</source>
         <translation>网络不可用。</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="503"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="526"/>
         <source>Enter an API key.</source>
         <translation>请输入 API 密钥。</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="601"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="625"/>
         <source>The provider returned an unexpected response.</source>
         <translation>提供程序返回了意外响应。</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="606"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="630"/>
         <source>Loaded %1 models.</source>
         <translation>已加载 %1 个模型。</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="607"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="631"/>
         <source>API key is valid. Loaded %1 models.</source>
         <translation>API 密钥有效。已加载 %1 个模型。</translation>
     </message>
@@ -960,32 +961,32 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="59"/>
+        <location filename="../src/services/deeplservice.cpp" line="60"/>
         <source>The DeepL API key was rejected (HTTP %1).</source>
         <translation>DeepL API 密钥被拒绝（HTTP %1）。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="61"/>
+        <location filename="../src/services/deeplservice.cpp" line="62"/>
         <source>The DeepL character limit is exceeded (HTTP %1).</source>
         <translation>超出 DeepL 字符限制 (HTTP %1)。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="63"/>
+        <location filename="../src/services/deeplservice.cpp" line="64"/>
         <source>Too many DeepL requests; try again later (HTTP %1).</source>
         <translation>DeepL 请求过多；稍后重试 (HTTP %1)。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="65"/>
+        <location filename="../src/services/deeplservice.cpp" line="66"/>
         <source>The DeepL request is too large (HTTP %1).</source>
         <translation>DeepL 请求太大 (HTTP %1)。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="67"/>
+        <location filename="../src/services/deeplservice.cpp" line="68"/>
         <source>DeepL is temporarily unavailable (HTTP %1).</source>
         <translation>DeepL 暂时不可用（HTTP %1）。</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="69"/>
+        <location filename="../src/services/deeplservice.cpp" line="70"/>
         <source>DeepL returned an unexpected response (HTTP %1).</source>
         <translation>DeepL 返回意外响应 (HTTP %1)。</translation>
     </message>
@@ -994,7 +995,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="35"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="592"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
@@ -1065,7 +1066,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="136"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="304"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="308"/>
         <source> ms</source>
         <translation> 毫秒</translation>
     </message>
@@ -1141,13 +1142,14 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="171"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="208"/>
         <source>Mode:</source>
         <translation>模式：</translation>
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="172"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="198"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="244"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="209"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="248"/>
         <source>API key:</source>
         <translation>API 密钥：</translation>
     </message>
@@ -1162,214 +1164,219 @@
         <translation>DeepL</translation>
     </message>
     <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="186"/>
+        <source>API (key required)</source>
+        <translation>API（需要密钥）</translation>
+    </message>
+    <message>
         <location filename="../src/ui/settingsdialog.cpp" line="187"/>
+        <source>Free web (unofficial, no key)</source>
+        <translation>免费网页版（非官方，无需密钥）</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="191"/>
         <source>DeepL API key (ends with :fx for Free)</source>
         <translation>DeepL API 密钥（以 :fx 结尾免费）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="192"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="196"/>
         <source>Check key</source>
         <translation>检查密钥</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="199"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="210"/>
         <source>English target:</source>
         <translation>英语目标：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="204"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="259"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="218"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="263"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="337"/>
         <source>Checking…</source>
         <translation>检查…</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="209"/>
-        <source>DeepL (free web)</source>
-        <translation>DeepL（免费网页版）</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="212"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="203"/>
         <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
         <translation>无需 API 密钥。此非官方端点可能停止工作、限制请求频率或阻止请求；文本会发送至 DeepL。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="219"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="223"/>
         <source>OpenAI-compatible provider</source>
         <translation>OpenAI 兼容提供程序</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="227"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="231"/>
         <source>API key</source>
         <translation>API 密钥</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="235"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="239"/>
         <source>Model ID, for example openai/gpt-4o-mini</source>
         <translation>模型 ID，例如 openai/gpt-4o-mini</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="237"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="241"/>
         <source>Load models</source>
         <translation>加载模型</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="243"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="247"/>
         <source>Server URL:</source>
         <translation>服务器 URL：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="245"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="249"/>
         <source>Model:</source>
         <translation>模型：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="249"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="253"/>
         <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key. The text is sent to the selected provider.</source>
         <translation>使用与 OpenAI 兼容的 Chat Completions API。默认服务器为 OpenRouter；URL 可指向其他兼容端点，例如 OpenAI、Ollama、llama.cpp 或 TeamRouter。模型必须可用于你的密钥。文本将发送给所选提供程序。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="269"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="273"/>
         <source>Services</source>
         <translation>服务</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="277"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="281"/>
         <source>No proxy</source>
         <translation>无代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="278"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="282"/>
         <source>System proxy</source>
         <translation>系统代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="279"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="283"/>
         <source>Manual proxy</source>
         <translation>手动代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="282"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="286"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="283"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="287"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="286"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="290"/>
         <source>Proxy host</source>
         <translation>代理主机</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="290"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="294"/>
         <source>Not set</source>
         <translation>未设置</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="291"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="295"/>
         <source>The proxy requires authentication</source>
         <translation>代理需要身份验证</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="295"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
         <source>User name</source>
         <translation>用户名</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="305"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="309"/>
         <source>Test connection</source>
         <translation>测试连接</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="312"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
         <source>Proxy mode:</source>
         <translation>代理模式：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="313"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
         <source>Proxy type:</source>
         <translation>代理类型：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="314"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="318"/>
         <source>Host:</source>
         <translation>主持人：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="315"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="319"/>
         <source>Port:</source>
         <translation>港口：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="321"/>
         <source>User name:</source>
         <translation>用户名：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="318"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="322"/>
         <source>Password:</source>
         <translation>密码：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="319"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="323"/>
         <source>Request timeout:</source>
         <translation>请求超时：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="324"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="328"/>
         <source>Network</source>
         <translation>网络</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="512"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
         <source>Translate in a popup</source>
         <translation>在弹出窗口中翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="533"/>
         <source>Replace the selected text with the translation</source>
         <translation>用翻译替换所选文本</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="515"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="534"/>
         <source>Translate in the main window</source>
         <translation>在主窗口中翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="516"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="535"/>
         <source>Show the main window</source>
         <translation>显示主窗口</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="524"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="543"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>“%1”使用多个组合键。全局热键支持单一组合。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="532"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>“%1”不能用作全局热键。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="564"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>同一组合键被分配多次：%1。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="556"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="575"/>
         <source>The primary and additional languages must differ.</source>
         <translation>主要语言和附加语言必须不同。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="563"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="582"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>输入代理主机和端口，或选择其他代理模式。</translation>
     </message>

@@ -14,7 +14,6 @@
 #include "platform/selectiongrabber.h"
 #include "platform/windowactivation.h"
 #include "services/deeplservice.h"
-#include "services/deeplwebservice.h"
 #include "services/googletranslateservice.h"
 #include "services/openaicompatibleservice.h"
 #include "ui/appicon.h"
@@ -153,15 +152,12 @@ void AppController::createTranslation()
 
     m_google = new GoogleTranslateService(m_network);
     m_deepl = new DeepLService(m_network);
-    m_deeplWeb = new DeepLWebService(m_network);
     m_llm = new OpenAiCompatibleService(m_network);
     m_google->applySettings(settings);
     m_deepl->applySettings(settings);
-    m_deeplWeb->applySettings(settings);
     m_llm->applySettings(settings);
     m_translations->registerService(m_google);
     m_translations->registerService(m_deepl);
-    m_translations->registerService(m_deeplWeb);
     m_translations->registerService(m_llm);
 
     if (m_translations->service(settings.translation.service))
@@ -451,8 +447,6 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_google->applySettings(newSettings);
     if (m_deepl)
         m_deepl->applySettings(newSettings);
-    if (m_deeplWeb)
-        m_deeplWeb->applySettings(newSettings);
     if (m_llm)
         m_llm->applySettings(newSettings);
 

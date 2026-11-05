@@ -181,6 +181,10 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
 
     auto *deepLGroup = new QGroupBox(tr("DeepL"), servicesPage);
     auto *deepLForm = new QFormLayout(deepLGroup);
+    m_deeplMode = new QComboBox(deepLGroup);
+    m_deeplMode->setObjectName(QStringLiteral("deeplMode"));
+    m_deeplMode->addItem(tr("API (key required)"), QStringLiteral("api"));
+    m_deeplMode->addItem(tr("Free web (unofficial, no key)"), QStringLiteral("free-web"));
     m_deeplApiKey = new QLineEdit(deepLGroup);
     m_deeplApiKey->setObjectName(QStringLiteral("deepLApiKey"));
     m_deeplApiKey->setEchoMode(QLineEdit::Password);
@@ -195,26 +199,26 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_deepLKeyStatus->setObjectName(QStringLiteral("deeplKeyStatus"));
     m_deepLKeyStatus->setWordWrap(true);
     m_deepLKeyStatus->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    m_deepLWebHint = new QLabel(
+        tr("Available without an API key. This unofficial endpoint may stop working, apply "
+           "rate limits or block requests, and the text is sent to DeepL."),
+        deepLGroup);
+    m_deepLWebHint->setObjectName(QStringLiteral("deepLWebHint"));
+    m_deepLWebHint->setWordWrap(true);
+    deepLForm->addRow(tr("Mode:"), m_deeplMode);
     deepLForm->addRow(tr("API key:"), m_deeplApiKey);
     deepLForm->addRow(tr("English target:"), m_deeplEnglishVariant);
     deepLForm->addRow(m_checkDeepLKey);
     deepLForm->addRow(m_deepLKeyStatus);
+    deepLForm->addRow(m_deepLWebHint);
+    connect(m_deeplMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &SettingsDialog::updateDeepLControls);
     connect(m_checkDeepLKey, &QPushButton::clicked, this, [this] {
         m_deepLKeyStatus->setStyleSheet(QString());
         m_deepLKeyStatus->setText(tr("Checking…"));
         m_checkDeepLKey->setEnabled(false);
         emit deepLKeyCheckRequested(m_deeplApiKey->text().trimmed());
     });
-
-    auto *deepLWebGroup = new QGroupBox(tr("DeepL (free web)"), servicesPage);
-    auto *deepLWebLayout = new QVBoxLayout(deepLWebGroup);
-    auto *deepLWebHint = new QLabel(
-        tr("Available without an API key. This unofficial endpoint may stop working, apply "
-           "rate limits or block requests, and the text is sent to DeepL."),
-        deepLWebGroup);
-    deepLWebHint->setObjectName(QStringLiteral("deepLWebHint"));
-    deepLWebHint->setWordWrap(true);
-    deepLWebLayout->addWidget(deepLWebHint);
 
     auto *llmGroup = new QGroupBox(tr("OpenAI-compatible provider"), servicesPage);
     auto *llmForm = new QFormLayout(llmGroup);
@@ -264,7 +268,6 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
 
     servicesLayout->addWidget(googleGroup);
     servicesLayout->addWidget(deepLGroup);
-    servicesLayout->addWidget(deepLWebGroup);
     servicesLayout->addWidget(llmGroup);
     servicesLayout->addStretch();
     m_tabs->addTab(servicesPage, tr("Services"));
@@ -384,11 +387,14 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_googleMode->setCurrentIndex(googleMode >= 0 ? googleMode : 0);
     m_googleApiKey->setText(settings.google.apiKey);
 
+    const int deeplMode = m_deeplMode->findData(settings.deepl.mode);
+    m_deeplMode->setCurrentIndex(deeplMode >= 0 ? deeplMode : 0);
     m_deeplApiKey->setText(settings.deepl.apiKey);
     const int englishVariant = m_deeplEnglishVariant->findData(settings.deepl.englishVariant);
     m_deeplEnglishVariant->setCurrentIndex(englishVariant >= 0 ? englishVariant : 0);
     m_deepLKeyStatus->clear();
     m_checkDeepLKey->setEnabled(true);
+    updateDeepLControls();
 
     m_llmBaseUrl->setText(settings.llm.baseUrl);
     m_llmApiKey->setText(settings.llm.apiKey);
@@ -431,6 +437,7 @@ AppSettings SettingsDialog::settings() const
     result.popup.autoCloseOnFocusLoss = m_autoClosePopup->isChecked();
     result.google.mode = m_googleMode->currentData().toString();
     result.google.apiKey = m_googleApiKey->text().trimmed();
+    result.deepl.mode = m_deeplMode->currentData().toString();
     result.deepl.apiKey = m_deeplApiKey->text().trimmed();
     result.deepl.englishVariant = m_deeplEnglishVariant->currentData().toString();
     result.llm.baseUrl = m_llmBaseUrl->text().trimmed();
@@ -453,6 +460,7 @@ void SettingsDialog::showDeepLKeyCheckResult(bool ok, const QString &message)
     m_deepLKeyStatus->setStyleSheet(ok ? QStringLiteral("color: #2e7d32;")
                                        : QStringLiteral("color: #d32f2f;"));
     m_checkDeepLKey->setEnabled(true);
+    updateDeepLControls();
 }
 
 void SettingsDialog::showLlmModels(bool ok, const QString &message,
@@ -490,6 +498,16 @@ void SettingsDialog::updateGoogleControls()
 {
     m_googleApiKey->setEnabled(m_googleMode->currentData().toString()
                                == QStringLiteral("cloud"));
+}
+
+void SettingsDialog::updateDeepLControls()
+{
+    const bool freeWeb =
+        m_deeplMode->currentData().toString() == QStringLiteral("free-web");
+    m_deeplApiKey->setEnabled(!freeWeb);
+    m_checkDeepLKey->setEnabled(!freeWeb);
+    m_deepLKeyStatus->setEnabled(!freeWeb);
+    m_deepLWebHint->setVisible(freeWeb);
 }
 
 void SettingsDialog::updateProxyControls()

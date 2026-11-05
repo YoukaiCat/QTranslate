@@ -185,6 +185,34 @@ private slots:
                  QStringLiteral("api.deepl.com"));
     }
 
+    void freeWebModeUsesWebEndpoint()
+    {
+        AppSettings settings = configuredSettings();
+        settings.deepl.mode = QStringLiteral("free-web");
+        settings.deepl.apiKey.clear();
+        m_service->applySettings(settings);
+        m_service->setWebRateLimitMs(0);
+        m_service->setWebEndpoint(
+            QUrl(QStringLiteral("http://127.0.0.1:%1/v1/translate").arg(m_server->port())));
+        QVERIFY(m_service->isConfigured());
+
+        m_server->handler = [](const FakeHttpServer::Request &request) {
+            return FakeHttpServer::Response{200, identityTranslation(request.body), true};
+        };
+        std::unique_ptr<TranslationReply> reply(m_service->translate(
+            {QStringLiteral("Hello, world"), QStringLiteral("en"), QStringLiteral("de")}));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(5000));
+        QVERIFY2(reply->result().ok(), qPrintable(reply->result().errorMessage));
+        QCOMPARE(reply->result().translatedText, QStringLiteral("Hello, world"));
+        QCOMPARE(reply->result().detectedSourceLang, QStringLiteral("en"));
+        QCOMPARE(reply->result().serviceId, QStringLiteral("deepl"));
+        QCOMPARE(m_server->requests.size(), 1);
+        const FakeHttpServer::Request &request = m_server->requests.first();
+        QCOMPARE(request.url.path(), QStringLiteral("/v1/translate"));
+        QCOMPARE(request.headers.value("authorization"), QByteArray("None"));
+    }
+
     void sendsAuthorizationAndArray()
     {
         m_server->handler = [](const FakeHttpServer::Request &request) {

@@ -66,17 +66,19 @@
 
 - `doc/free-endpoints.md`: DeepL web реализован; Yandex web, Bing web, Reverso, Mozhi, MyMemory —
   исследование.
-- **DeepL web реализован:** `src/services/deeplwebservice.*` и `deeplwebparser.*`, сервис
-  `deepl-web` с именем «DeepL (free web)». Ключ не нужен; доступен в списке сервисов сразу, как
-  бесплатный Google. Скрытого переключателя нет; в настройках — предупреждение, что эндпоинт
-  неофициальный.
+- **DeepL web реализован как режим:** `src/services/deeplwebservice.*` и `deeplwebparser.*`
+  используются внутри `DeepLService` при `deepl.mode=free-web`. Ключ не нужен; в списке сервисов
+  один «DeepL», в его настройках комбобокс «API / Free web»; поле ключа блокируется в free-web,
+  показывается предупреждение о неофициальности. Старый `service=deepl-web` мигрирует
+  в `service=deepl` + `deepl.mode=free-web`.
 - `POST https://oneshot-free.www.deepl.com/v1/translate`, `Authorization: None`, JSON;
   5000 символов на часть, запросы сериализуются и идут не чаще раза в 2 с, на `429` — одна
   повторная попытка через 3 с. `403` → `RateLimited`, `413` → `TooLong`, `5xx` → `Network`.
 - Коды языков: базовые в нижнем регистре (`DE` → `de`), региональные — `pt-BR`, `en-US`,
   `zh-Hans`. Верхний регистр базового кода эндпоинт молча возвращает без перевода, поэтому
   приведение обязательно. `DE`, `PT-BR`, `EN-US`, `zh-Hans` проверены живыми запросами.
-- `tst_deeplwebparser` и `tst_deeplwebservice`; Debug и Release: 21/21 тестов.
+- `tst_deeplwebparser`, `tst_deeplwebservice` и `tst_deeplservice` (режим `free-web`);
+  Debug и Release: 23/23 тестов.
 - Живой smoke через собранный `DeepLWebService`: `Hello, world` → `Hallo, Welt`,
   `detected_source_language=en`, ошибок нет.
 - Yandex web: `api.browser.yandex.com/instaserp/translate`, form-urlencoded; Bing web:

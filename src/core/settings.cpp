@@ -138,9 +138,19 @@ void normalize(AppSettings &settings)
 
     settings.google.mode =
         choice(settings.google.mode, defaults.google.mode, {"free", "cloud"});
+    settings.deepl.mode =
+        choice(settings.deepl.mode, defaults.deepl.mode, {"api", "free-web"});
     settings.deepl.englishVariant =
         choice(settings.deepl.englishVariant, defaults.deepl.englishVariant,
                {"EN-US", "EN-GB"});
+
+    // Older builds exposed the unofficial web endpoint as a separate
+    // "deepl-web" service. Keep the setting working while showing one DeepL
+    // entry in the service list.
+    if (settings.translation.service == QStringLiteral("deepl-web")) {
+        settings.translation.service = QStringLiteral("deepl");
+        settings.deepl.mode = QStringLiteral("free-web");
+    }
 
     settings.network.proxyMode =
         choice(settings.network.proxyMode, defaults.network.proxyMode,
@@ -287,6 +297,8 @@ void SettingsStore::load()
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("deepl"));
+    loaded.deepl.mode =
+        settings.value(QStringLiteral("mode"), loaded.deepl.mode).toString();
     loaded.deepl.apiKey = readSecret(settings, QStringLiteral("apiKey"), m_codec);
     loaded.deepl.englishVariant =
         settings.value(QStringLiteral("englishVariant"), loaded.deepl.englishVariant)
@@ -408,6 +420,7 @@ void SettingsStore::save(const AppSettings &settings)
     out.endGroup();
 
     out.beginGroup(QStringLiteral("deepl"));
+    out.setValue(QStringLiteral("mode"), normalized.deepl.mode);
     writeSecret(out, QStringLiteral("apiKey"), normalized.deepl.apiKey, m_codec);
     out.setValue(QStringLiteral("englishVariant"), normalized.deepl.englishVariant);
     out.endGroup();

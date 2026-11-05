@@ -42,6 +42,7 @@ struct GoogleSettings
 
 struct DeepLSettings
 {
+    QString mode = QStringLiteral("api"); // api | free-web
     QString apiKey;
     QString englishVariant = QStringLiteral("EN-US");
 };

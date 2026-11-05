@@ -19,6 +19,7 @@ class DeepLWebService : public TranslationService
 
 public:
     explicit DeepLWebService(NetworkManager *network, QObject *parent = nullptr);
+    DeepLWebService(NetworkManager *network, QString serviceId, QObject *parent = nullptr);
 
     QString id() const override;
     QString displayName() const override;
@@ -48,6 +49,7 @@ private:
     void noteRequestSent();
 
     NetworkManager *m_network = nullptr;
+    QString m_serviceId = QStringLiteral("deepl-web");
     QString m_englishVariant = QStringLiteral("EN-US");
     QUrl m_endpoint;
     int m_rateLimitMs = 2000;

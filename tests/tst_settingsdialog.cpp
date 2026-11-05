@@ -254,6 +254,7 @@ private slots:
 
         auto *googleMode = dialog.findChild<QComboBox *>(QStringLiteral("googleMode"));
         auto *googleKey = dialog.findChild<QLineEdit *>(QStringLiteral("googleApiKey"));
+        auto *deepLMode = dialog.findChild<QComboBox *>(QStringLiteral("deeplMode"));
         auto *deepLKey = dialog.findChild<QLineEdit *>(QStringLiteral("deepLApiKey"));
         auto *variant =
             dialog.findChild<QComboBox *>(QStringLiteral("deeplEnglishVariant"));
@@ -262,6 +263,7 @@ private slots:
         auto *llmModel = dialog.findChild<QComboBox *>(QStringLiteral("llmModel"));
         QVERIFY(googleMode);
         QVERIFY(googleKey);
+        QVERIFY(deepLMode);
         QVERIFY(deepLKey);
         QVERIFY(variant);
         QVERIFY(llmUrl);
@@ -271,8 +273,15 @@ private slots:
         QCOMPARE(googleMode->currentData().toString(), QStringLiteral("cloud"));
         QCOMPARE(googleKey->text(), QStringLiteral("google-key"));
         QVERIFY(googleKey->isEnabled());
+        QCOMPARE(deepLMode->currentData().toString(), QStringLiteral("api"));
         QCOMPARE(deepLKey->text(), QStringLiteral("deepl-key"));
+        QVERIFY(deepLKey->isEnabled());
         QCOMPARE(variant->currentData().toString(), QStringLiteral("EN-GB"));
+
+        deepLMode->setCurrentIndex(deepLMode->findData(QStringLiteral("free-web")));
+        QVERIFY(!deepLKey->isEnabled());
+        deepLMode->setCurrentIndex(deepLMode->findData(QStringLiteral("api")));
+        QVERIFY(deepLKey->isEnabled());
         QCOMPARE(llmUrl->text(), QStringLiteral("https://openrouter.ai/api/v1"));
         QCOMPARE(llmKey->text(), QStringLiteral("llm-key"));
         QCOMPARE(llmModel->currentText(), QStringLiteral("openai/gpt-4o-mini"));
@@ -283,6 +292,7 @@ private slots:
         QVERIFY(googleKey->isEnabled());
 
         googleKey->setText(QStringLiteral("new-google-key"));
+        deepLMode->setCurrentIndex(deepLMode->findData(QStringLiteral("free-web")));
         deepLKey->setText(QStringLiteral("new-deepl-key"));
         variant->setCurrentIndex(variant->findData(QStringLiteral("EN-US")));
         llmUrl->setText(QStringLiteral("http://127.0.0.1:11434/v1"));
@@ -292,6 +302,7 @@ private slots:
         const AppSettings result = dialog.settings();
         QCOMPARE(result.google.mode, QStringLiteral("cloud"));
         QCOMPARE(result.google.apiKey, QStringLiteral("new-google-key"));
+        QCOMPARE(result.deepl.mode, QStringLiteral("free-web"));
         QCOMPARE(result.deepl.apiKey, QStringLiteral("new-deepl-key"));
         QCOMPARE(result.deepl.englishVariant, QStringLiteral("EN-US"));
         QCOMPARE(result.llm.baseUrl, QStringLiteral("http://127.0.0.1:11434/v1"));
@@ -340,8 +351,14 @@ private slots:
     {
         SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
                               {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *mode = dialog.findChild<QComboBox *>(QStringLiteral("deeplMode"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("deepLWebHint"));
+        QVERIFY(mode);
         QVERIFY(hint);
+        QVERIFY(hint->isHidden());
+
+        mode->setCurrentIndex(mode->findData(QStringLiteral("free-web")));
+        QVERIFY(!hint->isHidden());
         QVERIFY(hint->text().contains(QStringLiteral("without an API key"),
                                       Qt::CaseInsensitive));
         QVERIFY(hint->text().contains(QStringLiteral("unofficial"),

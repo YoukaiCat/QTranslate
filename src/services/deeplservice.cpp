@@ -5,6 +5,7 @@
 #include "core/textchunker.h"
 #include "net/networkmanager.h"
 #include "services/deeplparser.h"
+#include "services/deeplwebservice.h"
 
 #include <QElapsedTimer>
 #include <QJsonArray>
@@ -244,6 +245,7 @@ void DeepLReply::stopRequest()
 DeepLService::DeepLService(NetworkManager *network, QObject *parent)
     : TranslationService(parent)
     , m_network(network)
+    , m_web(new DeepLWebService(network, QStringLiteral("deepl"), this))
 {
 }
 
@@ -259,7 +261,14 @@ QString DeepLService::displayName() const
 
 bool DeepLService::isConfigured() const
 {
-    return !m_apiKey.trimmed().isEmpty();
+    return m_mode == QStringLiteral("free-web") || !m_apiKey.trimmed().isEmpty();
+}
+
+QString DeepLService::configurationError() const
+{
+    if (m_mode != QStringLiteral("free-web"))
+        return tr("DeepL needs an API key.");
+    return {};
 }
 
 QStringList DeepLService::sourceLanguages() const
@@ -274,19 +283,26 @@ QStringList DeepLService::targetLanguages() const
 
 void DeepLService::applySettings(const AppSettings &settings)
 {
+    m_mode = settings.deepl.mode == QStringLiteral("free-web") ? QStringLiteral("free-web")
+                                                               : QStringLiteral("api");
     m_apiKey = settings.deepl.apiKey;
     m_englishVariant = settings.deepl.englishVariant == QStringLiteral("EN-GB")
         ? QStringLiteral("EN-GB")
         : QStringLiteral("EN-US");
+    if (m_web)
+        m_web->applySettings(settings);
 }
 
 TranslationReply *DeepLService::translate(const TranslationRequest &request)
 {
+    if (m_mode == QStringLiteral("free-web") && m_web)
+        return m_web->translate(request);
+
     if (!isConfigured()) {
         TranslationResult result;
         result.serviceId = kServiceId;
         result.error = TranslationError::Auth;
-        result.errorMessage = DeepLService::tr("DeepL needs an API key");
+        result.errorMessage = configurationError();
         return TranslationReply::createFinished(result);
     }
 
@@ -367,6 +383,18 @@ void DeepLService::checkKey(const QString &key, KeyCheckCallback callback)
 void DeepLService::setEndpoint(const QUrl &url)
 {
     m_endpointOverride = url;
+}
+
+void DeepLService::setWebEndpoint(const QUrl &url)
+{
+    if (m_web)
+        m_web->setEndpoint(url);
+}
+
+void DeepLService::setWebRateLimitMs(int ms)
+{
+    if (m_web)
+        m_web->setRateLimitMs(ms);
 }
 
 QUrl DeepLService::defaultEndpointForKey(const QString &key)

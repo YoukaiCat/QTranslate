@@ -23,7 +23,6 @@ Q_LOGGING_CATEGORY(lcDeepLWeb, "qtranslate.service.deeplweb", QtWarningMsg)
 
 namespace {
 
-const QString kServiceId = QStringLiteral("deepl-web");
 constexpr int kMaxChunkLength = 5000;
 
 struct WebPart
@@ -58,10 +57,11 @@ QList<WebPart> splitParts(const QString &text)
 class DeepLWebService::Reply : public TranslationReply
 {
 public:
-    Reply(NetworkManager *network, QUrl url, QList<WebPart> parts, QString source,
-          QString target, int retryDelayMs, DeepLWebService *service)
+    Reply(NetworkManager *network, QUrl url, QString serviceId, QList<WebPart> parts,
+          QString source, QString target, int retryDelayMs, DeepLWebService *service)
         : m_network(network)
         , m_url(std::move(url))
+        , m_serviceId(std::move(serviceId))
         , m_parts(std::move(parts))
         , m_source(std::move(source))
         , m_target(std::move(target))
@@ -95,6 +95,7 @@ private:
 
     QPointer<NetworkManager> m_network;
     QUrl m_url;
+    QString m_serviceId;
     QList<WebPart> m_parts;
     QString m_source;
     QString m_target;
@@ -216,7 +217,7 @@ void DeepLWebService::Reply::onFinished()
     }
 
     TranslationResult result;
-    result.serviceId = kServiceId;
+    result.serviceId = m_serviceId;
     result.detectedSourceLang = detected;
     int index = 0;
     for (const WebPart &part : std::as_const(m_parts)) {
@@ -236,7 +237,7 @@ void DeepLWebService::Reply::fail(TranslationError error, const QString &message
 {
     qCWarning(lcDeepLWeb) << "Translation failed:" << message;
     TranslationResult result;
-    result.serviceId = kServiceId;
+    result.serviceId = m_serviceId;
     result.error = error;
     result.errorMessage = message;
     finish(result);
@@ -253,8 +254,14 @@ void DeepLWebService::Reply::stopRequest()
 }
 
 DeepLWebService::DeepLWebService(NetworkManager *network, QObject *parent)
+    : DeepLWebService(network, QStringLiteral("deepl-web"), parent)
+{
+}
+
+DeepLWebService::DeepLWebService(NetworkManager *network, QString serviceId, QObject *parent)
     : TranslationService(parent)
     , m_network(network)
+    , m_serviceId(std::move(serviceId))
     , m_endpoint(defaultEndpoint())
 {
     m_timer = new QTimer(this);
@@ -264,12 +271,13 @@ DeepLWebService::DeepLWebService(NetworkManager *network, QObject *parent)
 
 QString DeepLWebService::id() const
 {
-    return kServiceId;
+    return m_serviceId;
 }
 
 QString DeepLWebService::displayName() const
 {
-    return QStringLiteral("DeepL (free web)");
+    return m_serviceId == QStringLiteral("deepl") ? QStringLiteral("DeepL")
+                                                  : QStringLiteral("DeepL (free web)");
 }
 
 bool DeepLWebService::isConfigured() const
@@ -279,12 +287,12 @@ bool DeepLWebService::isConfigured() const
 
 QStringList DeepLWebService::sourceLanguages() const
 {
-    return Languages::supported(kServiceId, Languages::Direction::Source);
+    return Languages::supported(m_serviceId, Languages::Direction::Source);
 }
 
 QStringList DeepLWebService::targetLanguages() const
 {
-    return Languages::supported(kServiceId, Languages::Direction::Target);
+    return Languages::supported(m_serviceId, Languages::Direction::Target);
 }
 
 void DeepLWebService::applySettings(const AppSettings &settings)
@@ -298,9 +306,9 @@ TranslationReply *DeepLWebService::translate(const TranslationRequest &request)
 {
     const QString source = request.sourceLang == Languages::autoCode()
                                ? Languages::autoCode()
-                               : Languages::toServiceCode(kServiceId, request.sourceLang,
+                               : Languages::toServiceCode(m_serviceId, request.sourceLang,
                                                           Languages::Direction::Source);
-    QString target = Languages::toServiceCode(kServiceId, request.targetLang,
+    QString target = Languages::toServiceCode(m_serviceId, request.targetLang,
                                               Languages::Direction::Target);
     if (request.targetLang == QStringLiteral("en") && !target.isEmpty())
         target = m_englishVariant;
@@ -308,7 +316,7 @@ TranslationReply *DeepLWebService::translate(const TranslationRequest &request)
     if (source.isEmpty() || target.isEmpty()) {
         const QString code = source.isEmpty() ? request.sourceLang : request.targetLang;
         TranslationResult result;
-        result.serviceId = kServiceId;
+        result.serviceId = m_serviceId;
         result.error = TranslationError::UnsupportedLanguage;
         result.errorMessage = QStringLiteral("language \"%1\" is not supported").arg(code);
         return TranslationReply::createFinished(result);
@@ -320,8 +328,8 @@ TranslationReply *DeepLWebService::translate(const TranslationRequest &request)
     qCDebug(lcDeepLWeb) << "Translating" << request.text.size() << "chars in" << parts.size()
                         << "part(s)," << webSource << "->" << webTarget;
 
-    auto *reply = new Reply(m_network, m_endpoint, parts, webSource, webTarget, m_retryDelayMs,
-                            this);
+    auto *reply = new Reply(m_network, m_endpoint, m_serviceId, parts, webSource, webTarget,
+                            m_retryDelayMs, this);
     enqueue(reply);
     return reply;
 }

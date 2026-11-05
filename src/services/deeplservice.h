@@ -6,9 +6,11 @@
 
 #include <functional>
 
+class DeepLWebService;
 class NetworkManager;
 
-// DeepL API Free/Pro (see doc/architecture.md, §4.7).
+// DeepL API or the unofficial free web endpoint, selected by
+// settings.deepl.mode (see doc/architecture.md, §4.7).
 class DeepLService : public TranslationService
 {
     Q_OBJECT
@@ -21,6 +23,7 @@ public:
     QString id() const override;
     QString displayName() const override;
     bool isConfigured() const override;
+    QString configurationError() const override;
     QStringList sourceLanguages() const override;
     QStringList targetLanguages() const override;
     void applySettings(const AppSettings &settings) override;
@@ -36,12 +39,16 @@ public:
 
     // Replaces the translate endpoint. For tests only.
     void setEndpoint(const QUrl &url);
+    void setWebEndpoint(const QUrl &url);
+    void setWebRateLimitMs(int ms);
 
 private:
     QUrl endpointForKey(const QString &key) const;
     QUrl usageUrlForKey(const QString &key) const;
 
     NetworkManager *m_network = nullptr;
+    DeepLWebService *m_web = nullptr;
+    QString m_mode = QStringLiteral("api");
     QString m_apiKey;
     QString m_englishVariant = QStringLiteral("EN-US");
     QUrl m_endpointOverride;

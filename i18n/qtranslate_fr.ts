@@ -4,59 +4,59 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="125"/>
-        <location filename="../src/app/appcontroller.cpp" line="497"/>
+        <location filename="../src/app/appcontroller.cpp" line="124"/>
+        <location filename="../src/app/appcontroller.cpp" line="491"/>
         <source>Autostart</source>
         <translation>Démarrage automatique</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="126"/>
-        <location filename="../src/app/appcontroller.cpp" line="498"/>
+        <location filename="../src/app/appcontroller.cpp" line="125"/>
+        <location filename="../src/app/appcontroller.cpp" line="492"/>
         <source>Could not update the autostart entry.</source>
         <translation>Impossible de mettre à jour l&apos;entrée de démarrage automatique.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="205"/>
+        <location filename="../src/app/appcontroller.cpp" line="201"/>
         <source>Hotkey unavailable</source>
         <translation>Raccourci clavier indisponible</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="206"/>
+        <location filename="../src/app/appcontroller.cpp" line="202"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 est déjà utilisé par un autre programme. Fermez ce programme ou choisissez une autre combinaison dans les paramètres.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="240"/>
+        <location filename="../src/app/appcontroller.cpp" line="236"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="528"/>
+        <location filename="../src/app/appcontroller.cpp" line="522"/>
         <source>DeepL is not available.</source>
         <translation>DeepL n’est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="543"/>
+        <location filename="../src/app/appcontroller.cpp" line="537"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>Le fournisseur compatible OpenAI n’est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="709"/>
+        <location filename="../src/app/appcontroller.cpp" line="717"/>
         <source>Nothing is selected.</source>
         <translation>Rien n&apos;est sélectionné.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="738"/>
+        <location filename="../src/app/appcontroller.cpp" line="746"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>La fenêtre active a changé ; la traduction a été copiée dans le presse-papiers.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="775"/>
+        <location filename="../src/app/appcontroller.cpp" line="783"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>Impossible de coller automatiquement&#xa0;; la traduction est dans le presse-papiers.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="799"/>
+        <location filename="../src/app/appcontroller.cpp" line="807"/>
         <source>Translate and replace</source>
         <translation>Traduire et remplacer</translation>
     </message>
@@ -64,37 +64,37 @@
 <context>
     <name>DeepLService</name>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="289"/>
-        <source>DeepL needs an API key</source>
-        <translation>DeepL nécessite une clé API</translation>
+        <location filename="../src/services/deeplservice.cpp" line="270"/>
+        <source>DeepL needs an API key.</source>
+        <translation>DeepL nécessite une clé API.</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="306"/>
+        <location filename="../src/services/deeplservice.cpp" line="322"/>
         <source>language &quot;%1&quot; is not supported</source>
         <translation>la langue &quot;%1&quot; n&apos;est pas prise en charge</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="322"/>
+        <location filename="../src/services/deeplservice.cpp" line="338"/>
         <source>Enter a DeepL API key.</source>
         <translation>Saisissez une clé API DeepL.</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="329"/>
+        <location filename="../src/services/deeplservice.cpp" line="345"/>
         <source>The network is not available.</source>
         <translation>Le réseau n&apos;est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="347"/>
+        <location filename="../src/services/deeplservice.cpp" line="363"/>
         <source>DeepL did not respond in time (%1 s).</source>
         <translation>DeepL n&apos;a ​​pas répondu à temps (%1 s).</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="359"/>
+        <location filename="../src/services/deeplservice.cpp" line="375"/>
         <source>Used %1 of %2 characters.</source>
         <translation>Utilisé des caractères %1 ou %2.</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="361"/>
+        <location filename="../src/services/deeplservice.cpp" line="377"/>
         <source>DeepL returned an unexpected response.</source>
         <translation>DeepL a renvoyé une réponse inattendue.</translation>
     </message>
@@ -760,28 +760,28 @@
 <context>
     <name>NetworkManager</name>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="98"/>
+        <location filename="../src/net/networkmanager.cpp" line="101"/>
         <source>Proxy connection works (HTTP %1).</source>
         <translation>La connexion proxy fonctionne (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="100"/>
+        <location filename="../src/net/networkmanager.cpp" line="105"/>
         <source>The proxy test returned no HTTP response.</source>
         <translation>Le test du proxy n&apos;a renvoyé aucune réponse HTTP.</translation>
     </message>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="115"/>
-        <location filename="../src/net/networkmanager.cpp" line="125"/>
+        <location filename="../src/net/networkmanager.cpp" line="120"/>
+        <location filename="../src/net/networkmanager.cpp" line="130"/>
         <source>Network error</source>
         <translation>Erreur réseau</translation>
     </message>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="118"/>
+        <location filename="../src/net/networkmanager.cpp" line="123"/>
         <source>Proxy authentication failed</source>
         <translation>Échec de l&apos;authentification du proxy</translation>
     </message>
     <message>
-        <location filename="../src/net/networkmanager.cpp" line="123"/>
+        <location filename="../src/net/networkmanager.cpp" line="128"/>
         <source>Proxy connection failed</source>
         <translation>Échec de la connexion au proxy</translation>
     </message>
@@ -825,8 +825,8 @@
     </message>
     <message>
         <location filename="../src/services/openaicompatibleservice.cpp" line="254"/>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="539"/>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="582"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="562"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="606"/>
         <source>The provider did not respond in time (%1 s).</source>
         <translation>Le fournisseur n’a pas répondu dans les %1 s.</translation>
     </message>
@@ -842,36 +842,37 @@
     </message>
     <message>
         <location filename="../src/services/openaicompatibleservice.cpp" line="359"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="509"/>
         <source>The provider needs a valid server URL.</source>
         <translation>Le fournisseur a besoin d’une URL de serveur valide.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="410"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="408"/>
         <source>The provider needs an API key.</source>
         <translation>Le fournisseur a besoin d’une clé API.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="495"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="494"/>
         <source>The network is not available.</source>
         <translation>Le réseau n’est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="503"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="526"/>
         <source>Enter an API key.</source>
         <translation>Saisissez une clé API.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="601"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="625"/>
         <source>The provider returned an unexpected response.</source>
         <translation>Le fournisseur a renvoyé une réponse inattendue.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="606"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="630"/>
         <source>Loaded %1 models.</source>
         <translation>%1 modèles chargés.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="607"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="631"/>
         <source>API key is valid. Loaded %1 models.</source>
         <translation>La clé API est valide. %1 modèles chargés.</translation>
     </message>
@@ -960,32 +961,32 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="59"/>
+        <location filename="../src/services/deeplservice.cpp" line="60"/>
         <source>The DeepL API key was rejected (HTTP %1).</source>
         <translation>La clé API DeepL a été rejetée (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="61"/>
+        <location filename="../src/services/deeplservice.cpp" line="62"/>
         <source>The DeepL character limit is exceeded (HTTP %1).</source>
         <translation>La limite de caractères DeepL est dépassée (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="63"/>
+        <location filename="../src/services/deeplservice.cpp" line="64"/>
         <source>Too many DeepL requests; try again later (HTTP %1).</source>
         <translation>Trop de requêtes DeepL&#xa0;; réessayez plus tard (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="65"/>
+        <location filename="../src/services/deeplservice.cpp" line="66"/>
         <source>The DeepL request is too large (HTTP %1).</source>
         <translation>La requête DeepL est trop volumineuse (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="67"/>
+        <location filename="../src/services/deeplservice.cpp" line="68"/>
         <source>DeepL is temporarily unavailable (HTTP %1).</source>
         <translation>DeepL est temporairement indisponible (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="69"/>
+        <location filename="../src/services/deeplservice.cpp" line="70"/>
         <source>DeepL returned an unexpected response (HTTP %1).</source>
         <translation>DeepL a renvoyé une réponse inattendue (HTTP %1).</translation>
     </message>
@@ -994,7 +995,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="35"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="592"/>
         <source>Settings</source>
         <translation>Paramètres</translation>
     </message>
@@ -1065,7 +1066,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="136"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="304"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="308"/>
         <source> ms</source>
         <translation> ms</translation>
     </message>
@@ -1141,13 +1142,14 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="171"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="208"/>
         <source>Mode:</source>
         <translation>Mode:</translation>
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="172"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="198"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="244"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="209"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="248"/>
         <source>API key:</source>
         <translation>Clé API :</translation>
     </message>
@@ -1162,214 +1164,219 @@
         <translation>DeepL</translation>
     </message>
     <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="186"/>
+        <source>API (key required)</source>
+        <translation>API (clé requise)</translation>
+    </message>
+    <message>
         <location filename="../src/ui/settingsdialog.cpp" line="187"/>
+        <source>Free web (unofficial, no key)</source>
+        <translation>Web gratuit (non officiel, sans clé)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="191"/>
         <source>DeepL API key (ends with :fx for Free)</source>
         <translation>Clé API DeepL (se termine par :fx pour Free)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="192"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="196"/>
         <source>Check key</source>
         <translation>Vérifier la clé</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="199"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="210"/>
         <source>English target:</source>
         <translation>Cible anglaise&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="204"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="259"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="218"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="263"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="337"/>
         <source>Checking…</source>
         <translation>Vérification…</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="209"/>
-        <source>DeepL (free web)</source>
-        <translation>DeepL (web gratuit)</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="212"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="203"/>
         <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
         <translation>Disponible sans clé API. Ce point de terminaison non officiel peut cesser de fonctionner, appliquer des limites de débit ou bloquer des requêtes ; le texte est envoyé à DeepL.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="219"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="223"/>
         <source>OpenAI-compatible provider</source>
         <translation>Fournisseur compatible OpenAI</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="227"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="231"/>
         <source>API key</source>
         <translation>Clé API</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="235"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="239"/>
         <source>Model ID, for example openai/gpt-4o-mini</source>
         <translation>ID du modèle, par exemple openai/gpt-4o-mini</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="237"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="241"/>
         <source>Load models</source>
         <translation>Charger les modèles</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="243"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="247"/>
         <source>Server URL:</source>
         <translation>URL du serveur :</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="245"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="249"/>
         <source>Model:</source>
         <translation>Modèle :</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="249"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="253"/>
         <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key. The text is sent to the selected provider.</source>
         <translation>Utilise l’API Chat Completions compatible OpenAI. Le serveur par défaut est OpenRouter ; l’URL peut pointer vers un autre point de terminaison compatible, comme OpenAI, Ollama, llama.cpp ou TeamRouter. Le modèle doit être disponible pour votre clé. Le texte est envoyé au fournisseur sélectionné.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="269"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="273"/>
         <source>Services</source>
         <translation>Services</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="277"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="281"/>
         <source>No proxy</source>
         <translation>Pas de procuration</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="278"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="282"/>
         <source>System proxy</source>
         <translation>Proxy système</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="279"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="283"/>
         <source>Manual proxy</source>
         <translation>Proxy manuel</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="282"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="286"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="283"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="287"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="286"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="290"/>
         <source>Proxy host</source>
         <translation>Hôte proxy</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="290"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="294"/>
         <source>Not set</source>
         <translation>Non défini</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="291"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="295"/>
         <source>The proxy requires authentication</source>
         <translation>Le proxy nécessite une authentification</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="295"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
         <source>User name</source>
         <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
         <source>Password</source>
         <translation>Mot de passe</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="305"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="309"/>
         <source>Test connection</source>
         <translation>Tester la connexion</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="312"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
         <source>Proxy mode:</source>
         <translation>Mode proxy&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="313"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
         <source>Proxy type:</source>
         <translation>Type de mandataire&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="314"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="318"/>
         <source>Host:</source>
         <translation>Hôte:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="315"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="319"/>
         <source>Port:</source>
         <translation>Port:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="321"/>
         <source>User name:</source>
         <translation>Nom d&apos;utilisateur:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="318"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="322"/>
         <source>Password:</source>
         <translation>Mot de passe:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="319"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="323"/>
         <source>Request timeout:</source>
         <translation>Délai d&apos;expiration de la demande&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="324"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="328"/>
         <source>Network</source>
         <translation>Réseau</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="512"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
         <source>Translate in a popup</source>
         <translation>Traduire dans une popup</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="533"/>
         <source>Replace the selected text with the translation</source>
         <translation>Remplacer le texte sélectionné par la traduction</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="515"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="534"/>
         <source>Translate in the main window</source>
         <translation>Traduire dans la fenêtre principale</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="516"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="535"/>
         <source>Show the main window</source>
         <translation>Afficher la fenêtre principale</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="524"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="543"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>&quot;%1&quot; utilise plusieurs combinaisons de touches. Les raccourcis clavier globaux prennent en charge une seule combinaison.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="532"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>&quot;%1&quot; ne peut pas être utilisé comme raccourci clavier global.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="564"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>La même combinaison de touches est attribuée plusieurs fois : %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="556"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="575"/>
         <source>The primary and additional languages must differ.</source>
         <translation>Les langues principales et supplémentaires doivent être différentes.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="563"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="582"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>Entrez l&apos;hôte et le port du proxy, ou choisissez un autre mode proxy.</translation>
     </message>

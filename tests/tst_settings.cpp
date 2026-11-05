@@ -69,6 +69,7 @@ private slots:
         QCOMPARE(settings.translation.autoTranslateDelayMs, 700);
 
         QCOMPARE(settings.google.mode, QStringLiteral("free"));
+        QCOMPARE(settings.deepl.mode, QStringLiteral("api"));
         QCOMPARE(settings.deepl.englishVariant, QStringLiteral("EN-US"));
         QCOMPARE(settings.llm.baseUrl, QStringLiteral("https://openrouter.ai/api/v1"));
         QVERIFY(settings.llm.apiKey.isEmpty());
@@ -107,6 +108,7 @@ private slots:
 
         settings.google.mode = QStringLiteral("cloud");
         settings.google.apiKey = QStringLiteral("google-secret");
+        settings.deepl.mode = QStringLiteral("free-web");
         settings.deepl.apiKey = QStringLiteral("deepl-secret");
         settings.deepl.englishVariant = QStringLiteral("EN-GB");
         settings.llm.baseUrl = QStringLiteral("http://127.0.0.1:11434/v1");
@@ -157,6 +159,7 @@ private slots:
 
         QCOMPARE(result.google.mode, QStringLiteral("cloud"));
         QCOMPARE(result.google.apiKey, QStringLiteral("google-secret"));
+        QCOMPARE(result.deepl.mode, QStringLiteral("free-web"));
         QCOMPARE(result.deepl.apiKey, QStringLiteral("deepl-secret"));
         QCOMPARE(result.deepl.englishVariant, QStringLiteral("EN-GB"));
         QCOMPARE(result.llm.baseUrl, QStringLiteral("http://127.0.0.1:11434/v1"));
@@ -185,6 +188,24 @@ private slots:
         QVERIFY(!ini.contains("deepl-secret"));
         QVERIFY(!ini.contains("llm-secret"));
         QVERIFY(!ini.contains("proxy-secret"));
+    }
+
+    void migratesLegacyDeepLWebService()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("translation/service"), QStringLiteral("deepl-web"));
+            raw.sync();
+        }
+
+        SettingsStore store(path, fakeCodec());
+        store.load();
+        QCOMPARE(store.current().translation.service, QStringLiteral("deepl"));
+        QCOMPARE(store.current().deepl.mode, QStringLiteral("free-web"));
     }
 
     void changedSignal()

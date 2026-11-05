@@ -65,6 +65,7 @@ private:
     void setHotkeyEditing(bool editing);
     bool anyHotkeyEditFocused() const;
     void updateGoogleControls();
+    void updateDeepLControls();
     void updateProxyControls();
 
     AppSettings m_initial;
@@ -92,10 +93,12 @@ private:
 
     QComboBox *m_googleMode = nullptr;
     QLineEdit *m_googleApiKey = nullptr;
+    QComboBox *m_deeplMode = nullptr;
     QLineEdit *m_deeplApiKey = nullptr;
     QComboBox *m_deeplEnglishVariant = nullptr;
     QPushButton *m_checkDeepLKey = nullptr;
     QLabel *m_deepLKeyStatus = nullptr;
+    QLabel *m_deepLWebHint = nullptr;
 
     QLineEdit *m_llmBaseUrl = nullptr;
     QLineEdit *m_llmApiKey = nullptr;
