@@ -1,6 +1,6 @@
-# qtranslate
+# QTranslate
 
-[![build](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml)
+[![build](https://github.com/youkaicat/QTranslate/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/youkaicat/QTranslate/actions/workflows/build.yml)
 
 Lightweight desktop translator. It lives in the system tray, translates the text
 selected in any application with a global hotkey, and can replace the selection with the
@@ -46,13 +46,13 @@ translation directly in the active input field.
 
 ## Download and install
 
-The latest build is on the [Releases](https://github.com/youkaicat/qtranslate/releases/latest) page:
+The latest build is on the [Releases](https://github.com/youkaicat/QTranslate/releases/latest) page:
 
-- **[`qtranslate-0.10.0-win64-setup.exe`](https://github.com/youkaicat/qtranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64-setup.exe)**. Installs qtranslate for the current user
+- **[`qtranslate-0.10.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64-setup.exe)**. Installs QTranslate for the current user
   without administrator rights; by default it creates a Start menu shortcut and enables autostart,
   with an optional desktop shortcut. It also adds an uninstaller. Uninstalling keeps the settings
   in `%APPDATA%\qtranslate`.
-- **[`qtranslate-0.10.0-win64.zip`](https://github.com/youkaicat/qtranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64.zip)**. Extract it and run `bin\qtranslate.exe`;
+- **[`qtranslate-0.10.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64.zip)**. Extract it and run `bin\qtranslate.exe`;
   no installation or administrator rights are needed. The archive is self-contained: Qt and the
   MSVC runtime are included.
 The installer is not code-signed yet, so Windows SmartScreen may show a warning.
@@ -95,7 +95,7 @@ qtranslate [--minimized] [--verbose]
    ```bat
    ollama pull llama3.2
    ```
-3. In qtranslate open **Settings → Services → OpenAI-compatible provider** and set:
+3. In QTranslate open **Settings → Services → OpenAI-compatible provider** and set:
    - Server URL: `http://localhost:11434/v1`
    - API key: leave empty
    - Model: the name from `ollama list`, for example `llama3.2`
@@ -172,5 +172,5 @@ ctest --test-dir build --output-on-failure
 - Linux support is not ready yet; see the build section above.
 
 The text being translated is sent to the selected provider: Google, DeepL, OpenRouter or another
-OpenAI-compatible server. A local server such as Ollama keeps the text on your machine. qtranslate
+OpenAI-compatible server. A local server such as Ollama keeps the text on your machine. QTranslate
 does not write the texts to its log.

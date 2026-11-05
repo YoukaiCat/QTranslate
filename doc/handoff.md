@@ -7,30 +7,36 @@
 - `origin/main` = `1e3e6b5` «Keep SHA256SUMS as an unlisted release asset»; тег `v0.10.0`
   указывает на `726dac0`.
 - История: релиз 0.10.0, удаление checksum-ссылок и возврат `SHA256SUMS.txt` как unlisted asset.
-- Текущая работа — OpenAI-совместимый перевод (OpenRouter) и объединение DeepL free web в один
-  сервис: локальные коммиты `bb71456`, `b212f6e`, `df3dd80`, `8f2156a`, `11fad9c`, **не
-  запушены**. Push — только по просьбе пользователя или при выпуске согласованного релиза. Внутри
-  `DeepLService` режим хранится как `enum class Mode { Api, FreeWeb }`, а в INI — как строка
-  `deepl.mode=api|free-web`. Вкладка «Сервисы» в настройках прокручивается (`QScrollArea`), чтобы
-  нижняя подсказка не обрезалась при 150% масштабировании.
-- Для live smoke запущен `build\dist\bin\qtranslate.exe` с `--verbose`; после проверки закрыть.
+- Текущая работа — OpenAI-совместимый перевод (OpenRouter), объединение DeepL free web в один
+  сервис и брендинг QTranslate: локальные коммиты `bb71456`, `b212f6e`, `df3dd80`, `8f2156a`,
+  `11fad9c`, **не запушены**. Push — только по просьбе пользователя или при выпуске согласованного
+  релиза. Внутри `DeepLService` режим хранится как `enum class Mode { Api, FreeWeb }`, а в INI —
+  как строка `deepl.mode=api|free-web`. Вкладка «Сервисы» в настройках прокручивается
+  (`QScrollArea`), чтобы нижняя подсказка не обрезалась при 150% масштабировании.
+- Отображаемое имя приложения — **QTranslate**: `AppInfo::name()`, заголовки окон, трей,
+  User-Agent, `FileDescription`/`ProductName` и установщик. Внутренние имена
+  `qtranslate.exe`, `qtranslate.ini`, ключ автозагрузки `qtranslate` и имена артефактов оставлены
+  для совместимости. Git remote переключён на `https://github.com/youkaicat/QTranslate.git`;
+  ссылки в README/доках обновлены.
+- Для live smoke запущен `build\dist\bin\qtranslate.exe` с `--verbose`; окно называется QTranslate.
+  После проверки закрыть.
 - Рабочее дерево после завершения должно быть чистым.
 
 ## Релизы
 
 - `v0.9.0` — первый публичный релиз, тег и ассеты не трогать.
-- `v0.9.1` — опубликован: https://github.com/youkaicat/qtranslate/releases/tag/v0.9.1
+- `v0.9.1` — опубликован: https://github.com/youkaicat/QTranslate/releases/tag/v0.9.1
   - Установщик ~16,4 МБ, ZIP ~22,5 МБ, `SHA256SUMS.txt`; хэши проверены.
   - Установщик уже с галочками: меню «Пуск» (вкл.), рабочий стол (выкл.), автозагрузка (вкл.).
-  - Успешный CI-прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41908976474
+  - Успешный CI-прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41908976474
 - `v0.9.1` собран из `00f342a`, **до** оптимизации размера и локализации. Не заменять его
   ассеты и не переставлять тег.
-- `v0.10.0` — опубликован: https://github.com/youkaicat/qtranslate/releases/tag/v0.10.0
+- `v0.10.0` — опубликован: https://github.com/youkaicat/QTranslate/releases/tag/v0.10.0
   - DeepL free web, 15 языков интерфейса, slim-дистрибутив.
   - Локально: Debug/Release 21/21, setup 11,51 МБ, ZIP 14,58 МБ.
   - CI: setup 10,63 МБ, ZIP 13,12 МБ; установка/запуск/удаление проверены.
   - `SHA256SUMS.txt` остаётся отдельным ассетом релиза; ссылка на него убрана из README/Downloads.
-  - CI-прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41930568365
+  - CI-прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41930568365
   - Тег и ассеты `v0.9.0`/`v0.9.1` не изменялись.
 
 ## Локализация (этап 12)
@@ -192,7 +198,7 @@ Qt-переводы для 13 языков добавляют ~2,4 МБ в dist,
 4. Установщик проверен: тихая установка, `FileVersion`/`ProductVersion` 0.10.0, запуск без Qt
    в `PATH`, удаление; настройки и `HKCU\Run` восстановлены.
 5. `main` и annotated tag `v0.10.0` запушены; CI-прогон успешен, ассеты скачаны и проверены.
-6. Релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.10.0
+6. Релиз: https://github.com/youkaicat/QTranslate/releases/tag/v0.10.0
 
 ## Следующий релиз (когда пользователь согласует)
 

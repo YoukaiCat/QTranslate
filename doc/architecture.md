@@ -704,7 +704,7 @@ TeamRouter, Ollama, LM Studio, llama.cpp и другие реализации `P
 POST <baseUrl>/chat/completions
 Authorization: Bearer <KEY>          ← не отправляется для локального адреса без ключа
 Content-Type: application/json
-HTTP-Referer: https://github.com/youkaicat/qtranslate
+HTTP-Referer: https://github.com/youkaicat/QTranslate
 X-Title: qtranslate
 ```
 
@@ -1491,9 +1491,9 @@ v0.9.0 — первый публичный release candidate; v0.9.1 — пат�
 CI: workflow `.github/workflows/build.yml` собирает и тестирует Release на `windows-latest`,
 затем повторяет упаковку; по тегу `v0.9.1` публикует релиз.
 
-- workflow: https://github.com/youkaicat/qtranslate/actions/workflows/build.yml
-- успешный прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41908976474
-- релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.9.1
+- workflow: https://github.com/youkaicat/QTranslate/actions/workflows/build.yml
+- успешный прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41908976474
+- релиз: https://github.com/youkaicat/QTranslate/releases/tag/v0.9.1
 
 Файлы, скачанные из релиза, совпали с `SHA256SUMS.txt`.
 
@@ -1512,8 +1512,8 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
   `detected_source_language=en`;
 - CI (Qt 6.8.3 LTS): setup 10,63 МБ, ZIP 13,12 МБ; хэши совпали с `SHA256SUMS.txt`;
   CI-установщик проверен тихой установкой, запуском и удалением;
-- CI-прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41930568365
-- релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.10.0
+- CI-прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41930568365
+- релиз: https://github.com/youkaicat/QTranslate/releases/tag/v0.10.0
 - старые теги `v0.9.0`/`v0.9.1` не изменяются.
 
 ---

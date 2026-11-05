@@ -1,4 +1,4 @@
-﻿; qtranslate installer (Inno Setup 6.3+ / 7).
+﻿; QTranslate installer (Inno Setup 6.3+ / 7).
 ;
 ; The installer is per-user and does not require administrator rights:
 ; files go to %LOCALAPPDATA%\Programs\qtranslate, shortcuts and the
@@ -22,22 +22,22 @@
 
 [Setup]
 AppId={{937CC1A0-7C30-48A5-8838-E78AE17B706E}
-AppName=qtranslate
+AppName=QTranslate
 AppVersion={#AppVersion}
-AppVerName=qtranslate {#AppVersion}
+AppVerName=QTranslate {#AppVersion}
 AppPublisher=youkaicat
-AppPublisherURL=https://github.com/youkaicat/qtranslate
-AppSupportURL=https://github.com/youkaicat/qtranslate/issues
-AppUpdatesURL=https://github.com/youkaicat/qtranslate/releases
-DefaultDirName={localappdata}\Programs\qtranslate
-DefaultGroupName=qtranslate
+AppPublisherURL=https://github.com/youkaicat/QTranslate
+AppSupportURL=https://github.com/youkaicat/QTranslate/issues
+AppUpdatesURL=https://github.com/youkaicat/QTranslate/releases
+DefaultDirName={localappdata}\Programs\QTranslate
+DefaultGroupName=QTranslate
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 OutputDir={#OutputDir}
 OutputBaseFilename=qtranslate-{#AppVersion}-win64-setup
 SetupIconFile=..\..\resources\icons\app.ico
 UninstallDisplayIcon={app}\bin\qtranslate.exe
-UninstallDisplayName=qtranslate {#AppVersion}
+UninstallDisplayName=QTranslate {#AppVersion}
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -49,8 +49,8 @@ RestartApplications=no
 AppMutex=Local\qtranslate-app
 VersionInfoVersion={#AppVersionQuad}
 VersionInfoProductVersion={#AppVersion}
-VersionInfoProductName=qtranslate
-VersionInfoDescription=qtranslate Setup
+VersionInfoProductName=QTranslate
+VersionInfoDescription=QTranslate Setup
 VersionInfoCompany=youkaicat
 
 [Languages]
@@ -60,18 +60,18 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 [Tasks]
 Name: "startmenuicon"; Description: "{cm:CreateStartMenuIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "autostart"; Description: "{cm:AutoStartProgram,qtranslate}"; GroupDescription: "{cm:AutoStartProgramGroupDescription}"
+Name: "autostart"; Description: "{cm:AutoStartProgram,QTranslate}"; GroupDescription: "{cm:AutoStartProgramGroupDescription}"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\qtranslate"; Filename: "{app}\bin\qtranslate.exe"; WorkingDir: "{app}\bin"; Comment: "Fast desktop translator"; Tasks: startmenuicon
-Name: "{group}\{cm:UninstallProgram,qtranslate}"; Filename: "{uninstallexe}"; Tasks: startmenuicon
-Name: "{autodesktop}\qtranslate"; Filename: "{app}\bin\qtranslate.exe"; WorkingDir: "{app}\bin"; Comment: "Fast desktop translator"; Tasks: desktopicon
+Name: "{group}\QTranslate"; Filename: "{app}\bin\qtranslate.exe"; WorkingDir: "{app}\bin"; Comment: "Fast desktop translator"; Tasks: startmenuicon
+Name: "{group}\{cm:UninstallProgram,QTranslate}"; Filename: "{uninstallexe}"; Tasks: startmenuicon
+Name: "{autodesktop}\QTranslate"; Filename: "{app}\bin\qtranslate.exe"; WorkingDir: "{app}\bin"; Comment: "Fast desktop translator"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\bin\qtranslate.exe"; Description: "Launch qtranslate"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\bin\qtranslate.exe"; Description: "Launch QTranslate"; Flags: nowait postinstall skipifsilent
 
 [CustomMessages]
 english.CreateStartMenuIcon=Create a &Start menu shortcut
@@ -131,7 +131,7 @@ var
 begin
   Result := -1;
   for I := 0 to WizardForm.TasksList.Items.Count - 1 do
-    if Pos('qtranslate', WizardForm.TasksList.ItemCaption[I]) > 0 then
+    if Pos('qtranslate', Lowercase(WizardForm.TasksList.ItemCaption[I])) > 0 then
     begin
       Result := I;
       Exit;

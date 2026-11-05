@@ -1,6 +1,6 @@
-# qtranslate
+# QTranslate
 
-[![build](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/youkaicat/qtranslate/actions/workflows/build.yml)
+[![build](https://github.com/youkaicat/QTranslate/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/youkaicat/QTranslate/actions/workflows/build.yml)
 
 Лёгкий десктопный переводчик. Живёт в системном трее, переводит выделенный текст в
 любой программе по глобальной горячей клавише и умеет сразу заменять выделение переводом в
@@ -47,13 +47,13 @@
 
 ## Скачивание и установка
 
-Последняя сборка — на странице [Releases](https://github.com/youkaicat/qtranslate/releases/latest):
+Последняя сборка — на странице [Releases](https://github.com/youkaicat/QTranslate/releases/latest):
 
-- **[`qtranslate-0.10.0-win64-setup.exe`](https://github.com/youkaicat/qtranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64-setup.exe)**. Устанавливает qtranslate для текущего
+- **[`qtranslate-0.10.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64-setup.exe)**. Устанавливает QTranslate для текущего
   пользователя без прав администратора; по умолчанию создаёт ярлык в меню «Пуск» и включает
   автозагрузку, ярлык на рабочем столе — по желанию. Добавляет деинсталлятор. При удалении
   настройки в `%APPDATA%\qtranslate` сохраняются.
-- **[`qtranslate-0.10.0-win64.zip`](https://github.com/youkaicat/qtranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64.zip)**. Распакуйте и запустите
+- **[`qtranslate-0.10.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64.zip)**. Распакуйте и запустите
   `bin\qtranslate.exe`; установка и права администратора не нужны. Архив самодостаточен: Qt и
   runtime MSVC уже включены.
 Установщик пока не подписан кодом, поэтому Windows SmartScreen может показать предупреждение.
@@ -96,7 +96,7 @@ qtranslate [--minimized] [--verbose]
    ```bat
    ollama pull llama3.2
    ```
-3. В qtranslate откройте **Настройки → Сервисы → Провайдер с поддержкой OpenAI** и укажите:
+3. В QTranslate откройте **Настройки → Сервисы → Провайдер с поддержкой OpenAI** и укажите:
    - Адрес сервера: `http://localhost:11434/v1`
    - API-ключ: оставьте пустым
    - Модель: имя из `ollama list`, например `llama3.2`
@@ -175,4 +175,4 @@ ctest --test-dir build --output-on-failure
 
 Переводимый текст отправляется выбранному провайдеру: Google, DeepL, OpenRouter или другому
 OpenAI-совместимому серверу. Локальный сервер, например Ollama, оставляет текст на вашей машине.
-qtranslate не записывает тексты в лог.
+QTranslate не записывает тексты в лог.

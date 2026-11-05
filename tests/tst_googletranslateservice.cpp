@@ -215,7 +215,7 @@ private slots:
         QCOMPARE(query.queryItemValue(QStringLiteral("tl")), QStringLiteral("zh-CN"));
         QCOMPARE(query.queryItemValue(QStringLiteral("dt")), QStringLiteral("t"));
         QVERIFY(request.headers.value("content-type").startsWith("application/x-www-form-urlencoded"));
-        QVERIFY(request.headers.value("user-agent").startsWith("qtranslate/"));
+        QVERIFY(request.headers.value("user-agent").startsWith("QTranslate/"));
         QCOMPARE(request.text, QStringLiteral("Hello, world & more"));
     }
 

@@ -12,7 +12,7 @@ QString name();
 // Semantic version from CMake's project(VERSION ...), e.g. "0.9.1".
 QString version();
 
-// User-Agent for outgoing HTTP requests, e.g. "qtranslate/0.9.1".
+// User-Agent for outgoing HTTP requests, e.g. "QTranslate/0.9.1".
 QString userAgent();
 
 } // namespace AppInfo

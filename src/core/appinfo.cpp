@@ -8,7 +8,7 @@ namespace AppInfo {
 
 QString name()
 {
-    return QStringLiteral("qtranslate");
+    return QStringLiteral("QTranslate");
 }
 
 QString version()

@@ -10,7 +10,7 @@ class TestAppInfo : public QObject
 private slots:
     void nameIsStable()
     {
-        QCOMPARE(AppInfo::name(), QStringLiteral("qtranslate"));
+        QCOMPARE(AppInfo::name(), QStringLiteral("QTranslate"));
     }
 
     void versionIsSemantic()

@@ -19,12 +19,12 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "qtranslate"
-            VALUE "FileDescription", "qtranslate"
+            VALUE "CompanyName", "youkaicat"
+            VALUE "FileDescription", "QTranslate"
             VALUE "FileVersion", "0.10.0"
             VALUE "InternalName", "qtranslate"
             VALUE "OriginalFilename", "qtranslate.exe"
-            VALUE "ProductName", "qtranslate"
+            VALUE "ProductName", "QTranslate"
             VALUE "ProductVersion", "0.10.0"
         END
     END

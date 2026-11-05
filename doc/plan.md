@@ -38,7 +38,7 @@
 | 17 | Словарь и глоссарии | запланирован: LLM/Google/CSV/Wiktionary, отдельный `DictionaryService`; детали в `dictionary.md` |
 
 Текущий публичный релиз — **0.10.0** (DeepL free web, 15 языков интерфейса, slim-дистрибутив):
-https://github.com/youkaicat/qtranslate/releases/tag/v0.10.0. `v0.9.1` остаётся историческим
+https://github.com/youkaicat/QTranslate/releases/tag/v0.10.0. `v0.9.1` остаётся историческим
 релизом, его тег и ассеты не меняются.
 
 Зависимости: каждый этап опирается на предыдущие. Этапы 6 и 7 друг от друга не зависят, их порядок
@@ -1196,9 +1196,9 @@ GitHub Actions по тегу, а не вручную.
 
 CI и релиз:
 
-- workflow `build`: https://github.com/youkaicat/qtranslate/actions/workflows/build.yml
-- успешный прогон тега: https://github.com/youkaicat/qtranslate/actions/runs/41908976474
-- релиз: https://github.com/youkaicat/qtranslate/releases/tag/v0.9.1
+- workflow `build`: https://github.com/youkaicat/QTranslate/actions/workflows/build.yml
+- успешный прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41908976474
+- релиз: https://github.com/youkaicat/QTranslate/releases/tag/v0.9.1
 - артефакты: `qtranslate-0.9.1-win64-setup.exe` (16,4 МБ),
   `qtranslate-0.9.1-win64.zip` (22,5 МБ), `SHA256SUMS.txt`; скачанные из релиза файлы
   совпали с контрольными суммами.

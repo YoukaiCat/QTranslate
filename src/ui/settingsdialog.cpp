@@ -1,5 +1,6 @@
 #include "ui/settingsdialog.h"
 
+#include "core/appinfo.h"
 #include "core/hotkeysequence.h"
 #include "core/languages.h"
 #include "core/uilanguages.h"
@@ -63,7 +64,8 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
         m_uiLanguage->addItem(language.nativeName, language.code);
     generalForm->addRow(tr("Interface language:"), m_uiLanguage);
     generalLayout->addLayout(generalForm);
-    m_autostart = new QCheckBox(tr("Start qtranslate when Windows starts"), generalPage);
+    m_autostart = new QCheckBox(tr("Start %1 when Windows starts").arg(AppInfo::name()),
+                                generalPage);
     m_autostart->setObjectName(QStringLiteral("autostart"));
     m_autostartHint = new QLabel(tr("Autostart is disabled in Windows Task Manager."),
                                  generalPage);

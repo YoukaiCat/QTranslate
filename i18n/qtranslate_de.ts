@@ -69,32 +69,32 @@
         <translation>DeepL benötigt einen API-Schlüssel.</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="322"/>
+        <location filename="../src/services/deeplservice.cpp" line="321"/>
         <source>language &quot;%1&quot; is not supported</source>
         <translation>Sprache „%1“ wird nicht unterstützt</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="338"/>
+        <location filename="../src/services/deeplservice.cpp" line="337"/>
         <source>Enter a DeepL API key.</source>
         <translation>Geben Sie einen DeepL-API-Schlüssel ein.</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="345"/>
+        <location filename="../src/services/deeplservice.cpp" line="344"/>
         <source>The network is not available.</source>
         <translation>Das Netzwerk ist nicht verfügbar.</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="363"/>
+        <location filename="../src/services/deeplservice.cpp" line="362"/>
         <source>DeepL did not respond in time (%1 s).</source>
         <translation>DeepL hat nicht rechtzeitig geantwortet (%1 s).</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="375"/>
+        <location filename="../src/services/deeplservice.cpp" line="374"/>
         <source>Used %1 of %2 characters.</source>
         <translation>Verwendete %1 von %2-Zeichen.</translation>
     </message>
     <message>
-        <location filename="../src/services/deeplservice.cpp" line="377"/>
+        <location filename="../src/services/deeplservice.cpp" line="376"/>
         <source>DeepL returned an unexpected response.</source>
         <translation>DeepL hat eine unerwartete Antwort zurückgegeben.</translation>
     </message>
@@ -994,389 +994,389 @@
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="35"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="592"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="37"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="606"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="60"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="62"/>
         <source>System</source>
         <translation>System</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="63"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="65"/>
         <source>Interface language:</source>
         <translation>Sprache der Oberfläche:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="65"/>
-        <source>Start qtranslate when Windows starts</source>
-        <translation>qtranslate beim Start von Windows starten</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="67"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="70"/>
         <source>Autostart is disabled in Windows Task Manager.</source>
         <translation>Der Autostart ist im Windows-Task-Manager deaktiviert.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="72"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="75"/>
         <source>Start minimized in the system tray</source>
         <translation>Minimiert im Infobereich starten</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="75"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="78"/>
         <source>Restore clipboard after copying the selection</source>
         <translation>Stellen Sie die Zwischenablage nach dem Kopieren der Auswahl wieder her</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="78"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="81"/>
         <source>Close the popup when it loses focus</source>
         <translation>Schließen Sie das Popup, wenn es den Fokus verliert</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="100"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="103"/>
         <source>Translate in a popup:</source>
         <translation>In einem Popup übersetzen:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="101"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="104"/>
         <source>Replace the selected text with the translation:</source>
         <translation>Ersetzen Sie den ausgewählten Text durch die Übersetzung:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="103"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="106"/>
         <source>Translate in the main window:</source>
         <translation>Im Hauptfenster übersetzen:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="104"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="107"/>
         <source>Show the main window:</source>
         <translation>Hauptfenster anzeigen:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="106"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="109"/>
         <source>Global hotkeys are disabled while a key combination field is focused. Leave a field empty to disable that action.</source>
         <translation>Globale Hotkeys sind deaktiviert, während ein Tastenkombinationsfeld fokussiert ist. Lassen Sie ein Feld leer, um diese Aktion zu deaktivieren.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="131"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="134"/>
         <source> characters</source>
         <translation> Zeichen</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="136"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="308"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="139"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="321"/>
         <source> ms</source>
         <translation> ms</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="137"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="140"/>
         <source>Off</source>
         <translation>Aus</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="139"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="142"/>
         <source>Source language:</source>
         <translation>Quellsprache:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="140"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="143"/>
         <source>Primary language:</source>
         <translation>Primärsprache:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="141"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="144"/>
         <source>Additional language:</source>
         <translation>Zusätzliche Sprache:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="142"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="145"/>
         <source>Maximum text length:</source>
         <translation>Maximale Textlänge:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="143"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="146"/>
         <source>Auto-translate delay:</source>
         <translation>Verzögerung der automatischen Übersetzung:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="145"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="148"/>
         <source>The additional language is used automatically when the detected text is already in the primary language.</source>
         <translation>Die zusätzliche Sprache wird automatisch verwendet, wenn der erkannte Text bereits in der Primärsprache vorliegt.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="153"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="156"/>
         <source>General</source>
         <translation>Allgemein</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="154"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="157"/>
         <source>Hotkeys</source>
         <translation>Hotkeys</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="155"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="158"/>
         <source>Translation</source>
         <translation>Übersetzung</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="160"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="171"/>
         <source>Google Translate</source>
         <translation>Google Übersetzer</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="164"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="175"/>
         <source>Free endpoint (no key)</source>
         <translation>Kostenloser Endpunkt (kein Schlüssel)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="165"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="176"/>
         <source>Cloud Translation API (key required)</source>
         <translation>Cloud Translation API (Schlüssel erforderlich)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="170"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="181"/>
         <source>Google Cloud API key</source>
         <translation>Google-Cloud-API-Schlüssel</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="171"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="208"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="182"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="219"/>
         <source>Mode:</source>
         <translation>Modus:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="172"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="209"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="248"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="183"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="220"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="259"/>
         <source>API key:</source>
         <translation>API-Schlüssel:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="174"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="185"/>
         <source>The free mode uses the public endpoint and needs no key. The Cloud API requires a key with the Translation API enabled.</source>
         <translation>Der kostenlose Modus verwendet den öffentlichen Endpunkt und benötigt keinen Schlüssel. Für die Cloud API ist ein Schlüssel mit aktivierter Übersetzung API erforderlich.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="182"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="193"/>
         <source>DeepL</source>
         <translation>DeepL</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="186"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="197"/>
         <source>API (key required)</source>
         <translation>API (Schlüssel erforderlich)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="187"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="198"/>
         <source>Free web (unofficial, no key)</source>
         <translation>Kostenloses Web (inoffiziell, ohne Schlüssel)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="191"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="202"/>
         <source>DeepL API key (ends with :fx for Free)</source>
         <translation>DeepL-API-Schlüssel (endet bei Free auf :fx)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="196"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="207"/>
         <source>Check key</source>
         <translation>Schlüssel prüfen</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="210"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="221"/>
         <source>English target:</source>
         <translation>Englisches Ziel:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="218"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="263"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="337"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="229"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="274"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="350"/>
         <source>Checking…</source>
         <translation>Überprüfung…</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="203"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="214"/>
         <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
         <translation>Ohne API-Schlüssel verfügbar. Dieser inoffizielle Endpunkt kann ausfallen, Ratenlimits anwenden oder Anfragen blockieren; der Text wird an DeepL gesendet.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="223"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="67"/>
+        <source>Start %1 when Windows starts</source>
+        <translation>%1 beim Start von Windows starten</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="234"/>
         <source>OpenAI-compatible provider</source>
         <translation>OpenAI-kompatibler Anbieter</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="231"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="242"/>
         <source>API key</source>
         <translation>API-Schlüssel</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="239"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="250"/>
         <source>Model ID, for example openai/gpt-4o-mini</source>
         <translation>Modell-ID, zum Beispiel openai/gpt-4o-mini</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="241"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="252"/>
         <source>Load models</source>
         <translation>Modelle laden</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="247"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="258"/>
         <source>Server URL:</source>
         <translation>Server-URL:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="249"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="260"/>
         <source>Model:</source>
         <translation>Modell:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="253"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="264"/>
         <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key. The text is sent to the selected provider.</source>
         <translation>Verwendet die OpenAI-kompatible Chat-Completions-API. Der Standardserver ist OpenRouter; die URL kann auf einen anderen kompatiblen Endpunkt wie OpenAI, Ollama, llama.cpp oder TeamRouter zeigen. Das Modell muss für deinen Schlüssel verfügbar sein. Der Text wird an den ausgewählten Anbieter gesendet.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="273"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="286"/>
         <source>Services</source>
         <translation>Dienstleistungen</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="281"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="294"/>
         <source>No proxy</source>
         <translation>Kein Proxy</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="282"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="295"/>
         <source>System proxy</source>
         <translation>System-Proxy</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="283"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="296"/>
         <source>Manual proxy</source>
         <translation>Manueller Proxy</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="286"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="287"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="300"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="290"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
         <source>Proxy host</source>
         <translation>Proxy-Host</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="294"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="307"/>
         <source>Not set</source>
         <translation>Nicht festgelegt</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="295"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="308"/>
         <source>The proxy requires authentication</source>
         <translation>Der Proxy erfordert eine Authentifizierung</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="312"/>
         <source>User name</source>
         <translation>Benutzername</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
         <source>Password</source>
         <translation>Passwort</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="309"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="322"/>
         <source>Test connection</source>
         <translation>Testverbindung</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="329"/>
         <source>Proxy mode:</source>
         <translation>Proxy-Modus:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="330"/>
         <source>Proxy type:</source>
         <translation>Proxy-Typ:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="318"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="331"/>
         <source>Host:</source>
         <translation>Gastgeber:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="319"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="332"/>
         <source>Port:</source>
         <translation>Hafen:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="321"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="334"/>
         <source>User name:</source>
         <translation>Benutzername:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="322"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="335"/>
         <source>Password:</source>
         <translation>Passwort:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="323"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="336"/>
         <source>Request timeout:</source>
         <translation>Anforderungszeitüberschreitung:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="328"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="341"/>
         <source>Network</source>
         <translation>Netzwerk</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
         <source>Translate in a popup</source>
         <translation>In einem Popup übersetzen</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="533"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="547"/>
         <source>Replace the selected text with the translation</source>
         <translation>Ersetzen Sie den ausgewählten Text durch die Übersetzung</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="534"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="548"/>
         <source>Translate in the main window</source>
         <translation>Übersetzen Sie im Hauptfenster</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="535"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="549"/>
         <source>Show the main window</source>
         <translation>Hauptfenster anzeigen</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="543"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="557"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>„%1“ verwendet mehr als eine Tastenkombination. Globale Hotkeys unterstützen eine einzelne Kombination.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="565"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>„%1“ kann nicht als globaler Hotkey verwendet werden.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="564"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="578"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>Dieselbe Tastenkombination wird mehrfach vergeben: %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="575"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="589"/>
         <source>The primary and additional languages must differ.</source>
         <translation>Die Haupt- und Zusatzsprachen müssen unterschiedlich sein.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="582"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="596"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>Geben Sie den Proxy-Host und -Port ein oder wählen Sie einen anderen Proxy-Modus.</translation>
     </message>

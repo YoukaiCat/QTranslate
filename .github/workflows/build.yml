@@ -115,17 +115,17 @@ jobs:
             gh release upload "$tag" artifacts/* --repo "$GITHUB_REPOSITORY" --clobber
             if [[ -f "$notes" ]]; then
               gh release edit "$tag" --repo "$GITHUB_REPOSITORY" \
-                --title "qtranslate ${version}" --notes-file "$notes" --latest
+                --title "QTranslate ${version}" --notes-file "$notes" --latest
             else
               gh release edit "$tag" --repo "$GITHUB_REPOSITORY" \
-                --title "qtranslate ${version}" --generate-notes --latest
+                --title "QTranslate ${version}" --generate-notes --latest
             fi
           else
             if [[ -f "$notes" ]]; then
               gh release create "$tag" artifacts/* --repo "$GITHUB_REPOSITORY" \
-                --title "qtranslate ${version}" --notes-file "$notes" --latest
+                --title "QTranslate ${version}" --notes-file "$notes" --latest
             else
               gh release create "$tag" artifacts/* --repo "$GITHUB_REPOSITORY" \
-                --title "qtranslate ${version}" --generate-notes --latest
+                --title "QTranslate ${version}" --generate-notes --latest
             fi
           fi

@@ -233,8 +233,8 @@ private slots:
         QCOMPARE(request.url.path(), QStringLiteral("/api/v1/chat/completions"));
         QCOMPARE(request.headers.value("authorization"), QByteArray("Bearer test-key"));
         QCOMPARE(request.headers.value("http-referer"),
-                 QByteArray("https://github.com/youkaicat/qtranslate"));
-        QCOMPARE(request.headers.value("x-title"), QByteArray("qtranslate"));
+                 QByteArray("https://github.com/youkaicat/QTranslate"));
+        QCOMPARE(request.headers.value("x-title"), QByteArray("QTranslate"));
         QVERIFY(request.headers.value("content-type").startsWith("application/json"));
 
         const QJsonObject body = QJsonDocument::fromJson(request.body).object();
