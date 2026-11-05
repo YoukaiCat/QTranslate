@@ -13,7 +13,7 @@ Move the Russian flat plan from `doc/plan.md` to `doc/roadmap/qtranslate/legacy-
 ## Steps
 
 1. Move the file with history: `git mv doc/plan.md doc/roadmap/qtranslate/legacy-plan.md`. Confirm `git status` shows a rename, not an add/delete pair.
-2. Prepend an English archive header before the original `# qtranslate — план реализации`:
+2. Prepend an English archive header before the original Russian title:
    - title `# qtranslate — legacy implementation plan (Russian archive)`;
    - a short blockquote: this is the historical Russian flat plan of stages 1-17, kept for history and rationale; it is not the active plan; the active roadmap is `plan.md` and the architecture is `../../architecture.md`;
    - explain that relative links in the body were rewritten from `X.md` to `../../X.md` after the move and that stage numbers below are the old flat-plan numbers;

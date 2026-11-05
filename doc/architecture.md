@@ -1863,7 +1863,7 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 
 ### 11.11. Open items
 
-- **Branch.** The lead asks whether to continue on `main` or create a branch. The user decides.
+- **Branch.** The user decided to continue on `main`; no separate branch was created.
 - **Commit and push policy.** The lead asks and follows `AGENTS.md`. No push without an explicit request.
 - **Archive name and location.** The archive is `doc/roadmap/qtranslate/legacy-plan.md`; stage 1 moved the file there.
 - **Translation glossary.** Use technical English and preserve identifiers, commands, paths, and product names. The user can spot-check and request terminology changes.
