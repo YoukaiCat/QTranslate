@@ -1,149 +1,148 @@
-# Бесплатные веб-эндпоинты перевода
+# Free web translation endpoints
 
-Дата: 2026-11-05. Статус: **DeepL web реализован как режим `free-web` сервиса DeepL;
-остальные эндпоинты — исследование**.
+Date: 2026-11-05. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
+mode of the DeepL service; the other endpoints are research**.
 
-Документ фиксирует бесплатные эндпоинты без API-ключа, которые можно добавить в qtranslate как
-экспериментальные сервисы. Основной источник — открытый проект
-[ahatem/QTranslate](https://github.com/ahatem/QTranslate) (MPL-2.0), плагины `deepl-services`,
+This document records the free endpoints without an API key that can be added to qtranslate as
+experimental services. The main source is the open project
+[ahatem/QTranslate](https://github.com/ahatem/QTranslate) (MPL-2.0), plugins `deepl-services`,
 `yandex-web-services`, `bing-services`, `reverso-services`, `mozhi-services`, `mymemory-services`.
 
-Все перечисленные ниже веб-эндпоинты, кроме MyMemory и self-hosted LibreTranslate/Mozhi,
-**неофициальные**: у них нет SLA и квот, они могут измениться, потребовать cookies/капчу,
-начать отдавать `429` или блокировать IP. Условия сервисов могут ограничивать автоматическое
-использование. DeepL web реализован как переключаемый режим одного сервиса «DeepL» без ключа, но
-явно помечен в UI как неофициальный; остальные рискованные эндпоинты лучше включать только явно и
-не делать единственным способом перевода.
+All web endpoints listed below, except MyMemory and self-hosted LibreTranslate/Mozhi, are
+**unofficial**: they have no SLA or quotas, they may change, require cookies/captcha, start
+returning `429`, or block IPs. The services' terms may restrict automated use. DeepL web is
+implemented as a switchable mode of a single "DeepL" service without a key, but it is explicitly
+marked in the UI as unofficial; the other risky endpoints are better enabled only explicitly and not
+made the only translation method.
 
 ## 1. DeepL web
 
-- **Запрос:** `POST https://oneshot-free.www.deepl.com/v1/translate`
-- **Заголовки:** `Authorization: None`, `Content-Type: application/json`,
-  `Accept: application/json`, браузерный `User-Agent`.
-- **Тело:** `{"text":["..."],"target_lang":"de"}`; `source_lang` можно не передавать.
-- **Ответ:** `{"translations":[{"detected_source_language":"en","text":"...", "...":...}]}`.
-- **Ограничения:** неофициальный endpoint; rate limit по IP; ошибка `1042911` / `Too many requests`.
-- **Что делает QTranslate:** пробует официальный API при наличии ключа; при отказе ключа один раз
-  переходит на веб-endpoint; веб-запросы не чаще раза в 2 секунды; текст режется по 5000 символов;
-  на `429` пауза и одна повторная попытка.
-- **Проверка:** 2026-11-05 endpoint ответил `200` на нейтральную фразу; до этого был `429`, то есть
-  лимит реальный и зависит от IP/частоты.
+- **Request:** `POST https://oneshot-free.www.deepl.com/v1/translate`
+- **Headers:** `Authorization: None`, `Content-Type: application/json`, `Accept: application/json`,
+  a browser `User-Agent`.
+- **Body:** `{"text":["..."],"target_lang":"de"}`; `source_lang` may be omitted.
+- **Response:** `{"translations":[{"detected_source_language":"en","text":"...", "...":...}]}`.
+- **Limits:** unofficial endpoint; rate limit by IP; error `1042911` / `Too many requests`.
+- **What QTranslate does:** tries the official API when a key is present; if the key is rejected,
+  switches to the web endpoint once; web requests no more often than once every 2 seconds; text is
+  split into 5000-character chunks; on `429`, a pause and one retry.
+- **Verification:** on 2026-11-05 the endpoint answered `200` to a neutral phrase; before that it
+  returned `429`, so the limit is real and depends on IP/rate.
 
-**Реализация в qtranslate (2026-11-05).**
+**Implementation in qtranslate (2026-11-05).**
 
-- Режим `free-web` в настройках сервиса «DeepL», рядом с режимом API, как у Google
-  free/Cloud. Отдельного `deepl-web` в списке сервисов больше нет. Режим доступен без ключа,
-  поле ключа блокируется, в настройках показывается предупреждение о неофициальности.
-  Старые настройки `service=deepl-web` мигрируют в `service=deepl` + `deepl.mode=free-web`.
-- Заголовки: `Authorization: None`, `Accept: application/json`, `Content-Type: application/json`;
-  `User-Agent` qtranslate подходит, маскироваться под браузер не нужно.
-- Коды языков: базовые — в нижнем регистре (`DE` → `de`), региональные — `pt-BR`, `en-US`,
-  `zh-Hans`. Важно: `DE` в верхнем регистре эндпоинт принимает за неизвестный код и возвращает
-  исходный текст с `200`, поэтому приведение к нижнему регистру обязательно. `PT-BR`, `EN-US` и
-  `zh-Hans` (после приведения из `ZH-HANS`) проверены живыми запросами.
-- 5000 символов на часть, все части уходят одним запросом массивом `text`; пробелы на краях
-  восстанавливаются.
-- Внутри `DeepLWebService` запросы сериализуются и идут не чаще раза в 2 с; на `429` — пауза 3 с
-  и одна повторная попытка; `403` считается блокировкой/лимитом. `413` → `TooLong`, `5xx` →
+- `free-web` mode in the settings of the "DeepL" service, next to the API mode, as with Google
+  free/Cloud. There is no separate `deepl-web` in the service list anymore. The mode is available
+  without a key, the key field is disabled, and the settings show a warning about the unofficial
+  status. Old `service=deepl-web` settings migrate to `service=deepl` + `deepl.mode=free-web`.
+- Headers: `Authorization: None`, `Accept: application/json`, `Content-Type: application/json`; the
+  qtranslate `User-Agent` is suitable, and there is no need to masquerade as a browser.
+- Language codes: base ones in lowercase (`DE` → `de`), regional ones — `pt-BR`, `en-US`, `zh-Hans`.
+  Important: the endpoint takes uppercase `DE` as an unknown code and returns the source text with
+  `200`, so lowercasing is mandatory. `PT-BR`, `EN-US`, and `zh-Hans` (after conversion from
+  `ZH-HANS`) were verified with live requests.
+- 5000 characters per chunk; all chunks are sent in one request as a `text` array; leading and
+  trailing spaces are restored.
+- Inside `DeepLWebService`, requests are serialized and sent no more often than once every 2 s; on
+  `429`, a 3 s pause and one retry; `403` is treated as a block/limit. `413` → `TooLong`, `5xx` →
   `Network`.
-- Код: `src/services/deeplwebservice.*`, `src/services/deeplwebparser.*`; тесты:
+- Code: `src/services/deeplwebservice.*`, `src/services/deeplwebparser.*`; tests:
   `tst_deeplwebparser`, `tst_deeplwebservice`.
 
 ## 2. Yandex web
 
-- **Запрос:** `POST https://api.browser.yandex.com/instaserp/translate`
-- **Формат:** `application/x-www-form-urlencoded`; браузерный `User-Agent` (в QTranslate —
+- **Request:** `POST https://api.browser.yandex.com/instaserp/translate`
+- **Format:** `application/x-www-form-urlencoded`; a browser `User-Agent` (in QTranslate —
   Chrome/YaBrowser).
-- **Поля:** `text`, `brandID=int`, `statLang=<target>`, `targetLang=auto`, `locale=<target>`,
+- **Fields:** `text`, `brandID=int`, `statLang=<target>`, `targetLang=auto`, `locale=<target>`,
   `clid=2270494`, `disable=serp`, `use_llm_srv=0`.
-- **Ответ:** JSON-массив, первый элемент содержит `text` и определённый язык.
-- **Ограничения:** неофициальный endpoint; QTranslate держит паузу 750 мс и при ошибке пробует
-  Mozhi с `engine=yandex`.
-- **Зачем:** хорошее покрытие ru/uk/tr и языков СНГ.
+- **Response:** a JSON array; the first element contains `text` and the detected language.
+- **Limits:** unofficial endpoint; QTranslate keeps a 750 ms pause and on error tries Mozhi with
+  `engine=yandex`.
+- **Why:** good coverage of ru/uk/tr and CIS languages.
 
 ## 3. Bing web
 
-- **Подготовка:** `GET https://www.bing.com/translator` и разбор HTML:
-  `IG`, `data-iid`, `params_AbusePreventionHelper` (key/token), `MUID`, `SID`, `TID`.
-- **Запрос:** `POST https://www.bing.com/ttranslatev3?isVertical=1&IG=...&IID=...`
-- **Формат:** form-data: `text`, `fromLang`, `to`, `token`, `key`, `isAuthv2=true`,
+- **Preparation:** `GET https://www.bing.com/translator` and HTML parsing: `IG`, `data-iid`,
+  `params_AbusePreventionHelper` (key/token), `MUID`, `SID`, `TID`.
+- **Request:** `POST https://www.bing.com/ttranslatev3?isVertical=1&IG=...&IID=...`
+- **Format:** form-data: `text`, `fromLang`, `to`, `token`, `key`, `isAuthv2=true`,
   `tryFetchingGenderDebiasedTranslations=true`; cookie `MUID`.
-- **Ответ:** JSON с `detectedLanguage` и массивом `translations[].text`.
-- **Ограничения:** токен живёт около часа; при `401` нужно один раз обновить токен и повторить,
-  без циклов. HTML Bing меняется, поэтому парсер хрупкий.
-- **Сложность:** выше остальных из-за извлечения токенов и cookie.
+- **Response:** JSON with `detectedLanguage` and a `translations[].text` array.
+- **Limits:** the token lives about an hour; on `401`, refresh the token once and retry, without
+  loops. Bing's HTML changes, so the parser is fragile.
+- **Complexity:** higher than the others because of token and cookie extraction.
 
 ## 4. Reverso
 
-- **Запрос:** `POST https://cps.reverso.net/api2/TranslateText`
-- **Тело:** JSON `{"source":"...","direction":"...","deviceId":"0","uiLang":"en",
+- **Request:** `POST https://cps.reverso.net/api2/TranslateText`
+- **Body:** JSON `{"source":"...","direction":"...","deviceId":"0","uiLang":"en",
   "origin":"chromeextension","accessToken":"","appId":"0"}`.
-- **Ответ:** `translation`, `directionFrom`, `directionTo`, `success`, `message`.
-- **Ограничения:** неофициальный endpoint; пауза 600 мс; коды направлений свои; покрытие языков
-  уже, чем у Google/DeepL.
+- **Response:** `translation`, `directionFrom`, `directionTo`, `success`, `message`.
+- **Limits:** unofficial endpoint; a 600 ms pause; its own direction codes; narrower language
+  coverage than Google/DeepL.
 
 ## 5. Mozhi
 
-- **Запрос:** `GET https://<instance>/api/translate?engine=<engine>&from=<src>&to=<dst>&text=...`
-- **Ответ:** `"translated-text"`, `detected`, `"source_language"`, `"target_transliteration"`.
-- **Движки:** Google, DeepL, DuckDuckGo, LibreTranslate, MyMemory, Reverso, Yandex.
-- **Инстансы:** публичные (`mozhi.adminforge.de`, `mozhi.pussthecat.org` и др.) или self-hosted;
-  публичные могут быть недоступны, поэтому нужен выбор инстанса и fallback.
-- **Плюс:** одна интеграция даёт несколько движков и возможность self-hosted.
-- **Минус:** это прокси к чужим endpoint'ам, стабильность и условия зависят от инстанса.
+- **Request:** `GET https://<instance>/api/translate?engine=<engine>&from=<src>&to=<dst>&text=...`
+- **Response:** `"translated-text"`, `detected`, `"source_language"`, `"target_transliteration"`.
+- **Engines:** Google, DeepL, DuckDuckGo, LibreTranslate, MyMemory, Reverso, Yandex.
+- **Instances:** public (`mozhi.adminforge.de`, `mozhi.pussthecat.org`, and others) or self-hosted;
+  public ones may be unavailable, so instance selection and a fallback are needed.
+- **Pro:** one integration gives several engines and a self-hosted option.
+- **Con:** it is a proxy to third-party endpoints; stability and terms depend on the instance.
 
 ## 6. MyMemory
 
-- **Запрос:** `GET https://api.mymemory.translated.net/get?q=...&langpair=en|ru&mt=1`
-- **Ответ:** `responseData.translatedText`, `responseStatus`, `responseDetails`,
-  `quotaFinished`.
-- **Ограничения:** бесплатный API, но около **500 байт на запрос**, требуется явный исходный
-  язык (автоопределение не поддерживается), есть квота; QTranslate держит паузу 350 мс и режет
-  текст по 500 байт.
-- **Плюс:** не нужен ключ, более предсказуем, чем scraping.
-- **Минус:** короткие запросы, качество смешанное, для длинных текстов много запросов.
+- **Request:** `GET https://api.mymemory.translated.net/get?q=...&langpair=en|ru&mt=1`
+- **Response:** `responseData.translatedText`, `responseStatus`, `responseDetails`, `quotaFinished`.
+- **Limits:** a free API, but about **500 bytes per request**; an explicit source language is
+  required (auto-detection is not supported); there is a quota; QTranslate keeps a 350 ms pause and
+  splits text into 500-byte chunks.
+- **Pro:** no key is needed, and it is more predictable than scraping.
+- **Con:** short requests, mixed quality, and many requests for long texts.
 
-## 7. DeepL API: актуальный бесплатный тариф
+## 7. DeepL API: the current free tier
 
-Раньше здесь был указан `DeepL API Free` с 500 000 символов в месяц. Это устарело: сейчас
-**DeepL API Developer** даёт **1 000 000 символов всего**, и этот лимит **не сбрасывается
-ежемесячно**. После исчерпания нужно переходить на DeepL API Growth. Ключи с суффиксом `:fx`
-по-прежнему используют хост `api-free.deepl.com`, но это уже не бесконечный месячный бесплатный
-тариф.
+This section used to list `DeepL API Free` with 500,000 characters per month. That is outdated: now
+**DeepL API Developer** gives **1,000,000 characters in total**, and this limit **does not reset
+monthly**. After it is exhausted, you have to move to DeepL API Growth. Keys with the `:fx` suffix
+still use the `api-free.deepl.com` host, but this is no longer an endless monthly free tier.
 
-Практический вывод: официальный ключ DeepL — фактически trial на 1 млн символов, а не постоянный
-бесплатный вариант. Поэтому веб-endpoint DeepL полезен как бесплатный режим или fallback, но
-остаётся неофициальным.
+Practical conclusion: an official DeepL key is effectively a 1-million-character trial, not a
+permanent free option. Therefore the DeepL web endpoint is useful as a free mode or fallback, but it
+remains unofficial.
 
-## 8. Как встраивать
+## 8. How to integrate
 
-1. DeepL web — режим `free-web` внутри `DeepLService` (внутренний `DeepLWebService`) и
-   предупреждение в настройках; отдельного сервиса нет. Для остальных рискованных эндпоинтов
-   можно добавить общий переключатель «Разрешить неофициальные бесплатные сервисы».
-2. Для каждого сервиса — свой `TranslationService` и парсер; ключи не нужны.
-3. Ограничение частоты на хост: mutex + пауза (DeepL 2 с, Yandex 750 мс, Reverso 600 мс,
-   MyMemory 350 мс); без параллельных запросов к одному хосту.
-4. Разбиение текста: DeepL 5000 символов, MyMemory 500 байт, остальные — по лимитам сервиса.
-5. Ошибки: `429`/`403`/HTML-заглушка → `RateLimited`/`ServiceUnavailable` с понятным текстом,
-   без шторма повторных запросов.
-6. Fallback: официальный API → бесплатный web → Mozhi/другой сервис; не показывать сырой HTML.
-7. Приватность: текст уходит стороннему сервису; в лог не писать текст, ключи и cookies.
-8. Тесты: фикстуры ответов и локальный `QTcpServer`; реальные endpoint'ы — только ручной smoke,
-   потому что они живые и нестабильные.
+1. DeepL web — the `free-web` mode inside `DeepLService` (the internal `DeepLWebService`) and a
+   warning in settings; there is no separate service. For the other risky endpoints, a common "Allow
+   unofficial free services" toggle can be added.
+2. For each service — its own `TranslationService` and parser; no keys are needed.
+3. Per-host rate limiting: a mutex + pause (DeepL 2 s, Yandex 750 ms, Reverso 600 ms, MyMemory 350
+   ms); no parallel requests to one host.
+4. Text splitting: DeepL 5000 characters, MyMemory 500 bytes, the rest — according to the service
+   limits.
+5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,
+   without a retry storm.
+6. Fallback: the official API → free web → Mozhi/another service; do not show raw HTML.
+7. Privacy: the text goes to a third-party service; do not write text, keys, or cookies to the log.
+8. Tests: response fixtures and a local `QTcpServer`; real endpoints — manual smoke only, because
+   they are live and unstable.
 
-## 9. Приоритеты
+## 9. Priorities
 
-1. **DeepL web** — реализован: высокое качество, но высокий риск; доступен как режим DeepL.
-2. **MyMemory** — самый простой и относительно официальный бесплатный API.
-3. **Mozhi** — одна интеграция, много движков, возможен self-hosted.
-4. **Yandex web** — важно для русской аудитории.
-5. **Bing web** — хрупкая авторизация и HTML; делать после остальных.
-6. **Reverso** — нишевый, меньше языков.
+1. **DeepL web** — implemented: high quality but high risk; available as a DeepL mode.
+2. **MyMemory** — the simplest and relatively official free API.
+3. **Mozhi** — one integration, many engines, self-hosting possible.
+4. **Yandex web** — important for the Russian audience.
+5. **Bing web** — fragile auth and HTML; do it after the rest.
+6. **Reverso** — niche, fewer languages.
 
-## 10. Что не делать
+## 10. What not to do
 
-- Не включать неофициальные endpoint'ы по умолчанию и не выдавать их за официальный API.
-- Не обходить платные квоты и не публиковать чужие ключи/cookies.
-- Не использовать публичные инстансы Mozhi/LibreTranslate как единственный канал без fallback.
-- Не копировать код QTranslate без соблюдения MPL-2.0; реализации писать самостоятельно по
-  наблюдаемому HTTP-протоколу.
+- Do not enable unofficial endpoints by default or present them as an official API.
+- Do not bypass paid quotas or publish other people's keys/cookies.
+- Do not use public Mozhi/LibreTranslate instances as the only channel without a fallback.
+- Do not copy QTranslate code without complying with MPL-2.0; write implementations yourself from
+  the observed HTTP protocol.

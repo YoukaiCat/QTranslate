@@ -1,83 +1,86 @@
-# Локальный offline-перевод: вариант Argos / CTranslate2
+# Local offline translation: the Argos / CTranslate2 option
 
-Дата: 2026-11-05. Статус: **вариант, код не реализован**.
+Date: 2026-11-05. Status: **roadmap stage 4 (old stage 14); option, code not implemented**.
 
-Документ фиксирует возможный локальный режим qtranslate без API-ключей и без отправки текста в
-интернет. Основной кандидат — модели Argos Translate, исполняемые через CTranslate2. Это не LLM,
-а нейросетевой машинный перевод (NMT).
+This document records a possible local mode of qtranslate without API keys and without sending text
+to the internet. The main candidate is Argos Translate models executed through CTranslate2. This is
+not an LLM but neural machine translation (NMT).
 
-## 1. Зачем
+## 1. Why
 
-- Приватность: текст не уходит в облако.
-- Работа без интернета после скачивания модели.
-- Нет ключей, квот и зависимости от смены облачных API.
-- Дополнение к облачным сервисам: «локальный режим» как fallback или выбор пользователя.
+- Privacy: the text does not go to the cloud.
+- Work without the internet after a model is downloaded.
+- No keys, quotas, or dependence on changes in cloud APIs.
+- A complement to cloud services: a "local mode" as a fallback or user choice.
 
-Минусы: качество ниже DeepL/Google, модели занимают место, на слабом CPU перевод длинных текстов
-медленнее, а установщик требует отдельного движка и менеджера моделей.
+Cons: quality lower than DeepL/Google, models take space, on a weak CPU long texts are slower, and
+the installer requires a separate engine and model manager.
 
-## 2. Варианты движка
+## 2. Engine options
 
-| Вариант | Что это | Плюсы | Минусы |
+| Option | What it is | Pros | Cons |
 |---|---|---|---|
-| **Argos Translate (Python)** | Python-библиотека + `argospm` + модели | Быстрый прототип, всё готово | Нельзя поставлять как есть: нужен Python, spaCy/Stanza и зависимости |
-| **Argos-модели + CTranslate2 (C++)** | Нативный runner читает `.argosmodel` | Нет Python, меньше размер, встраивается в Qt | Нужно самим сделать загрузку/распаковку, сегментацию и UI |
-| **MetalTranslate** | Экспериментальный C++-шаблон Argos на CTranslate2 | Показывает минимальный native-путь | Не production: нет менеджера моделей, сегментации, Windows-сборки «из коробки» |
-| **OPUS-MT + CTranslate2** | Модели Helsinki-NLP + CTranslate2 | Много моделей, понятный формат | Лицензии моделей разные, качество/размер сильно варьируются |
-| **llama.cpp + GGUF LLM** | Локальная LLM через промпт | Контекст, тон, глоссарии | 2,5–5 ГБ на модель, медленно на CPU, недетерминированно |
-| **ONNX Runtime GenAI** | Универсальный runtime для ONNX-моделей | DirectML/OpenVINO, один runtime для разных моделей | Нужны совместимые ONNX-модели, сложнее экспорт; меньше готовых LLM |
-| **LibreTranslate** | Python-сервер поверх Argos | Готовый HTTP API, self-hosted | AGPL-3.0, Python, тяжёлый; это сервер, а не библиотека |
+| **Argos Translate (Python)** | Python library + `argospm` + models | Fast prototype, everything is ready | Cannot be shipped as is: Python, spaCy/Stanza, and dependencies are required |
+| **Argos models + CTranslate2 (C++)** | A native runner reads `.argosmodel` | No Python, smaller size, embeds into Qt | We must implement loading/unpacking, segmentation, and the UI ourselves |
+| **MetalTranslate** | Experimental C++ template of Argos on CTranslate2 | Shows the minimal native path | Not production-ready: no model manager, segmentation, or out-of-the-box Windows build |
+| **OPUS-MT + CTranslate2** | Helsinki-NLP models + CTranslate2 | Many models, a clear format | Model licenses vary; quality and size vary widely |
+| **llama.cpp + GGUF LLM** | A local LLM via a prompt | Context, tone, glossaries | 2.5–5 GB per model, slow on CPU, non-deterministic |
+| **ONNX Runtime GenAI** | A universal runtime for ONNX models | DirectML/OpenVINO, one runtime for different models | Compatible ONNX models are required; export is harder; fewer ready LLMs |
+| **LibreTranslate** | A Python server on top of Argos | A ready HTTP API, self-hosted | AGPL-3.0, Python, heavy; it is a server, not a library |
 
-Для qtranslate рекомендуемый путь: **Argos-модели + CTranslate2**. Python-Argos использовать
-только для прототипа и проверки качества.
+For qtranslate the recommended path is: **Argos models + CTranslate2**. Use Python Argos only for a
+prototype and quality checks.
 
-### 2.1. ONNX Runtime GenAI и llama.cpp
+### 2.1. ONNX Runtime GenAI and llama.cpp
 
-**ONNX** — это формат модели, а не движок. Сам `.onnx` не запускается: нужен **ONNX Runtime**.
-Для LLM поверх него есть **ONNX Runtime GenAI** — обёртка с токенизатором, KV-cache и генерацией.
-Обычный ONNX Runtime даёт только тензоры, и токенизацию/sampling/KV-cache пришлось бы писать самим.
+**ONNX** is a model format, not an engine. `.onnx` itself does not run: **ONNX Runtime** is
+required. For LLMs on top of it there is **ONNX Runtime GenAI** — a wrapper with a tokenizer, KV
+cache, and generation. Plain ONNX Runtime provides only tensors, and tokenization/sampling/KV cache
+would have to be written by us.
 
-- **CPU:** да, ONNX Runtime работает на CPU (x86-64/ARM64, AVX2/AVX-512, INT8).
-- **Linux:** да, есть официальные сборки x64/ARM64 и C++ API; GenAI тоже собирается под Linux.
-- **GPU:** CUDA/TensorRT/OpenVINO — Linux и Windows; **DirectML — только Windows**; Metal — macOS.
-- **Модели:** нужны совместимые ONNX-экспорты, часто многофайловые; не любой `.onnx` подойдёт для GenAI.
-- **Размер:** гигабайты — это модель, а не движок; у ONNX и llama.cpp модель 4B/7B весит
-  примерно одинаково (2,5–5 ГБ в INT4/Q4).
+- **CPU:** yes, ONNX Runtime works on CPU (x86-64/ARM64, AVX2/AVX-512, INT8).
+- **Linux:** yes, there are official x64/ARM64 builds and a C++ API; GenAI also builds on Linux.
+- **GPU:** CUDA/TensorRT/OpenVINO — Linux and Windows; **DirectML — Windows only**; Metal — macOS.
+- **Models:** compatible ONNX exports are required, often multi-file; not every `.onnx` is suitable
+  for GenAI.
+- **Size:** gigabytes are the model, not the engine; with ONNX and llama.cpp a 4B/7B model weighs
+  about the same (2.5–5 GB in INT4/Q4).
 
-**llama.cpp** — специализированный C++-движок для GGUF-моделей. Он тоже встраивается, но:
+**llama.cpp** is a specialized C++ engine for GGUF models. It also embeds, but:
 
-- модель GGUF — один файл, внутри токенизатор и chat template;
-- готовых GGUF-моделей гораздо больше;
-- CPU-инференс очень хорошо оптимизирован;
-- есть готовые релизы; для продукта движок собирается один раз в CI, пользователь ничего не компилирует;
-- `llama-server` можно запускать как сайдкар с OpenAI-совместимым API.
+- A GGUF model is one file with the tokenizer and chat template inside;
+- There are far more ready GGUF models;
+- CPU inference is very well optimized;
+- Ready releases exist; for the product the engine is built once in CI, and the user compiles
+  nothing;
+- `llama-server` can be run as a sidecar with an OpenAI-compatible API.
 
 | | ONNX Runtime GenAI | llama.cpp |
 |---|---|---|
-| Формат | ONNX | GGUF |
-| Назначение | общий ML + LLM | в первую очередь LLM |
-| CPU | да, MLAS/oneDNN | да, ggml |
+| Format | ONNX | GGUF |
+| Purpose | general ML + LLM | primarily LLM |
+| CPU | yes, MLAS/oneDNN | yes, ggml |
 | GPU | CUDA/TensorRT/DirectML/OpenVINO | CUDA/Vulkan/Metal/HIP |
-| Linux | да | да |
-| Готовые LLM | меньше, нужен экспорт | очень много |
-| Квантизация | INT8/INT4 инструментами ORT | GGUF K-quants |
-| Интеграция | C++ API + DLL/SO + провайдеры | C++ API, часто один бинарник/библиотека |
-| Когда выбирать | DirectML/OpenVINO, уже есть ONNX-модель, один runtime на всё | локальная LLM, CPU-first, простая раздача моделей |
+| Linux | yes | yes |
+| Ready LLMs | fewer, export needed | very many |
+| Quantization | INT8/INT4 with ORT tools | GGUF K-quants |
+| Integration | C++ API + DLL/SO + providers | C++ API, often a single binary/library |
+| When to choose | DirectML/OpenVINO, an ONNX model already exists, one runtime for everything | a local LLM, CPU-first, simple model distribution |
 
-Для qtranslate: **llama.cpp** — основной кандидат для локальной LLM; **ONNX Runtime GenAI** —
-альтернатива, если понадобится DirectML/OpenVINO или конкретная ONNX-модель. Для NMT
-(Argos/OPUS) всё равно лучше **CTranslate2**, а не ONNX.
+For qtranslate: **llama.cpp** is the main candidate for a local LLM; **ONNX Runtime GenAI** is an
+alternative if DirectML/OpenVINO or a specific ONNX model is needed. For NMT (Argos/OPUS),
+**CTranslate2** is still better than ONNX.
 
-## 3. Как устроен Argos
+## 3. How Argos works
 
-`pip install argostranslate` (на 2026-11 — версия 1.11.0) ставит:
+`pip install argostranslate` (version 1.11.0 as of 2026-11) installs:
 
-- `ctranslate2` — инференс;
-- `sentencepiece`, `sacremoses` — токенизация;
-- `spacy`, `stanza==1.10.1`, `minisbd` — сегментация предложений;
+- `ctranslate2` — inference;
+- `sentencepiece`, `sacremoses` — tokenization;
+- `spacy`, `stanza==1.10.1`, `minisbd` — sentence segmentation;
 - `packaging`.
 
-Модели ставятся отдельно:
+Models are installed separately:
 
 ```bash
 argospm update
@@ -85,87 +88,88 @@ argospm install translate-en_ru translate-ru_en
 argos-translate --from en --to ru "Hello world"
 ```
 
-Модель `.argosmodel` — это zip:
+The `.argosmodel` model is a zip:
 
-- `model/` — модель CTranslate2;
+- `model/` — the CTranslate2 model;
 - `sentencepiece.model`;
-- `metadata.json` (коды языков, версия пакета).
+- `metadata.json` (language codes, package version).
 
-CTranslate2 читает `model/`, SentencePiece — токенизатор. В модели используются языковые префиксы
-вида `__en__` / `__ru__`: их добавляют к токенам перед переводом и убирают из результата.
-Именно так устроен минимальный [MetalTranslate](https://github.com/argosopentech/MetalTranslate)
-(MIT): C++ + CTranslate2 + OpenNMT Tokenizer.
+CTranslate2 reads `model/`, and SentencePiece handles the tokenizer. The model uses language
+prefixes such as `__en__` / `__ru__`: they are added to the tokens before translation and removed
+from the result. This is exactly how the minimal
+[MetalTranslate](https://github.com/argosopentech/MetalTranslate) (MIT) is built: C++ + CTranslate2
++ OpenNMT Tokenizer.
 
-Индекс моделей Argos — [argospm-index](https://github.com/argosopentech/argospm-index). Он в
-основном содержит направления `X → en` и `en → X`; для пар без прямой модели Argos делает pivot
-через английский (`ru → en → de`). Это важно для качества и задержки.
+The Argos model index is [argospm-index](https://github.com/argosopentech/argospm-index). It mostly
+contains `X → en` and `en → X` directions; for pairs without a direct model, Argos pivots through
+English (`ru → en → de`). This matters for quality and latency.
 
-## 4. Что нужно для native-режима
+## 4. What a native mode needs
 
 1. **`ArgosModelManager`**
-   - список доступных моделей из нашего манифеста (URL, SHA-256, размер, лицензия, направления);
-   - скачивание с прогрессом, докачкой и отменой;
-   - проверка хэша и свободного места;
-   - безопасная распаковка `.argosmodel` в `%LOCALAPPDATA%\qtranslate\models`;
-   - удаление модели и очистка диска.
+   - A list of available models from our manifest (URL, SHA-256, size, license, directions);
+   - Download with progress, resume, and cancellation;
+   - Hash and free-space checks;
+   - Safe unpacking of `.argosmodel` into `%LOCALAPPDATA%\qtranslate\models`;
+   - Model deletion and disk cleanup.
 
 2. **`CTranslate2Runner`**
-   - загрузка `model/` и `sentencepiece.model`;
-   - токенизация, языковые префиксы, декодирование;
-   - `Translator`/пул потоков, отмена запроса;
-   - ленивая загрузка модели и выгрузка из памяти.
+   - Loading `model/` and `sentencepiece.model`;
+   - Tokenization, language prefixes, decoding;
+   - `Translator`/thread pool, request cancellation;
+   - Lazy model loading and unloading from memory.
 
-3. **Сегментация**
-   - Argos использует Stanza/minisbd; в native-варианте — `QTextBoundaryFinder` или собственный
-     splitter по предложениям/абзацам;
-   - длинный текст режется на предложения, переводится пакетом и склеивается с сохранением
-     пробелов и переводов строк.
+3. **Segmentation**
+   - Argos uses Stanza/minisbd; in the native variant — `QTextBoundaryFinder` or our own
+     sentence/paragraph splitter;
+   - Long text is split into sentences, translated as a batch, and joined back while preserving
+     spaces and line breaks.
 
 4. **`LocalArgosService : TranslationService`**
-   - `isConfigured()` — установлена ли модель для пары;
-   - pivot `src → en → dst`, если прямой модели нет;
-   - ошибки «модель не установлена», «не хватает памяти», «неподдерживаемый язык»;
-   - кэш переводов (общий `TranslationManager` уже умеет).
+   - `isConfigured()` — whether a model for the pair is installed;
+   - Pivot `src → en → dst` if there is no direct model;
+   - Errors "model is not installed", "not enough memory", "unsupported language";
+   - Translation cache (the shared `TranslationManager` already has it).
 
 5. **UI**
-   - вкладка «Сервисы» → «Локальный (offline)»;
-   - список установленных и доступных моделей;
-   - кнопки «Скачать», «Удалить», размер и свободное место;
-   - предупреждение, что качество ниже облачных сервисов;
-   - выбор «Локальный» в общем списке сервисов.
+   - The "Services" tab → "Local (offline)";
+   - A list of installed and available models;
+   - "Download", "Delete" buttons, size and free space;
+   - A warning that quality is lower than cloud services;
+   - The "Local" choice in the common service list.
 
-## 5. Ограничения и риски
+## 5. Limitations and risks
 
-- **Качество.** Модели Argos старше и меньше DeepL/Google. Для en↔ru и европейских пар может быть
-  приемлемо, для других языков — заметно хуже. Нужен бенчмарк на реальных фразах.
-- **Pivot.** `ru → de` через английский даёт двойной перевод и потерю качества.
-- **Размер.** Одно направление — обычно десятки–сотни МБ; двусторонний режим требует двух моделей.
-  Полную матрицу языков ставить нельзя.
-- **Лицензии.** Argos Translate — MIT/CC0, CTranslate2 — MIT, MetalTranslate — MIT. Лицензии
-  конкретных моделей нужно проверять отдельно; NLLB/Seamless, например, CC-BY-NC и не подходят
-  для коммерческого распространения без проверки.
-- **Безопасность.** `.argosmodel` — zip из интернета: нужна защита от path traversal, проверка
-  SHA-256 и загрузка только с доверенных URL.
-- **Python-путь.** Если делать прототип на Argos Python, нельзя рассчитывать, что у пользователя
-  есть Python/pip; это только dev-инструмент.
+- **Quality.** Argos models are older and smaller than DeepL/Google. For en↔ru and European pairs it
+  may be acceptable; for other languages it is noticeably worse. A benchmark on real phrases is
+  needed.
+- **Pivot.** `ru → de` through English means double translation and quality loss.
+- **Size.** One direction is usually tens to hundreds of MB; bidirectional mode needs two models.
+  The full language matrix cannot be installed.
+- **Licenses.** Argos Translate — MIT/CC0, CTranslate2 — MIT, MetalTranslate — MIT. Licenses of
+  specific models must be checked separately; NLLB/Seamless, for example, are CC-BY-NC and are not
+  suitable for commercial distribution without checking.
+- **Security.** `.argosmodel` is a zip from the internet: path traversal protection, SHA-256
+  verification, and downloads only from trusted URLs are needed.
+- **Python path.** If a prototype is made with Argos Python, we cannot assume the user has
+  Python/pip; it is a dev tool only.
 
 ## 6. PoC
 
-1. Локально: `pip install argostranslate`, `argospm update`, поставить `en↔ru`, `en↔de`, `en↔zh`.
-2. Прогнать 20–30 реальных фраз qtranslate: короткие, длинные абзацы, форматирование, имена,
-   термины.
-3. Замерить: качество, время на 100/1000/5000 символов, RAM, размер моделей, поведение на CPU без
-   GPU.
-4. Проверить pivot `ru → de` и `ru → zh`.
-5. Если качество приемлемо — делать native CTranslate2 runner; если нет — оставить Argos как
-   экспериментальный режим или перейти к llama.cpp/облаку.
+1. Locally: `pip install argostranslate`, `argospm update`, install `en↔ru`, `en↔de`, `en↔zh`.
+2. Run 20–30 real qtranslate phrases: short ones, long paragraphs, formatting, names, and terms.
+3. Measure: quality, time for 100/1000/5000 characters, RAM, model size, and behaviour on a CPU
+   without a GPU.
+4. Check the pivot `ru → de` and `ru → zh`.
+5. If the quality is acceptable — build a native CTranslate2 runner; if not — keep Argos as an
+   experimental mode or move to llama.cpp/cloud.
 
-## 7. Решение
+## 7. Decision
 
-Argos — хороший **первый кандидат** для offline-режима, но не через `pip install` в поставке.
-Правильный путь:
+Argos is a good **first candidate** for offline mode, but not through `pip install` in the
+distribution. The right path:
 
-- прототип на Python — для проверки качества и скорости;
-- native CTranslate2 + `.argosmodel` — для продукта;
-- llama.cpp/LLM — отдельный, более тяжёлый вариант, если нужен контекст и тон;
-- LibreTranslate — только как внешний self-hosted сервер, с учётом AGPL.
+- A Python prototype — for checking quality and speed;
+- Native CTranslate2 + `.argosmodel` — for the product;
+- llama.cpp/LLM — a separate, heavier option if context and tone are needed;
+- LibreTranslate — only as an external self-hosted server, considering AGPL.

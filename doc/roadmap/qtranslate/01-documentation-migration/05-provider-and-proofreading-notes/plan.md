@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 depends: [01-archive-legacy-plan]
 ---
@@ -33,3 +33,14 @@ Translate `doc/free-endpoints.md`, `doc/local-translation.md`, and `doc/proofrea
 - Keep the distinction between implemented (DeepL web) and research or planned endpoints.
 - Local translation compares engines; preserve the recommendation and caveats.
 - Proofreading offsets are UTF-16; do not change units or field semantics.
+
+## Outcome
+
+Translated `doc/free-endpoints.md` (149 → 148 lines), `doc/local-translation.md` (171 → 175 lines), and `doc/proofreading.md` (171 → 174 lines) to English. Each status now names the roadmap stage with the old stage in parentheses: stage 3 (old 13), stage 4 (old 14), and stage 5 (old 15). No code changes.
+
+- The notes are fully English; only typographic characters (`—`, `→`, `↔`, `–`) remain non-ASCII. Kept Russian UI labels: none. Quoted UI labels use the English source strings already used in `doc/architecture.md` ("Text checking", "Check", "Translate", "Replace all", "Apply corrections") and planned English labels for buttons and states.
+- Preserved against `HEAD`: endpoint URLs and payload examples, headers, status codes, rate limits, provider and model names, licenses, formats (`.argosmodel`, CTranslate2, SentencePiece), sizes, settings keys, `ProofreadingIssue` fields, UTF-16 offset semantics, test names, priorities, recommendations, and caveats. Code-block comments were translated; identifiers and literals were not.
+- Links: the incoming links from `doc/dictionary.md:76`, `doc/architecture.md` §4.15 and §9.2, and `doc/handoff.md` resolve; no document links to anchors in these notes, so the translated headings break nothing. `legacy-plan.md` links to the same file names and stays valid.
+- Verification: no Cyrillic in the three files; all backticked spans match `HEAD` exactly; numeric tokens match except English digit grouping and the added stage numbers; heading counts and order, list numbering, tables, and code fences match; `git diff --check` is clean. No build was required.
+- Review found no issues.
+- Found but not fixed, out of scope: `doc/handoff.md:165` calls the planned settings tab "Proofreading", while `doc/proofreading.md:111` and `doc/architecture.md:1252` use "Text checking"; task 04 introduced that mismatch. The stale `doc/plan.md` reference in `src/platform/selectiongrabber_win.cpp:248` remains a known deferred item.

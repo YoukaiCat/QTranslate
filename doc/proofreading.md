@@ -1,42 +1,42 @@
-# Проверка орфографии, грамматики и пунктуации
+# Spelling, grammar, and punctuation checking
 
-Дата: 2026-11-05. Статус: **задача на будущее, код не реализован**.
+Date: 2026-11-05. Status: **roadmap stage 5 (old stage 15); future task, code not implemented**.
 
-## 1. Цель
+## 1. Goal
 
-Добавить в qtranslate отдельный режим проверки текста:
+Add a separate text-checking mode to qtranslate:
 
-- находить орфографические, грамматические и пунктуационные ошибки;
-- показывать их списком и подсветкой;
-- принимать замены по одной или все сразу;
-- заменять исходный текст исправленным;
-- при необходимости проверять текст перед переводом.
+- find spelling, grammar, and punctuation errors;
+- show them in a list and with highlighting;
+- accept replacements one by one or all at once;
+- replace the source text with the corrected text;
+- optionally check the text before translation.
 
-Это не часть перевода: проверка должна быть отдельным действием, отдельной вкладкой настроек и
-отдельным набором настроек.
+This is not part of translation: checking must be a separate action, a separate settings tab, and a
+separate set of settings.
 
-## 2. Сценарии
+## 2. Scenarios
 
-1. **Проверить текст в главном окне.** Пользователь нажимает «Проверить» или настроенное
-   сочетание; ошибки подсвечиваются в исходном поле, справа/снизу появляется список.
-2. **Заменить исправленным.** Кнопка «Заменить всё» / «Применить исправления» заменяет текст в
-   поле с сохранением форматирования и возможностью отмены через undo.
-3. **Проверить выделение в другом приложении.** Аналог Ctrl+Shift+Q: захватить выделение,
-   проверить, показать кандидатов и заменить выделение исправленным текстом. Для внешнего
-   приложения нужна защита от смены активного окна и предупреждение, что undo зависит от
-   приложения.
-4. **Проверка перед переводом.** Опция «Проверять перед переводом» (по умолчанию выключена):
-   показать ошибки и запросить подтверждение, а не молча менять текст.
-5. **Только орфография.** Лёгкий offline-режим без грамматики и пунктуации.
+1. **Check text in the main window.** The user clicks "Check" or presses the configured shortcut;
+   errors are highlighted in the source field, and a list appears on the right/below.
+2. **Replace with the corrected text.** The "Replace all" / "Apply corrections" button replaces the
+   text in the field while preserving formatting and allowing undo.
+3. **Check the selection in another application.** Similar to Ctrl+Shift+Q: capture the selection,
+   check it, show candidates, and replace the selection with the corrected text. For an external
+   application, protection against active-window changes and a warning that undo depends on the
+   application are needed.
+4. **Check before translation.** The "Check before translation" option (off by default): show errors
+   and ask for confirmation instead of silently changing the text.
+5. **Spelling only.** A lightweight offline mode without grammar and punctuation.
 
-## 3. Провайдеры
+## 3. Providers
 
-| Провайдер | Что проверяет | Языки | Доступ | Замечания |
+| Provider | What it checks | Languages | Access | Notes |
 |---|---|---|---|---|
-| **LanguageTool** | орфография, грамматика, пунктуация, стиль | 25+ языков, включая ru, uk, en, de, fr, es, pl, pt, zh, ja, ar | HTTP API или self-hosted Java-сервер | Лучший мультиязычный вариант; LGPL-2.1; публичный API с лимитами |
-| **Hunspell / Nuspell** | только орфография | много языков, словари отдельно | C/C++ библиотека | Легко встроить; нет грамматики/пунктуации |
-| **Yandex Speller** | орфография, опечатки, регистр | ru, uk, en и др. | HTTP без ключа | Бесплатно, но не проверяет запятые/грамматику |
-| **LLM** | орфография, пунктуация, стиль, тон | много языков | API или локальная модель | Возвращает исправленный текст, а не список ошибок; нужен diff и подтверждение |
+| **LanguageTool** | spelling, grammar, punctuation, style | 25+ languages, including ru, uk, en, de, fr, es, pl, pt, zh, ja, ar | HTTP API or a self-hosted Java server | The best multilingual option; LGPL-2.1; a public API with limits |
+| **Hunspell / Nuspell** | spelling only | many languages, dictionaries separately | C/C++ library | Easy to embed; no grammar/punctuation |
+| **Yandex Speller** | spelling, typos, case | ru, uk, en, and others | HTTP without a key | Free, but does not check commas/grammar |
+| **LLM** | spelling, punctuation, style, tone | many languages | API or a local model | Returns corrected text rather than a list of errors; a diff and confirmation are needed |
 
 LanguageTool HTTP:
 
@@ -47,21 +47,22 @@ Content-Type: application/x-www-form-urlencoded
 text=...&language=ru-RU
 ```
 
-Ответ содержит `matches[]`: `offset`, `length`, `message`, `replacements`, `rule`, `context`.
-Это удобно для подсветки и замен. Публичный API имеет лимиты (около 20 запросов/мин,
-75 000 символов/мин, 20 000 символов на запрос); для регулярного использования лучше свой сервер.
+The response contains `matches[]`: `offset`, `length`, `message`, `replacements`, `rule`, `context`.
+This is convenient for highlighting and replacements. The public API has limits (about 20
+requests/min, 75,000 characters/min, 20,000 characters per request); for regular use a dedicated
+server is better.
 
-Для русского/украинского LanguageTool покрывает грамматику и пунктуацию лучше, чем Hunspell;
-Hunspell/Nuspell — только орфография. Yandex Speller — дешёвый вариант для орфографии ru/uk/en.
+For Russian/Ukrainian, LanguageTool covers grammar and punctuation better than Hunspell;
+Hunspell/Nuspell — spelling only. Yandex Speller is a cheap option for ru/uk/en spelling.
 
-## 4. Архитектура
+## 4. Architecture
 
-Новый модуль в `qtranslate_core`:
+A new module in `qtranslate_core`:
 
 ```cpp
 struct ProofreadingIssue
 {
-    int offset = 0;          // в QChar/UTF-16, как в Qt
+    int offset = 0;          // in QChar/UTF-16, as in Qt
     int length = 0;
     QString message;
     QStringList replacements;
@@ -73,7 +74,7 @@ struct ProofreadingIssue
 struct ProofreadingResult
 {
     QVector<ProofreadingIssue> issues;
-    QString correctedText;   // заполняется, если провайдер вернул готовый текст
+    QString correctedText;   // filled when the provider returned ready text
 };
 
 class ProofreadingService
@@ -88,84 +89,86 @@ public:
 };
 ```
 
-Особенности:
+Details:
 
-- `offset`/`length` — в UTF-16 (`QString`), а не в байтах; суррогатные пары не разрывать.
-- длинный текст резать по предложениям/абзацам, смещения склеивать с учётом разделителей;
-- отменять устаревший запрос при новом нажатии;
-- не блокировать UI; сеть — через существующий `NetworkManager` с прокси и таймаутом;
-- ключи API — через DPAPI, как у DeepL/Google;
-- в лог не писать проверяемый текст.
+- `offset`/`length` are in UTF-16 (`QString`), not bytes; do not split surrogate pairs.
+- Split long text by sentences/paragraphs, merge offsets taking separators into account;
+- Cancel a stale request on a new click;
+- Do not block the UI; network — through the existing `NetworkManager` with proxy and timeout;
+- API keys — through DPAPI, as with DeepL/Google;
+- Do not write the checked text to the log.
 
-Для замены текста:
+For text replacement:
 
-- в главном окне — через `QTextDocument`/курсор, чтобы работал undo;
-- во внешнем приложении — через тот же механизм, что Ctrl+Shift+Q, с проверкой активного окна;
-- перед «заменить всё» показывать предпросмотр/diff, если исправлений больше одного;
-- после замены пересчитать смещения или заново запросить проверку.
+- In the main window — through `QTextDocument`/the cursor so that undo works;
+- In an external application — through the same mechanism as Ctrl+Shift+Q, with active-window
+  checking;
+- Before "replace all", show a preview/diff if there is more than one correction;
+- After replacement, recalculate the offsets or request the check again.
 
-## 5. Настройки
+## 5. Settings
 
-Отдельная вкладка **«Проверка текста»** (не смешивать с «Переводом»):
+A separate **"Text checking"** tab (do not mix it with "Translation"):
 
-- `proofreading/enabled` — включить режим;
+- `proofreading/enabled` — enable the mode;
 - `proofreading/provider` — `languagetool`, `hunspell`, `yandex`, `llm`;
-- `proofreading/language` — язык проверки (`auto` или конкретный);
-- `proofreading/endpoint` — URL своего LanguageTool/LLM;
-- `proofreading/apiKey` — ключ, если нужен (DPAPI);
-- `proofreading/categories` — орфография, грамматика, пунктуация, стиль;
-- `proofreading/checkBeforeTranslation` — по умолчанию `false`;
-- `proofreading/autoReplace` — по умолчанию `false` (молча не менять текст);
-- `proofreading/hotkey` — отдельное сочетание, по умолчанию пусто.
+- `proofreading/language` — checking language (`auto` or a specific one);
+- `proofreading/endpoint` — URL of your own LanguageTool/LLM;
+- `proofreading/apiKey` — key, if needed (DPAPI);
+- `proofreading/categories` — spelling, grammar, punctuation, style;
+- `proofreading/checkBeforeTranslation` — `false` by default;
+- `proofreading/autoReplace` — `false` by default (do not change text silently);
+- `proofreading/hotkey` — a separate shortcut, empty by default.
 
-Вкладка должна быть отдельной, как и просили; настройки — независимыми от перевода и не влиять на
-выбранный сервис перевода.
+The tab must be separate, as requested; the settings must be independent of translation and must not
+affect the selected translation service.
 
 ## 6. UI
 
-- Кнопка «Проверить» рядом с «Перевести» (или отдельная панель).
-- Подсветка проблем в исходном поле; при клике — выделение фрагмента.
-- Список: сообщение, правило, варианты замены, кнопки «Заменить», «Игнорировать».
-- «Заменить всё» / «Применить исправления» с предпросмотром.
-- «Копировать исправленный текст».
-- Состояния: проверка, ошибок нет, провайдер недоступен, нужен ключ, лимит запросов.
-- Для внешнего выделения: отдельное окно/панель, как у popup, с подтверждением замены.
+- A "Check" button next to "Translate" (or a separate panel).
+- Highlighting issues in the source field; clicking selects the fragment.
+- List: message, rule, replacement options, "Replace", "Ignore" buttons.
+- "Replace all" / "Apply corrections" with a preview.
+- "Copy corrected text".
+- States: checking, no errors, provider unavailable, key required, request limit.
+- For an external selection: a separate window/panel, like the popup, with replacement confirmation.
 
-## 7. Тесты
+## 7. Tests
 
-- парсер LanguageTool на фикстурах: несколько ошибок, replacements, offset/length, UTF-16 и
-  суррогатные пары, пустой ответ, 429/403/5xx;
-- склейка смещений при разбиении длинного текста;
-- Hunspell/Nuspell: словарь, регистр, пунктуация вокруг слова;
-- Yandex Speller: успех, пустой ответ, лимит;
-- настройки: сохранение/загрузка, DPAPI для ключа, отдельная вкладка;
-- UI (offscreen): список, замена одной/всех, undo, отмена запроса;
-- ручной smoke: LanguageTool cloud/self-hosted, замена в Блокноте/браузере.
+- The LanguageTool parser on fixtures: several errors, replacements, offset/length, UTF-16 and
+  surrogate pairs, an empty response, 429/403/5xx;
+- Merging offsets when splitting long text;
+- Hunspell/Nuspell: dictionary, case, punctuation around the word;
+- Yandex Speller: success, empty response, limit;
+- Settings: saving/loading, DPAPI for the key, a separate tab;
+- UI (offscreen): the list, replacing one/all, undo, request cancellation;
+- Manual smoke: LanguageTool cloud/self-hosted, replacement in Notepad/a browser.
 
-## 8. Риски
+## 8. Risks
 
-- ложные срабатывания правил; пользователь должен подтверждать замены;
-- пунктуационные правила зависят от языка и стиля;
-- LanguageTool — Java; облачный API проще, self-hosted тяжелее;
-- публичный API имеет лимиты и не гарантирует доступность;
-- LLM может переписать смысл; только diff + подтверждение;
-- замена во внешнем приложении не всегда отменяется через undo;
-- текст проверки уходит провайдеру; локальные Hunspell/Nuspell — приватнее.
+- Rule false positives; the user must confirm replacements;
+- Punctuation rules depend on language and style;
+- LanguageTool is Java; the cloud API is simpler, self-hosting is heavier;
+- The public API has limits and does not guarantee availability;
+- An LLM may rewrite the meaning; only a diff + confirmation;
+- Replacement in an external application is not always undone by undo;
+- The checked text goes to the provider; local Hunspell/Nuspell are more private.
 
-## 9. Приоритеты
+## 9. Priorities
 
-1. **LanguageTool** — грамматика и пунктуация для основных языков.
-2. **Hunspell/Nuspell** — лёгкая offline-орфография.
-3. **Yandex Speller** — бесплатная орфография для ru/uk/en.
-4. **LLM** — опционально, для стиля/тона, не как единственный чекер.
+1. **LanguageTool** — grammar and punctuation for the main languages.
+2. **Hunspell/Nuspell** — lightweight offline spelling.
+3. **Yandex Speller** — free spelling for ru/uk/en.
+4. **LLM** — optional, for style/tone, not as the only checker.
 
-## 10. Критерии готовности
+## 10. Done criteria
 
-- [ ] Есть отдельная вкладка «Проверка текста» и независимые настройки.
-- [ ] Проверка находит ошибки и показывает их списком/подсветкой.
-- [ ] Можно заменить одну ошибку, все ошибки и заменить текст исправленным.
-- [ ] Замена в главном окне отменяется через undo; для внешнего приложения есть подтверждение.
-- [ ] LanguageTool работает через облако и self-hosted URL; ключи хранятся через DPAPI.
-- [ ] Hunspell/Nuspell и Yandex Speller работают как минимум для орфографии.
-- [ ] Ошибки сети/лимитов/ключей показываются понятно, приложение не зависает.
-- [ ] Тесты и документация обновлены.
+- [ ] There is a separate "Text checking" tab and independent settings.
+- [ ] Checking finds errors and shows them in a list/with highlighting.
+- [ ] It is possible to replace one error, all errors, and the text with the corrected one.
+- [ ] Replacement in the main window is undone by undo; for an external application there is
+  confirmation.
+- [ ] LanguageTool works through the cloud and a self-hosted URL; keys are stored through DPAPI.
+- [ ] Hunspell/Nuspell and Yandex Speller work at least for spelling.
+- [ ] Network/limit/key errors are shown clearly and the application does not hang.
+- [ ] Tests and documentation are updated.
