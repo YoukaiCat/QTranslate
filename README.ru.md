@@ -6,8 +6,8 @@
 любой программе по глобальной горячей клавише и умеет сразу заменять выделение переводом в
 активном поле ввода.
 
-> **Статус:** 0.10.0 выпущен. Доступны установщик для Windows и портативный архив.
-> Что изменилось — в [заметках к релизу 0.10.0](doc/releases/0.10.0.md).
+> **Статус:** 0.11.0 выпущен. Доступны установщик для Windows и портативный архив.
+> Что изменилось — в [заметках к релизу 0.11.0](doc/releases/0.11.0.md).
 > Поддержка Linux в разработке.
 
 [English](README.md) | **Русский**
@@ -49,11 +49,11 @@
 
 Последняя сборка — на странице [Releases](https://github.com/youkaicat/QTranslate/releases/latest):
 
-- **[`qtranslate-0.10.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64-setup.exe)**. Устанавливает QTranslate для текущего
+- **[`qtranslate-0.11.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.11.0/qtranslate-0.11.0-win64-setup.exe)**. Устанавливает QTranslate для текущего
   пользователя без прав администратора; по умолчанию создаёт ярлык в меню «Пуск» и включает
   автозагрузку, ярлык на рабочем столе — по желанию. Добавляет деинсталлятор. При удалении
   настройки в `%APPDATA%\qtranslate` сохраняются.
-- **[`qtranslate-0.10.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.10.0/qtranslate-0.10.0-win64.zip)**. Распакуйте и запустите
+- **[`qtranslate-0.11.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.11.0/qtranslate-0.11.0-win64.zip)**. Распакуйте и запустите
   `bin\qtranslate.exe`; установка и права администратора не нужны. Архив самодостаточен: Qt и
   runtime MSVC уже включены.
 Установщик пока не подписан кодом, поэтому Windows SmartScreen может показать предупреждение.
@@ -138,7 +138,7 @@ ctest --test-dir build/release --output-on-failure
 
 Результат — в `build/artifacts`. Workflow CI
 [`.github/workflows/build.yml`](.github/workflows/build.yml) запускает те же шаги на
-`windows-latest` с Qt 6.8.3 LTS. Пуш тега вроде `v0.10.0` публикует GitHub Release с этими
+`windows-latest` с Qt 6.8.3 LTS. Пуш тега вроде `v0.11.0` публикует GitHub Release с этими
 файлами; версия тега должна совпадать с версией в `CMakeLists.txt`.
 
 ### Linux (в разработке)
