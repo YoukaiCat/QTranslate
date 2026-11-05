@@ -1,79 +1,79 @@
-# LLM-действия: перевод, проверка, суммаризация, рерайтинг
+# LLM actions: translation, checking, summarization, and rewriting
 
-Дата: 2026-11-05. Статус: **перевод через OpenAI-совместимый провайдер реализован;
-остальные действия и словарь запланированы**. Словарь вынесен в отдельный дизайн —
-[`dictionary.md`](dictionary.md).
+Date: 2026-11-05. Status: **roadmap stage 6 (old stage 16); translation via an OpenAI-compatible
+provider is implemented; the other actions and the dictionary are planned**. The dictionary has its
+own design — [`dictionary.md`](dictionary.md).
 
-## 1. Цель
+## 1. Goal
 
-Добавить необязательный LLM-слой для текстовых действий:
+Add an optional LLM layer for text actions:
 
-- перевод;
-- проверка орфографии/грамматики/пунктуации;
-- суммаризация;
-- рерайтинг (тон, стиль, сокращение, формализация);
-- объяснение перевода, идиом и терминов;
-- транскрипция/произношение в виде IPA или текстового описания.
+- translation;
+- spelling/grammar/punctuation checking;
+- summarization;
+- rewriting (tone, style, shortening, formalization);
+- explanation of translations, idioms, and terms;
+- transcription/pronunciation as IPA or a text description.
 
-LLM не заменяет DeepL/Google/LanguageTool, а дополняет их для задач, где нужен контекст, тон и
-понимание инструкций. Основные переводчики и структурированные чекеры остаются специализированными.
+The LLM does not replace DeepL/Google/LanguageTool; it complements them for tasks that need context,
+tone, and instruction following. The main translators and structured checkers remain specialized.
 
-## 2. Что входит
+## 2. What is included
 
-- `LlmProvider` — OpenAI-совместимый клиент:
-  - облако: OpenAI, Gemini (OpenAI-compatible endpoint), OpenRouter, Groq и др.;
-  - локально: Ollama, LM Studio, llama.cpp server;
-  - настройки base URL, модели, ключа, таймаута. **Уже реализовано** для перевода:
-    сервис `llm` и транспорт `src/ai/openaichat.*`.
-- `AiAction` — действие с собственным промптом, ограничениями и валидацией результата:
+- `LlmProvider` — an OpenAI-compatible client:
+  - cloud: OpenAI, Gemini (OpenAI-compatible endpoint), OpenRouter, Groq, and others;
+  - local: Ollama, LM Studio, llama.cpp server;
+  - settings for base URL, model, key, timeout. **Already implemented** for translation:
+    the `llm` service and the `src/ai/openaichat.*` transport.
+- `AiAction` — an action with its own prompt, limits, and result validation:
   - `translate`;
   - `proofread`;
   - `summarize`;
   - `rewrite`;
   - `explain`;
-  - `pronounce` (текст/IPA).
-- UI: меню/кнопки AI-действий, предпросмотр, копирование, замена с подтверждением.
-- Настройки: отдельная вкладка «AI» (или «LLM»), независимые ключи.
-- Локальный режим: подключение к `http://127.0.0.1:.../v1` без обязательного облака.
-- Кэш результатов для повторных одинаковых запросов (по возможности).
+  - `pronounce` (text/IPA).
+- UI: AI action menu/buttons, preview, copying, replacement with confirmation.
+- Settings: a separate "AI" tab (or "LLM"), independent keys.
+- Local mode: connection to `http://127.0.0.1:.../v1` without a mandatory cloud.
+- Result cache for repeated identical requests (where possible).
 
-## 3. Что не входит
+## 3. What is not included
 
-- ASR/TTS/OCR — это отдельные движки (будущие задачи), а не текстовая LLM.
-- Автоматическая замена текста без подтверждения.
-- Замена DeepL/Google по умолчанию.
-- Единая модель «на всё»: пользователь выбирает модель и провайдера.
-- Собственный training/fine-tuning моделей.
-- Словарь и глоссарии — отдельный `DictionaryService`, а не действие перевода
+- ASR/TTS/OCR — these are separate engines (future tasks), not a text LLM.
+- Automatic text replacement without confirmation.
+- Replacing DeepL/Google by default.
+- A single model "for everything": the user chooses the model and provider.
+- Training/fine-tuning our own models.
+- The dictionary and glossaries — a separate `DictionaryService`, not a translation action
   ([`dictionary.md`](dictionary.md)).
 
-## 4. Провайдеры
+## 4. Providers
 
-| Провайдер | Тип | Плюсы | Минусы |
+| Provider | Type | Pros | Cons |
 |---|---|---|---|
-| **OpenAI-compatible** (OpenAI, OpenRouter, Groq, Together) | облако | единый API, много моделей | цена, приватность, лимиты |
-| **Gemini API** | облако | хорошее качество, бесплатный тариф с лимитами | другой API/формат |
-| **Anthropic API** | облако | качественный текст | другой API, цена |
-| **Ollama / LM Studio** | локально | приватно, без ключей | нужен свой сервер и железо |
-| **llama.cpp server** | локально | встраивается/сайдкар, GGUF | модель 2,5–5 ГБ, CPU медленнее |
+| **OpenAI-compatible** (OpenAI, OpenRouter, Groq, Together) | cloud | a single API, many models | price, privacy, limits |
+| **Gemini API** | cloud | good quality, a free tier with limits | a different API/format |
+| **Anthropic API** | cloud | high-quality text | a different API, price |
+| **Ollama / LM Studio** | local | private, no keys | requires your own server and hardware |
+| **llama.cpp server** | local | embeds/sidecar, GGUF | model 2.5–5 GB, slower on CPU |
 
-Для MVP достаточно одного OpenAI-совместимого клиента: он покрывает облако и локальные серверы.
+For the MVP one OpenAI-compatible client is enough: it covers the cloud and local servers.
 
-## 5. Архитектура
+## 5. Architecture
 
-Реализованный транспорт (`src/ai/openaichat.h`):
+The implemented transport (`src/ai/openaichat.h`):
 
 ```cpp
 namespace OpenAiChat {
 struct Message { QString role; QString content; };
 struct Request {
     QUrl endpoint;        // .../chat/completions
-    QString apiKey;       // пусто для локального сервера
+    QString apiKey;       // empty for a local server
     QString model;
     QList<Message> messages;
     double temperature = 0.2;
     int maxTokens = 0;
-    QString referer;      // OpenRouter attribution, необязательно
+    QString referer;      // OpenRouter attribution, optional
     QString title;
 };
 struct Response {
@@ -92,11 +92,11 @@ QUrl modelsUrl(const QString &baseUrl);
 }
 ```
 
-`OpenAiCompatibleService` (`src/services/openaicompatibleservice.*`) реализует
-`TranslationService` поверх этого транспорта. Он же будет основой `LlmProvider`; отдельный
-класс на каждого провайдера не нужен. OpenRouter — только адрес по умолчанию; локальные Ollama,
-LM Studio и llama.cpp работают через тот же `/v1/chat/completions` и не требуют ключа. Для
-будущих действий предлагается:
+`OpenAiCompatibleService` (`src/services/openaicompatibleservice.*`) implements
+`TranslationService` on top of this transport. It will also be the basis of `LlmProvider`; a separate
+class per provider is not needed. OpenRouter is only the default address; local Ollama, LM Studio,
+and llama.cpp work through the same `/v1/chat/completions` and do not require a key. For future
+actions the following is proposed:
 
 ```cpp
 struct LlmRequest
@@ -128,89 +128,90 @@ public:
 };
 ```
 
-Слой действий:
+The action layer:
 
-- `AiActionRegistry` — список действий, названия, иконки, горячие клавиши.
-- `AiAction` — собирает промпт, вызывает `LlmProvider`, валидирует ответ.
-- Для `proofread` — просить JSON со списком правок (`offset`, `length`, `replacement`,
-  `message`) или делать diff исходного и исправленного текста.
-- Для `translate` — строгий промпт «верни только перевод, без пояснений», проверка языка и длины.
-- Для `summarize` — параметр длины/формата.
-- Для `rewrite` — стиль/тон/аудитория.
-- Для `explain` — ответ в чат/панель, без замены текста.
+- `AiActionRegistry` — the list of actions, names, icons, shortcuts.
+- `AiAction` — builds the prompt, calls `LlmProvider`, validates the response.
+- For `proofread` — ask for JSON with a list of edits (`offset`, `length`, `replacement`,
+  `message`) or diff the source and the corrected text.
+- For `translate` — a strict prompt "return only the translation, without explanations", language and
+  length checks.
+- For `summarize` — a length/format parameter.
+- For `rewrite` — style/tone/audience.
+- For `explain` — a response in a chat/panel, without replacing the text.
 
-Настройки (уже используются переводом):
+Settings (already used by translation):
 
 ```ini
 [llm]
-baseUrl=https://openrouter.ai/api/v1   ; или OpenAI/Ollama/llama.cpp/TeamRouter
+baseUrl=https://openrouter.ai/api/v1   ; or OpenAI/Ollama/llama.cpp/TeamRouter
 model=openrouter/free
-apiKey=                                 ; DPAPI; пусто для локального сервера
+apiKey=                                 ; DPAPI; empty for a local server
 ```
 
-`temperature` и `maxTokens` пока заданы в коде перевода (0.2, без max_tokens); для AI-действий
-они станут отдельными настройками. Ключи — через DPAPI, как у DeepL/Google. В лог не писать текст,
-ключи и полные ответы модели. Смена `baseUrl`/`model` очищает кэш переводов.
+`temperature` and `maxTokens` are currently set in the translation code (0.2, without max_tokens);
+for AI actions they will become separate settings. Keys — via DPAPI, as with DeepL/Google. Do not
+write text, keys, or full model responses to the log. Changing `baseUrl`/`model` clears the
+translation cache.
 
 ## 6. UI
 
-- Отдельная вкладка настроек **«AI»**: провайдер, base URL, модель, ключ, проверка соединения.
-- Меню/панель действий: «Перевести», «Проверить», «Сократить», «Переписать», «Объяснить»,
-  «Произношение».
-- Результат — в отдельной панели с diff/предпросмотром; замена — по кнопке.
-- Для внешнего выделения — те же действия через popup, с подтверждением вставки.
-- Индикация: используется облако или локальная модель; сколько токенов/времени.
-- Ошибки: нет ключа, нет соединения, лимит, модель не найдена, ответ не по формату.
+- A separate **"AI"** settings tab: provider, base URL, model, key, connection test.
+- Actions menu/panel: "Translate", "Check", "Summarize", "Rewrite", "Explain", "Pronunciation".
+- The result is in a separate panel with a diff/preview; replacement — on a button click.
+- For an external selection — the same actions through the popup, with paste confirmation.
+- Indication: whether the cloud or a local model is used; how many tokens/time.
+- Errors: no key, no connection, limit, model not found, response not in the expected format.
 
-## 7. Промпты и валидация
+## 7. Prompts and validation
 
-- Системный промпт фиксирует роль: «ты переводчик/редактор, верни только результат».
-- Язык, тон, длина и глоссарий передаются отдельными полями, не склеиваются с текстом.
-- Температура по умолчанию низкая (0–0.3).
-- Для перевода — проверка, что ответ не пустой и не содержит служебных пояснений.
-- Для проверки — JSON-схема + fallback на diff.
-- Для суммаризации — ограничение длины и проверка, что это не перевод.
-- Ответы модели не считать доверенными: не выполнять команды из текста, не логировать секреты.
+- The system prompt fixes the role: "you are a translator/editor, return only the result".
+- Language, tone, length, and glossary are passed as separate fields, not glued to the text.
+- The default temperature is low (0–0.3).
+- For translation — a check that the response is not empty and does not contain service explanations.
+- For checking — a JSON schema + fallback to a diff.
+- For summarization — a length limit and a check that it is not a translation.
+- Do not treat model responses as trusted: do not execute commands from the text, do not log secrets.
 
-## 8. Риски
+## 8. Risks
 
-- галлюцинации и добавление смысла;
-- нестабильность формата JSON;
-- стоимость и лимиты облака;
-- приватность: текст уходит провайдеру;
-- локальные модели требуют RAM/CPU/GPU и места;
-- разные модели по-разному держат язык/тон;
-- промпт-инъекции в переводимом тексте (текст — данные, не инструкции);
-- ключи и cookies не должны попадать в логи.
+- hallucinations and added meaning;
+- unstable JSON format;
+- cloud cost and limits;
+- privacy: the text goes to the provider;
+- local models require RAM/CPU/GPU and disk space;
+- different models hold language/tone differently;
+- prompt injections in the translated text (text is data, not instructions);
+- keys and cookies must not end up in the logs.
 
-## 9. Тесты
+## 9. Tests
 
-- `tst_openaichat`: сериализация запроса, разбор обычного/массивного content, ошибки,
-  `finish_reason`, список моделей, построение URL;
-- `tst_openaicompatibleservice`: mock OpenAI-совместимого сервера, JSON/plain fallback,
-  сохранение краевых пробелов, 401/402/429/413/5xx, таймаут, отмена, загрузка моделей,
-  локальный сервер без ключа, `openrouter/free`;
-- `tst_settings`/`tst_settingsdialog`: DPAPI, base URL, модель, кнопка «Загрузить модели»;
-- проверка промптов на «верни только перевод»;
-- ручной smoke: облако + Ollama/llama.cpp, разные модели.
+- `tst_openaichat`: request serialization, parsing plain/array content, errors,
+  `finish_reason`, model list, URL construction;
+- `tst_openaicompatibleservice`: a mock OpenAI-compatible server, JSON/plain fallback,
+  preserving leading and trailing spaces, 401/402/429/413/5xx, timeout, cancellation, model loading,
+  a local server without a key, `openrouter/free`;
+- `tst_settings`/`tst_settingsdialog`: DPAPI, base URL, model, the "Load models" button;
+- prompt checks for "return only the translation";
+- manual smoke: cloud + Ollama/llama.cpp, different models.
 
-## 10. Приоритеты
+## 10. Priorities
 
-1. ~~OpenAI-совместимый провайдер + настройки + `translate`~~ — сделано.
-2. `summarize`/`rewrite`/`explain`/`pronounce` на том же транспорте.
-3. `proofread` через LLM (дополнительно к LanguageTool).
-4. Локальный llama.cpp/Ollama как полноценный провайдер (транспорт уже готов).
-5. Словарь — отдельный `DictionaryService` ([`dictionary.md`](dictionary.md)).
-6. Стриминг ответа и отмена (если понадобится).
+1. ~~OpenAI-compatible provider + settings + `translate`~~ — done.
+2. `summarize`/`rewrite`/`explain`/`pronounce` on the same transport.
+3. `proofread` via LLM (in addition to LanguageTool).
+4. Local llama.cpp/Ollama as a full-fledged provider (the transport is already implemented).
+5. The dictionary — a separate `DictionaryService` ([`dictionary.md`](dictionary.md)).
+6. Response streaming and cancellation (if needed).
 
-## 11. Критерии готовности
+## 11. Done criteria
 
-- [x] Работает облачный OpenAI-совместимый провайдер с ключом и моделью (OpenRouter).
-- [x] Работает настраиваемый base URL и загрузка моделей; локальный сервер проверен тестами,
-      живой smoke — после появления локального сервера.
-- [ ] Есть отдельная вкладка «AI» и независимые настройки.
-- [ ] Действия «сократить», «переписать», «объяснить» дают результат и не меняют текст без
-      подтверждения.
-- [ ] `proofread` возвращает структурированные правки или diff.
-- [x] Ошибки ключей/лимитов/сети/модели понятны, приложение не зависает.
-- [x] Ключи DPAPI, тексты не логируются, тесты и документация обновлены (для перевода).
+- [x] A cloud OpenAI-compatible provider with a key and model works (OpenRouter).
+- [x] A configurable base URL and model loading work; the local server is covered by tests,
+      live smoke — after a local server becomes available.
+- [ ] There is a separate "AI" tab and independent settings.
+- [ ] The "summarize", "rewrite", "explain" actions produce a result and do not change the text
+      without confirmation.
+- [ ] `proofread` returns structured edits or a diff.
+- [x] Key/limit/network/model errors are clear, and the application does not hang.
+- [x] Keys via DPAPI, texts are not logged, tests and documentation are updated (for translation).

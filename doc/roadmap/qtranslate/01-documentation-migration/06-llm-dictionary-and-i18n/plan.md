@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 depends: [01-archive-legacy-plan]
 ---
@@ -33,3 +33,15 @@ Translate `doc/llm-actions.md`, `doc/dictionary.md`, and `i18n/README.md` to Eng
 - The i18n table's native names are intentionally not English; keep them.
 - `i18n/README.md` has commands with placeholders; preserve them byte-for-byte.
 - Dictionary and proofreading share UTF-16 semantics; keep the cross-reference.
+
+## Outcome
+
+Translated `doc/llm-actions.md` (216 → 217 lines), `doc/dictionary.md` (207 → 208 lines), and `i18n/README.md` (72 lines) to English. No code changes.
+
+- Statuses: `doc/llm-actions.md` says "roadmap stage 6 (old stage 16)"; `doc/dictionary.md` says "roadmap stage 7 (old stage 17)" and keeps the active-roadmap link `[plan.md](roadmap/qtranslate/plan.md)`.
+- Fully English except native language names: the `i18n/README.md` table keeps `Русский` and `Українська`; kept Russian UI labels: none. Proposed UI labels use English source-style wording ("Translate", "Check", "Summarize", "Rewrite", "Explain", "Pronunciation", "Dictionary", "Copy", "Open in main window", "Refresh").
+- Preserved against `HEAD`: `OpenAiCompatibleService`, `src/ai/openaichat`, `TranslationService`/`TranslationError`, `OpenAiChat`, `LlmProvider`/`LlmRequest`/`LlmResult`, `AiAction`/`AiActionRegistry`, `DictionaryService` and its structs, provider and model names (OpenAI, Gemini, OpenRouter, Groq, Together, Anthropic, Ollama, LM Studio, llama.cpp, GGUF, `openrouter/free`, `TeamRouter`), JSON/CSV formats, Google `dt=bd`, `translate.googleapis.com/translate_a/single`, MediaWiki API, Wiktionary, `[llm]`/`[dictionary]` keys and values, test names, `.ts`/`.qm`, `tr()`, `QT_TRANSLATE_NOOP`, `qt_add_translations`, `QTRANSLATE_TS_FILES`, `lupdate`, placeholders, emoji, commands, numbers, and priorities. Code-block comments were translated; identifiers and literals were not. The CSV sample meaning is English (`software interface`), and the cache-key description is English (`source|language|model|text`).
+- Links: `llm-actions.md` → `dictionary.md` (three places); `dictionary.md` → `proofreading.md` and the active roadmap; all relative links resolve.
+- Verification: Cyrillic remains only in the two native language names; backticked spans and numeric tokens match `HEAD` except the translated cache-key description, `2.5–5 GB`, and the added stage numbers; heading, list, table, code-fence, and checkbox counts match; `git diff --check` is clean. No build was required.
+- Review found no issues.
+- Found: the original `i18n/README.md` does not mention `lrelease`, so it was not added; `qt_add_translations` covers compilation. Remaining: verification task 07, including the deferred `handoff.md` "Proofreading"/"Text checking" mismatch and the old `doc/plan.md` reference in `src/platform/selectiongrabber_win.cpp:248`.
