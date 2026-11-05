@@ -1629,4 +1629,179 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
 
 ## 10. Порядок реализации
 
-Пошаговый план по этапам — в [`plan.md`](plan.md).
+Пошаговый план по этапам — в [`doc/roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md). Подробная история старого плоского плана сохранена в `legacy-plan.md` рядом с новой картой; она будет перенесена туда на первом этапе.
+
+---
+
+## 11. Documentation and roadmap
+
+### 11.1. Context
+
+The project documentation is currently Russian and authoritative: `doc/architecture.md`, `doc/plan.md`, `doc/handoff.md`, and the design notes in `doc/`. `README.md` is English, `README.ru.md` is Russian, and the release notes in `doc/releases/` are already English. The flat `doc/plan.md` contains the detailed history of stages 1-12, the partial work on stages 13 and 16, and the remaining stages 11 and 13-17. This is a personal project with no Jira issue numbers; commit messages follow the repository's existing style without a Jira key.
+
+The lead agent works with a tree roadmap rather than a flat plan. The existing documents do not provide that structure, so the project needs a one-time documentation migration and an English baseline.
+
+### 11.2. Decision
+
+Adopt a tree roadmap under `doc/roadmap/`, keep one active map for the project, and move the active documentation to English. Preserve the old flat plan as a Russian historical archive next to the new map. Do not change product code during the migration.
+
+The active map is `doc/roadmap/qtranslate/plan.md`. The old plan will be archived as `doc/roadmap/qtranslate/legacy-plan.md` in stage 1. The map list is `doc/roadmap/README.md`. The migration is the first stage of the new map; the remaining product work follows the old plan order: Linux, free web endpoints, local offline translation, proofreading, LLM actions, and the dictionary.
+
+### 11.3. Repository layout
+
+```
+doc/
+  architecture.md
+  handoff.md
+  code-signing.md
+  dictionary.md
+  free-endpoints.md
+  llm-actions.md
+  local-translation.md
+  proofreading.md
+  releases/
+    ...
+  roadmap/
+    README.md
+    qtranslate/
+      plan.md
+      legacy-plan.md
+      journal.md
+      01-documentation-migration/
+        plan.md
+        ...
+      02-linux/
+        plan.md
+      ...
+```
+
+- `doc/roadmap/README.md` lists maps by slug, status, one-line description, and link.
+- `doc/roadmap/qtranslate/plan.md` is the root node (`kind: root`) and the active roadmap.
+- `doc/roadmap/qtranslate/legacy-plan.md` is the Russian original of the old flat plan. It is a file next to the root plan, not a roadmap node. It is kept for history and rationale.
+- `doc/roadmap/qtranslate/journal.md` is created and maintained by the lead. It records "Where we left off" and decisions. It is not a roadmap node.
+- Stage directories (`NN-slug/plan.md`, `kind: stage`) and task directories (`NN-slug/plan.md`, `kind: task`) are created by the lead and its planner. The architect does not create them.
+- A roadmap node is a directory containing `plan.md`. Other files and directories in the map are not nodes.
+
+### 11.4. Language policy
+
+- Active project documentation is English: `doc/architecture.md`, `doc/handoff.md`, the design notes in `doc/`, `i18n/README.md`, `AGENTS.md`, and the roadmap.
+- `README.md` stays English and `README.ru.md` stays Russian as the user-facing localisation. Keep them in sync.
+- Code comments are not translated in this migration. Translating them is a separate task and would create unrelated code churn.
+- The archived `legacy-plan.md` stays Russian. It is not active documentation and is clearly marked as historical.
+- Release notes in `doc/releases/` are already English; keep them English.
+- English text may quote a Russian UI string where the distinction matters. Prefer the English source string; keep the quoted Russian only when the Russian UI label itself is the subject.
+- The roadmap root uses `lang: en`. Headings and field names in the map are English.
+
+### 11.5. Roadmap format
+
+The lead's tree rules define the generic workflow. The project records the map location, language, and stage order in this document and in `AGENTS.md`.
+
+Root node:
+
+```yaml
+---
+kind: root
+status: todo
+lang: en
+source: doc/architecture.md
+---
+```
+
+The root body contains the title, goal, `## Done when`, a short `## History`, and `## Stages`. The history summarises completed work and links to the detailed Russian archive. The stages list the remaining work in order. Stage directories are created when the lead starts each stage.
+
+Stage node:
+
+```yaml
+---
+kind: stage
+status: todo
+---
+```
+
+The stage body contains the title, goal, what to do and what is touched, `## Done when`, depends on, and risks plus what is needed from the user. The lead's planner splits the stage into tasks when the stage starts.
+
+Task node:
+
+```yaml
+---
+kind: task
+status: todo
+detailed: true
+---
+```
+
+The task body contains `## Task`, `## Steps`, `## Done when`, and, after completion, `## Outcome`. The coordinator fills the outcome after the commit.
+
+Statuses are `todo`, `in-progress`, `done`, `blocked`, and `dropped`. A blocked or dropped node states the reason in its body. `jira` is absent because this project has no Jira key. The lead asks the user about the branch and the commit/push policy when the roadmap starts; the project rules in `AGENTS.md` govern pushing.
+
+### 11.6. Migration
+
+The migration is stage 1 of the roadmap. The lead performs these steps:
+
+1. Create the stage directory and tasks; the roadmap README and root plan already exist.
+2. Move `doc/plan.md` to `doc/roadmap/qtranslate/legacy-plan.md`. Add an English header that marks the file as a historical Russian archive and points to the active `plan.md`. Update its relative links to `../../...` so they still resolve.
+3. Translate `doc/architecture.md` sections 1-10 to English, keep section 11, and translate the title and headings. Section 10 already points to the new roadmap.
+4. Translate `doc/handoff.md` to English. Update the release process to reference the roadmap and the legacy plan instead of the old flat plan. Record the manual checks that were never completed as known gaps.
+5. Translate the design notes: `doc/code-signing.md`, `doc/dictionary.md`, `doc/free-endpoints.md`, `doc/llm-actions.md`, `doc/local-translation.md`, `doc/proofreading.md`, and `i18n/README.md`.
+6. Update design-note stage references to the new roadmap numbering. Keep the old plan stage numbers in parentheses where they help trace history.
+7. Update `AGENTS.md`: English design docs, roadmap location, archive location, release process, and the absence of a Jira key.
+8. Search for `doc/plan.md` references. Update active documents to the roadmap or the archive; keep historical references only in the archive and release history.
+9. Update `README.md` or `README.ru.md` only if a link actually changed. Keep the READMEs in sync.
+10. Verify links, English prose, roadmap frontmatter, and that no code changed.
+
+### 11.7. References and compatibility
+
+- The old plan's links to `architecture.md`, `free-endpoints.md`, `local-translation.md`, `proofreading.md`, `llm-actions.md`, and `dictionary.md` become `../../...` after the move. The archive header explains the change.
+- Design notes that cite "stage 13", "stage 14", and so on now cite the new roadmap stage and keep the old number in parentheses. The old plan remains the detailed history.
+- Release notes are English and do not need translation. Update them only if they link to the old plan.
+- Code comments and source files are not touched. If a documentation change would require a code comment change, defer it to a separate task.
+- The migration is documentation-only. A build is not required. If a change accidentally touches code or tests, run the relevant Debug and Release checks and all 23 tests.
+
+### 11.8. Verification
+
+- Run the lead's tree overview command and confirm the root plan has valid `kind`, `status`, and `lang`.
+- Check every relative Markdown link in `doc/` resolves to an existing file.
+- Search for Cyrillic in active documentation, excluding `README.ru.md`, `doc/roadmap/qtranslate/legacy-plan.md`, and quoted Russian UI strings. Review headings and paragraphs manually; a raw grep can produce false positives for quoted labels.
+- Search for `doc/plan.md` and `plan.md` references. Active docs should point to the roadmap; only the archive and historical notes may point to the old plan.
+- Confirm `git diff --name-only` contains only documentation and `AGENTS.md`. No source, test, build, or packaging file changes.
+- Ask the user to spot-check `doc/architecture.md` and `doc/handoff.md`, the two documents most likely to affect future work.
+- Do not push without an explicit user request. Follow the commit rules in `AGENTS.md`.
+
+### 11.9. Accepted decisions
+
+| Question | Decision | Reason | Rejected alternative |
+|---|---|---|---|
+| Documentation language | English for active docs | User request; consistent technical docs; the lead works in English | Keep Russian; translate only the architecture; translate everything including `README.ru.md` |
+| `README.ru.md` | Keep Russian | It is the user-facing Russian localisation and must stay in sync with `README.md` | Translate it; remove it |
+| Code comments | Leave unchanged | Separate task; avoids unrelated code churn | Translate now |
+| Old flat plan | Archive in Russian as `doc/roadmap/qtranslate/legacy-plan.md` | Preserves details and original wording; user choice | Delete it; translate it fully; keep it as the active plan |
+| Roadmap location | `doc/roadmap/qtranslate/plan.md` | Project docs live in `doc/`; one map for the project | `docs/`; a separate map for the migration |
+| Stage order | Migration first, then old order: Linux, web endpoints, local offline, proofreading, LLM actions, dictionary | User choice; preserves the old plan order | Linux last; migration-only map; features before migration |
+| Completed stages | Brief English history in the root; details in the Russian archive | Avoids duplicating 1,488 lines; keeps history | Full translation; no history |
+| Legacy manual checks | Record in `doc/handoff.md` as known gaps | Releases already shipped; they do not block new work | New acceptance stage; ignore them |
+| Jira key | None | Personal project; user confirmed | Invent a key; ask the user again |
+| Commit and push | Follow `AGENTS.md`; no push without explicit request | Project rules; GitHub Actions load | Push every commit; push automatically |
+| Verification | Link check, English review, frontmatter check, no code changes | Documentation-only migration | Full build and test; not needed for docs |
+
+### 11.10. Risks and mitigations
+
+- **Translation inaccuracies.** Technical English may change a nuance. Keep the Russian archive as the original wording and ask the user to spot-check the architecture and handoff.
+- **Broken links after the move.** Update every relative link in the archive and active docs, then run a link check.
+- **Mixed language during migration.** The architecture document is mixed until stage 1 finishes. Keep the migration in one stage and prioritise the architecture and handoff.
+- **Stale `AGENTS.md`.** It is loaded in every session. Update it in stage 1 and search for old paths.
+- **Archive mistaken for the active plan.** Add a clear English header and list the archive in the map README and `AGENTS.md`.
+- **Translation volume.** The active docs total roughly 4,000 lines. Split the work into tasks; start with the architecture and handoff, then the design notes, then `i18n/README.md`.
+- **Linux stage may block.** The old order puts Linux first after migration. It needs a Linux machine and CI. If it is blocked, the lead asks the user whether to start independent stages earlier.
+- **Release process references.** `doc/handoff.md` and `doc/code-signing.md` mention the old plan. Update them during migration.
+- **Quoted Russian UI strings.** English docs may need to quote a Russian label. Allow quoted strings; do not treat them as unfinished translation.
+- **Machine-only translation.** It can be inaccurate. Use human-reviewed technical English.
+- **Git history and releases.** Do not push without an explicit request. Do not create a release during the migration.
+
+### 11.11. Open items
+
+- **Branch.** The lead asks whether to continue on `main` or create a branch. The user decides.
+- **Commit and push policy.** The lead asks and follows `AGENTS.md`. No push without an explicit request.
+- **Archive name and location.** Proposed as `doc/roadmap/qtranslate/legacy-plan.md`; the user can change it before stage 1 moves the file.
+- **Translation glossary.** Use technical English and preserve identifiers, commands, paths, and product names. The user can spot-check and request terminology changes.
+- **No Jira key.** Confirmed by the user. The lead must not ask for a Jira number.
+- **Stage order.** Migration first, then the old order. Confirmed by the user. If Linux is blocked, the lead may ask to start independent stages earlier.
