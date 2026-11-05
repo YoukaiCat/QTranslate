@@ -11,7 +11,7 @@ base: ef09e8c
 
 Move the project from the flat Russian plan to the tree roadmap used by the lead agent, translate all active project documentation to English, and continue the remaining product work in the order of the old plan. Product code stays unchanged during the documentation migration; later stages deliver the remaining features.
 
-The active roadmap is this file. The detailed Russian history of the old flat plan is in [`doc/plan.md`](../../plan.md); stage 1 moves it to `legacy-plan.md` next to this roadmap. The documentation and roadmap policy is in [`doc/architecture.md`](../../architecture.md), section 11. This is a personal project with no Jira issue numbers; commit messages follow the repository's existing style without a Jira key.
+The active roadmap is this file. The detailed Russian history of the old flat plan is in [`legacy-plan.md`](legacy-plan.md); stage 1 moved it there. The documentation and roadmap policy is in [`doc/architecture.md`](../../architecture.md), section 11. This is a personal project with no Jira issue numbers; commit messages follow the repository's existing style without a Jira key.
 
 ## Done when
 

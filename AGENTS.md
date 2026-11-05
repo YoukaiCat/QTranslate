@@ -8,8 +8,11 @@
   is shared by the app and tests. `qtranslate` adds `src/app`, `src/ui` and `src/platform`.
 - `AppController` is the only class that wires modules together. Keep network/translation logic in
   `TranslationManager`/services and UI logic in the widgets.
-- Design docs are Russian and authoritative: `doc/architecture.md` and `doc/plan.md`. Keep both in
-  sync with behavior changes. `README.md` (English) and `README.ru.md` (Russian) must stay in sync.
+- Design docs are English and authoritative: `doc/architecture.md`, `doc/handoff.md`, and the design
+  notes in `doc/`. The active roadmap is `doc/roadmap/qtranslate/plan.md`; the old flat plan is
+  archived at `doc/roadmap/qtranslate/legacy-plan.md`, is Russian, and is historical only. Keep the
+  documents in sync with behavior changes. `README.md` (English) and `README.ru.md` (Russian) must
+  stay in sync.
 - Current work state and release handoff: `doc/handoff.md`. Update it at the end of a session.
 
 ## Build and test
@@ -31,6 +34,8 @@
 
 ## Git and release approval
 
+- This is a personal project with no Jira key; commit messages follow the repository's existing
+  style without a Jira number.
 - Do **not** push every commit: GitHub Actions load matters. Make local commits and push only when
   the user explicitly asks, or when publishing an already approved release.
 - Never create/push a release tag, publish a GitHub release or replace release assets without
@@ -53,6 +58,9 @@
 - Never move or rewrite an existing release tag; ship fixes as a new patch tag.
 - `doc/releases/<version>.md` supplies GitHub release notes. Keep release artifacts CI-built:
   local packaging uses Qt 6.12, CI uses Qt 6.8.3 LTS.
+- Documentation for a release or a behavior change goes to the active roadmap
+  `doc/roadmap/qtranslate/plan.md`; the archived `doc/roadmap/qtranslate/legacy-plan.md` is
+  historical and is not edited.
 - Code signing is not implemented. Options, SignPath Foundation requirements and integration notes
   are in `doc/code-signing.md`; do not claim releases are signed until CI verifies the signature.
 - CI uses Qt 6.8.3 LTS because aqtinstall 3.3.0 cannot install Qt 6.12. Do not switch CI to 6.12

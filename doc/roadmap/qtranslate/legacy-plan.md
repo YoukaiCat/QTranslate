@@ -1,7 +1,15 @@
+# qtranslate — legacy implementation plan (Russian archive)
+
+> This is the historical Russian flat plan of stages 1-17, kept for history and rationale. It is **not** the active plan. The active roadmap is [`plan.md`](plan.md); the architecture is [`../../architecture.md`](../../architecture.md).
+
+After the move to `doc/roadmap/qtranslate/`, relative links in the body were rewritten from `X.md` to `../../X.md` so they still resolve. The stage numbers below are the old flat-plan numbers, not the numbers of the new roadmap.
+
+---
+
 # qtranslate — план реализации
 
 План разбит на этапы. Каждый этап заканчивается работающей программой, которую можно
-запустить и проверить. Архитектура, на которую ссылается план, описана в [`architecture.md`](architecture.md)
+запустить и проверить. Архитектура, на которую ссылается план, описана в [`architecture.md`](../../architecture.md)
 (ссылки вида §4.3 ведут туда).
 
 ## Как работаем с планом
@@ -1340,7 +1348,7 @@ Ctrl+Q / Ctrl+Shift+Q / Ctrl+W, настройки и автозагрузка, 
 
 **Статус:** DeepL web реализован как режим `free-web` одного сервиса DeepL (в 0.10.0 он был
 отдельным сервисом, теперь объединён); остальные эндпоинты запланированы. Ограничения и
-приоритеты — [`free-endpoints.md`](free-endpoints.md).
+приоритеты — [`free-endpoints.md`](../../free-endpoints.md).
 
 **Цель.** Добавить бесплатные сервисы без API-ключа: DeepL web, Yandex web, Bing web, Reverso,
 Mozhi и MyMemory. Они не заменяют официальные API и явно помечены как неофициальные.
@@ -1373,7 +1381,7 @@ Mozhi и MyMemory. Они не заменяют официальные API и я
 
 ## Этап 14. Локальный offline-перевод (вариант)
 
-**Статус:** вариант, PoC не начат. Детали — [`local-translation.md`](local-translation.md).
+**Статус:** вариант, PoC не начат. Детали — [`local-translation.md`](../../local-translation.md).
 
 **Цель.** Добавить необязательный локальный режим без API-ключей и без отправки текста в сеть:
 модели Argos Translate, исполняемые через CTranslate2, с загрузкой моделей по кнопке.
@@ -1401,7 +1409,7 @@ Mozhi и MyMemory. Они не заменяют официальные API и я
 
 ## Этап 15. Проверка орфографии, грамматики и пунктуации (запланирован)
 
-**Статус:** задача зафиксирована, код не начат. Полный дизайн — [`proofreading.md`](proofreading.md).
+**Статус:** задача зафиксирована, код не начат. Полный дизайн — [`proofreading.md`](../../proofreading.md).
 
 **Цель.** Отдельный режим проверки текста: найти ошибки, показать их списком/подсветкой и заменить
 текст исправленным. Не смешивать с переводом и его настройками.
@@ -1432,7 +1440,7 @@ Mozhi и MyMemory. Они не заменяют официальные API и я
 ## Этап 16. LLM-действия (частично реализован)
 
 **Статус:** перевод через OpenAI-совместимый провайдер работает (`llm`, OpenRouter по умолчанию);
-остальные действия запланированы. Полный дизайн — [`llm-actions.md`](llm-actions.md).
+остальные действия запланированы. Полный дизайн — [`llm-actions.md`](../../llm-actions.md).
 
 **Цель.** Добавить необязательный LLM-слой для текстовых действий: перевод, проверка, суммаризация,
 рерайтинг, объяснение и произношение. LLM дополняет DeepL/Google/LanguageTool, а не заменяет их.
@@ -1463,7 +1471,7 @@ Mozhi и MyMemory. Они не заменяют официальные API и я
 
 ## Этап 17. Словарь и глоссарии (запланирован)
 
-**Статус:** дизайн зафиксирован, код не начат. Полный дизайн — [`dictionary.md`](dictionary.md).
+**Статус:** дизайн зафиксирован, код не начат. Полный дизайн — [`dictionary.md`](../../dictionary.md).
 
 **Цель.** Отдельный режим словаря для слов и коротких фраз: части речи, значения, примеры,
 синонимы и транскрипция. Не смешивать с переводом и его настройками.

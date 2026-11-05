@@ -138,7 +138,7 @@ SignedUninstaller=yes
 3. Подать заявку в SignPath Foundation; приложить ссылку на репозиторий и релизы.
 4. После одобрения добавить signing workflow, подписывать `qtranslate.exe` и установщик, проверять
    подпись в CI.
-5. Обновить `README`, `doc/plan.md`, `doc/architecture.md` и заметки к релизу.
+5. Обновить `README`, `doc/roadmap/qtranslate/plan.md`, `doc/architecture.md` и заметки к релизу.
 
 Если SignPath не одобрит проект или нужен издатель с именем владельца, остается Azure Artifact
 Signing (при доступности страны) или коммерческий OV/EV. До внедрения подписи релизы остаются

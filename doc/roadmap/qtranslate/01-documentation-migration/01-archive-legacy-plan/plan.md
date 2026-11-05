@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 ---
 
@@ -48,3 +48,13 @@ Move the Russian flat plan from `doc/plan.md` to `doc/roadmap/qtranslate/legacy-
 - Updating the root plan must be limited to the reference sentence; its goal, `## Done when`, and `## Stages` are fixed.
 - `AGENTS.md` is loaded in every session; stale paths there affect all future work, so grep it last.
 - The archive must remain clearly non-active; do not translate or edit its Russian body.
+
+## Outcome
+
+Done. The old flat plan was moved with `git mv` to `doc/roadmap/qtranslate/legacy-plan.md`, and git records a rename. An English archive header was prepended: the title, a blockquote marking the file as historical, a note that relative links were rewritten to `../../...`, and a horizontal rule before the original Russian title. The Russian body is otherwise unchanged; only the six links to `architecture.md`, `free-endpoints.md`, `local-translation.md`, `proofreading.md`, `llm-actions.md`, and `dictionary.md` were repointed, and all of them resolve.
+
+Active references were repointed: the root plan line 14 says the archive is `legacy-plan.md` and that stage 1 moved it; `doc/roadmap/README.md` links the existing archive; `AGENTS.md` states the English documentation policy, the active roadmap, the Russian archive, the release guidance, and the absence of a Jira key; `doc/handoff.md` points the 0.10.0 history to the archive and the release process to the roadmap; `doc/code-signing.md` and `doc/dictionary.md` point to the roadmap. The root goal, `## Done when`, `## History`, and `## Stages` were not changed.
+
+Verification: `grep -rn 'doc/plan\.md\|](plan\.md)' --include='*.md' .` finds only allowed places: the archive, `doc/architecture.md` section 11, map nodes, and this journal. `git diff --name-only` lists only `AGENTS.md` and `doc/` files; no `src/`, `tests/`, `CMakeLists.txt`, `packaging/`, or build files changed. No build is required.
+
+Notes: `src/platform/selectiongrabber_win.cpp:248` has a source comment pointing to `doc/plan.md`; architecture §11.7 defers code-comment changes to a separate task, so it is left as is. Architecture §10 still says the archive "will be moved"; task 03 makes that past tense while translating sections 4.8-10. The previous coordinator made these edits but the session ended before the commit; the current coordinator verified the work, added this outcome, marked the task done, and committed it without redoing the edits.

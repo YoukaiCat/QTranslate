@@ -225,7 +225,7 @@ Qt-переводы для 13 языков добавляют ~2,4 МБ в dist,
 ## Релиз 0.10.0 (2026-11-05)
 
 1. Версия поднята в `CMakeLists.txt` и `resources/qtranslate.rc`; README, `doc/releases/0.10.0.md`,
-   `doc/plan.md` и `doc/architecture.md` обновлены.
+   `doc/roadmap/qtranslate/legacy-plan.md` и `doc/architecture.md` обновлены.
 2. Debug и Release: 21/21, `/W4` без предупреждений.
 3. `package.ps1` собрал setup 11,51 МБ, ZIP 14,58 МБ и `SHA256SUMS.txt`; файлы проверены.
 4. Установщик проверен: тихая установка, `FileVersion`/`ProductVersion` 0.10.0, запуск без Qt
@@ -240,7 +240,7 @@ Qt-переводы для 13 языков добавляют ~2,4 МБ в dist,
    (`project(VERSION ...)`) и `resources/qtranslate.rc` (`FileVersion`/`ProductVersion`).
    Версию и масштаб релиза согласовать с пользователем заранее.
 3. Обновить под версию: `README.md`, `README.ru.md` (статус, имена/ссылки файлов),
-   `doc/releases/<version>.md`, `doc/plan.md`, `doc/architecture.md`.
+   `doc/releases/<version>.md`, `doc/roadmap/qtranslate/plan.md`, `doc/architecture.md`.
 4. Собрать и проверить:
    - `cmd /c build\cli-build.cmd Debug`
    - `cmd /c build\cli-build.cmd Release`
