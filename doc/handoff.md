@@ -4,13 +4,13 @@
 
 ## Git
 
-- `origin/main` = `1e3e6b5` «Keep SHA256SUMS as an unlisted release asset»; тег `v0.10.0`
-  указывает на `726dac0`. Готовится релиз **0.11.0**.
-- История: релиз 0.10.0, удаление checksum-ссылок и возврат `SHA256SUMS.txt` как unlisted asset.
+- `origin/main` = `f50c1da` «Release 0.11.0»; annotated tag `v0.11.0` указывает на этот коммит.
+  Старый `v0.10.0` указывает на `726dac0` и не изменяется.
+- История: релиз 0.10.0, удаление checksum-ссылок и возврат `SHA256SUMS.txt` как unlisted asset,
+  затем 0.11.0: OpenAI-совместимый перевод, объединённый DeepL, бренд QTranslate.
 - Текущая работа — OpenAI-совместимый перевод (OpenRouter), объединение DeepL free web в один
-  сервис и брендинг QTranslate: локальные коммиты `bb71456`, `b212f6e`, `df3dd80`, `8f2156a`,
-  `11fad9c`, `2f1fcbf`, `e442cb9`, затем версия 0.11.0 и документация. Push — по просьбе
-  пользователя (запрошен). Внутри `DeepLService` режим хранится как
+  сервис и брендинг QTranslate: коммиты `bb71456`, `b212f6e`, `df3dd80`, `8f2156a`, `11fad9c`,
+  `2f1fcbf`, `e442cb9`, `f50c1da`; `main` и тег запушены. Внутри `DeepLService` режим хранится как
   `enum class Mode { Api, FreeWeb }`, а в INI — как строка `deepl.mode=api|free-web`. Вкладка
   «Сервисы» в настройках прокручивается (`QScrollArea`), чтобы нижняя подсказка не обрезалась при
   150% масштабировании.
@@ -39,14 +39,20 @@
   - `SHA256SUMS.txt` остаётся отдельным ассетом релиза; ссылка на него убрана из README/Downloads.
   - CI-прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41930568365
   - Тег и ассеты `v0.9.0`/`v0.9.1` не изменялись.
-- `v0.11.0` — готовится к публикации.
+- `v0.11.0` — опубликован: https://github.com/youkaicat/QTranslate/releases/tag/v0.11.0
+  - Тег указывает на `f50c1da`; `main` и тег запушены.
   - OpenAI-совместимый провайдер (OpenRouter по умолчанию, бесплатные/платные модели, локальные
     Ollama/LM Studio/llama.cpp), объединённый DeepL с режимом free-web, бренд QTranslate,
     исправлен proxy test, добавлена прокрутка вкладки «Сервисы».
   - Локально: Debug/Release 23/23, setup 12 097 066 байт, ZIP 15 333 372 байта; установщик
     проверен тихой установкой, `ProductVersion=0.11.0`, `ProductName=QTranslate`.
   - Живой smoke OpenRouter через SOCKS5: `Hello, world` → `Привет, мир`.
-  - Push `main`, тег `v0.11.0` и CI-прогон — после финального коммита.
+  - CI (Qt 6.8.3 LTS): setup 11 173 822 байта, ZIP 13 795 207 байт; хэши совпали с
+    `SHA256SUMS.txt`; CI-установщик проверен тихой установкой, запуском без Qt в `PATH` и
+    удалением.
+  - CI-прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41943741295
+  - CI-прогон `main`: https://github.com/youkaicat/QTranslate/actions/runs/41943729918
+  - `SHA256SUMS.txt` остаётся unlisted asset; в README/Downloads ссылки нет.
 
 ## Локализация (этап 12)
 

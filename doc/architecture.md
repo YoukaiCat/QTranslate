@@ -1532,7 +1532,12 @@ CI: workflow `.github/workflows/build.yml` собирает и тестируе�
   `openrouter/free`, HTTP 200;
 - OpenAI-совместимый провайдер работает с настраиваемым base URL, ключом и моделью; DeepL free web
   объединён в режим `free-web` одного сервиса DeepL;
-- CI (Qt 6.8.3 LTS) и публикация релиза: заполняется после прогона тега.
+- CI (Qt 6.8.3 LTS): setup 11 173 822 байта (10,66 МБ), ZIP 13 795 207 байт (13,16 МБ);
+  хэши совпали с `SHA256SUMS.txt`; CI-установщик проверен тихой установкой, запуском без Qt в
+  `PATH` и удалением; `ProductName=QTranslate`, `ProductVersion=0.11.0`;
+- CI-прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41943741295
+- CI-прогон `main`: https://github.com/youkaicat/QTranslate/actions/runs/41943729918
+- релиз: https://github.com/youkaicat/QTranslate/releases/tag/v0.11.0
 
 ---
 
