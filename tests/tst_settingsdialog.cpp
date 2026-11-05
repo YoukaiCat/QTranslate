@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QSignalSpy>
 #include <QSpinBox>
 #include <QTest>
@@ -236,6 +237,16 @@ private slots:
         host->setText(QStringLiteral("proxy.local"));
         port->setValue(3128);
         QVERIFY(dialog.validate(&error));
+    }
+
+    void servicesTabIsScrollable()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *scroll = dialog.findChild<QScrollArea *>(QStringLiteral("servicesScroll"));
+        QVERIFY(scroll);
+        QVERIFY(scroll->widget());
+        QVERIFY(scroll->widgetResizable());
     }
 
     void servicesTab()

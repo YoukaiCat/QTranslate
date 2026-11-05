@@ -17,6 +17,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QSignalBlocker>
 #include <QSpinBox>
 #include <QTabWidget>
@@ -154,10 +155,18 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_tabs->addTab(hotkeysPage, tr("Hotkeys"));
     m_tabs->addTab(translationPage, tr("Translation"));
 
-    // Services.
+    // Services. The page is taller than the dialog at high DPI scaling, so it
+    // scrolls instead of clipping the hint at the bottom.
     auto *servicesPage = new QWidget(m_tabs);
-    auto *servicesLayout = new QVBoxLayout(servicesPage);
-    auto *googleGroup = new QGroupBox(tr("Google Translate"), servicesPage);
+    auto *servicesPageLayout = new QVBoxLayout(servicesPage);
+    servicesPageLayout->setContentsMargins(0, 0, 0, 0);
+    auto *servicesScroll = new QScrollArea(servicesPage);
+    servicesScroll->setObjectName(QStringLiteral("servicesScroll"));
+    servicesScroll->setWidgetResizable(true);
+    servicesScroll->setFrameShape(QFrame::NoFrame);
+    auto *servicesContent = new QWidget(servicesScroll);
+    auto *servicesLayout = new QVBoxLayout(servicesContent);
+    auto *googleGroup = new QGroupBox(tr("Google Translate"), servicesContent);
     auto *googleForm = new QFormLayout(googleGroup);
     m_googleMode = new QComboBox(googleGroup);
     m_googleMode->setObjectName(QStringLiteral("googleMode"));
@@ -179,7 +188,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     connect(m_googleMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             &SettingsDialog::updateGoogleControls);
 
-    auto *deepLGroup = new QGroupBox(tr("DeepL"), servicesPage);
+    auto *deepLGroup = new QGroupBox(tr("DeepL"), servicesContent);
     auto *deepLForm = new QFormLayout(deepLGroup);
     m_deeplMode = new QComboBox(deepLGroup);
     m_deeplMode->setObjectName(QStringLiteral("deeplMode"));
@@ -220,7 +229,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
         emit deepLKeyCheckRequested(m_deeplApiKey->text().trimmed());
     });
 
-    auto *llmGroup = new QGroupBox(tr("OpenAI-compatible provider"), servicesPage);
+    auto *llmGroup = new QGroupBox(tr("OpenAI-compatible provider"), servicesContent);
     auto *llmForm = new QFormLayout(llmGroup);
     m_llmBaseUrl = new QLineEdit(llmGroup);
     m_llmBaseUrl->setObjectName(QStringLiteral("llmBaseUrl"));
@@ -270,6 +279,8 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     servicesLayout->addWidget(deepLGroup);
     servicesLayout->addWidget(llmGroup);
     servicesLayout->addStretch();
+    servicesScroll->setWidget(servicesContent);
+    servicesPageLayout->addWidget(servicesScroll);
     m_tabs->addTab(servicesPage, tr("Services"));
 
     // Network.
