@@ -390,6 +390,9 @@ signals:
   включения (например, если игра не определяется как полноэкранная). Пауза не сохраняется между
   запусками. Ввод нового сочетания в настройках также приостанавливает регистрацию; после закрытия
   диалога состояние пересчитывается с учётом ручной паузы и полноэкранного режима.
+- Автопауза управляется настройкой `hotkeys/pauseInFullscreen` (по умолчанию `true`, вкладка
+  «Горячие клавиши»). Если её выключить, таймер продолжает работать, но полноэкранное приложение
+  больше не снимает сочетания; ручная пауза в трее остаётся доступной.
 
 Настройки по умолчанию:
 
@@ -964,6 +967,7 @@ signals:
 | `hotkeys/replaceSelection` | QKeySequence | `Ctrl+Shift+Q` |
 | `hotkeys/mainWindow` | QKeySequence | `Ctrl+W` |
 | `hotkeys/showMainWindow` | QKeySequence | пусто |
+| `hotkeys/pauseInFullscreen` | bool | `true` |
 | `translation/service` | string | `google` |
 | `translation/sourceLang` | string | `auto` |
 | `translation/primaryLang` | string | язык системы |

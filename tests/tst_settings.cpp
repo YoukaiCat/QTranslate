@@ -60,6 +60,7 @@ private slots:
                  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Q));
         QCOMPARE(settings.hotkeys.mainWindow, QKeySequence(Qt::CTRL | Qt::Key_W));
         QVERIFY(settings.hotkeys.showMainWindow.isEmpty());
+        QVERIFY(settings.hotkeys.pauseInFullscreen);
 
         QCOMPARE(settings.translation.service, QStringLiteral("google"));
         QCOMPARE(settings.translation.sourceLang, Languages::autoCode());
@@ -98,6 +99,7 @@ private slots:
         settings.hotkeys.replaceSelection = QKeySequence(QStringLiteral("Ctrl+Alt+R"));
         settings.hotkeys.mainWindow = QKeySequence();
         settings.hotkeys.showMainWindow = QKeySequence(QStringLiteral("Ctrl+Shift+F12"));
+        settings.hotkeys.pauseInFullscreen = false;
 
         settings.translation.service = QStringLiteral("deepl");
         settings.translation.sourceLang = QStringLiteral("en");
@@ -149,6 +151,7 @@ private slots:
         QVERIFY(result.hotkeys.mainWindow.isEmpty());
         QCOMPARE(result.hotkeys.showMainWindow,
                  QKeySequence(QStringLiteral("Ctrl+Shift+F12")));
+        QVERIFY(!result.hotkeys.pauseInFullscreen);
 
         QCOMPARE(result.translation.service, QStringLiteral("deepl"));
         QCOMPARE(result.translation.sourceLang, QStringLiteral("en"));

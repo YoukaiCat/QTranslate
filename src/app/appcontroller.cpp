@@ -171,7 +171,9 @@ void AppController::createHotkeys()
 {
     const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
 
-    m_fullscreenAppActive = Platform::isFullscreenForegroundWindow();
+    m_pauseInFullscreen = settings.hotkeys.pauseInFullscreen;
+    m_fullscreenAppActive =
+        m_pauseInFullscreen && Platform::isFullscreenForegroundWindow();
     m_hotkeys = new HotkeyManager(this);
     if (m_fullscreenAppActive)
         m_hotkeys->setSuspended(true);
@@ -246,7 +248,8 @@ void AppController::updateFullscreenState()
 {
     if (!m_hotkeys)
         return;
-    const bool active = Platform::isFullscreenForegroundWindow();
+    const bool active =
+        m_pauseInFullscreen && Platform::isFullscreenForegroundWindow();
     if (active == m_fullscreenAppActive)
         return;
     m_fullscreenAppActive = active;
@@ -453,6 +456,10 @@ void AppController::applySettings(const AppSettings &oldSettings,
                  newSettings.hotkeys.mainWindow);
     updateHotkey(HotkeyAction::ShowMainWindow, oldSettings.hotkeys.showMainWindow,
                  newSettings.hotkeys.showMainWindow);
+    if (oldSettings.hotkeys.pauseInFullscreen != newSettings.hotkeys.pauseInFullscreen) {
+        m_pauseInFullscreen = newSettings.hotkeys.pauseInFullscreen;
+        updateFullscreenState();
+    }
     updateTrayToolTip();
 
     if (oldSettings.general.restoreClipboard != newSettings.general.restoreClipboard)

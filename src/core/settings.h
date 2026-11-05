@@ -22,6 +22,7 @@ struct HotkeySettings
     QKeySequence replaceSelection;
     QKeySequence mainWindow;
     QKeySequence showMainWindow;
+    bool pauseInFullscreen = true;
 };
 
 struct TranslationSettings

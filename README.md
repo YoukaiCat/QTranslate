@@ -70,7 +70,8 @@ qtranslate [--minimized] [--verbose]
 - Settings, service selection, **Show window** and **Quit** are available from the tray menu.
   Hotkeys, languages, proxy, autostart and API keys are configured in **Settings**.
 - Global hotkeys are released automatically while a fullscreen application is in the foreground,
-  so games receive Ctrl+Q/Ctrl+W. **Tray → Pause hotkeys** disables them manually.
+  so games receive Ctrl+Q/Ctrl+W. This can be disabled in **Settings → Hotkeys**; **Tray → Pause
+  hotkeys** disables them manually.
 - `--minimized` starts hidden in the tray; `--verbose` writes a detailed log to
   `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
 - Portable mode: put an empty `qtranslate.ini` next to `qtranslate.exe` and the application will

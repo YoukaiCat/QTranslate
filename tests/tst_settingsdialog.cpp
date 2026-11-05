@@ -70,6 +70,8 @@ private slots:
         auto *maxLength = dialog.findChild<QSpinBox *>(QStringLiteral("maxLength"));
         auto *delay =
             dialog.findChild<QSpinBox *>(QStringLiteral("autoTranslateDelay"));
+        auto *pauseInFullscreen =
+            dialog.findChild<QCheckBox *>(QStringLiteral("pauseInFullscreen"));
 
         QVERIFY(autostart);
         QVERIFY(startMinimized);
@@ -83,6 +85,7 @@ private slots:
         QVERIFY(secondary);
         QVERIFY(maxLength);
         QVERIFY(delay);
+        QVERIFY(pauseInFullscreen);
 
         QVERIFY(autostart->isChecked());
         QVERIFY(!startMinimized->isChecked());
@@ -97,6 +100,7 @@ private slots:
         QCOMPARE(secondary->currentCode(), QStringLiteral("fr"));
         QCOMPARE(maxLength->value(), 5000);
         QCOMPARE(delay->value(), 0);
+        QVERIFY(pauseInFullscreen->isChecked());
     }
 
     void returnsEditedValues()
@@ -131,6 +135,7 @@ private slots:
             ->setCurrentCode(QStringLiteral("de"));
         dialog.findChild<QSpinBox *>(QStringLiteral("maxLength"))->setValue(7000);
         dialog.findChild<QSpinBox *>(QStringLiteral("autoTranslateDelay"))->setValue(1200);
+        dialog.findChild<QCheckBox *>(QStringLiteral("pauseInFullscreen"))->setChecked(false);
 
         const AppSettings result = dialog.settings();
         QVERIFY(result.general.autostart);
@@ -147,6 +152,7 @@ private slots:
         QCOMPARE(result.translation.secondaryLang, QStringLiteral("de"));
         QCOMPARE(result.translation.maxLength, 7000);
         QCOMPARE(result.translation.autoTranslateDelayMs, 1200);
+        QVERIFY(!result.hotkeys.pauseInFullscreen);
         QCOMPARE(result.google.apiKey, QStringLiteral("keep-me"));
         QCOMPARE(result.network.proxyHost, QStringLiteral("proxy.local"));
     }

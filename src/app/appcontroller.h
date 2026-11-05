@@ -107,6 +107,7 @@ private:
     bool m_hotkeyEditing = false;
     bool m_hotkeysPaused = false;
     bool m_fullscreenAppActive = false;
+    bool m_pauseInFullscreen = true;
     SelectionGrabber *m_grabber = nullptr;
     QTranslator *m_translator = nullptr;
     QTranslator *m_qtTranslator = nullptr;

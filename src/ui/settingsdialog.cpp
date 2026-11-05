@@ -105,12 +105,16 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
                         m_replaceSelectionHotkey);
     hotkeysForm->addRow(tr("Translate in the main window:"), m_mainWindowHotkey);
     hotkeysForm->addRow(tr("Show the main window:"), m_showMainWindowHotkey);
+    m_pauseInFullscreen =
+        new QCheckBox(tr("Pause global hotkeys in fullscreen apps"), hotkeysPage);
+    m_pauseInFullscreen->setObjectName(QStringLiteral("pauseInFullscreen"));
     auto *hotkeysHint = new QLabel(
         tr("Global hotkeys are disabled while a key combination field is focused. "
            "Leave a field empty to disable that action."),
         hotkeysPage);
     hotkeysHint->setWordWrap(true);
     hotkeysLayout->addLayout(hotkeysForm);
+    hotkeysLayout->addWidget(m_pauseInFullscreen);
     hotkeysLayout->addWidget(hotkeysHint);
     hotkeysLayout->addStretch();
 
@@ -381,6 +385,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_replaceSelectionHotkey->setKeySequence(settings.hotkeys.replaceSelection);
     m_mainWindowHotkey->setKeySequence(settings.hotkeys.mainWindow);
     m_showMainWindowHotkey->setKeySequence(settings.hotkeys.showMainWindow);
+    m_pauseInFullscreen->setChecked(settings.hotkeys.pauseInFullscreen);
 
     if (!m_sourceLanguage->setCurrentCode(settings.translation.sourceLang))
         m_sourceLanguage->setCurrentCode(Languages::autoCode());
@@ -442,6 +447,7 @@ AppSettings SettingsDialog::settings() const
     result.hotkeys.replaceSelection = m_replaceSelectionHotkey->keySequence();
     result.hotkeys.mainWindow = m_mainWindowHotkey->keySequence();
     result.hotkeys.showMainWindow = m_showMainWindowHotkey->keySequence();
+    result.hotkeys.pauseInFullscreen = m_pauseInFullscreen->isChecked();
     result.translation.sourceLang = m_sourceLanguage->currentCode();
     result.translation.primaryLang = m_primaryLanguage->currentCode();
     result.translation.secondaryLang = m_secondaryLanguage->currentCode();

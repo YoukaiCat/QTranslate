@@ -270,6 +270,9 @@ void SettingsStore::load()
                                                 loaded.hotkeys.mainWindow);
     loaded.hotkeys.showMainWindow = readKeySequence(settings, QStringLiteral("showMainWindow"),
                                                     loaded.hotkeys.showMainWindow);
+    loaded.hotkeys.pauseInFullscreen =
+        settings.value(QStringLiteral("pauseInFullscreen"), loaded.hotkeys.pauseInFullscreen)
+            .toBool();
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("translation"));
@@ -402,6 +405,7 @@ void SettingsStore::save(const AppSettings &settings)
                  normalized.hotkeys.mainWindow.toString(QKeySequence::PortableText));
     out.setValue(QStringLiteral("showMainWindow"),
                  normalized.hotkeys.showMainWindow.toString(QKeySequence::PortableText));
+    out.setValue(QStringLiteral("pauseInFullscreen"), normalized.hotkeys.pauseInFullscreen);
     out.endGroup();
 
     out.beginGroup(QStringLiteral("translation"));
