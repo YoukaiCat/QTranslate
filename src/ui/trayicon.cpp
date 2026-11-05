@@ -5,6 +5,7 @@
 #include <QAction>
 #include <QIcon>
 #include <QMenu>
+#include <QSignalBlocker>
 
 TrayIcon::TrayIcon(const QIcon &icon, QObject *parent)
     : QObject(parent)
@@ -20,6 +21,12 @@ TrayIcon::TrayIcon(const QIcon &icon, QObject *parent)
     m_serviceMenu->setObjectName(QStringLiteral("serviceMenu"));
 
     m_menu->addSeparator();
+
+    m_pauseHotkeysAction = m_menu->addAction(tr("Pause hotkeys"));
+    m_pauseHotkeysAction->setObjectName(QStringLiteral("pauseHotkeys"));
+    m_pauseHotkeysAction->setCheckable(true);
+    connect(m_pauseHotkeysAction, &QAction::toggled, this,
+            &TrayIcon::hotkeysPauseToggled);
 
     m_settingsAction = m_menu->addAction(tr("Settings…"));
     connect(m_settingsAction, &QAction::triggered, this, &TrayIcon::settingsRequested);
@@ -59,6 +66,14 @@ void TrayIcon::setToolTip(const QString &text)
     m_tray->setToolTip(text);
 }
 
+void TrayIcon::setHotkeysPaused(bool paused)
+{
+    if (!m_pauseHotkeysAction)
+        return;
+    const QSignalBlocker blocker(m_pauseHotkeysAction);
+    m_pauseHotkeysAction->setChecked(paused);
+}
+
 void TrayIcon::setServices(const QList<ServiceEntry> &services, const QString &activeId)
 {
     if (!m_serviceMenu)
@@ -85,6 +100,8 @@ void TrayIcon::retranslate()
 {
     if (m_showAction)
         m_showAction->setText(tr("Show window"));
+    if (m_pauseHotkeysAction)
+        m_pauseHotkeysAction->setText(tr("Pause hotkeys"));
     if (m_serviceMenu)
         m_serviceMenu->setTitle(tr("Service"));
     if (m_settingsAction)

@@ -13,6 +13,7 @@ class MainWindow;
 class NetworkManager;
 class PopupWindow;
 class QMimeData;
+class QTimer;
 class SelectionGrabber;
 class SettingsStore;
 class SingleInstance;
@@ -52,6 +53,8 @@ private:
     void initMainWindowLanguages();
     void updateLanguageConfiguration();
     void updateServiceSelectors();
+    void updateHotkeySuspension();
+    void updateFullscreenState();
     void onActiveServiceChanged(const QString &id);
     void selectService(const QString &id);
     void updateTrayToolTip();
@@ -100,6 +103,10 @@ private:
     std::unique_ptr<PopupWindow> m_popup;
     TrayIcon *m_tray = nullptr;
     HotkeyManager *m_hotkeys = nullptr;
+    QTimer *m_fullscreenTimer = nullptr;
+    bool m_hotkeyEditing = false;
+    bool m_hotkeysPaused = false;
+    bool m_fullscreenAppActive = false;
     SelectionGrabber *m_grabber = nullptr;
     QTranslator *m_translator = nullptr;
     QTranslator *m_qtTranslator = nullptr;

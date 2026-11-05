@@ -5,58 +5,58 @@
     <name>AppController</name>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="124"/>
-        <location filename="../src/app/appcontroller.cpp" line="491"/>
+        <location filename="../src/app/appcontroller.cpp" line="529"/>
         <source>Autostart</source>
         <translation>Otomatik başlatma</translation>
     </message>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="125"/>
-        <location filename="../src/app/appcontroller.cpp" line="492"/>
+        <location filename="../src/app/appcontroller.cpp" line="530"/>
         <source>Could not update the autostart entry.</source>
         <translation>Otomatik başlatma girişi güncellenemedi.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="201"/>
+        <location filename="../src/app/appcontroller.cpp" line="213"/>
         <source>Hotkey unavailable</source>
         <translation>Kısayol tuşu kullanılamıyor</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="202"/>
+        <location filename="../src/app/appcontroller.cpp" line="214"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 zaten başka bir program tarafından kullanılıyor. Bu programı kapatın veya ayarlardan başka bir kombinasyon seçin.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="236"/>
+        <location filename="../src/app/appcontroller.cpp" line="274"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="522"/>
+        <location filename="../src/app/appcontroller.cpp" line="563"/>
         <source>DeepL is not available.</source>
         <translation>DeepL mevcut değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="537"/>
+        <location filename="../src/app/appcontroller.cpp" line="578"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI uyumlu sağlayıcı kullanılamıyor.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="717"/>
+        <location filename="../src/app/appcontroller.cpp" line="760"/>
         <source>Nothing is selected.</source>
         <translation>Hiçbir şey seçilmedi.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="746"/>
+        <location filename="../src/app/appcontroller.cpp" line="789"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>Etkin pencere değişti; çeviri panoya kopyalandı.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="783"/>
+        <location filename="../src/app/appcontroller.cpp" line="826"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>Otomatik olarak yapıştırılamadı; çeviri panodadır.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="807"/>
+        <location filename="../src/app/appcontroller.cpp" line="850"/>
         <source>Translate and replace</source>
         <translation>Çevir ve değiştir</translation>
     </message>
@@ -1437,26 +1437,32 @@
 <context>
     <name>TrayIcon</name>
     <message>
-        <location filename="../src/ui/trayicon.cpp" line="14"/>
-        <location filename="../src/ui/trayicon.cpp" line="87"/>
+        <location filename="../src/ui/trayicon.cpp" line="15"/>
+        <location filename="../src/ui/trayicon.cpp" line="102"/>
         <source>Show window</source>
         <translation>Pencereyi göster</translation>
     </message>
     <message>
-        <location filename="../src/ui/trayicon.cpp" line="19"/>
-        <location filename="../src/ui/trayicon.cpp" line="89"/>
+        <location filename="../src/ui/trayicon.cpp" line="20"/>
+        <location filename="../src/ui/trayicon.cpp" line="106"/>
         <source>Service</source>
         <translation>Hizmet</translation>
     </message>
     <message>
-        <location filename="../src/ui/trayicon.cpp" line="24"/>
-        <location filename="../src/ui/trayicon.cpp" line="91"/>
+        <location filename="../src/ui/trayicon.cpp" line="25"/>
+        <location filename="../src/ui/trayicon.cpp" line="104"/>
+        <source>Pause hotkeys</source>
+        <translation>Kısayolları duraklat</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/trayicon.cpp" line="31"/>
+        <location filename="../src/ui/trayicon.cpp" line="108"/>
         <source>Settings…</source>
         <translation>Ayarlar…</translation>
     </message>
     <message>
-        <location filename="../src/ui/trayicon.cpp" line="27"/>
-        <location filename="../src/ui/trayicon.cpp" line="93"/>
+        <location filename="../src/ui/trayicon.cpp" line="34"/>
+        <location filename="../src/ui/trayicon.cpp" line="110"/>
         <source>Quit</source>
         <translation>Çıkış</translation>
     </message>

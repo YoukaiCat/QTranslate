@@ -5,58 +5,58 @@
     <name>AppController</name>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="124"/>
-        <location filename="../src/app/appcontroller.cpp" line="491"/>
+        <location filename="../src/app/appcontroller.cpp" line="529"/>
         <source>Autostart</source>
         <translation>自動起動</translation>
     </message>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="125"/>
-        <location filename="../src/app/appcontroller.cpp" line="492"/>
+        <location filename="../src/app/appcontroller.cpp" line="530"/>
         <source>Could not update the autostart entry.</source>
         <translation>自動開始エントリを更新できませんでした。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="201"/>
+        <location filename="../src/app/appcontroller.cpp" line="213"/>
         <source>Hotkey unavailable</source>
         <translation>ホットキーは使用できません</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="202"/>
+        <location filename="../src/app/appcontroller.cpp" line="214"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 はすでに別のプログラムによって使用されています。そのプログラムを閉じるか、設定で別の組み合わせを選択してください。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="236"/>
+        <location filename="../src/app/appcontroller.cpp" line="274"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="522"/>
+        <location filename="../src/app/appcontroller.cpp" line="563"/>
         <source>DeepL is not available.</source>
         <translation>DeepLは使用できません。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="537"/>
+        <location filename="../src/app/appcontroller.cpp" line="578"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI 互換プロバイダーを利用できません。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="717"/>
+        <location filename="../src/app/appcontroller.cpp" line="760"/>
         <source>Nothing is selected.</source>
         <translation>何も選択されていません。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="746"/>
+        <location filename="../src/app/appcontroller.cpp" line="789"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>アクティブなウィンドウが変更されました。翻訳がクリップボードにコピーされました。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="783"/>
+        <location filename="../src/app/appcontroller.cpp" line="826"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>自動的に貼り付けることができませんでした。翻訳はクリップボードにあります。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="807"/>
+        <location filename="../src/app/appcontroller.cpp" line="850"/>
         <source>Translate and replace</source>
         <translation>翻訳して置き換える</translation>
     </message>
@@ -1437,26 +1437,32 @@
 <context>
     <name>TrayIcon</name>
     <message>
-        <location filename="../src/ui/trayicon.cpp" line="14"/>
-        <location filename="../src/ui/trayicon.cpp" line="87"/>
+        <location filename="../src/ui/trayicon.cpp" line="15"/>
+        <location filename="../src/ui/trayicon.cpp" line="102"/>
         <source>Show window</source>
         <translation>ウィンドウを表示</translation>
     </message>
     <message>
-        <location filename="../src/ui/trayicon.cpp" line="19"/>
-        <location filename="../src/ui/trayicon.cpp" line="89"/>
+        <location filename="../src/ui/trayicon.cpp" line="20"/>
+        <location filename="../src/ui/trayicon.cpp" line="106"/>
         <source>Service</source>
         <translation>サービス</translation>
     </message>
     <message>
-        <location filename="../src/ui/trayicon.cpp" line="24"/>
-        <location filename="../src/ui/trayicon.cpp" line="91"/>
+        <location filename="../src/ui/trayicon.cpp" line="25"/>
+        <location filename="../src/ui/trayicon.cpp" line="104"/>
+        <source>Pause hotkeys</source>
+        <translation>ホットキーを一時停止</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/trayicon.cpp" line="31"/>
+        <location filename="../src/ui/trayicon.cpp" line="108"/>
         <source>Settings…</source>
         <translation>設定…</translation>
     </message>
     <message>
-        <location filename="../src/ui/trayicon.cpp" line="27"/>
-        <location filename="../src/ui/trayicon.cpp" line="93"/>
+        <location filename="../src/ui/trayicon.cpp" line="34"/>
+        <location filename="../src/ui/trayicon.cpp" line="110"/>
         <source>Quit</source>
         <translation>終了</translation>
     </message>

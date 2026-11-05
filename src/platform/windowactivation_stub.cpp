@@ -11,6 +11,11 @@ quintptr foregroundWindow()
     return 0;
 }
 
+bool isFullscreenForegroundWindow()
+{
+    return false;
+}
+
 bool isForegroundWindow(quintptr)
 {
     return false;

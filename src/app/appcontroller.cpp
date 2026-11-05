@@ -171,7 +171,19 @@ void AppController::createHotkeys()
 {
     const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
 
+    m_fullscreenAppActive = Platform::isFullscreenForegroundWindow();
     m_hotkeys = new HotkeyManager(this);
+    if (m_fullscreenAppActive)
+        m_hotkeys->setSuspended(true);
+
+    if (m_tray) {
+        connect(m_tray, &TrayIcon::hotkeysPauseToggled, this, [this](bool paused) {
+            m_hotkeysPaused = paused;
+            updateHotkeySuspension();
+        });
+        m_tray->setHotkeysPaused(m_hotkeysPaused);
+    }
+
     m_grabber = new SelectionGrabber(this);
     m_grabber->setMaxLength(m_translations->maxLength());
     m_grabber->setRestoreClipboard(settings.general.restoreClipboard);
@@ -215,6 +227,32 @@ void AppController::createHotkeys()
     registerHotkey(HotkeyAction::TranslateToMainWindow, settings.hotkeys.mainWindow);
     registerHotkey(HotkeyAction::ShowMainWindow, settings.hotkeys.showMainWindow);
     updateTrayToolTip();
+
+    m_fullscreenTimer = new QTimer(this);
+    m_fullscreenTimer->setInterval(500);
+    connect(m_fullscreenTimer, &QTimer::timeout, this, &AppController::updateFullscreenState);
+    m_fullscreenTimer->start();
+}
+
+void AppController::updateHotkeySuspension()
+{
+    if (!m_hotkeys)
+        return;
+    const bool suspended = m_hotkeyEditing || m_hotkeysPaused || m_fullscreenAppActive;
+    m_hotkeys->setSuspended(suspended);
+}
+
+void AppController::updateFullscreenState()
+{
+    if (!m_hotkeys)
+        return;
+    const bool active = Platform::isFullscreenForegroundWindow();
+    if (active == m_fullscreenAppActive)
+        return;
+    m_fullscreenAppActive = active;
+    qCDebug(lcApp) << (active ? "Fullscreen foreground app detected; hotkeys paused"
+                              : "Fullscreen foreground app ended; hotkeys resumed");
+    updateHotkeySuspension();
 }
 
 void AppController::updateTrayToolTip()
@@ -509,8 +547,11 @@ void AppController::showSettings()
                           service ? service->targetLanguages() : QStringList(),
                           Autostart::isApproved(), m_mainWindow.get());
     if (m_hotkeys) {
-        connect(&dialog, &SettingsDialog::hotkeyEditingChanged, m_hotkeys,
-                &HotkeyManager::setSuspended);
+        connect(&dialog, &SettingsDialog::hotkeyEditingChanged, this,
+                [this](bool editing) {
+                    m_hotkeyEditing = editing;
+                    updateHotkeySuspension();
+                });
     }
 
     QPointer<SettingsDialog> dialogGuard(&dialog);
@@ -574,8 +615,10 @@ void AppController::showSettings()
     if (dialog.exec() == QDialog::Accepted)
         m_settings->save(dialog.settings());
 
-    if (m_hotkeys)
-        m_hotkeys->setSuspended(false);
+    if (m_hotkeys) {
+        m_hotkeyEditing = false;
+        updateHotkeySuspension();
+    }
 }
 
 void AppController::translateInMainWindow(const TranslationRequest &request)

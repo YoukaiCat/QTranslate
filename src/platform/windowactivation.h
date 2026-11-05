@@ -13,6 +13,11 @@ void allowAnyProcessToActivate();
 // Native handle of the current foreground window, 0 if unavailable.
 quintptr foregroundWindow();
 
+// True when another process owns a fullscreen foreground window (a game,
+// fullscreen video, etc.). Used to release global hotkeys so they reach the
+// game instead of being consumed by QTranslate.
+bool isFullscreenForegroundWindow();
+
 // True if `window` is still the foreground window. Used before pasting a
 // translation, so a delayed answer cannot be inserted into another program.
 bool isForegroundWindow(quintptr window);
