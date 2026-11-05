@@ -136,22 +136,47 @@ qtranslate/
 │   ├── llm-actions.md
 │   ├── local-translation.md
 │   ├── proofreading.md
-│   ├── releases/0.11.0.md      release notes
+│   ├── releases/
+│   │   ├── 0.9.0.md            release notes
+│   │   ├── 0.9.1.md
+│   │   ├── 0.10.0.md
+│   │   └── 0.11.0.md
 │   └── roadmap/
-│       ├── README.md
+│       ├── README.md           map list
 │       └── qtranslate/
-│           ├── plan.md
-│           ├── legacy-plan.md
+│           ├── plan.md         active roadmap
+│           ├── legacy-plan.md  Russian historical archive of the old flat plan
 │           ├── journal.md
-│           └── 01-documentation-migration/plan.md
+│           ├── 01-documentation-migration/    ...
+│           ├── 02-linux/                      ...
+│           ├── 03-free-web-endpoints/         ...
+│           ├── 04-local-offline-translation/  ...
+│           ├── 05-proofreading/               ...
+│           ├── 06-llm-actions/                ...
+│           └── 07-dictionary/                 ...
 ├── resources/
-│   ├── qtranslate.qrc          tray and window icons
-│   ├── icons/                  app.ico, tray-*.png (light/dark theme)
+│   ├── icons/                  app.ico, app.png
 │   └── qtranslate.rc           exe icon and version
-├── i18n/
-│   └── qtranslate_ru_RU.ts     UI translation
+├── i18n/                       UI translations, one .ts per shipped language
+│   ├── README.md
+│   ├── qtranslate_ru_RU.ts
+│   ├── qtranslate_es.ts
+│   ├── qtranslate_de.ts
+│   ├── qtranslate_fr.ts
+│   ├── qtranslate_pt_BR.ts
+│   ├── qtranslate_it.ts
+│   ├── qtranslate_pl.ts
+│   ├── qtranslate_uk.ts
+│   ├── qtranslate_tr.ts
+│   ├── qtranslate_zh_CN.ts
+│   ├── qtranslate_ja.ts
+│   ├── qtranslate_ko.ts
+│   ├── qtranslate_ar.ts
+│   └── qtranslate_hi.ts
 ├── src/
 │   ├── main.cpp
+│   ├── ai/
+│   │   └── openaichat.h/.cpp         OpenAI-compatible Chat Completions transport
 │   ├── app/
 │   │   ├── appcontroller.h/.cpp
 │   │   ├── logging.h/.cpp            qtranslate.app logging category
@@ -162,6 +187,7 @@ qtranslate/
 │   │   ├── translationservice.h/.cpp service interface + TranslationReply
 │   │   ├── translationmanager.h/.cpp service registry, cache, language logic, cancellation
 │   │   ├── languages.h/.cpp          language table and code mapping
+│   │   ├── uilanguages.h/.cpp        UI language codes, native names, resource names
 │   │   ├── popupplacement.h/.cpp     popup positioning at the cursor
 │   │   ├── textchunker.h/.cpp        splitting long text into chunks
 │   │   ├── settings.h/.cpp           AppSettings + SettingsStore
@@ -172,7 +198,10 @@ qtranslate/
 │   │   ├── googletranslateservice.h/.cpp
 │   │   ├── googleparser.h/.cpp       pure response parsing functions
 │   │   ├── deeplservice.h/.cpp
-│   │   └── deeplparser.h/.cpp
+│   │   ├── deeplparser.h/.cpp
+│   │   ├── deeplwebservice.h/.cpp    unofficial free web endpoint
+│   │   ├── deeplwebparser.h/.cpp     pure parsing for the web endpoint
+│   │   └── openaicompatibleservice.h/.cpp  OpenAI-compatible provider
 │   ├── platform/
 │   │   ├── hotkeymanager.h           platform-independent interface
 │   │   ├── hotkeymanager_win.cpp
@@ -182,8 +211,10 @@ qtranslate/
 │   │   ├── selectiongrabber_stub.cpp stub for non-Windows builds
 │   │   ├── autostart.h
 │   │   ├── autostart_win.cpp
+│   │   ├── autostart_stub.cpp        stub for non-Windows builds
 │   │   ├── secretprotector.h
 │   │   ├── secretprotector_win.cpp   DPAPI
+│   │   ├── secretprotector_stub.cpp  stub for non-Windows builds
 │   │   ├── windowactivation.h        right to bring a window to the foreground
 │   │   ├── windowactivation_win.cpp  AllowSetForegroundWindow
 │   │   └── windowactivation_stub.cpp stub for non-Windows builds
@@ -198,37 +229,45 @@ qtranslate/
 └── tests/
     ├── CMakeLists.txt
     ├── fixtures/                     saved Google/DeepL responses (google/, deepl/)
-    ├── tst_googleparser.cpp
-    ├── tst_googletranslateservice.cpp  service against a local HTTP server
+    ├── tst_appinfo.cpp
     ├── tst_deeplparser.cpp
     ├── tst_deeplservice.cpp
+    ├── tst_deeplwebparser.cpp
+    ├── tst_deeplwebservice.cpp
+    ├── tst_googleparser.cpp
+    ├── tst_googletranslateservice.cpp  service against a local HTTP server
+    ├── tst_hotkeymanager.cpp           Windows-only
+    ├── tst_hotkeysequence.cpp
     ├── tst_languages.cpp
     ├── tst_networkmanager.cpp
-    ├── tst_textchunker.cpp
-    ├── tst_translationmanager.cpp
-    ├── tst_hotkeysequence.cpp
+    ├── tst_openaichat.cpp
+    ├── tst_openaicompatibleservice.cpp
     ├── tst_popupplacement.cpp
     ├── tst_popupwindow.cpp
-    ├── tst_secretprotector.cpp
+    ├── tst_secretprotector.cpp         Windows-only
     ├── tst_settings.cpp
     ├── tst_settingsdialog.cpp
-    └── tst_autostart.cpp
+    ├── tst_textchunker.cpp
+    ├── tst_translationmanager.cpp
+    ├── tst_translations.cpp            shipped .ts files: completeness and placeholders
+    ├── tst_uilanguages.cpp             UI language table
+    └── tst_autostart.cpp               Windows-only
 ```
 
 ### 3.2. Mapping to the current `CMakeLists.txt`
 
-The §3.1 structure is the target: directories and files appear and are added to targets as the stages
-are implemented. Currently:
+The §3.1 tree shows the repository's current layout, and the table below maps it to the current
+targets. Currently:
 
 | Target | What is included now (0.11.0) |
 |---|---|
-| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `hotkeysequence`, `languages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `openaicompatibleservice` |
+| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `openaicompatibleservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*`, `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_openaichat`, `tst_openaicompatibleservice`; each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_openaichat`, `tst_openaicompatibleservice`; each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
-- `qtranslate_core` — a `STATIC` library from `core/`, `net/`, `services/`; depends on `Qt::Core`,
+- `qtranslate_core` — a `STATIC` library from `ai/`, `core/`, `net/`, `services/`; depends on `Qt::Core`,
   `Qt::Gui` (because of `QKeySequence` in `hotkeysequence`) and `Qt::Network`, but not on `Qt::Widgets`
   and does not use WinAPI. Both the application and the tests link against it.
 - `qtranslate` — the executable (`WIN32`): `app/`, `platform/`, `ui/`, resources; links against
@@ -1657,15 +1696,15 @@ The step-by-step plan by stages is in the active roadmap [`roadmap/qtranslate/pl
 
 ### 11.1. Context
 
-The project documentation is currently Russian and authoritative: `doc/architecture.md`, `doc/plan.md`, `doc/handoff.md`, and the design notes in `doc/`. `README.md` is English, `README.ru.md` is Russian, and the release notes in `doc/releases/` are already English. The flat `doc/plan.md` contains the detailed history of stages 1-12, the partial work on stages 13 and 16, and the remaining stages 11 and 13-17. This is a personal project with no Jira issue numbers; commit messages follow the repository's existing style without a Jira key.
+Before the migration, the project documentation was Russian and authoritative: `doc/architecture.md`, `doc/plan.md`, `doc/handoff.md`, and the design notes in `doc/`. `README.md` is English, `README.ru.md` is Russian, and the release notes in `doc/releases/` are already English. The flat plan, archived as `doc/roadmap/qtranslate/legacy-plan.md`, contains the detailed history of stages 1-12, the partial work on stages 13 and 16, and the remaining stages 11 and 13-17. This is a personal project with no Jira issue numbers; commit messages follow the repository's existing style without a Jira key.
 
-The lead agent works with a tree roadmap rather than a flat plan. The existing documents do not provide that structure, so the project needs a one-time documentation migration and an English baseline.
+The lead agent works with a tree roadmap rather than a flat plan. The existing documents did not provide that structure, so the project needed a one-time documentation migration and an English baseline, which the migration in stage 1 provided.
 
 ### 11.2. Decision
 
-Adopt a tree roadmap under `doc/roadmap/`, keep one active map for the project, and move the active documentation to English. Preserve the old flat plan as a Russian historical archive next to the new map. Do not change product code during the migration.
+Adopt a tree roadmap under `doc/roadmap/`, keep one active map for the project, and move the active documentation to English. Preserve the old flat plan as a Russian historical archive next to the new map. Do not change product code during the migration, with one approved exception: the stale `doc/plan.md` reference in the comment at `src/platform/selectiongrabber_win.cpp:248` is repointed to the archive, and nothing else in the code changes.
 
-The active map is `doc/roadmap/qtranslate/plan.md`. The old plan will be archived as `doc/roadmap/qtranslate/legacy-plan.md` in stage 1. The map list is `doc/roadmap/README.md`. The migration is the first stage of the new map; the remaining product work follows the old plan order: Linux, free web endpoints, local offline translation, proofreading, LLM actions, and the dictionary.
+The active map is `doc/roadmap/qtranslate/plan.md`. Stage 1 archived the old plan as `doc/roadmap/qtranslate/legacy-plan.md`. The map list is `doc/roadmap/README.md`. The migration is the first stage of the new map; the remaining product work follows the old plan order: Linux, free web endpoints, local offline translation, proofreading, LLM actions, and the dictionary.
 
 ### 11.3. Repository layout
 
@@ -1767,14 +1806,17 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 7. Update `AGENTS.md`: English design docs, roadmap location, archive location, release process, and the absence of a Jira key.
 8. Search for `doc/plan.md` references. Update active documents to the roadmap or the archive; keep historical references only in the archive and release history.
 9. Update `README.md` or `README.ru.md` only if a link actually changed. Keep the READMEs in sync.
-10. Verify links, English prose, roadmap frontmatter, and that no code changed.
+10. Verify links, English prose, roadmap frontmatter, and that no code changed except the one approved
+    comment line in `src/platform/selectiongrabber_win.cpp`.
 
 ### 11.7. References and compatibility
 
 - The old plan's links to `architecture.md`, `free-endpoints.md`, `local-translation.md`, `proofreading.md`, `llm-actions.md`, and `dictionary.md` become `../../...` after the move. The archive header explains the change.
 - Design notes that cite "stage 13", "stage 14", and so on now cite the new roadmap stage and keep the old number in parentheses. The old plan remains the detailed history.
 - Release notes are English and do not need translation. Update them only if they link to the old plan.
-- Code comments and source files are not touched. If a documentation change would require a code comment change, defer it to a separate task.
+- Code comments and source files are not touched, except the one approved comment line in
+  `src/platform/selectiongrabber_win.cpp` that now points to the archive. Any other documentation
+  change that would require a code comment change is deferred to a separate task.
 - The migration is documentation-only. A build is not required. If a change accidentally touches code or tests, run the relevant Debug and Release checks and all 23 tests.
 
 ### 11.8. Verification
@@ -1783,7 +1825,9 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 - Check every relative Markdown link in `doc/` resolves to an existing file.
 - Search for Cyrillic in active documentation, excluding `README.ru.md`, `doc/roadmap/qtranslate/legacy-plan.md`, and quoted Russian UI strings. Review headings and paragraphs manually; a raw grep can produce false positives for quoted labels.
 - Search for `doc/plan.md` and `plan.md` references. Active docs should point to the roadmap; only the archive and historical notes may point to the old plan.
-- Confirm `git diff --name-only` contains only documentation and `AGENTS.md`. No source, test, build, or packaging file changes.
+- Confirm `git diff --name-only` contains only documentation, `AGENTS.md`, and the approved comment
+  line in `src/platform/selectiongrabber_win.cpp`. No other source, test, build, or packaging file
+  changes.
 - Ask the user to spot-check `doc/architecture.md` and `doc/handoff.md`, the two documents most likely to affect future work.
 - Do not push without an explicit user request. Follow the commit rules in `AGENTS.md`.
 
@@ -1793,7 +1837,7 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 |---|---|---|---|
 | Documentation language | English for active docs | User request; consistent technical docs; the lead works in English | Keep Russian; translate only the architecture; translate everything including `README.ru.md` |
 | `README.ru.md` | Keep Russian | It is the user-facing Russian localisation and must stay in sync with `README.md` | Translate it; remove it |
-| Code comments | Leave unchanged | Separate task; avoids unrelated code churn | Translate now |
+| Code comments | One approved comment line; everything else unchanged | Separate task; avoids unrelated code churn; the stale path would otherwise point to a deleted file | Translate now |
 | Old flat plan | Archive in Russian as `doc/roadmap/qtranslate/legacy-plan.md` | Preserves details and original wording; user choice | Delete it; translate it fully; keep it as the active plan |
 | Roadmap location | `doc/roadmap/qtranslate/plan.md` | Project docs live in `doc/`; one map for the project | `docs/`; a separate map for the migration |
 | Stage order | Migration first, then old order: Linux, web endpoints, local offline, proofreading, LLM actions, dictionary | User choice; preserves the old plan order | Linux last; migration-only map; features before migration |
@@ -1801,7 +1845,7 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 | Legacy manual checks | Record in `doc/handoff.md` as known gaps | Releases already shipped; they do not block new work | New acceptance stage; ignore them |
 | Jira key | None | Personal project; user confirmed | Invent a key; ask the user again |
 | Commit and push | Follow `AGENTS.md`; no push without explicit request | Project rules; GitHub Actions load | Push every commit; push automatically |
-| Verification | Link check, English review, frontmatter check, no code changes | Documentation-only migration | Full build and test; not needed for docs |
+| Verification | Link check, English review, frontmatter check, no code changes except the one approved comment line | Documentation-only migration | Full build and test; not needed for docs |
 
 ### 11.10. Risks and mitigations
 

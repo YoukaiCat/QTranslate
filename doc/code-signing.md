@@ -1,7 +1,7 @@
 # Code signing and SmartScreen
 
-Date: 2026-11-05. Status: not implemented; the `v0.9.0`, `v0.9.1` and `v0.10.0` releases are not
-signed.
+Date: 2026-11-05. Status: not implemented; the `v0.9.0`, `v0.9.1`, `v0.10.0` and `v0.11.0` releases
+are not signed.
 
 This document records the signing options for the qtranslate installer, the service requirements and
 the implementation plan. The technical limitations of selection capture through UI Automation are

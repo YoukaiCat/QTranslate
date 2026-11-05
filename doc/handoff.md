@@ -162,7 +162,7 @@ documents are being translated in stage 1 of the migration.
 
 - [`proofreading.md`](proofreading.md): a separate mode for spelling, grammar and punctuation
   checking; the code is not implemented.
-- A separate **Proofreading** settings tab and independent `proofreading/*` keys; checking must not be
+- A separate **Text checking** settings tab and independent `proofreading/*` keys; checking must not be
   part of `TranslationService`.
 - Providers: LanguageTool (cloud/self-hosted, grammar/punctuation), Hunspell/Nuspell (spelling),
   Yandex Speller (spelling ru/uk/en), LLM — optionally through a diff.

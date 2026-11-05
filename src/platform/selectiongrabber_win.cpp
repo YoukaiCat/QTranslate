@@ -245,7 +245,7 @@ void SelectionGrabber::restoreClipboardData()
 
     // Keep the synthetic Ctrl+C out of clipboard history and clipboard
     // managers as far as Windows allows it (see the stage 3 notes in
-    // doc/plan.md).
+    // doc/roadmap/qtranslate/legacy-plan.md).
     m_snapshot->setData(QStringLiteral("ExcludeClipboardContentFromMonitorProcessing"),
                         QByteArray(1, '\0'));
     QByteArray noHistory(4, '\0');

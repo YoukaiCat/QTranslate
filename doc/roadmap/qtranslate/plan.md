@@ -9,7 +9,7 @@ base: ef09e8c
 
 # QTranslate — Roadmap
 
-Move the project from the flat Russian plan to the tree roadmap used by the lead agent, translate all active project documentation to English, and continue the remaining product work in the order of the old plan. Product code stays unchanged during the documentation migration; later stages deliver the remaining features.
+Move the project from the flat Russian plan to the tree roadmap used by the lead agent, translate all active project documentation to English, and continue the remaining product work in the order of the old plan. Product code stays unchanged during the documentation migration except for one user-approved comment line in `src/platform/selectiongrabber_win.cpp`, where a stale `doc/plan.md` reference is repointed to the archive; later stages deliver the remaining features.
 
 The active roadmap is this file. The detailed Russian history of the old flat plan is in [`legacy-plan.md`](legacy-plan.md); stage 1 moved it there. The documentation and roadmap policy is in [`doc/architecture.md`](../../architecture.md), section 11. This is a personal project with no Jira issue numbers; commit messages follow the repository's existing style without a Jira key.
 
@@ -19,7 +19,12 @@ The active roadmap is this file. The detailed Russian history of the old flat pl
 - Active project documentation is English; only `README.ru.md`, the archived `legacy-plan.md`, and quoted Russian UI strings remain in Russian.
 - `AGENTS.md` points to the active roadmap and the English documentation; all relative Markdown links in `doc/` resolve.
 - The old flat plan is preserved as a clearly marked Russian archive and is not mistaken for the active plan.
-- After any code changes, the application builds in Debug and Release without `/W4` warnings and all 23 tests pass. The documentation migration itself changes no code.
+- The documentation migration changes no code except one user-approved comment line in
+  `src/platform/selectiongrabber_win.cpp`, which repoints a stale `doc/plan.md` reference to the
+  archive. Windows Debug/Release builds and the 23 tests are unavailable in the current Linux
+  environment; the outcome records them as not performed, not as passed.
+- After any other code changes, the application builds in Debug and Release without `/W4` warnings
+  and all 23 tests pass.
 
 ## History
 
@@ -29,7 +34,7 @@ Old stages 13 (free web endpoints) and 16 (LLM actions) are partially implemente
 
 ## Stages
 
-1. [Documentation migration and English baseline](01-documentation-migration/plan.md) — migrate to the tree roadmap and translate all active documentation to English; no code changes.
+1. [Documentation migration and English baseline](01-documentation-migration/plan.md) — migrate to the tree roadmap and translate all active documentation to English; no code changes except one approved comment line.
 2. [Linux support (old stage 11)](02-linux/plan.md) — Linux x86_64 build, X11 as the full target, Wayland limited with clear warnings.
 3. [Free web endpoints (old stage 13)](03-free-web-endpoints/plan.md) — MyMemory, Mozhi, and other no-key endpoints as optional fallbacks.
 4. [Local offline translation (old stage 14)](04-local-offline-translation/plan.md) — Argos Translate through CTranslate2 with model downloads.
