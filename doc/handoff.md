@@ -9,15 +9,18 @@
 - История: релиз 0.10.0, удаление checksum-ссылок и возврат `SHA256SUMS.txt` как unlisted asset.
 - Текущая работа — OpenAI-совместимый перевод (OpenRouter), объединение DeepL free web в один
   сервис и брендинг QTranslate: локальные коммиты `bb71456`, `b212f6e`, `df3dd80`, `8f2156a`,
-  `11fad9c`, **не запушены**. Push — только по просьбе пользователя или при выпуске согласованного
-  релиза. Внутри `DeepLService` режим хранится как `enum class Mode { Api, FreeWeb }`, а в INI —
-  как строка `deepl.mode=api|free-web`. Вкладка «Сервисы» в настройках прокручивается
-  (`QScrollArea`), чтобы нижняя подсказка не обрезалась при 150% масштабировании.
+  `11fad9c`, `2f1fcbf`, `e442cb9`, **не запушены**. Push — только по просьбе пользователя или при
+  выпуске согласованного релиза. Внутри `DeepLService` режим хранится как
+  `enum class Mode { Api, FreeWeb }`, а в INI — как строка `deepl.mode=api|free-web`. Вкладка
+  «Сервисы» в настройках прокручивается (`QScrollArea`), чтобы нижняя подсказка не обрезалась при
+  150% масштабировании.
 - Отображаемое имя приложения — **QTranslate**: `AppInfo::name()`, заголовки окон, трей,
   User-Agent, `FileDescription`/`ProductName` и установщик. Внутренние имена
   `qtranslate.exe`, `qtranslate.ini`, ключ автозагрузки `qtranslate` и имена артефактов оставлены
   для совместимости. Git remote переключён на `https://github.com/youkaicat/QTranslate.git`;
-  ссылки в README/доках обновлены.
+  ссылки в README/доках обновлены. README получил разделы «Translation providers» /
+  «Провайдеры перевода»: Google, DeepL, OpenRouter (ключ обязателен даже для `openrouter/free`),
+  локальные Ollama/LM Studio/llama.cpp и пошаговая настройка Ollama.
 - Для live smoke запущен `build\dist\bin\qtranslate.exe` с `--verbose`; окно называется QTranslate.
   После проверки закрыть.
 - Рабочее дерево после завершения должно быть чистым.
