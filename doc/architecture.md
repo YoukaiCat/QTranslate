@@ -1270,7 +1270,7 @@ is unacceptable.
 Planned artifacts: `qtranslate-<version>-linux-x86_64.tar.gz` (portable, with Qt),
 `.deb` (Qt dependencies from the distribution), and AppImage. CI — `ubuntu-24.04`, Qt 6.5+, tests in
 `xvfb-run`; the Windows platform tests (`tst_hotkeymanager`, `tst_autostart`,
-`tst_secretprotector`) are replaced by Linux analogues, the other 14 tests are shared.
+`tst_secretprotector`) are replaced by Linux analogues, the other 20 tests are shared.
 
 **Wayland limitations.** Global shortcuts and synthetic input are not base capabilities of
 Wayland. The `GlobalShortcuts` portal is not supported by all desktops and versions; insertion
@@ -1480,12 +1480,15 @@ are linked into separate test targets):
 
 | Test | What it checks |
 |---|---|
+| `tst_appinfo` | Stable application name, semantic version, and user-agent string |
 | `tst_googleparser` | Parsing of gtx and Cloud API responses by fixtures: multiple sentences, language detection, empty/broken response, Cloud error codes with a body |
 | `tst_googletranslateservice` | The service against a local HTTP server: free/cloud modes, body/key, splitting long text and joining, HTTP errors, connection refusal, timeout, cancellation |
 | `tst_deeplparser` | Parsing `translations[]`, per-part parsing, `/v2/usage`, error codes → `TranslationError` |
 | `tst_deeplservice` | DeepL against a local HTTP server: Authorization, `text` array, English variants, Developer/Growth hosts, errors, timeout, key check |
 | `tst_deeplwebparser` | Parsing the DeepL web endpoint response, error codes `403/429/413/5xx`, rate limit detection in the body |
 | `tst_deeplwebservice` | DeepL free web against a local HTTP server: `Authorization: None`, language codes, 5000 characters, retry on `429`, serialization and a 2 s pause, errors, timeout |
+| `tst_openaichat` | Chat Completions request serialization (model, messages, temperature, `max_tokens`, stream), response parsing, error and finish-reason mapping, model list, endpoint building |
+| `tst_openaicompatibleservice` | The OpenAI-compatible service against a local HTTP server: configuration errors, chat request, source language, plain-text and fenced-JSON responses, whitespace, HTTP errors, timeout, cancellation, OpenRouter key rules, model loading and edited base URL |
 | `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, `closest` when the service changes, unknown codes |
 | `tst_networkmanager` | Proxy types, HTTP proxy with authentication and `CONNECT`, SOCKS5 with login/password, `testProxy`, clear errors and no password in the text |
 | `tst_popupplacement` | Positioning of the Ctrl+Q window: reflection at edges, pressing against the screen, a second monitor with negative coordinates |
