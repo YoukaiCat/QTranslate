@@ -764,14 +764,14 @@ X-Title: qtranslate
 - The `src/ai/openaichat.*` transport does not depend on `TranslationService`: future AI actions and
   the dictionary will use it too.
 
-### 4.8. Языки — `languages`
+### 4.8. Languages — `languages`
 
-Внутри программы используются собственные коды языков (`en`, `ru`, `de`, `pt-BR`, `zh-Hans`…).
-Сервисы переводят их в свои коды:
+The program uses its own language codes internally (`en`, `ru`, `de`, `pt-BR`, `zh-Hans`…).
+Services map them to their own codes:
 
-| Внутренний | Google | DeepL source | DeepL target |
+| Internal | Google | DeepL source | DeepL target |
 |---|---|---|---|
-| `en` | `en` | `EN` | `EN-US` (настраивается: `EN-GB`) |
+| `en` | `en` | `EN` | `EN-US` (configurable: `EN-GB`) |
 | `pt-BR` | `pt` | `PT` | `PT-BR` |
 | `zh-Hans` | `zh-CN` | `ZH` | `ZH-HANS` |
 | `ru` | `ru` | `RU` | `RU` |
@@ -779,34 +779,34 @@ X-Title: qtranslate
 | `nb` | `no` | `NB` | `NB` |
 | `fil` | `tl` | — | — |
 
-Модуль хранит таблицу `{код, английское название, название на родном языке, коды сервисов}`
-(около 110 языков Google, из них около 35 есть у DeepL) и предоставляет функции в пространстве имён
-`Languages`:
+The module stores a table `{code, English name, native name, service codes}`
+(about 110 Google languages, of which about 35 are available in DeepL) and provides functions in the
+`Languages` namespace:
 
-- `toServiceCode(serviceId, code, direction)` — пустая строка, если сервис язык не поддерживает;
-- `fromServiceCode(serviceId, serviceCode, direction)` — без учёта регистра; сначала код нужного
-  направления, затем другого (DeepL `EN-US` как исходный, `PT` как целевой), затем синонимы
-  (Google `he`/`jv`/`zh`, DeepL `EN-GB`); неизвестный код — пустая строка. Обратное
-  преобразование нужно для `detectedSourceLang`;
-- `supported(serviceId, direction)` — списки языков для сервисов и `LanguageComboBox`;
-- `closest(serviceId, code, direction)` — ближайший поддерживаемый код: точный, затем язык той же
-  основы (`pt-BR`/`pt-PT`, `zh-Hans`/`zh-Hant`), системный, `en`, первый доступный;
-- `displayName(code)` — название для UI, помечено `QT_TRANSLATE_NOOP` (контекст `Languages`) под
-  локализацию этапа 8; `englishName(code)` — стабильное английское имя для промптов LLM, не
-  зависящее от языка интерфейса; `nativeName(code)` — самоназвание (подсказка в списке);
-- `autoCode()` — `"auto"`; `forLocale(QLocale)` / `systemLanguage()` — язык системы с учётом
-  письменности и региона (`zh-Hans`/`zh-Hant`, `pt-BR`/`pt-PT`, нюнорск → `nb`), иначе `en`.
-- Для сервиса `llm` используются внутренние коды языка и весь каталог Google: LLM не требует
-  отдельной таблицы кодов, а `englishName()` даёт модели однозначное название языка.
+- `toServiceCode(serviceId, code, direction)` — empty string if the service does not support the language;
+- `fromServiceCode(serviceId, serviceCode, direction)` — case-insensitive; first the code for the requested
+  direction, then the other one (DeepL `EN-US` as source, `PT` as target), then synonyms
+  (Google `he`/`jv`/`zh`, DeepL `EN-GB`); unknown code — empty string. Reverse
+  conversion is needed for `detectedSourceLang`;
+- `supported(serviceId, direction)` — language lists for services and `LanguageComboBox`;
+- `closest(serviceId, code, direction)` — nearest supported code: exact, then a language of the same
+  base (`pt-BR`/`pt-PT`, `zh-Hans`/`zh-Hant`), system, `en`, first available;
+- `displayName(code)` — UI name, marked with `QT_TRANSLATE_NOOP` (context `Languages`) for
+  localization in old plan stage 8; `englishName(code)` — stable English name for LLM prompts, not
+  dependent on the UI language; `nativeName(code)` — native name (tooltip in the list);
+- `autoCode()` — `"auto"`; `forLocale(QLocale)` / `systemLanguage()` — system language considering
+  script and region (`zh-Hans`/`zh-Hant`, `pt-BR`/`pt-PT`, Nynorsk → `nb`), otherwise `en`.
+- The `llm` service uses internal language codes and the full Google catalogue: LLM does not require
+  a separate code table, and `englishName()` gives the model an unambiguous language name.
 
-Списки языков у сервисов разные (у DeepL их меньше). `LanguageComboBox` показывает только
-поддерживаемые выбранным сервисом; при смене сервиса `AppController` заменяет текущий язык через
-`Languages::closest` (например, `pt` → `pt-BR`, `fil` → системный/`en`). «Auto-detect» остаётся
-исходным языком всегда.
+Service language lists differ (DeepL has fewer). `LanguageComboBox` shows only
+the languages supported by the selected service; when the service changes, `AppController` replaces the current language via
+`Languages::closest` (for example, `pt` → `pt-BR`, `fil` → system/`en`). "Auto-detect" always remains
+the source language.
 
 ### 4.9. `TranslationManager`
 
-Фасад над сервисами, с которым работают `AppController` и UI.
+A facade over the services that `AppController` and the UI work with.
 
 ```cpp
 class TranslationManager : public QObject {
@@ -814,46 +814,46 @@ class TranslationManager : public QObject {
 public:
     enum class Channel { MainWindow, Popup, InPlace };
 
-    void registerService(TranslationService *service);   // забирает владение; первый — активный
+    void registerService(TranslationService *service);   // takes ownership; the first is active
     QList<TranslationService *> services() const;
     TranslationService *service(const QString &id) const;
     TranslationService *activeService() const;
     void setActiveService(const QString &id);
-    void setMaxLength(int length);                         // 20 000 по умолчанию; из настроек — этап 5
+    void setMaxLength(int length);                         // 20,000 by default; from settings — old plan stage 5
 
-    // channel — «канал» запроса: Popup, MainWindow или InPlace.
-    // Новый запрос в том же канале отменяет предыдущий незавершённый.
+    // channel — the request "channel": Popup, MainWindow, or InPlace.
+    // A new request in the same channel cancels the previous incomplete one.
     TranslationReply *translate(const TranslationRequest &req, Channel channel);
     void cancel(Channel channel);
-    void cancelAll();                                      // при завершении программы (§5.6)
+    void cancelAll();                                      // on program exit (§5.6)
 signals:
     void activeServiceChanged(const QString &id);
 };
 ```
 
-Менеджер хранит на текущий ответ каждого канала только `QPointer`: ответом владеет вызывающий.
-`translate()` сначала проверяет кэш, затем оборачивает ответ сервиса в `Reply` (кэширование и
-повтор на дополнительный язык); интерфейс менеджера от этого не меняется. Отменённый ответ
-приходит вызывающему с `Cancelled`, и UI его не показывает.
+The manager keeps only a `QPointer` to the current reply of each channel: the caller owns the reply.
+`translate()` first checks the cache, then wraps the service reply in a `Reply` (caching and
+retry to the additional language); the manager's interface does not change. A cancelled reply
+arrives at the caller with `Cancelled`, and the UI does not show it.
 
-Ответственность:
+Responsibilities:
 
-1. **Отмена устаревших запросов.** Пользователь нажал Ctrl+Q, не дождался и выделил другой текст —
-   первый запрос отменяется, его результат не покажется поверх нового. Каналы независимы:
-   перевод в главном окне не отменяет всплывающий.
-2. **Умный выбор языка перевода.** В настройках два языка: основной (например, `ru`) и
-   дополнительный (`en`). Если исходный язык «auto» и сервис определил, что текст уже на основном
-   языке, запрос автоматически повторяется с переводом на дополнительный. Так одна клавиша
-   работает в обе стороны: английский → русский и русский → английский.
-3. **Кэш.** LRU на 200 записей, ключ — `serviceId|src|dst|text`. Повторный перевод того же
-   фрагмента мгновенный и не тратит квоту DeepL. Кэш только в памяти.
-4. **Проверки до сети.** Пустой текст (`EmptyText`), превышение `maxLength` (`TooLong`),
-   ненастроенный сервис (`Auth`) — ошибка возвращается сразу, без запроса (через
-   `TranslationReply::createFinished`, то есть асинхронно).
+1. **Cancelling stale requests.** The user pressed Ctrl+Q, did not wait, and selected other text —
+   the first request is cancelled, its result will not appear on top of the new one. Channels are independent:
+   a translation in the main window does not cancel the popup.
+2. **Smart choice of the translation language.** There are two languages in settings: the primary (for example, `ru`) and
+   the additional (`en`). If the source language is "auto" and the service determines that the text is already in the primary
+   language, the request is automatically repeated with translation to the additional language. So one key
+   works both ways: English → Russian and Russian → English.
+3. **Cache.** LRU of 200 entries, key — `serviceId|src|dst|text`. Re-translating the same
+   fragment is instant and does not consume DeepL quota. The cache is in memory only.
+4. **Checks before the network.** Empty text (`EmptyText`), exceeding `maxLength` (`TooLong`),
+   an unconfigured service (`Auth`) — the error is returned immediately, without a request (via
+   `TranslationReply::createFinished`, that is, asynchronously).
 
-### 4.10. Сеть и прокси — `NetworkManager`
+### 4.10. Network and proxy — `NetworkManager`
 
-Владеет единственным `QNetworkAccessManager` приложения.
+Owns the application's single `QNetworkAccessManager`.
 
 ```cpp
 enum class ProxyMode { None, System, Manual };
@@ -875,64 +875,64 @@ public:
     QNetworkAccessManager *nam();
     void applyProxy(const ProxySettings &p);
     const ProxySettings &proxySettings() const;
-    QNetworkRequest makeRequest(const QUrl &url) const;   // таймаут, User-Agent, HTTP/1.1
-    // Проверка прокси без сохранения: временный QNAM с заданными параметрами
+    QNetworkRequest makeRequest(const QUrl &url) const;   // timeout, User-Agent, HTTP/1.1
+    // Proxy test without saving: a temporary QNAM with the given parameters
     void testProxy(const ProxySettings &p, const QUrl &url,
                    std::function<void(bool ok, const QString &message)> cb);
     QString describeNetworkError(QNetworkReply *reply, bool includeDetails = true) const;
 };
 ```
 
-Сопоставление с Qt:
+Mapping to Qt:
 
-| Режим / тип | Реализация |
+| Mode / type | Implementation |
 |---|---|
-| Без прокси | `QNetworkProxy::NoProxy` |
-| Системный | `QNetworkProxyFactory::setUseSystemConfiguration(true)` (WinINet/WPAD, PAC) |
-| HTTP | `QNetworkProxy::HttpProxy`; для https-адресов Qt сам делает туннель `CONNECT` |
-| SOCKS5 | `QNetworkProxy::Socks5Proxy`; DNS-имена резолвятся на стороне прокси |
+| No proxy | `QNetworkProxy::NoProxy` |
+| System | `QNetworkProxyFactory::setUseSystemConfiguration(true)` (WinINet/WPAD, PAC) |
+| HTTP | `QNetworkProxy::HttpProxy`; for https addresses Qt creates the `CONNECT` tunnel itself |
+| SOCKS5 | `QNetworkProxy::Socks5Proxy`; DNS names are resolved on the proxy side |
 
-Логин и пароль задаются прямо в `QNetworkProxy`. `proxyAuthenticationRequired` не показывает
-диалог: при наличии данных они передаются один раз; повторный запрос завершается отказом. Ошибки
-прокси (`ProxyAuthenticationRequiredError`, `ProxyConnectionRefusedError`, `ProxyNotFoundError`,
-`ProxyTimeoutError` и т.п.) превращаются в короткие сообщения «Proxy authentication failed» /
-«Proxy connection failed» через `describeNetworkError`; остальные ошибки сохраняют текст Qt. Для
-Cloud-URL с ключом `includeDetails = false` оставляет только общий «Network error».
+Login and password are set directly in `QNetworkProxy`. `proxyAuthenticationRequired` does not show a
+dialog: if credentials are present, they are sent once; a repeated request is rejected. Proxy
+errors (`ProxyAuthenticationRequiredError`, `ProxyConnectionRefusedError`, `ProxyNotFoundError`,
+`ProxyTimeoutError`, etc.) are converted into short "Proxy authentication failed" /
+"Proxy connection failed" messages via `describeNetworkError`; other errors keep the Qt text. For
+Cloud URLs with a key, `includeDetails = false` leaves only the generic "Network error".
 
-После `applyProxy` вызывается `nam->clearConnectionCache()`, чтобы уже открытые keep-alive
-соединения не продолжали идти мимо нового прокси. `testProxy` использует такой же временный QNAM,
-те же таймаут/User-Agent и считает успехом любой HTTP-ответ (кроме `407 Proxy Authentication
-Required`); в UI проверка идёт на `https://www.gstatic.com/generate_204`. Раньше использовался
-`https://translate.googleapis.com/`, который отвечает `404`, и проверка ошибочно считала рабочий
-прокси неисправным.
+After `applyProxy`, `nam->clearConnectionCache()` is called so that already open keep-alive
+connections do not continue bypassing the new proxy. `testProxy` uses the same temporary QNAM,
+the same timeout/User-Agent, and considers any HTTP response a success (except `407 Proxy Authentication
+Required`); in the UI, the test goes to `https://www.gstatic.com/generate_204`. Previously,
+`https://translate.googleapis.com/` was used, which responds with `404`, and the test incorrectly considered a working
+proxy to be faulty.
 
-**О «HTTPS-прокси» (решение принято).** Под HTTPS-прокси в проекте понимается HTTP-прокси,
-через который идут https-запросы (туннель `CONNECT`). Отдельного типа для этого нет: тип `Http`
-обслуживает и http-, и https-адреса. Прокси с TLS-соединением *до самого прокси* `QNetworkProxy`
-не поддерживает, и в проекте он не нужен.
+**On "HTTPS proxies" (decision made).** An HTTPS proxy in the project means an HTTP proxy
+through which https requests go (a `CONNECT` tunnel). There is no separate type for this: the `Http`
+type serves both http and https addresses. A proxy with a TLS connection *to the proxy itself* is not supported by
+`QNetworkProxy`, and the project does not need it.
 
-SOCKS4 Qt не поддерживает; в UI предлагается только SOCKS5.
+Qt does not support SOCKS4; only SOCKS5 is offered in the UI.
 
-Общие параметры запросов: `setTransferTimeout(10 000 мс)` (настраивается), постоянный
-`User-Agent: qtranslate/<версия>`, только HTTPS.
+Common request parameters: `setTransferTimeout(10 000 ms)` (configurable), a persistent
+`User-Agent: qtranslate/<version>`, HTTPS only.
 
-**HTTP/1.1 для бесплатного Google.** Qt 6.12 по умолчанию согласует HTTP/2, и
-`translate.googleapis.com/translate_a/single` в наших проверках стабильно отвечал на такие запросы
-`HTTP 429`, хотя те же GET/POST по HTTP/1.1 (curl, .NET) проходили. Поэтому `makeRequest()` ставит
-`QNetworkRequest::Http2AllowedAttribute = false`; после этого gtx переводит без 429. Запросы ко всем
-сервисам идут по HTTP/1.1 — для DeepL это не имеет значения, а поведение бесплатного Google
-становится предсказуемым. Регрессия проверяется в `tst_networkmanager::requestsUseHttp11`.
+**HTTP/1.1 for free Google.** Qt 6.12 negotiates HTTP/2 by default, and
+`translate.googleapis.com/translate_a/single` in our tests consistently responded to such requests with
+`HTTP 429`, although the same GET/POST over HTTP/1.1 (curl, .NET) passed. Therefore `makeRequest()` sets
+`QNetworkRequest::Http2AllowedAttribute = false`; after this, gtx translates without 429. Requests to all
+services go over HTTP/1.1 — this does not matter for DeepL, and the behavior of free Google
+becomes predictable. The regression is checked in `tst_networkmanager::requestsUseHttp11`.
 
-**Состояние на этапе 8.** Реализованы `applyProxy`, `testProxy`, обработка авторизации/ошибок
-прокси и `describeNetworkError`. Режимы `None`/`System`/`Manual`, типы HTTP/SOCKS5; после смены
-прокси кэш соединений сбрасывается. Прокси применяется при старте и при сохранении настроек.
-Системный режим и ручной HTTP-прокси проверены на реальном прокси `127.0.0.1:2080`.
+**State at old plan stage 8.** `applyProxy`, `testProxy`, proxy authorization/error handling, and
+`describeNetworkError` are implemented. Modes `None`/`System`/`Manual`, types HTTP/SOCKS5; after changing the
+proxy, the connection cache is reset. The proxy is applied at startup and when settings are saved.
+The system mode and manual HTTP proxy were tested on a real proxy `127.0.0.1:2080`.
 
-### 4.11. Настройки — `AppSettings` и `SettingsStore`
+### 4.11. Settings — `AppSettings` and `SettingsStore`
 
-`AppSettings` — обычная структура-значение со всеми параметрами (вложенные группы `general`,
-`hotkeys`, `translation`, `google`, `deepl`, `llm`, `network`, `popup`, `mainWindow` и
-`settingsVersion`). `SettingsStore` загружает и сохраняет её и сообщает об изменениях:
+`AppSettings` is a plain value structure with all parameters (nested groups `general`,
+`hotkeys`, `translation`, `google`, `deepl`, `llm`, `network`, `popup`, `mainWindow`, and
+`settingsVersion`). `SettingsStore` loads and saves it and reports changes:
 
 ```cpp
 class SettingsStore : public QObject {
@@ -946,38 +946,38 @@ public:
     const AppSettings &current() const;
     void setSecretCodec(const SecretCodec &codec);
     void load();
-    void save(const AppSettings &s);       // пишет на диск и испускает changed
+    void save(const AppSettings &s);       // writes to disk and emits changed
 signals:
     void changed(const AppSettings &oldS, const AppSettings &newS);
 };
 ```
 
-Окно настроек редактирует **копию** `AppSettings`; по «ОК» отдаёт её в `save()`.
-`AppController` сравнивает старое и новое значение и применяет только изменившееся
-(перерегистрирует клавиши, меняет языки, автозагрузку и т.д.).
+The settings window edits a **copy** of `AppSettings`; on "OK" it passes it to `save()`.
+`AppController` compares the old and new values and applies only what changed
+(re-registers hotkeys, changes languages, autostart, etc.).
 
-Хранение: INI-файл через `QSettings`.
+Storage: an INI file via `QSettings`.
 
-- Обычный режим: `%APPDATA%\qtranslate\qtranslate.ini`.
-- Портативный режим: если рядом с exe лежит `qtranslate.ini`, используется он. Путь выбирает
-  чистая `SettingsStore::defaultFilePath(applicationDir, appDataDir)`, поэтому правило проверяется
-  тестом без записи рядом с тестовым exe.
+- Normal mode: `%APPDATA%\qtranslate\qtranslate.ini`.
+- Portable mode: if `qtranslate.ini` is next to the exe, it is used. The path is chosen by the
+  pure `SettingsStore::defaultFilePath(applicationDir, appDataDir)`, so the rule is tested
+  without writing next to the test exe.
 
-`organizationName` не задан (§4.1), поэтому `QSettings` по умолчанию для этого не годится.
-`SettingsStore` открывает INI по явному пути — `QSettings(path, QSettings::IniFormat)`. Группа
-`general` в INI называется `[app]`: `QSettings` зарезервировал имя `[General]` для ключей верхнего
-уровня и иначе экранирует группу в `[%General]`.
+`organizationName` is not set (§4.1), so the default `QSettings` is not suitable for this.
+`SettingsStore` opens the INI by an explicit path — `QSettings(path, QSettings::IniFormat)`. The
+`general` group in the INI is called `[app]`: `QSettings` has reserved the name `[General]` for top-level
+keys and otherwise escapes the group as `[%General]`.
 
-Секреты (API-ключи, пароль прокси) хранятся зашифрованными через Windows DPAPI
-(`CryptProtectData`, привязка к учётной записи пользователя) в base64. Модуль
-`platform/secretprotector` предоставляет `protect(QString) → QByteArray` и
-`unprotect(QByteArray) → QString`. `SettingsStore` не знает WinAPI: приложение передаёт ему
-`SecretCodec` из двух `std::function`; без кодека секреты не пишутся вовсе (открытым текстом —
-никогда). Если расшифровать не удалось (файл перенесён на другую машину), поле считается пустым.
+Secrets (API keys, proxy password) are stored encrypted via Windows DPAPI
+(`CryptProtectData`, tied to the user account) in base64. The
+`platform/secretprotector` module provides `protect(QString) → QByteArray` and
+`unprotect(QByteArray) → QString`. `SettingsStore` does not know WinAPI: the application passes it a
+`SecretCodec` of two `std::function`s; without a codec, secrets are not written at all (in plain text —
+never). If decryption fails (the file was moved to another machine), the field is considered empty.
 
-Ключи файла:
+File keys:
 
-| Ключ | Тип | По умолчанию |
+| Key | Type | Default |
 |---|---|---|
 | `app/autostart` | bool | `false` |
 | `app/startMinimized` | bool | `true` |
@@ -986,75 +986,75 @@ signals:
 | `hotkeys/popup` | QKeySequence (portable text) | `Ctrl+Q` |
 | `hotkeys/replaceSelection` | QKeySequence | `Ctrl+Shift+Q` |
 | `hotkeys/mainWindow` | QKeySequence | `Ctrl+W` |
-| `hotkeys/showMainWindow` | QKeySequence | пусто |
+| `hotkeys/showMainWindow` | QKeySequence | empty |
 | `hotkeys/pauseInFullscreen` | bool | `true` |
 | `translation/service` | string | `google` |
 | `translation/sourceLang` | string | `auto` |
-| `translation/primaryLang` | string | язык системы |
-| `translation/secondaryLang` | string | `en` (или `ru`, если системный — английский) |
+| `translation/primaryLang` | string | system language |
+| `translation/secondaryLang` | string | `en` (or `ru` if the system language is English) |
 | `translation/maxLength` | int | `20000` |
-| `translation/autoTranslateDelayMs` | int | `700` (0 — выкл.) |
+| `translation/autoTranslateDelayMs` | int | `700` (0 — off) |
 | `google/mode` | `free` \| `cloud` | `free` |
-| `google/apiKey` | секрет | пусто |
-| `deepl/mode` | `api` \| `free-web` | `api`; старый `translation/service=deepl-web` мигрирует в `deepl` + `free-web` |
-| `deepl/apiKey` | секрет | пусто |
+| `google/apiKey` | secret | empty |
+| `deepl/mode` | `api` \| `free-web` | `api`; the old `translation/service=deepl-web` migrates to `deepl` + `free-web` |
+| `deepl/apiKey` | secret | empty |
 | `deepl/englishVariant` | `EN-US` \| `EN-GB` | `EN-US` |
 | `llm/baseUrl` | string | `https://openrouter.ai/api/v1` |
-| `llm/apiKey` | секрет | пусто |
+| `llm/apiKey` | secret | empty |
 | `llm/model` | string | `openrouter/free` |
 | `network/proxyMode` | `none` \| `system` \| `manual` | `system` |
 | `network/proxyType` | `http` \| `socks5` | `http` |
 | `network/proxyHost`, `proxyPort` | string, int | — |
 | `network/proxyAuth`, `proxyUser` | bool, string | — |
-| `network/proxyPassword` | секрет | — |
+| `network/proxyPassword` | secret | — |
 | `network/timeoutMs` | int | `10000` |
 | `popup/width`, `popup/height`, `popup/autoCloseOnFocusLoss` | — | `460`, `260`, `true` |
 | `mainWindow/geometry`, `mainWindow/state` | QByteArray | — |
 
-В файл пишется `settingsVersion`; при изменении формата миграция выполняется в `SettingsStore::load()`.
+`settingsVersion` is written to the file; when the format changes, migration is performed in `SettingsStore::load()`.
 
-### 4.12. Автозагрузка — `Autostart`
+### 4.12. Autostart — `Autostart`
 
 ```cpp
 namespace Autostart {
     QString commandForExecutable(const QString &path);
     bool isEnabled();
-    bool setEnabled(bool on);   // false — нет доступа к реестру
-    bool sync(bool wanted);     // привести реестр к настройке, обновить путь
-    bool isApproved();          // учитывает StartupApproved
+    bool setEnabled(bool on);   // false — no access to the registry
+    bool sync(bool wanted);     // bring the registry in line with the setting, update the path
+    bool isApproved();          // takes StartupApproved into account
 }
 ```
 
-- Запись в `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, значение `qtranslate` =
-  `"C:\…\qtranslate.exe" --minimized` (через `QSettings` с `NativeFormat`). Права администратора
-  не нужны.
-- `sync()` вызывается при каждом старте: если автозагрузка включена, а путь к exe изменился
-  (программу переместили или обновили в другую папку), запись обновляется.
-- Пользователь может отключить автозагрузку в Диспетчере задач — тогда Windows ставит флаг в
-  `…\Explorer\StartupApproved\Run`. Мы его не переписываем, а только показываем в настройках
-  «отключено в Диспетчере задач».
+- Entry in `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, value `qtranslate` =
+  `"C:\…\qtranslate.exe" --minimized` (via `QSettings` with `NativeFormat`). Administrator rights
+  are not required.
+- `sync()` is called on every start: if autostart is enabled and the exe path has changed
+  (the program was moved or updated to a different folder), the entry is updated.
+- The user can disable autostart in Task Manager — then Windows sets a flag in
+  `…\Explorer\StartupApproved\Run`. We do not overwrite it, but only show "disabled in Task Manager"
+  in settings.
 
-### 4.13. Пользовательский интерфейс
+### 4.13. User interface
 
 #### `TrayIcon`
 
-`QSystemTrayIcon` с меню:
+`QSystemTrayIcon` with a menu:
 
 ```
-Показать окно
-Сервис ▸  ● Google Translate
-          ○ DeepL
+Show window
+Service ▸  ● Google Translate
+           ○ DeepL
 ───────────
-Настройки…
-Выход
+Settings…
+Quit
 ```
 
-- Левый клик — показать/скрыть главное окно.
-- Подсказка значка: «qtranslate — Ctrl+Q / Ctrl+W» (актуальные сочетания).
-- `showMessage()` для уведомлений: занятая горячая клавиша, ошибка сети при выключенном окне,
-  первый запуск.
-- Если `QSystemTrayIcon::isSystemTrayAvailable()` вернул `false`, главное окно всегда показывается
-  при старте, а закрытие окна завершает программу.
+- Left click — show/hide the main window.
+- Icon tooltip: "qtranslate — Ctrl+Q / Ctrl+W" (the current shortcuts).
+- `showMessage()` for notifications: hotkey in use, network error when the window is hidden,
+  first launch.
+- If `QSystemTrayIcon::isSystemTrayAvailable()` returns `false`, the main window is always shown
+  at startup, and closing the window exits the program.
 
 #### `PopupWindow` (Ctrl+Q)
 
@@ -1062,594 +1062,594 @@ namespace Autostart {
 ┌──────────────────────────────────────────────┐
 │ EN → RU ▾                    Google   📌  ✕   │
 ├──────────────────────────────────────────────┤
-│ Перевод текста, который можно выделять       │
-│ и копировать…                                │
+│ Translation of text that can be selected     │
+│ and copied…                                  │
 ├──────────────────────────────────────────────┤
-│ ⧉ Копировать   ⇄ В главное окно              │
+│ ⧉ Copy   ⇄ Open in Main Window               │
 └──────────────────────────────────────────────┘
 ```
 
-- Флаги: `Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint` — без кнопки на панели задач.
-- Создаётся лениво при первом Ctrl+Q и переиспользуется, чтобы появляться без задержки.
-- Позиция: у курсора в момент нажатия клавиши (точка запоминается до захвата выделения), с
-  ограничением рамками `QScreen::availableGeometry()` того монитора, где курсор. Чистая геометрия
-  вынесена в `core/popupplacement`: окно сначала ставится справа-снизу, у края отражается
-  влево/вверх, затем прижимается к экрану.
-- Ширина 460 логических пикселей (настройка — этап 5). Высота подстраивается под текст результата
-  до предела `min(600, 70% рабочей области)`; дальше прокрутка.
-- Состояния: «загрузка» (анимированный спиннер, показ сразу после захвата выделения), «результат»,
-  «ошибка» (текст и кнопка «Повторить»), «нет выделения» (короткая подсказка, закрывается через
-  1,5 с).
-- Закрытие: Esc и ✕ всегда; потеря фокуса — если не закреплено 📌. Закрепление действует в пределах
-  одного вызова и сбрасывается при новом Ctrl+Q. Меню языка — временный popup: пока приложение
-  остаётся активным и другое наше окно не стало активным, закрытие меню не закрывает окно; клик в
-  другой программе или в главном окне закрывает. Настройка `popup/autoCloseOnFocusLoss` появится на
-  этапе 5, пока поведение включено.
-- Клик по «Auto → Русский ▾» открывает меню целевых языков; выбор сразу переводит сохранённый
-  исходный текст заново. После результата в строке показывается определённый язык.
-- «Копировать» кладёт перевод в буфер. «В главное окно» испускает
-  `openInMainWindowRequested(request, result)`; `AppController` передаёт оба текста в
-  `MainWindow::showTranslation()` без нового запроса и показывает главное окно.
-- Скрытие испускает `closed()`; `AppController` отменяет незавершённый запрос канала `Popup`, чтобы
-  поздний ответ не показался поверх следующего. Новый Ctrl+Q заменяет старый запрос того же канала.
-- Активация: Windows разрешает процессу, получившему `WM_HOTKEY`, вывести окно на передний план,
-  поэтому `activateWindow()` после горячей клавиши срабатывает.
+- Flags: `Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint` — no taskbar button.
+- Created lazily on the first Ctrl+Q and reused to appear without delay.
+- Position: at the cursor when the key is pressed (the point is remembered before the selection capture), with
+  clamping to `QScreen::availableGeometry()` of the monitor where the cursor is. The pure geometry
+  is moved to `core/popupplacement`: the window is first placed bottom-right, reflected at the edge
+  left/up, then pressed against the screen.
+- Width 460 logical pixels (the setting was added in old plan stage 5). Height adapts to the result text
+  up to `min(600, 70% of the work area)`; then scrolling.
+- States: "loading" (animated spinner, shown immediately after the selection capture), "result",
+  "error" (text and "Retry" button), "no selection" (short hint, closes after
+  1.5 s).
+- Closing: Esc and ✕ always; focus loss — if not pinned 📌. Pinning applies within
+  one invocation and resets on a new Ctrl+Q. The language menu is a temporary popup: while the application
+  remains active and another of our windows has not become active, closing the menu does not close the window; a click in
+  another program or in the main window closes it. The `popup/autoCloseOnFocusLoss` setting was added in old plan stage 5;
+  the behaviour is enabled by default.
+- Clicking "Auto → Russian ▾" opens the target language menu; the selection immediately re-translates the saved
+  source text. After the result, the detected language is shown in the line.
+- "Copy" puts the translation on the clipboard. "Open in Main Window" emits
+  `openInMainWindowRequested(request, result)`; `AppController` passes both texts to
+  `MainWindow::showTranslation()` without a new request and shows the main window.
+- Hiding emits `closed()`; `AppController` cancels the incomplete request of the `Popup` channel so that
+  a late response does not appear on top of the next one. A new Ctrl+Q replaces the old request of the same channel.
+- Activation: Windows allows the process that received `WM_HOTKEY` to bring the window to the foreground,
+  so `activateWindow()` after the hotkey works.
 
 #### `MainWindow` (Ctrl+W)
 
 ```
 ┌───────────────────────────────────────────────────────────┐
-│ [Авто ▾]  ⇄  [Русский ▾]          Сервис: [Google ▾]       │
+│ [Auto ▾]  ⇄  [Russian ▾]          Service: [Google ▾]       │
 ├─────────────────────────────┬─────────────────────────────┤
-│ Исходный текст              │ Перевод (только чтение)     │
+│ Source text                 │ Translation (read-only)     │
 │                             │                             │
 ├─────────────────────────────┴─────────────────────────────┤
-│ Определён: английский   [Перевести Ctrl+Enter] [Копировать]│
+│ Detected language: English   [Translate Ctrl+Enter] [Copy]│
 └───────────────────────────────────────────────────────────┘
 ```
 
-- Два `QPlainTextEdit`: исходный текст и перевод (read-only).
-- Автоперевод при наборе с задержкой `autoTranslateDelayMs` (0 — выкл.); «Перевести» и Ctrl+Enter —
-  перевести сразу. Повторное нажатие до ответа заменяет запрос (канал `MainWindow`, §4.9).
-- ⇄ меняет языки местами, переносит перевод в поле исходного текста и сразу переводит его. Если
-  исходный язык «авто», новым целевым становится определённый язык последнего перевода; пока он
-  неизвестен, кнопка недоступна.
-- Строка состояния: «Translating…», определённый язык (когда исходный — «авто»), ошибки (красным,
-  текст из `ui/translationerrortext`). «Копировать» доступна, когда есть перевод.
-- Выбор сервиса показывает активный сервис и доступен, только когда сервисов больше одного (этап 6).
-- Окно не знает о сервисах и сети: испускает `translateRequested(request)`, а `AppController`
-  вызывает `TranslationManager` и возвращает итог через `showTranslationStarted()` /
-  `showResult(result)`; результат показывается, только если это текущий запрос окна.
-- `translateText(text)` подставляет текст, полученный сценарием Ctrl+W, в поле исходного текста,
-  ставит курсор в начало и запускает перевод.
-- `showTranslation(request, result)` показывает перевод, переданный из всплывающего окна: выставляет
-  языки, оба текста и статус, но не запускает новый запрос.
-- `closeEvent` скрывает окно в трей; выход — только из меню трея.
-- Геометрия сохраняется в настройках.
+- Two `QPlainTextEdit`s: source text and translation (read-only).
+- Auto-translate while typing with a delay `autoTranslateDelayMs` (0 — off); "Translate" and Ctrl+Enter —
+  translate immediately. Pressing again before the response replaces the request (`MainWindow` channel, §4.9).
+- ⇄ swaps the languages, moves the translation into the source text field and translates it immediately. If
+  the source language is "auto", the new target becomes the detected language of the last translation; while it is
+  unknown, the button is disabled.
+- Status line: "Translating…", the detected language (when the source is "auto"), errors (in red,
+  text from `ui/translationerrortext`). "Copy" is available when there is a translation.
+- The service choice shows the active service and is available only when there is more than one service (old plan stage 6).
+- The window does not know about services and the network: it emits `translateRequested(request)`, and `AppController`
+  calls `TranslationManager` and returns the result via `showTranslationStarted()` /
+  `showResult(result)`; the result is shown only if it is the current request of the window.
+- `translateText(text)` inserts the text received by the Ctrl+W scenario into the source text field,
+  places the cursor at the beginning and starts the translation.
+- `showTranslation(request, result)` shows the translation passed from the popup: it sets the
+  languages, both texts and the status, but does not start a new request.
+- `closeEvent` hides the window to the tray; exit is only from the tray menu.
+- Geometry is saved in settings.
 
 #### `LanguageComboBox`
 
-`QComboBox` с внутренними кодами языков: `setLanguages(codes, includeAuto)` (сортировка по
-названию, «Auto-detect» сверху, текущий язык сохраняется, если он остался в списке),
-`currentCode()` / `setCurrentCode()`, сигнал `currentCodeChanged`. Подстановка ближайшего языка
-при смене сервиса (§4.8) добавляется на этапе 6.
+A `QComboBox` with internal language codes: `setLanguages(codes, includeAuto)` (sorted by
+name, "Auto-detect" on top, the current language is kept if it remains in the list),
+`currentCode()` / `setCurrentCode()`, signal `currentCodeChanged`. The nearest language substitution
+when the service changes (§4.8) is added in old plan stage 6.
 
 #### `SettingsDialog`
 
-Модальный диалог редактирует копию `AppSettings`; «ОК» возвращает её, `AppController` сохраняет и
-применяет изменения, «Отмена» ничего не меняет. Вкладки:
+The modal dialog edits a copy of `AppSettings`; "OK" returns it, `AppController` saves and
+applies the changes, "Cancel" changes nothing. Tabs:
 
-1. **Общие** — автозагрузка (с подсказкой, если Windows отключила её в Диспетчере задач), запуск
-   свёрнутым, язык интерфейса (системный/English/Русский), восстановление буфера обмена, закрытие
-   popup при потере фокуса.
-2. **Горячие клавиши** — `QKeySequenceEdit` для Ctrl+Q, Ctrl+Shift+Q (перевод с заменой
-   выделения), Ctrl+W и показа главного окна. Пустое поле отключает действие. Перед принятием
-   проверяются односоставность, поддержка Win32 и отсутствие дубликатов. Пока фокус в любом поле,
-   диалог испускает `hotkeyEditingChanged(true)`, и `AppController` приостанавливает глобальные
-   клавиши; после ухода фокуса/закрытия — возобновляет.
-3. **Перевод** — исходный язык (с «Auto-detect»), основной и дополнительный языки, максимальная
-   длина, задержка автоперевода. Дополнительный язык используется для умного переключения,
-   когда текст уже на основном языке (этап 8).
-4. **Сервисы** — Google: режим (бесплатный/Cloud API), ключ (password echo). DeepL: режим
-   (API с ключом или бесплатный веб-эндпоинт без ключа), ключ (password echo), вариант английского,
-   кнопка «Проверить ключ» с асинхронным результатом (`character_count`/`character_limit` или
-   ошибка). В режиме `free-web` поле ключа и проверка блокируются, показывается предупреждение о
-   неофициальности; отдельной группы «DeepL (free web)» нет. Кнопка проверки не блокирует диалог;
-   ключ берётся из поля ввода. Ключи сохраняются через DPAPI из этапа 5.
-5. **Сеть** — режим (без прокси/системный/ручной), тип HTTP/SOCKS5, хост, порт, авторизация,
-   логин, пароль (password echo), таймаут, кнопка «Проверить соединение» с асинхронным результатом.
-   Поля включаются только для ручного режима; диалог испускает `proxyTestRequested()`, а
-   `AppController` проверяет ещё не сохранённые параметры через `NetworkManager::testProxy`.
+1. **General** — autostart (with a hint if Windows disabled it in Task Manager), start
+   minimized, UI language (system/English/Русский), clipboard restoration, closing the
+   popup on focus loss.
+2. **Hotkeys** — `QKeySequenceEdit` for Ctrl+Q, Ctrl+Shift+Q (translation with selection
+   replacement), Ctrl+W, and showing the main window. An empty field disables the action. Before accepting,
+   single-key composition, Win32 support, and the absence of duplicates are checked. While focus is in any field,
+   the dialog emits `hotkeyEditingChanged(true)`, and `AppController` suspends global
+   hotkeys; after focus leaves/closes — resumes them.
+3. **Translation** — source language (with "Auto-detect"), primary and additional languages, maximum
+   length, auto-translate delay. The additional language is used for smart switching
+   when the text is already in the primary language (old plan stage 8).
+4. **Services** — Google: mode (free/Cloud API), key (password echo). DeepL: mode
+   (API with a key or a free web endpoint without a key), key (password echo), English variant,
+   "Check key" button with an asynchronous result (`character_count`/`character_limit` or
+   an error). In `free-web` mode, the key field and the check are disabled, and a warning about
+   being unofficial is shown; there is no separate "DeepL (free web)" group. The check button does not block the dialog;
+   the key is taken from the input field. Keys have been stored via DPAPI since old plan stage 5.
+5. **Network** — mode (no proxy/system/manual), type HTTP/SOCKS5, host, port, authentication,
+   login, password (password echo), timeout, "Test connection" button with an asynchronous result.
+   Fields are enabled only for manual mode; the dialog emits `proxyTestRequested()`, and
+   `AppController` tests the not-yet-saved parameters via `NetworkManager::testProxy`.
 
 #### `AppIcon`
 
-Иконки для трея и окна. Для трея — отдельные варианты под светлую и тёмную тему панели задач
-(`QStyleHints::colorScheme()`), во время запроса можно показывать анимированный индикатор.
-Иконка exe (`resources/icons/app.ico`) и версия встраиваются через `resources/qtranslate.rc`.
+Icons for the tray and the window. For the tray — separate variants for the light and dark taskbar theme
+(`QStyleHints::colorScheme()`); during a request, an animated indicator can be shown.
+The exe icon (`resources/icons/app.ico`) and the version are embedded via `resources/qtranslate.rc`.
 
-#### Локализация
+#### Localization
 
-Строки помечены `tr()`/`QT_TRANSLATE_NOOP`. Английский — исходный язык; в `i18n/` лежат
-`qtranslate_ru_RU.ts` и переводы на испанский, немецкий, французский, португальский (Бразилия),
-итальянский, польский, украинский, турецкий, китайский (упрощённый), японский, корейский, арабский
-и хинди. Все `.ts` компилируются `qt_add_translations` и встраиваются в ресурсы `:/i18n`.
+Strings are marked with `tr()`/`QT_TRANSLATE_NOOP`. English is the source language; `i18n/` contains
+`qtranslate_ru_RU.ts` and translations into Spanish, German, French, Portuguese (Brazil),
+Italian, Polish, Ukrainian, Turkish, Chinese (Simplified), Japanese, Korean, Arabic,
+and Hindi. All `.ts` files are compiled by `qt_add_translations` and embedded into `:/i18n` resources.
 
-`core/uilanguages` хранит поддерживаемые коды, родные названия и путь к `.qm`. `normalize()`
-разрешает `system`, региональные теги (`de-DE`, `ru_RU`) и особые случаи: `pt-PT` → `pt-BR`,
-`zh-CN`/`zh-Hans` → `zh-Hans`; неподдерживаемые языки и `zh-Hant` пока откатываются на английский.
-`AppController::applyUiLanguage()` загружает нужный `QTranslator`, для арабского включает
-`Qt::RightToLeft` и рассылает `LanguageChange`; главное окно переприменяет статические тексты, трей
-перестраивает меню, popup пересоздаётся при следующем вызове.
+`core/uilanguages` stores the supported codes, native names, and the path to `.qm`. `normalize()`
+resolves `system`, regional tags (`de-DE`, `ru_RU`), and special cases: `pt-PT` → `pt-BR`,
+`zh-CN`/`zh-Hans` → `zh-Hans`; unsupported languages and `zh-Hant` still fall back to English.
+`AppController::applyUiLanguage()` loads the required `QTranslator`, enables `Qt::RightToLeft` for Arabic,
+and broadcasts `LanguageChange`; the main window reapplies static texts, the tray
+rebuilds the menu, and the popup is recreated on the next call.
 
-`tst_uilanguages` проверяет нормализацию кодов и таблицу языков, `tst_translations` — полноту всех
-`.ts`, сохранность `%1`/`%2`, эмодзи и краевых пробелов. Переводы — машинно-ассистированный первый
-проход; перед публичным релизом желательна проверка носителями языка, особенно для арабского RTL и
-длинных строк в настройках.
+`tst_uilanguages` checks code normalization and the language table, `tst_translations` — the completeness of all
+`.ts` files, preservation of `%1`/`%2`, emoji, and edge whitespace. Translations are a machine-assisted first
+pass; before a public release, native-speaker review is desirable, especially for Arabic RTL and
+long strings in settings.
 
-Стандартные диалоги Qt переводятся отдельными `qt_<locale>.qm`; `AppController::applyUiLanguage()`
-загружает их из `../translations` рядом с exe (в dev-сборке — из
-`QLibraryInfo::TranslationsPath`). `windeployqt --translations` развёртывает каталоги для
-`ru,es,de,fr,pt_BR,it,pl,uk,tr,zh_CN,ja,ko,ar`; в Qt 6.12 нет `qt_hi.qm`, поэтому стандартные
-кнопки и меню для хинди остаются английскими.
+Standard Qt dialogs are translated by separate `qt_<locale>.qm` files; `AppController::applyUiLanguage()`
+loads them from `../translations` next to the exe (in a dev build — from
+`QLibraryInfo::TranslationsPath`). `windeployqt --translations` deploys directories for
+`ru,es,de,fr,pt_BR,it,pl,uk,tr,zh_CN,ja,ko,ar`; Qt 6.12 has no `qt_hi.qm`, so standard
+buttons and menus for Hindi remain English.
 
-### 4.14. Переносимость и план поддержки Linux
+### 4.14. Portability and the Linux support plan
 
-Windows-код изолирован: заголовки `platform/*.h` не включают `<windows.h>`, а реализации —
-`*_win.cpp`; для остальных платформ есть `*_stub.cpp`. `qtranslate_core`, `net/`, `services/` и
-UI не используют WinAPI. Благодаря этому `CMakeLists.txt` рассчитан на сборку каркаса под Linux,
-но фактическая проверка и реальные платформенные действия появятся только на этапе 11:
-сейчас все Linux-реализации — заглушки.
+Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
+`*_win.cpp`; for other platforms there is `*_stub.cpp`. `qtranslate_core`, `net/`, `services/`, and
+the UI do not use WinAPI. Thanks to this, `CMakeLists.txt` is designed to build the skeleton on Linux,
+but actual testing and real platform actions will appear only in roadmap stage 2 (old stage 11):
+currently all Linux implementations are stubs.
 
-| Модуль | Windows (сейчас) | Linux X11 (план) | Linux Wayland (план) |
+| Module | Windows (current) | Linux X11 (plan) | Linux Wayland (plan) |
 |---|---|---|---|
-| Горячие клавиши | `RegisterHotKey` | `XGrabKey` через xcb/Xlib | портал `org.freedesktop.portal.GlobalShortcuts`; если нет — команды CLI, привязанные в DE |
-| Захват выделения | `SendInput` Ctrl+C | XTest + `QClipboard` | синтетический ввод недоступен; пользователь копирует сам |
-| Вставка перевода | `SendInput` Ctrl+V | XTest Ctrl+V | недоступна надёжно; максимум — `wtype`/`ydotool` как внешняя зависимость |
-| Активное окно | `GetForegroundWindow` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus` | нет надёжного API; режим «в поле» не гарантируется |
-| Автозагрузка | реестр `Run` | `~/.config/autostart/qtranslate.desktop` | то же |
-| Секреты | DPAPI | libsecret | libsecret; fallback — файл 0600 + предупреждение |
-| Трей | `QSystemTrayIcon`/WinAPI | StatusNotifierItem | StatusNotifierItem; в GNOME нужен AppIndicator-extension |
-| Настройки | `%APPDATA%\qtranslate` | `$XDG_CONFIG_HOME/qtranslate` | то же |
-| Логи | `%LOCALAPPDATA%\qtranslate` | `$XDG_STATE_HOME/qtranslate` | то же |
+| Hotkeys | `RegisterHotKey` | `XGrabKey` via xcb/Xlib | the `org.freedesktop.portal.GlobalShortcuts` portal; if unavailable — CLI commands bound in the DE |
+| Selection capture | `SendInput` Ctrl+C | XTest + `QClipboard` | synthetic input is unavailable; the user copies manually |
+| Translation insertion | `SendInput` Ctrl+V | XTest Ctrl+V | not reliably available; at most `wtype`/`ydotool` as an external dependency |
+| Active window | `GetForegroundWindow` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus` | no reliable API; "in-field" mode is not guaranteed |
+| Autostart | `Run` registry | `~/.config/autostart/qtranslate.desktop` | same |
+| Secrets | DPAPI | libsecret | libsecret; fallback — a 0600 file + warning |
+| Tray | `QSystemTrayIcon`/WinAPI | StatusNotifierItem | StatusNotifierItem; GNOME needs the AppIndicator extension |
+| Settings | `%APPDATA%\qtranslate` | `$XDG_CONFIG_HOME/qtranslate` | same |
+| Logs | `%LOCALAPPDATA%\qtranslate` | `$XDG_STATE_HOME/qtranslate` | same |
 
-**Команды CLI.** Чтобы горячие клавиши работали в любом окружении (и на Wayland, где портала
-может не быть), приложение получит команды `--translate-popup`, `--translate-main` и
-`--translate-inplace`. Их можно назначить на сочетания в настройках GNOME/KDE/Xfce; для
-X11-реализации они не нужны, но остаются удобным fallback и используются тестами.
+**CLI commands.** So that hotkeys work in any environment (and on Wayland, where the portal
+may be absent), the application will get the commands `--translate-popup`, `--translate-main`, and
+`--translate-inplace`. They can be assigned to shortcuts in GNOME/KDE/Xfce settings; for the
+X11 implementation they are not needed, but remain a convenient fallback and are used by tests.
 
-**Трей.** Qt использует StatusNotifierItem/DBus. В GNOME по умолчанию иконки приложений не
-показываются — потребуется расширение AppIndicator; если трей недоступен, приложение должно
-показать главное окно и предупредить, а не завершаться молча.
+**Tray.** Qt uses StatusNotifierItem/DBus. In GNOME, application icons are not shown by default —
+the AppIndicator extension will be required; if the tray is unavailable, the application should
+show the main window and warn rather than exit silently.
 
-**Секреты.** Предпочтительный вариант — libsecret (`secret_password_store_sync`), который
-использует системный keyring. Если библиотеки нет при сборке, секреты пишутся в INI с правами
-0600, а в настройках показывается предупреждение. Молчаливое хранение паролей в открытом виде
-недопустимо.
+**Secrets.** The preferred option is libsecret (`secret_password_store_sync`), which
+uses the system keyring. If the library is not present at build time, secrets are written to the INI with 0600
+permissions, and a warning is shown in settings. Silently storing passwords in plain text
+is unacceptable.
 
-**Сборка и пакеты.** CMake уже умеет `install` и `qt_generate_deploy_app_script`; для Linux
-добавляются `.desktop`, иконки hicolor, `share/applications` и `RPATH`/`$ORIGIN` для AppImage.
-Планируемые артефакты: `qtranslate-<версия>-linux-x86_64.tar.gz` (портативный, с Qt),
-`.deb` (зависимости Qt из дистрибутива) и AppImage. CI — `ubuntu-24.04`, Qt 6.5+, тесты в
-`xvfb-run`; платформенные тесты Windows (`tst_hotkeymanager`, `tst_autostart`,
-`tst_secretprotector`) заменяются Linux-аналогами, остальные 14 тестов общие.
+**Build and packages.** CMake already supports `install` and `qt_generate_deploy_app_script`; for Linux
+`.desktop` files, hicolor icons, `share/applications`, and `RPATH`/`$ORIGIN` for AppImage are added.
+Planned artifacts: `qtranslate-<version>-linux-x86_64.tar.gz` (portable, with Qt),
+`.deb` (Qt dependencies from the distribution), and AppImage. CI — `ubuntu-24.04`, Qt 6.5+, tests in
+`xvfb-run`; the Windows platform tests (`tst_hotkeymanager`, `tst_autostart`,
+`tst_secretprotector`) are replaced by Linux analogues, the other 14 tests are shared.
 
-**Ограничения Wayland.** Глобальные сочетания и синтетический ввод — не базовые возможности
-Wayland. Портал `GlobalShortcuts` поддерживается не всеми рабочими столами и версиями; вставка
-в активное поле и Ctrl+Shift+Q на Wayland не могут быть гарантированы без внешних инструментов
-или портала RemoteDesktop. Поэтому на первом этапе Linux-поддержки X11 считается полноценным
-таргетом, а Wayland — ограниченным: Ctrl+Q с копированием вручную, CLI-команды и явные
-предупреждения в интерфейсе. macOS не планируется.
+**Wayland limitations.** Global shortcuts and synthetic input are not base capabilities of
+Wayland. The `GlobalShortcuts` portal is not supported by all desktops and versions; insertion
+into the active field and Ctrl+Shift+Q on Wayland cannot be guaranteed without external tools
+or the RemoteDesktop portal. Therefore, in the first phase of Linux support, X11 is considered a full
+target, and Wayland — a limited one: Ctrl+Q with manual copying, CLI commands, and explicit
+warnings in the interface. macOS is not planned.
 
-### 4.15. Проверка орфографии, грамматики и пунктуации (план)
+### 4.15. Spelling, grammar, and punctuation checking (plan)
 
-Задача на будущее: отдельный режим проверки текста, не связанный с переводом. Полный дизайн,
-провайдеры и критерии — [`proofreading.md`](proofreading.md).
+A future task: a separate text-checking mode not related to translation. The full design,
+providers, and criteria are in [`proofreading.md`](proofreading.md).
 
-- Отдельный `ProofreadingService` и `ProofreadingIssue` с `offset`/`length` в UTF-16,
+- A separate `ProofreadingService` and `ProofreadingIssue` with `offset`/`length` in UTF-16,
   `message`, `replacements`, `ruleId`, `category`, `severity`.
-- Провайдеры: LanguageTool (HTTP/self-hosted, грамматика и пунктуация), Hunspell/Nuspell
-  (только орфография), Yandex Speller (орфография ru/uk/en), LLM (опционально, через diff).
-- Отдельная вкладка настроек «Проверка текста», независимые ключи `proofreading/*`; ключи API —
-  DPAPI. `checkBeforeTranslation=false` и `autoReplace=false` по умолчанию.
-- Замена в главном окне — через `QTextDocument` с undo; во внешнем приложении — через механизм
-  Ctrl+Shift+Q с проверкой активного окна и подтверждением.
-- Текст не логируется; публичные API имеют лимиты, для регулярного использования — свой
-  LanguageTool-сервер.
+- Providers: LanguageTool (HTTP/self-hosted, grammar and punctuation), Hunspell/Nuspell
+  (spelling only), Yandex Speller (spelling ru/uk/en), LLM (optional, via diff).
+- A separate "Text checking" settings tab, independent `proofreading/*` keys; API keys —
+  DPAPI. `checkBeforeTranslation=false` and `autoReplace=false` by default.
+- Replacement in the main window — via `QTextDocument` with undo; in an external application — via the
+  Ctrl+Shift+Q mechanism with active-window checking and confirmation.
+- Text is not logged; public APIs have limits; for regular use, a dedicated
+  LanguageTool server.
 
-### 4.16. LLM-действия и словарь (частично реализовано)
+### 4.16. LLM actions and the dictionary (partially implemented)
 
-Перевод через OpenAI-совместимый провайдер уже реализован (§4.7.2): сервис `llm`, настройки
-`[llm]`, транспорт `src/ai/openaichat.*`. Остальные действия — задача на будущее; полный дизайн,
-провайдеры и критерии — [`llm-actions.md`](llm-actions.md).
+Translation via an OpenAI-compatible provider is already implemented (§4.7.2): the `llm` service, `[llm]`
+settings, and the `src/ai/openaichat.*` transport. The other actions are a future task; the full design,
+providers, and criteria are in [`llm-actions.md`](llm-actions.md).
 
-- `LlmProvider` — тот же OpenAI-совместимый транспорт для облака (OpenAI, OpenRouter,
-  Gemini-compatible) и локальных серверов (Ollama, LM Studio, llama.cpp).
-- `AiAction`/`AiActionRegistry` — действия `translate`, `proofread`, `summarize`, `rewrite`,
-  `explain`, `pronounce`; промпты с фиксированной ролью, низкой температурой и валидацией.
-  `translate` уже работает как обычный `TranslationService`, остальные появятся в отдельной
-  панели с предпросмотром.
-- Словарь — отдельный `DictionaryService`, не `TranslationService`; источники: LLM (JSON-схема),
-  Google `dt=bd` для коротких текстов, локальный CSV-глоссарий, Wiktionary. Дизайн —
+- `LlmProvider` — the same OpenAI-compatible transport for the cloud (OpenAI, OpenRouter,
+  Gemini-compatible) and local servers (Ollama, LM Studio, llama.cpp).
+- `AiAction`/`AiActionRegistry` — actions `translate`, `proofread`, `summarize`, `rewrite`,
+  `explain`, `pronounce`; prompts with a fixed role, low temperature, and validation.
+  `translate` already works as a regular `TranslationService`; the others will appear in a separate
+  panel with a preview.
+- The dictionary is a separate `DictionaryService`, not a `TranslationService`; sources: LLM (JSON schema),
+  Google `dt=bd` for short texts, a local CSV glossary, Wiktionary. The design is in
   [`dictionary.md`](dictionary.md).
-- Настройки — отдельная вкладка «AI»: base URL, модель, ключ (DPAPI), таймаут, проверка
-  соединения; ключи `llm/*`. Словарь использует те же `[llm]` настройки, но имеет собственный
-  кэш и не влияет на перевод.
-- Результат показывается в предпросмотре/diff; замена текста — только по подтверждению.
-- LLM не заменяет DeepL/Google/LanguageTool по умолчанию; ASR/TTS/OCR — отдельные будущие задачи.
+- Settings — a separate "AI" tab: base URL, model, key (DPAPI), timeout, connection test;
+  `llm/*` keys. The dictionary uses the same `[llm]` settings but has its own
+  cache and does not affect translation.
+- The result is shown in a preview/diff; text replacement — only on confirmation.
+- LLM does not replace DeepL/Google/LanguageTool by default; ASR/TTS/OCR are separate future tasks.
 
 ---
 
-## 5. Основные сценарии
+## 5. Main scenarios
 
-### 5.1. Запуск
+### 5.1. Startup
 
 ```
 main
  ├─ QApplication, setQuitOnLastWindowClosed(false)
- ├─ SingleInstance: уже запущены? → отправить "activate" → exit(0)
- ├─ SettingsStore: DPAPI SecretCodec, load()   (миграция, расшифровка секретов)
- ├─ QTranslator по general/uiLanguage
+ ├─ SingleInstance: already running? → send "activate" → exit(0)
+ ├─ SettingsStore: DPAPI SecretCodec, load()   (migration, secret decryption)
+ ├─ QTranslator for general/uiLanguage
  └─ AppController
      ├─ NetworkManager (timeout, applyProxy), GoogleTranslateService + DeepLService → TranslationManager
-     ├─ языки/сервис/maxLength/restoreClipboard из настроек
-     ├─ MainWindow + восстановление геометрии; PopupWindow — лениво при первом Ctrl+Q
+     ├─ languages/service/maxLength/restoreClipboard from settings
+     ├─ MainWindow + geometry restoration; PopupWindow — lazily on the first Ctrl+Q
      ├─ TrayIcon.show()
-     ├─ HotkeyManager.register(...)  → занятые сочетания → уведомление в трее
+     ├─ HotkeyManager.register(...)  → occupied combinations → tray notification
      ├─ Autostart::sync(settings.autostart)
-     └─ если нет --minimized и не startMinimized → MainWindow.show()
+     └─ if there is no --minimized and startMinimized is off → MainWindow.show()
 ```
 
-Всё, что не нужно для появления значка в трее, создаётся лениво (окно настроек, всплывающее окно).
+Everything that is not needed for the tray icon to appear is created lazily (settings window, popup window).
 
-### 5.2. Ctrl+Q — перевод во всплывающем окне
+### 5.2. Ctrl+Q — translation in the popup window
 
 ```
-Пользователь      HotkeyMgr     AppController     SelectionGrabber   TranslationMgr   PopupWindow
+User              HotkeyMgr     AppController     SelectionGrabber   TranslationMgr   PopupWindow
     │ Ctrl+Q          │                │                  │                 │               │
     ├────────────────►│ WM_HOTKEY      │                  │                 │               │
     │                 ├─activated────► │ pos = cursor     │                 │               │
-    │                 │                ├─grab()─────────► │ ждём отпускания │               │
-    │                 │                │                  │ снимок буфера   │               │
+    │                 │                ├─grab()─────────► │ waiting for release │           │
+    │                 │                │                  │ buffer snapshot │               │
     │                 │                │                  │ SendInput Ctrl+C│               │
-    │                 │                │                  │ ждём seq number │               │
-    │                 │                │                  │ читаем, восстан.│               │
+    │                 │                │                  │ waiting for seq number │       │
+    │                 │                │                  │ read, restore   │               │
     │                 │                │◄──cb(text)───────┤                 │               │
-    │                 │                │ text пуст? → showNoSelection(pos) ─────────────────► │
+    │                 │                │ text empty? → showNoSelection(pos) ─────────────────► │
     │                 │                ├─showLoading(pos)────────────────────────────────────►│
-    │                 │                ├─translate(req, Popup)───────────► │ отменить старый│
-    │                 │                │                  │                 │ кэш? → сразу   │
-    │                 │                │                  │                 │ сервис → HTTP  │
+    │                 │                ├─translate(req, Popup)───────────► │ cancel old     │
+    │                 │                │                  │                 │ cache? → immediately │
+    │                 │                │                  │                 │ service → HTTP │
     │                 │                │◄────────────── reply.finished ────┤                 │
     │                 │                ├─showResult / showError────────────────────────────► │
 ```
 
-### 5.3. Ctrl+W — перевод в главном окне
+### 5.3. Ctrl+W — translation in the main window
 
-Отличается от Ctrl+Q:
+Differs from Ctrl+Q:
 
-- `AppController` сначала запускает `SelectionGrabber::grab()`, **не показывая окно**: если показать
-  и активировать его раньше, Ctrl+C уйдёт в собственное окно, а не в программу с выделением.
-- После колбэка окно показывается и активируется, исходный текст подставляется в левое поле,
-  перевод — в правое. Перевод стартует сразу, не дожидаясь показа: окно появляется ещё до ответа
-  сервиса.
-- Если выделения нет, окно просто открывается с фокусом в поле ввода — это удобный способ
-  «вызвать переводчик и набрать текст».
-- Повторное срабатывание Ctrl+W во время захвата игнорируется, чтобы не перехватить фокус у
-  source-программы.
+- `AppController` first runs `SelectionGrabber::grab()` **without showing the window**: if shown
+  and activated earlier, Ctrl+C would go to its own window instead of the program with the selection.
+- After the callback, the window is shown and activated, the source text is inserted into the left field,
+  the translation — into the right one. Translation starts immediately without waiting for the window to be shown:
+  the window appears even before the service response.
+- If there is no selection, the window simply opens with focus in the input field — this is a convenient way
+  to "call the translator and type text".
+- A repeated Ctrl+W during capture is ignored so as not to steal focus from the
+  source program.
 
-### 5.4. Ctrl+Shift+Q — перевод с заменой выделения
+### 5.4. Ctrl+Shift+Q — translation with replacement of the selection
 
 ```
-Пользователь   HotkeyMgr   AppController   SelectionGrabber   TranslationMgr   Windows
+User           HotkeyMgr   AppController   SelectionGrabber   TranslationMgr   Windows
   │Ctrl+Shift+Q │              │                 │                │              │
   ├────────────►│ WM_HOTKEY    │                 │                │              │
   │             ├─activated──► │ target = foregroundWindow()      │              │
-  │             │              ├─grab()──────────►│ снимок буфера, Ctrl+C,       │
-  │             │              │◄──text───────────┤ восстановление буфера        │
+  │             │              ├─grab()──────────►│ buffer snapshot, Ctrl+C,     │
+  │             │              │◄──text───────────┤ buffer restoration           │
   │             │              ├─translate(req, InPlace)──────────►│              │
   │             │              │◄──────────── finished ───────────┤              │
-  │             │              ├─target всё ещё активен? ────────────────────────►│
-  │             │              │   да: буфер := перевод, SendInput Ctrl+V,        │
-  │             │              │       через 500 мс вернуть буфер                 │
-  │             │              │   нет: перевод в буфер + уведомление в трее      │
+  │             │              ├─target still active? ────────────────────────────►│
+  │             │              │   yes: buffer := translation, SendInput Ctrl+V,   │
+  │             │              │       restore buffer after 500 ms                 │
+  │             │              │   no: translation to clipboard + tray notification│
 ```
 
-- Целевое окно (`GetForegroundWindow`) запоминается **до** захвата. Своё окно не показывается,
-  поэтому фокус и выделение остаются в поле ввода; после ответа Ctrl+V заменяет выделение.
-- Перевод идёт через тот же `TranslationManager`, что и Ctrl+Q, с тем же умным выбором языка:
-  при основном русском и дополнительном английском русский ответ автоматически переводится на
-  английский. Канал `InPlace` не отменяет запросы popup и главного окна.
-- Если пользователь переключился в другое окно, пока шёл запрос, перевод **не вставляется**:
-  он копируется в буфер обмена, а в трее показывается уведомление. Это защищает от вставки в
-  чужое поле (в том числе в поле пароля).
-- Буфер обмена восстанавливается через 500 мс после Ctrl+V. Если `app/restoreClipboard` выключен,
-  перевод остаётся в буфере.
-- Нет выделения или ошибка перевода → уведомление в трее; окно не появляется.
+- The target window (`GetForegroundWindow`) is remembered **before** the capture. Our own window is not shown,
+  so focus and selection remain in the input field; after the response, Ctrl+V replaces the selection.
+- Translation goes through the same `TranslationManager` as Ctrl+Q, with the same smart language choice:
+  with primary Russian and additional English, a Russian response is automatically translated into
+  English. The `InPlace` channel does not cancel popup and main-window requests.
+- If the user switched to another window while the request was in progress, the translation is **not inserted**:
+  it is copied to the clipboard, and a notification is shown in the tray. This protects against insertion into
+  a foreign field (including a password field).
+- The clipboard is restored 500 ms after Ctrl+V. If `app/restoreClipboard` is disabled,
+  the translation remains on the clipboard.
+- No selection or a translation error → tray notification; the window does not appear.
 
-### 5.5. Применение настроек
+### 5.5. Applying settings
 
 ```
 SettingsDialog ──OK──► SettingsStore::save ──changed(old,new)──► AppController
-                                                                    ├─ hotkeys изменились → register/unregister только их
+                                                                    ├─ hotkeys changed → register/unregister only them
                                                                     ├─ autostart         → Autostart::sync
-                                                                    ├─ языки/сервис      → MainWindow/PopupWindow + TranslationManager
+                                                                    ├─ languages/service → MainWindow/PopupWindow + TranslationManager
                                                                     ├─ maxLength         → TranslationManager + SelectionGrabber
                                                                     ├─ restoreClipboard  → SelectionGrabber
                                                                     ├─ network           → NetworkManager.applyProxy / setTimeoutMs
                                                                     ├─ popup width/focus → PopupWindow
                                                                     ├─ uiLanguage       → QTranslator + LanguageChange
-                                                                    └─ service/ключи     → service
+                                                                    └─ service/keys     → service
 ```
 
-Пока фокус находится в любом `QKeySequenceEdit`, `SettingsDialog` испускает
-`hotkeyEditingChanged(true)`, и `AppController` приостанавливает глобальные клавиши
-(`HotkeyManager::setSuspended`). После ухода фокуса или закрытия диалога регистрация
-восстанавливается.
+While focus is in any `QKeySequenceEdit`, `SettingsDialog` emits
+`hotkeyEditingChanged(true)`, and `AppController` suspends global hotkeys
+(`HotkeyManager::setSuspended`). After focus leaves or the dialog closes, registration
+is restored.
 
-Смена сервиса в трее или главном окне вызывает `TranslationManager::setActiveService()`.
-`activeServiceChanged` → `AppController::updateLanguageConfiguration()`: списки языков обоих окон
-обновляются, неподдерживаемый язык заменяется через `Languages::closest`; выбор сохраняется в
-`translation/service` через `SettingsStore::save()`.
+Changing the service in the tray or the main window calls `TranslationManager::setActiveService()`.
+`activeServiceChanged` → `AppController::updateLanguageConfiguration()`: the language lists of both windows
+are updated, an unsupported language is replaced via `Languages::closest`; the choice is saved to
+`translation/service` via `SettingsStore::save()`.
 
-### 5.6. Завершение
+### 5.6. Shutdown
 
-«Выход» в трее → `AppController::prepareForQuit()`: флаг завершения (чтобы `closeEvent` не прятал
-окно и `changed` не применялся повторно), сохранение геометрии главного окна в `SettingsStore`,
-`HotkeyManager::unregisterAll()`, отмена активных запросов, скрытие popup → `QApplication::quit()`.
-Повторный вызов (`aboutToQuit`, завершение сеанса) ничего не делает.
+"Quit" in the tray → `AppController::prepareForQuit()`: a shutdown flag (so that `closeEvent` does not hide
+the window and `changed` is not applied again), saving the main window geometry to `SettingsStore`,
+`HotkeyManager::unregisterAll()`, cancelling active requests, hiding the popup → `QApplication::quit()`.
+A repeated call (`aboutToQuit`, session end) does nothing.
 
 ---
 
-## 6. Обработка ошибок
+## 6. Error handling
 
-| Ситуация | Где обрабатывается | Что видит пользователь |
+| Situation | Where it is handled | What the user sees |
 |---|---|---|
-| Горячая клавиша занята | `AppController` при регистрации | Уведомление в трее, предупреждение в настройках |
-| Нет выделения | `AppController` | «Ничего не выделено» у курсора / пустое главное окно |
-| Нет сети, ошибка прокси, TLS | сервис → `Network` | Текст ошибки и «Повторить» в окне перевода |
-| Таймаут | `Timeout` | «Сервис не ответил за N с» |
-| Пустой текст | `TranslationManager` до запроса → `EmptyText` | «Нечего переводить» |
-| Неверный ключ | `Auth` | «Неверный API-ключ DeepL» + ссылка «Открыть настройки» |
-| Квота / частые запросы | `QuotaExceeded`, `RateLimited` | Пояснение и совет сменить сервис |
-| Неожиданный формат ответа | парсер → `BadResponse` | «Сервис вернул неожиданный ответ», подробности в лог |
-| Сервис не настроен | `TranslationManager` до запроса | «Для DeepL нужен API-ключ» + «Открыть настройки» |
+| Hotkey is taken | `AppController` during registration | Tray notification, warning in settings |
+| No selection | `AppController` | "Nothing is selected" at the cursor / empty main window |
+| No network, proxy error, TLS | service → `Network` | Error text and "Retry" in the translation window |
+| Timeout | `Timeout` | "The service did not respond in N s" |
+| Empty text | `TranslationManager` before the request → `EmptyText` | "Nothing to translate" |
+| Invalid key | `Auth` | "Invalid DeepL API key" + "Open settings" link |
+| Quota / frequent requests | `QuotaExceeded`, `RateLimited` | Explanation and advice to switch service |
+| Unexpected response format | parser → `BadResponse` | "The translation service returned an unexpected response", details in the log |
+| Service not configured | `TranslationManager` before the request | "DeepL requires an API key" + "Open settings" |
 
-Исключения C++ не используются для управления потоком: ошибки передаются в `TranslationResult`.
+C++ exceptions are not used for flow control: errors are passed in `TranslationResult`.
 
 ---
 
-## 7. Логирование, безопасность, приватность
+## 7. Logging, security, privacy
 
-- Категории `QLoggingCategory`: `qtranslate.app`, `.hotkey`, `.grab`, `.net`, `.translation`
+- `QLoggingCategory` categories: `qtranslate.app`, `.hotkey`, `.grab`, `.net`, `.translation`
   (`TranslationManager`), `.service.google`, `.service.deepl`, `.settings`, `.autostart`, `.secret`.
-  По умолчанию выводятся только предупреждения; подробный лог включается
-  переменной окружения `QT_LOGGING_RULES` или флагом `--verbose` (запись в
-  `%LOCALAPPDATA%\qtranslate\qtranslate.log`, ротация при 5 МБ в `.1`). Обработчик сообщений
-  пишет время, уровень, категорию и текст; каталог создаётся при старте.
-- **В лог не пишутся переводимые тексты, ключи и пароли** — только длины, коды ответов, время.
-- Все запросы только по HTTPS; ошибки TLS не игнорируются.
-- Секреты в INI зашифрованы DPAPI (§4.11).
-- В справке и при первом выборе сервиса указать, что текст отправляется стороннему сервису
+  Only warnings are output by default; detailed logging is enabled by the
+  `QT_LOGGING_RULES` environment variable or the `--verbose` flag (writing to
+  `%LOCALAPPDATA%\qtranslate\qtranslate.log`, rotation at 5 MB to `.1`). The message handler
+  writes the time, level, category, and text; the directory is created at startup.
+- **Texts being translated, keys, and passwords are never written to the log** — only lengths, response codes, time.
+- All requests use HTTPS only; TLS errors are not ignored.
+- Secrets in the INI are encrypted with DPAPI (§4.11).
+- In the help and when a service is selected for the first time, state that the text is sent to a third-party service
   (Google/DeepL).
 
 ---
 
-## 8. Тестирование
+## 8. Testing
 
-Модульные тесты (Qt Test; логика берётся из `qtranslate_core`, платформенные модули
-подключаются к отдельным тестовым целям):
+Unit tests (Qt Test; logic comes from `qtranslate_core`, platform modules
+are linked into separate test targets):
 
-| Тест | Что проверяет |
+| Test | What it checks |
 |---|---|
-| `tst_googleparser` | Разбор ответов gtx и Cloud API по фикстурам: несколько предложений, определение языка, пустой/битый ответ, коды ошибок Cloud с телом |
-| `tst_googletranslateservice` | Сервис против локального HTTP-сервера: free/cloud режимы, тело/ключ, разбиение длинного текста и склейка, HTTP-ошибки, отказ в соединении, таймаут, отмена |
-| `tst_deeplparser` | Разбор `translations[]`, почастный разбор, `/v2/usage`, коды ошибок → `TranslationError` |
-| `tst_deeplservice` | DeepL против локального HTTP-сервера: Authorization, массив `text`, варианты английского, Developer/Growth хосты, ошибки, таймаут, проверка ключа |
-| `tst_deeplwebparser` | Разбор ответа веб-эндпоинта DeepL, коды ошибок `403/429/413/5xx`, распознавание rate limit в теле |
-| `tst_deeplwebservice` | DeepL free web против локального HTTP-сервера: `Authorization: None`, коды языков, 5000 символов, повтор на `429`, сериализация и пауза 2 с, ошибки, таймаут |
-| `tst_languages` | Маппинг кодов в обе стороны, варианты `EN-US/EN-GB`, `PT-BR`, `deepl-web`, `closest` при смене сервиса, неизвестные коды |
-| `tst_networkmanager` | Типы прокси, HTTP-прокси с авторизацией и `CONNECT`, SOCKS5 с логином/паролем, `testProxy`, понятные ошибки и отсутствие пароля в тексте |
-| `tst_popupplacement` | Позиционирование окна Ctrl+Q: отражение у краёв, прижатие к экрану, второй монитор с отрицательными координатами |
-| `tst_popupwindow` | Состояния всплывающего окна (offscreen): запрос, результат, копирование, ошибка/«Повторить», смена языка, закрепление, автозакрытие подсказки |
-| `tst_textchunker` | Разбиение по абзацам/предложениям, слова длиннее лимита, суррогатные пары не разрываются |
-| `tst_hotkeysequence` | `QKeySequence` ↔ `(MOD, VK)`, неподдерживаемые клавиши |
-| `tst_hotkeymanager` | `RegisterHotKey`: конфликт сочетаний, `setSuspended`, отложенная регистрация (Windows; собирается вместе с `platform/hotkeymanager_win.cpp`) |
-| `tst_settings` | Значения по умолчанию, запись/чтение, миграция версий, портативный путь, DPAPI-совместимое шифрование секретов |
-| `tst_settingsdialog` | Заполнение вкладок (включая ключи/режим/вариант), возврат изменённой копии, проверка сочетаний и языков, приостановка глобальных клавиш, запрос проверки ключа (offscreen) |
-| `tst_secretprotector` | DPAPI: round-trip, пустые и испорченные данные |
-| `tst_autostart` | Формат команды автозагрузки |
-| `tst_translationmanager` | Отмена запросов в канале, кэш, повтор на дополнительный язык — на фейковом сервисе |
-| `tst_uilanguages` | Поддерживаемые языки интерфейса, нормализация `system`/региональных тегов, ресурсы `.qm` |
-| `tst_translations` | Полнота всех `.ts`, сохранность `%1`/`%2`, эмодзи и краевых пробелов |
+| `tst_googleparser` | Parsing of gtx and Cloud API responses by fixtures: multiple sentences, language detection, empty/broken response, Cloud error codes with a body |
+| `tst_googletranslateservice` | The service against a local HTTP server: free/cloud modes, body/key, splitting long text and joining, HTTP errors, connection refusal, timeout, cancellation |
+| `tst_deeplparser` | Parsing `translations[]`, per-part parsing, `/v2/usage`, error codes → `TranslationError` |
+| `tst_deeplservice` | DeepL against a local HTTP server: Authorization, `text` array, English variants, Developer/Growth hosts, errors, timeout, key check |
+| `tst_deeplwebparser` | Parsing the DeepL web endpoint response, error codes `403/429/413/5xx`, rate limit detection in the body |
+| `tst_deeplwebservice` | DeepL free web against a local HTTP server: `Authorization: None`, language codes, 5000 characters, retry on `429`, serialization and a 2 s pause, errors, timeout |
+| `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, `closest` when the service changes, unknown codes |
+| `tst_networkmanager` | Proxy types, HTTP proxy with authentication and `CONNECT`, SOCKS5 with login/password, `testProxy`, clear errors and no password in the text |
+| `tst_popupplacement` | Positioning of the Ctrl+Q window: reflection at edges, pressing against the screen, a second monitor with negative coordinates |
+| `tst_popupwindow` | Popup states (offscreen): request, result, copying, error/"Retry", language change, pinning, automatic hint closing |
+| `tst_textchunker` | Splitting by paragraphs/sentences, words longer than the limit, surrogate pairs are not split |
+| `tst_hotkeysequence` | `QKeySequence` ↔ `(MOD, VK)`, unsupported keys |
+| `tst_hotkeymanager` | `RegisterHotKey`: shortcut conflicts, `setSuspended`, delayed registration (Windows; built together with `platform/hotkeymanager_win.cpp`) |
+| `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption |
+| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request (offscreen) |
+| `tst_secretprotector` | DPAPI: round-trip, empty and corrupted data |
+| `tst_autostart` | Autostart command format |
+| `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language — on a fake service |
+| `tst_uilanguages` | Supported UI languages, normalization of `system`/regional tags, `.qm` resources |
+| `tst_translations` | Completeness of all `.ts` files, preservation of `%1`/`%2`, emoji and edge whitespace |
 
-Сервисы тестируются через подмену сети: фейковый `TranslationService` для менеджера и
-локальный HTTP-сервер (`QTcpServer`) с заранее заданными ответами для проверки кодов ошибок,
-таймаутов и прокси.
+Services are tested by substituting the network: a fake `TranslationService` for the manager and a
+local HTTP server (`QTcpServer`) with predefined responses to check error codes,
+timeouts, and proxies.
 
-Ручной чек-лист перед релизом: захват выделения в Блокноте, браузере, Word, VS Code, Telegram;
-окно в администраторском процессе (ожидаемо не работает); буфер обмена после перевода совпадает с
-исходным; Ctrl+Q у краёв экрана и на двух мониторах с разным масштабом; Ctrl+Shift+Q в поле ввода
-(замена выделения, восстановление буфера, защита при смене окна); работа через HTTP- и
-SOCKS5-прокси с авторизацией; автозапуск после перезагрузки.
+Manual checklist before release: selection capture in Notepad, a browser, Word, VS Code, Telegram;
+a window in an administrator process (expected not to work); the clipboard after translation matches the
+source; Ctrl+Q at screen edges and on two monitors with different scaling; Ctrl+Shift+Q in an input field
+(selection replacement, clipboard restoration, protection when the window changes); operation through HTTP and
+SOCKS5 proxies with authentication; autostart after a reboot.
 
-### 8.1. Результаты финальной проверки (этап 8)
+### 8.1. Final verification results (old plan stage 8)
 
-Проверено вручную на Release (Windows 11, один монитор 3840×2160, масштаб 175%):
+Checked manually on Release (Windows 11, one 3840×2160 monitor, 175% scaling):
 
-- язык интерфейса переключается English ↔ Русский в настройках без перезапуска: главное окно,
-  трей и его меню обновляются сразу, выбор сохраняется в INI;
-- умный язык на реальном Google: русский текст при целевом «русский» автоматически переводится на
-  английский (в логе два запроса `ru → ru` и `ru → en`), статус «Detected language: Russian»;
-- кэш: повторный перевод того же текста занимает ~3 мс, в логе `Cache hit`, новых сетевых запросов
-  нет; ошибки не кэшируются (три ответа 429 подряд не создали записей);
-- DPI: `GetProcessDpiAwareness` = 2 (per-monitor), контекст окна сравнивается с
-  `DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2`; иконка exe и `WM_GETICON` окна совпадают с
+- the UI language switches English ↔ Русский in settings without restart: the main window,
+  the tray and its menu update immediately, the choice is saved in the INI;
+- smart language on real Google: Russian text with the target "Russian" is automatically translated into
+  English (two requests `ru → ru` and `ru → en` in the log), status "Detected language: Russian";
+- cache: re-translating the same text takes ~3 ms, `Cache hit` in the log, no new network requests;
+  errors are not cached (three 429 responses in a row did not create entries);
+- DPI: `GetProcessDpiAwareness` = 2 (per-monitor), the window context is compared with
+  `DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2`; the exe icon and the window `WM_GETICON` match
   `resources/icons/app.ico`;
-- системный режим и ручной HTTP-прокси (реальный прокси `127.0.0.1:2080`): перевод проходит;
-- Ctrl+Q в Блокноте и Edge: окно показывает перевод, буфер обмена восстанавливается;
-  Ctrl+W переносит исходник и перевод в главное окно, буфер также восстанавливается;
-- Ctrl+Shift+Q в textarea Edge: выделенный русский текст заменён английским переводом, буфер
-  обмена восстановлен; при переключении в другое окно во время запроса вставки не произошло,
-  перевод остался в буфере и было показано уведомление;
-- Ctrl+Q у правого-нижнего края экрана остаётся в рабочей области.
+- system mode and manual HTTP proxy (real proxy `127.0.0.1:2080`): translation works;
+- Ctrl+Q in Notepad and Edge: the window shows the translation, the clipboard is restored;
+  Ctrl+W moves the source and translation to the main window, the clipboard is also restored;
+- Ctrl+Shift+Q in the Edge textarea: the selected Russian text was replaced with the English translation, the clipboard
+  was restored; when switching to another window during the request, insertion did not happen,
+  the translation remained on the clipboard and a notification was shown;
+- Ctrl+Q at the bottom-right edge of the screen remains within the work area.
 
-Ограничения среды: Word и VS Code не установлены; Telegram установлен и авторизован, но выделение
-в личных чатах не проверялось; второго монитора с другим масштабом нет; чистая Windows без Qt
-недоступна (проверен запуск `build/dist/bin/qtranslate.exe` без Qt в `PATH`); реальная перезагрузка
-для автозагрузки и прокси с авторизацией не проверялись; см. §9.2.
+Environment limitations: Word and VS Code are not installed; Telegram is installed and authorized, but selection
+in private chats was not tested; there is no second monitor with different scaling; a clean Windows without Qt is
+unavailable (starting `build/dist/bin/qtranslate.exe` without Qt in `PATH` was tested); a real reboot
+for autostart and a proxy with authentication were not tested; see §9.2.
 
-### 8.2. CI и проверка релиза 0.9.1
+### 8.2. CI and release verification 0.9.1
 
-v0.9.0 — первый публичный release candidate; v0.9.1 — патч с галочками установщика и
-обновлённой документацией.
+v0.9.0 — the first public release candidate; v0.9.1 — a patch with installer checkboxes and
+updated documentation.
 
-Локальная проверка (Windows 11, Qt 6.12.0 MSVC 2022 x64):
+Local verification (Windows 11, Qt 6.12.0 MSVC 2022 x64):
 
-- Debug и Release: сборка без предупреждений `/W4`, **17/17 тестов**;
-- `package.ps1` собрал `qtranslate-0.9.1-win64.zip` (22,4 МБ),
-  `qtranslate-0.9.1-win64-setup.exe` (16,6 МБ) и `SHA256SUMS.txt`; обе контрольные суммы
-  совпали с файлами;
-- установщик: тихая установка в отдельный каталог, `FileVersion` exe = 0.9.1 (`qtranslate
-  --version` → `qtranslate 0.9.1`), ярлык в меню «Пуск» создан; запуск `bin\qtranslate.exe`
-  без Qt в `PATH` успешен, `Qt6Core.dll` и `vcruntime140.dll` загрузились из каталога установки;
-- `AppMutex`: при запущенном qtranslate деинсталлятор завершился с кодом 1 и не удалил файлы;
-- задачи установщика: по умолчанию меню «Пуск» и автозагрузка включены, рабочий стол выключен;
-  установка с `/TASKS=desktopicon` выключает меню и автозагрузку; обновление с
-  `autostart=false` не включает её обратно; при удалении запись `Run` удаляется;
-- удаление: exe и ярлык удалены, каталог установки очищен, `%APPDATA%\qtranslate\qtranslate.ini`
-  сохранён;
-- портативный zip: распакован в отдельный каталог, `bin\qtranslate.exe` запустился без Qt в
-  `PATH`, Qt и CRT загрузились из архива.
+- Debug and Release: build without `/W4` warnings, **17/17 tests**;
+- `package.ps1` built `qtranslate-0.9.1-win64.zip` (22.4 MB),
+  `qtranslate-0.9.1-win64-setup.exe` (16.6 MB) and `SHA256SUMS.txt`; both checksums
+  matched the files;
+- installer: silent installation into a separate directory, exe `FileVersion` = 0.9.1 (`qtranslate
+  --version` → `qtranslate 0.9.1`), a Start menu shortcut was created; starting `bin\qtranslate.exe`
+  without Qt in `PATH` succeeded, `Qt6Core.dll` and `vcruntime140.dll` loaded from the installation directory;
+- `AppMutex`: with qtranslate running, the uninstaller exited with code 1 and did not delete files;
+- installer tasks: by default the Start menu and autostart are enabled, the desktop is disabled;
+  installation with `/TASKS=desktopicon` disables the menu and autostart; upgrading with
+  `autostart=false` does not re-enable it; on uninstall the `Run` entry is removed;
+- uninstall: exe and shortcut removed, the installation directory cleaned, `%APPDATA%\qtranslate\qtranslate.ini`
+  preserved;
+- portable zip: unpacked into a separate directory, `bin\qtranslate.exe` started without Qt in
+  `PATH`, Qt and CRT loaded from the archive.
 
-Артефакты CI (Qt 6.8.3 LTS, `windows-latest`) скачаны и проверены отдельно: zip 22,5 МБ,
-установщик 16,4 МБ; установка, запуск без Qt в `PATH`, удаление и контрольные суммы — в порядке.
-CI: workflow `.github/workflows/build.yml` собирает и тестирует Release на `windows-latest`,
-затем повторяет упаковку; по тегу `v0.9.1` публикует релиз.
+CI artifacts (Qt 6.8.3 LTS, `windows-latest`) were downloaded and checked separately: zip 22.5 MB,
+installer 16.4 MB; installation, starting without Qt in `PATH`, uninstall, and checksums — all in order.
+CI: the workflow `.github/workflows/build.yml` builds and tests Release on `windows-latest`,
+then repeats packaging; on the `v0.9.1` tag it publishes the release.
 
 - workflow: https://github.com/youkaicat/QTranslate/actions/workflows/build.yml
-- успешный прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41908976474
-- релиз: https://github.com/youkaicat/QTranslate/releases/tag/v0.9.1
+- successful tag run: https://github.com/youkaicat/QTranslate/actions/runs/41908976474
+- release: https://github.com/youkaicat/QTranslate/releases/tag/v0.9.1
 
-Файлы, скачанные из релиза, совпали с `SHA256SUMS.txt`.
+Files downloaded from the release matched `SHA256SUMS.txt`.
 
-### 8.3. CI и проверка релиза 0.10.0
+### 8.3. CI and release verification 0.10.0
 
-Локальная проверка (Windows 11, Qt 6.12.0 MSVC 2022 x64):
+Local verification (Windows 11, Qt 6.12.0 MSVC 2022 x64):
 
-- Debug и Release: сборка без предупреждений `/W4`, **21/21 тест**;
-- `package.ps1` собрал `qtranslate-0.10.0-win64-setup.exe` (11,51 МБ),
-  `qtranslate-0.10.0-win64.zip` (14,58 МБ) и `SHA256SUMS.txt`; контрольные суммы проверены;
-- `build/dist` — 35,0 МБ; в ZIP 41 запись, 13 Qt-переводов, `opengl32sw.dll` отсутствует;
-- установщик: тихая установка во временный каталог, `FileVersion`/`ProductVersion` = 0.10.0,
-  запуск `bin\qtranslate.exe` без Qt в `PATH`, удаление; `%APPDATA%\qtranslate\qtranslate.ini`
-  и `HKCU\...\Run` восстановлены после проверки;
-- живой smoke DeepL free web через собранный сервис: `Hello, world` → `Hallo, Welt`,
+- Debug and Release: build without `/W4` warnings, **21/21 tests**;
+- `package.ps1` built `qtranslate-0.10.0-win64-setup.exe` (11.51 MB),
+  `qtranslate-0.10.0-win64.zip` (14.58 MB) and `SHA256SUMS.txt`; checksums verified;
+- `build/dist` — 35.0 MB; the ZIP has 41 entries, 13 Qt translations, `opengl32sw.dll` is absent;
+- installer: silent installation into a temporary directory, `FileVersion`/`ProductVersion` = 0.10.0,
+  starting `bin\qtranslate.exe` without Qt in `PATH`, uninstall; `%APPDATA%\qtranslate\qtranslate.ini`
+  and `HKCU\...\Run` restored after the check;
+- live smoke test of DeepL free web through the built service: `Hello, world` → `Hallo, Welt`,
   `detected_source_language=en`;
-- CI (Qt 6.8.3 LTS): setup 10,63 МБ, ZIP 13,12 МБ; хэши совпали с `SHA256SUMS.txt`;
-  CI-установщик проверен тихой установкой, запуском и удалением;
-- CI-прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41930568365
-- релиз: https://github.com/youkaicat/QTranslate/releases/tag/v0.10.0
-- старые теги `v0.9.0`/`v0.9.1` не изменяются.
+- CI (Qt 6.8.3 LTS): setup 10.63 MB, ZIP 13.12 MB; hashes matched `SHA256SUMS.txt`;
+  the CI installer was checked by silent installation, launch, and uninstall;
+- CI tag run: https://github.com/youkaicat/QTranslate/actions/runs/41930568365
+- release: https://github.com/youkaicat/QTranslate/releases/tag/v0.10.0
+- old tags `v0.9.0`/`v0.9.1` are not changed.
 
-### 8.4. CI и проверка релиза 0.11.0
+### 8.4. CI and release verification 0.11.0
 
-Локальная проверка (Windows 11, Qt 6.12.0 MSVC 2022 x64):
+Local verification (Windows 11, Qt 6.12.0 MSVC 2022 x64):
 
-- Debug и Release: сборка без предупреждений `/W4`, **23/23 теста**;
-- `package.ps1` собрал `qtranslate-0.11.0-win64-setup.exe` (12 097 066 байт),
-  `qtranslate-0.11.0-win64.zip` (15 333 372 байта) и `SHA256SUMS.txt`;
-- `build/dist` — 36 845 376 байт; в ZIP 41 запись, 13 Qt-переводов;
-- установщик: тихая установка во временный каталог, `ProductName=QTranslate`,
-  `FileVersion`/`ProductVersion` = 0.11.0, запуск без Qt в `PATH`, удаление; Run-запись
-  автозагрузки создаётся и удаляется, `%APPDATA%\qtranslate\qtranslate.ini` и `HKCU\...\Run`
-  восстановлены после проверки;
-- живой smoke OpenRouter через SOCKS5 `127.0.0.1:2080`: `Hello, world` → `Привет, мир`,
+- Debug and Release: build without `/W4` warnings, **23/23 tests**;
+- `package.ps1` built `qtranslate-0.11.0-win64-setup.exe` (12 097 066 bytes),
+  `qtranslate-0.11.0-win64.zip` (15 333 372 bytes) and `SHA256SUMS.txt`;
+- `build/dist` — 36 845 376 bytes; the ZIP has 41 entries, 13 Qt translations;
+- installer: silent installation into a temporary directory, `ProductName=QTranslate`,
+  `FileVersion`/`ProductVersion` = 0.11.0, starting without Qt in `PATH`, uninstall; the Run entry
+  of autostart is created and removed, `%APPDATA%\qtranslate\qtranslate.ini` and `HKCU\...\Run`
+  restored after the check;
+- live smoke test of OpenRouter through SOCKS5 `127.0.0.1:2080`: `Hello, world` → `Привет, мир`,
   `openrouter/free`, HTTP 200;
-- OpenAI-совместимый провайдер работает с настраиваемым base URL, ключом и моделью; DeepL free web
-  объединён в режим `free-web` одного сервиса DeepL;
-- CI (Qt 6.8.3 LTS): setup 11 173 822 байта (10,66 МБ), ZIP 13 795 207 байт (13,16 МБ);
-  хэши совпали с `SHA256SUMS.txt`; CI-установщик проверен тихой установкой, запуском без Qt в
-  `PATH` и удалением; `ProductName=QTranslate`, `ProductVersion=0.11.0`;
-- CI-прогон тега: https://github.com/youkaicat/QTranslate/actions/runs/41943741295
-- CI-прогон `main`: https://github.com/youkaicat/QTranslate/actions/runs/41943729918
-- релиз: https://github.com/youkaicat/QTranslate/releases/tag/v0.11.0
+- the OpenAI-compatible provider works with a configurable base URL, key, and model; DeepL free web
+  is merged into the `free-web` mode of a single DeepL service;
+- CI (Qt 6.8.3 LTS): setup 11 173 822 bytes (10.66 MB), ZIP 13 795 207 bytes (13.16 MB);
+  hashes matched `SHA256SUMS.txt`; the CI installer was checked by silent installation, launch without Qt in
+  `PATH`, and uninstall; `ProductName=QTranslate`, `ProductVersion=0.11.0`;
+- CI tag run: https://github.com/youkaicat/QTranslate/actions/runs/41943741295
+- CI `main` run: https://github.com/youkaicat/QTranslate/actions/runs/41943729918
+- release: https://github.com/youkaicat/QTranslate/releases/tag/v0.11.0
 
 ---
 
-## 9. Принятые решения и развитие
+## 9. Accepted decisions and development
 
-### 9.1. Принятые решения
+### 9.1. Accepted decisions
 
-| Вопрос | Решение |
+| Question | Decision |
 |---|---|
-| Ctrl+Q / Ctrl+W перехватываются у всех программ | Оставить по умолчанию, без предупреждений; меняются в настройках (§4.3) |
-| Ctrl+Alt на не-английской раскладке | Qt может вернуть `GroupSwitchModifier` (AltGr); нормализуем его в `MOD_CONTROL \| MOD_ALT`, иначе сочетание ошибочно отвергалось бы (§4.3) |
-| HTTPS-прокси | HTTP-прокси с туннелем `CONNECT`; TLS до прокси не поддерживается (§4.10) |
-| Окна процессов, запущенных от администратора | Захват выделения в них не работает — это известное ограничение, его не обходим (§4.4) |
-| Закрепление 📌 во всплывающем окне | Действует до закрытия окна; новый Ctrl+Q начинает с незакреплённого состояния (§4.13) |
-| HTTP/2 и бесплатный Google | Принудительно HTTP/1.1: gtx стабильно отвечал `429` на HTTP/2-запросы Qt, по HTTP/1.1 работает (§4.10) |
-| Перевод с заменой выделения | Отдельное действие Ctrl+Shift+Q, не меняет Ctrl+Q. Вставка только если исходное окно всё ещё активно; иначе перевод копируется в буфер и показывается уведомление (§5.4) |
-| Установщик | Inno Setup 6.3+/7, установка **для текущего пользователя** без UAC в `%LOCALAPPDATA%\Programs\qtranslate`; задачи «меню Пуск» (вкл.), «рабочий стол» (выкл.) и «автозагрузка» (вкл.); автозагрузка синхронизируется с настройкой приложения; настройки при удалении сохраняются (§3.4) |
-| Портативная сборка | Остаётся вторым артефактом релиза: zip с `bin/`, `plugins/`, `translations/`; нужна пользователям без прав установки (§3.4) |
-| CI и релизы | GitHub Actions на `windows-latest`; push/PR собирают и тестируют, тег `v*` публикует установщик, zip и `SHA256SUMS.txt`; версия тега сверяется с CMake (§3.4) |
-| Контрольные суммы | `SHA256SUMS.txt` остаётся отдельным ассетом релиза, но не указывается в README/Downloads; при необходимости пользователь находит файл сам |
-| Linux | Отдельный этап 11 после перехода на Linux-машину: X11 — полноценный таргет, Wayland — портал/CLI-fallback с явными ограничениями; macOS не планируется (§4.14) |
-| Запись в журнале Win+V при захвате | Промежуточный Ctrl+C может оставить запись; exclusion-форматы защищают только восстановление буфера. Полный обход — стратегия через UI Automation (§4.4, §9.2), принята как будущее развитие |
+| Ctrl+Q / Ctrl+W are captured from all programs | Keep as default, without warnings; they can be changed in settings (§4.3) |
+| Ctrl+Alt on a non-English layout | Qt may return `GroupSwitchModifier` (AltGr); normalize it to `MOD_CONTROL \| MOD_ALT`, otherwise the combination would be rejected incorrectly (§4.3) |
+| HTTPS proxy | HTTP proxy with a `CONNECT` tunnel; TLS to the proxy is not supported (§4.10) |
+| Windows of processes launched as administrator | Selection capture does not work in them — this is a known limitation, we do not work around it (§4.4) |
+| Pinning 📌 in the popup window | Active until the window is closed; a new Ctrl+Q starts in an unpinned state (§4.13) |
+| HTTP/2 and free Google | Force HTTP/1.1: gtx consistently returned `429` for Qt HTTP/2 requests, works over HTTP/1.1 (§4.10) |
+| Translation with replacement of the selection | A separate Ctrl+Shift+Q action; does not change Ctrl+Q. Insert only if the original window is still active; otherwise the translation is copied to the clipboard and a notification is shown (§5.4) |
+| Installer | Inno Setup 6.3+/7, **per-user** installation without UAC to `%LOCALAPPDATA%\Programs\qtranslate`; Start menu (on), desktop (off), and autostart (on) tasks; autostart is synchronized with the application setting; settings are preserved on uninstall (§3.4) |
+| Portable build | Remains the second release artifact: a ZIP with `bin/`, `plugins/`, `translations/`; needed by users without installation rights (§3.4) |
+| CI and releases | GitHub Actions on `windows-latest`; push/PR build and test, the `v*` tag publishes the installer, ZIP, and `SHA256SUMS.txt`; the tag version is checked against CMake (§3.4) |
+| Checksums | `SHA256SUMS.txt` remains a separate release asset but is not listed in README/Downloads; if needed, the user can find the file |
+| Linux | Roadmap stage 2 (old stage 11) after moving to a Linux machine: X11 is a full target, Wayland is a portal/CLI fallback with explicit limitations; macOS is not planned (§4.14) |
+| Win+V history entry during capture | The intermediate Ctrl+C may leave an entry; exclusion formats protect only clipboard restoration. A full workaround is a UI Automation strategy (§4.4, §9.2), accepted as future development |
 
-### 9.2. Ограничения и возможное развитие
+### 9.2. Limitations and possible development
 
-Ограничения среды, в которой выполнялась финальная проверка (не дефекты приложения):
+Limitations of the environment in which the final verification was performed (not application defects):
 
-- Word и VS Code не установлены — захват выделения в них не проверен; Telegram авторизован, но
-  личные чаты не открывались.
-- Второй монитор с другим масштабом отсутствует; проверен один монитор 3840×2160 при 175%.
-- Чистая Windows без Qt недоступна; проверен запуск самодостаточного `build/dist` без Qt в `PATH`.
-- Реальная перезагрузка Windows для автозагрузки и внешний прокси с авторизацией не проверялись
-  (локальные HTTP/SOCKS5-прокси с авторизацией покрыты `tst_networkmanager`).
-- Захват в окнах администраторских процессов и запись Win+V — известные ограничения (§9.1).
-- Установщик не подписан кодом: Windows SmartScreen может показать предупреждение. Сертификата
-  в проекте нет; варианты и требования описаны в [`code-signing.md`](code-signing.md).
-  Добавление подписи не меняет формат артефактов.
-- Linux-сборка в 0.11.0 отсутствует: платформенные модули — заглушки, полноценный порт — этап 11
-  (§4.14). macOS не планируется.
+- Word and VS Code are not installed — selection capture in them was not tested; Telegram is authorized, but
+  private chats were not opened.
+- There is no second monitor with different scaling; one 3840×2160 monitor at 175% was tested.
+- A clean Windows without Qt is unavailable; starting the self-contained `build/dist` without Qt in `PATH` was tested.
+- A real Windows reboot for autostart and an external proxy with authentication were not tested
+  (local HTTP/SOCKS5 proxies with authentication are covered by `tst_networkmanager`).
+- Capture in windows of administrator processes and the Win+V entry are known limitations (§9.1).
+- The installer is not code-signed: Windows SmartScreen may show a warning. There is no certificate
+  in the project; options and requirements are described in [`code-signing.md`](code-signing.md).
+  Adding a signature does not change the artifact format.
+- There is no Linux build in 0.11.0: platform modules are stubs, a full port is roadmap stage 2 (old stage 11)
+  (§4.14). macOS is not planned.
 
-Возможное развитие:
+Possible development:
 
-1. **Захват через UI Automation** без использования буфера обмена (§4.4): цепочка «UIA →
-   буфер обмена», TextPattern/GetSelection, fallback для программ без UIA.
-2. **Словарные статьи** — отдельный сервис/панель, не часть перевода: LLM по JSON-схеме,
-   Google gtx `dt=bd` для коротких текстов, локальный CSV-глоссарий и Wiktionary. Показывать
-   части речи, значения, примеры, синонимы и транскрипцию для отдельных слов и коротких фраз.
-   Дизайн — [`dictionary.md`](dictionary.md); формат Google недокументирован.
-3. Дополнительные официальные сервисы (Microsoft Translator, Amazon Translate, Yandex,
-   PROMT, LibreTranslate) — новый класс `TranslationService`.
-4. Озвучивание текста (`QTextToSpeech`), история переводов.
-5. **Linux** — этап 11: X11-реализации `platform/*`, Wayland через портал `GlobalShortcuts` и
-   CLI-fallback, пакеты `.deb`/AppImage (§4.14).
-6. **Локализация на основные языки мира** — этап 12 выполнен: испанский, немецкий, французский,
-   португальский (Бразилия), итальянский, польский, украинский, турецкий, китайский
-   (упрощённый), японский, корейский, арабский, хинди; RTL и проверка переводов в CI (§4.13).
-   Переводы требуют выборочной проверки носителями перед публичным релизом.
-7. **Кодовая подпись** установщика ([`code-signing.md`](code-signing.md)) и автообновление поверх
-   установленной версии.
-8. **Бесплатные веб-endpoints** — DeepL web уже реализован как режим `free-web` одного сервиса
-   «DeepL» без ключа (§4.7.1); Yandex web, Bing web, Reverso, Mozhi, MyMemory остаются
-   экспериментальными. Для всех действуют rate limit и предупреждение о неофициальности.
-   Детали и приоритеты — [`free-endpoints.md`](free-endpoints.md).
-9. **Локальный offline-перевод** — Argos-модели + CTranslate2 без Python: загрузка моделей по
-   кнопке, pivot через английский, fallback на облако. Детали и PoC — [`local-translation.md`](local-translation.md).
-10. **Проверка орфографии, грамматики и пунктуации** — отдельная вкладка, LanguageTool/Hunspell/
-    Yandex Speller, замена текста исправленным. Детали — [`proofreading.md`](proofreading.md), §4.15.
-11. **LLM-действия** — перевод уже работает через OpenAI-совместимый провайдер (OpenRouter по
-    умолчанию, облако или локально); проверка, суммаризация, рерайтинг, объяснение и произношение
-    запланированы. Словарь — отдельный `DictionaryService` ([`dictionary.md`](dictionary.md)).
-    Детали — [`llm-actions.md`](llm-actions.md), §4.16.
+1. **Capture via UI Automation** without using the clipboard (§4.4): the "UIA →
+   clipboard" chain, TextPattern/GetSelection, a fallback for programs without UIA.
+2. **Dictionary entries** — a separate service/panel, not part of translation: LLM via a JSON schema,
+   Google gtx `dt=bd` for short texts, a local CSV glossary, and Wiktionary. Show
+   parts of speech, meanings, examples, synonyms, and transcription for individual words and short phrases.
+   Design — [`dictionary.md`](dictionary.md); the Google format is undocumented.
+3. Additional official services (Microsoft Translator, Amazon Translate, Yandex,
+   PROMT, LibreTranslate) — a new `TranslationService` class.
+4. Text-to-speech (`QTextToSpeech`), translation history.
+5. **Linux** — roadmap stage 2 (old stage 11): X11 implementations of `platform/*`, Wayland via the `GlobalShortcuts` portal and
+   a CLI fallback, `.deb`/AppImage packages (§4.14).
+6. **Localization into major world languages** — old plan stage 12 is done: Spanish, German, French,
+   Portuguese (Brazil), Italian, Polish, Ukrainian, Turkish, Chinese
+   (Simplified), Japanese, Korean, Arabic, Hindi; RTL and translation checks in CI (§4.13).
+   Translations require selective native-speaker review before a public release.
+7. **Code signing** of the installer ([`code-signing.md`](code-signing.md)) and auto-update over
+   the installed version.
+8. **Free web endpoints** — DeepL web is already implemented as the `free-web` mode of a single
+   "DeepL" service without a key (§4.7.1); Yandex web, Bing web, Reverso, Mozhi, MyMemory remain
+   experimental. Rate limits and an unofficial-status warning apply to all.
+   Details and priorities — [`free-endpoints.md`](free-endpoints.md).
+9. **Local offline translation** — Argos models + CTranslate2 without Python: model download by
+   button, pivot through English, fallback to the cloud. Details and PoC — [`local-translation.md`](local-translation.md).
+10. **Spelling, grammar, and punctuation checking** — a separate tab, LanguageTool/Hunspell/
+    Yandex Speller, replacing text with the corrected one. Details — [`proofreading.md`](proofreading.md), §4.15.
+11. **LLM actions** — translation already works via an OpenAI-compatible provider (OpenRouter by
+    default, cloud or local); checking, summarization, rewriting, explanation, and pronunciation
+    are planned. The dictionary is a separate `DictionaryService` ([`dictionary.md`](dictionary.md)).
+    Details — [`llm-actions.md`](llm-actions.md), §4.16.
 
 ---
 
-## 10. Порядок реализации
+## 10. Implementation order
 
-Пошаговый план по этапам — в [`doc/roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md). Подробная история старого плоского плана сохранена в `legacy-plan.md` рядом с новой картой; она будет перенесена туда на первом этапе.
+The step-by-step plan by stages is in the active roadmap [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md); the detailed history of the old flat plan was moved to [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md) in stage 1 of the migration.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 depends: [02-architecture-core]
 ---
@@ -42,3 +42,12 @@ Translate the rest of `doc/architecture.md`: modules 4.8-4.16, scenarios 5, erro
 - Old and new stage numbers are easy to confuse; record the mapping in the outcome: new 2/3/4/5/6/7 ↔ old 11/13/14/15/16/17.
 - The decisions table is dense; do not change decisions, only language.
 - Section 11 is the migration policy; leave it untouched even though its “currently Russian” context describes the pre-migration state.
+
+## Outcome
+
+Translated the rest of `doc/architecture.md`: modules 4.8-4.16, scenarios 5, error handling 6, logging/security/privacy 7, testing 8, decisions 9, and implementation order 10. Section 11 is untouched and byte-identical to `HEAD`. The document is now English from the title through section 10; only three legitimate Russian strings remain. The interrupted sessions' work was verified and finished, not redone.
+
+- Stage references: future work uses the new roadmap numbering with old numbers in parentheses — roadmap stages 2/3/4/5/6/7 correspond to old stages 11/13/14/15/16/17; completed old stages are written `old plan stage N` (localization is `old plan stage 12`). Section 10 states that the old flat plan was moved to `doc/roadmap/qtranslate/legacy-plan.md` in stage 1 of the migration and points to the active roadmap `roadmap/qtranslate/plan.md`.
+- Kept Russian strings: `Русский` in the §4.13 UI-language list (native language name), `English ↔ Русский` in §8.1 (native language name in the UI), and `Привет, мир` in §8.1 (the actual translated output of the smoke test). No other Cyrillic remains.
+- Verification: `grep -nP '[А-Яа-яЁё]' doc/architecture.md` finds exactly those three strings; the tail from `## 11. Documentation and roadmap` is identical to `git show HEAD:doc/architecture.md`; in the translated sections, `grep -nP '\bstage\s+\d+' doc/architecture.md` shows only `roadmap stage 2 (old stage 11)`, `old plan stage N`, and the migration's `stage 1`, while the untouched section 11 keeps its original references; backticked spans, headings, table rows, list items, code fences, and digit tokens match `HEAD` except for translated prose, decimal separators, and the requested link changes in section 10; all 13 relative Markdown links resolve from `doc/`; `git diff --check` is clean; only `doc/architecture.md`, this task's `plan.md`, and `doc/roadmap/qtranslate/journal.md` are modified. No build was required.
+- Found but not fixed, out of scope: the 3.1 tree misses `src/ai/openaichat.*`, `src/core/uilanguages`, the DeepL web and OpenAI-compatible services, the `autostart_stub.cpp`/`secretprotector_stub.cpp` stubs, and the newer tests; 3.2 misses only `tst_translations` and `tst_uilanguages`; §11.1 still calls `doc/plan.md` active; the comment at `src/platform/selectiongrabber_win.cpp:248` still points to the removed `doc/plan.md`.
