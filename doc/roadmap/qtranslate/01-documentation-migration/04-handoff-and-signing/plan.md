@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 depends: [01-archive-legacy-plan]
 ---
@@ -43,3 +43,15 @@ Translate `doc/handoff.md` and `doc/code-signing.md` to English, update their re
 - Known gaps must come from the old plan status table and architecture §9.2, not from guesses; do not add new gaps.
 - The handoff is the release handoff; do not claim the documentation migration is complete or that releases are signed.
 - Code-signing recommendations are user decisions; translate them, do not change the recommendation.
+
+## Outcome
+
+Translated `doc/handoff.md` (281 → 319 lines) and `doc/code-signing.md` (145 → 154 lines) to English. `doc/handoff.md` gained the current-state note at the top and `## Known manual gaps`; `doc/code-signing.md` step 5 now points to the active roadmap and the archive.
+
+- Stage references: future work uses `roadmap stage N (old stage M)` (3↔13, 4↔14, 5↔15, 6↔16, 7↔17); completed localization is `old stage 12, completed`; the known gaps cite the old stage numbers.
+- Kept Russian strings: `Привет, мир` (the OpenRouter and LLM smoke-test output, `doc/handoff.md:72` and `:189`) and `Провайдеры перевода` (the Russian README.ru section name paired with `Translation providers`, `:25`). German `Automatische Erkennung` is kept as the example of a cut-off label; it is not Cyrillic. Russian UI labels elsewhere were replaced with the English source strings: `Pause hotkeys`, `Services`, `Settings → Hotkeys`, `Proofreading`.
+- `## Known manual gaps` lists the eight gaps from the old plan status table and architecture §9.2 (tray; Word/VS Code/Telegram capture; busy-hotkey notification; Win+V; second monitor; autostart after a reboot; real DeepL/Google Cloud keys; SOCKS5/authenticated proxy), says they do not block new work, and links the archive and §9.2.
+- References: the historical `Release 0.10.0` step links the archived plan; `Next release` and code-signing step 5 link the active `roadmap/qtranslate/plan.md`; history in code-signing points to `roadmap/qtranslate/legacy-plan.md`. No reference to `doc/plan.md` remains in either file. Paths are relative to `doc/`; `doc/releases/<version>.md` became `releases/<version>.md`.
+- Facts were checked mechanically against `HEAD`: hashes, tags, URLs, byte counts, sizes, test counts, INI keys, class names and log strings are unchanged. Only the two documents changed; all relative links resolve; `git diff --check` is clean; no build was needed.
+- Review found no issues. The coordinator found one ambiguous translation in `code-signing.md` §2.2 — “the application is reviewed manually” for “заявку рассматривают вручную” — and it was fixed to `the request is reviewed manually`.
+- Found but not fixed, out of scope: `doc/code-signing.md:3` still lists only `v0.9.0`, `v0.9.1` and `v0.10.0` as unsigned although `v0.11.0` is released; this is a pre-existing fact list, not a translation error.

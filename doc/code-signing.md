@@ -1,105 +1,110 @@
-# Подпись кода и SmartScreen
+# Code signing and SmartScreen
 
-Дата: 2026-11-05. Статус: не внедрено; релизы `v0.9.0`, `v0.9.1` и `v0.10.0` не подписаны.
+Date: 2026-11-05. Status: not implemented; the `v0.9.0`, `v0.9.1` and `v0.10.0` releases are not
+signed.
 
-Документ фиксирует варианты подписи установщика qtranslate, требования сервисов и план внедрения.
-Технические ограничения захвата выделения через UI Automation описаны в
-[`architecture.md`](architecture.md), §4.4 и §9.2.
+This document records the signing options for the qtranslate installer, the service requirements and
+the implementation plan. The technical limitations of selection capture through UI Automation are
+described in [`architecture.md`](architecture.md), §4.4 and §9.2.
 
-## 1. Что даёт подпись
+## 1. What signing gives
 
-Подпись Authenticode привязывает файл к сертификату и позволяет Windows проверить, что файл не
-изменён после сборки. Для пользователя это выглядит как имя издателя в SmartScreen вместо
-«Unknown publisher».
+An Authenticode signature binds the file to a certificate and lets Windows verify that the file was
+not changed after the build. For the user this looks like the publisher name in SmartScreen instead
+of "Unknown publisher".
 
-Важно:
+Important:
 
-- подпись не делает файл безопасным сама по себе — она подтверждает только издателя и целостность;
-- Windows доверяет только сертификатам, цепочка которых ведёт к корневому сертификату из
-  хранилища Trusted Root. Самоподписанный сертификат в это хранилище не входит;
-- SmartScreen учитывает репутацию сертификата и издателя. Новый сертификат начинает с низкой
-  репутации, поэтому предупреждения могут оставаться, пока накопится статистика загрузок;
-- подпись должна иметь RFC 3161 timestamp: без него после истечения сертификата подпись станет
-  недействительной;
-- подписывать нужно не только установщик, но и `qtranslate.exe` внутри дистрибутива, иначе
-  portable-версия и установленная программа останутся без подписи.
+- the signature does not make the file safe by itself — it confirms only the publisher and integrity;
+- Windows trusts only certificates whose chain leads to a root certificate in the Trusted Root store.
+  A self-signed certificate is not in that store;
+- SmartScreen takes the reputation of the certificate and the publisher into account. A new
+  certificate starts with low reputation, so warnings may remain until download statistics
+  accumulate;
+- the signature must have an RFC 3161 timestamp: without it the signature becomes invalid after the
+  certificate expires;
+- not only the installer but also `qtranslate.exe` inside the distribution must be signed, otherwise
+  the portable version and the installed program remain unsigned.
 
-## 2. Варианты
+## 2. Options
 
-### 2.1. Самоподписанный сертификат
+### 2.1. Self-signed certificate
 
-Подходит только для проверки пайплайна и внутренних сборок. Windows не доверяет такому
-сертификату, пользователь всё равно увидит «Unknown publisher»; устанавливать корневой сертификат
-в систему пользователя ради распространения недопустимо.
+Suitable only for pipeline testing and internal builds. Windows does not trust such a certificate,
+the user will still see "Unknown publisher"; installing a root certificate into the user's system
+for distribution is unacceptable.
 
-Плюсы: бесплатно, можно проверить `signtool`, timestamp и порядок подписи артефактов.
-Минусы: не решает SmartScreen, не годится для публичных релизов.
+Pros: free; `signtool`, the timestamp and the artifact signing order can be verified.
+Cons: does not solve SmartScreen, not suitable for public releases.
 
 ### 2.2. SignPath Foundation
 
-Бесплатная подпись для open-source проектов. Сертификат выпущен на **SignPath Foundation**,
-поэтому в свойствах файла издателем будет SignPath Foundation, а не qtranslate. Приватный ключ
-хранится в HSM SignPath, подпись выполняется через GitHub Actions; каждый релиз вручную
-подтверждается approver'ом.
+Free signing for open-source projects. The certificate is issued to the **SignPath Foundation**, so
+the publisher in the file properties will be SignPath Foundation, not qtranslate. The private key is
+stored in the SignPath HSM, signing is performed through GitHub Actions; every release is manually
+approved by an approver.
 
-Условия, которые важны для qtranslate:
+Requirements that matter for qtranslate:
 
-- публичный репозиторий и **OSI-лицензия** для всех компонентов; сейчас файла `LICENSE` нет;
-- политика код-подписи на главной странице/в README с ролями и ссылками на участников;
-- MFA у всех, у кого есть доступ к GitHub и SignPath;
-- роли **Authors**, **Reviewers**, **Approvers**: авторы меняют код, ревьюеры проверяют внешние
-  PR, approvers вручную одобряют каждый запрос на подпись;
-- проект должен быть уже выпущен и иметь проверяемую репутацию; заявку рассматривают вручную,
-  гарантий одобрения нет;
-- для одного мейнтейнера роли можно совмещать, но разделения обязанностей тогда нет. Лучше иметь
-  второго доверенного approver'а.
+- a public repository and an **OSI license** for all components; there is currently no `LICENSE` file;
+- a code-signing policy on the main page/in the README with the roles and links to the participants;
+- MFA for everyone who has access to GitHub and SignPath;
+- the **Authors**, **Reviewers**, **Approvers** roles: authors change code, reviewers check external
+  PRs, approvers manually approve every signing request;
+- the project must already be released and have a verifiable reputation; the request is reviewed
+  manually, and approval is not guaranteed;
+- for a single maintainer the roles can be combined, but then there is no separation of duties. It is
+  better to have a second trusted approver.
 
-Это предпочтительный бесплатный вариант. Перед заявкой нужно выбрать лицензию: MIT, Apache-2.0
-или GPL-3.0. Для небольшой утилиты обычно достаточно MIT, но выбор за владельцем проекта.
+This is the preferred free option. Before applying, a license must be chosen: MIT, Apache-2.0 or
+GPL-3.0. MIT is usually enough for a small utility, but the choice is up to the project owner.
 
 ### 2.3. Azure Artifact Signing
 
-Сервис Microsoft, бывший **Trusted Signing**. Basic-план — $9.99/мес за 5 000 подписей,
-Premium — $99.99/мес за 100 000. Сертификат и ключ находятся в управляемом HSM, есть интеграция
-с GitHub Actions и `signtool`.
+A Microsoft service, formerly **Trusted Signing**. The Basic plan is $9.99/month for 5 000
+signatures, Premium is $99.99/month for 100 000. The certificate and the key are in a managed HSM,
+and there is integration with GitHub Actions and `signtool`.
 
-Ограничения Public Trust (по документации на 2026-11):
+Public Trust limitations (per the documentation as of 2026-11):
 
-- организации — только США, Канада, ЕС, Великобритания, Австралия, Новая Зеландия, Япония,
-  Южная Корея, Сингапур, Швейцария, Норвегия, Израиль;
-- индивидуальные разработчики — только США и Канада;
-- нужна identity validation в портале Azure, обычно 1–20 рабочих дней;
-- для России Public Trust недоступен.
+- organizations — only the USA, Canada, the EU, the UK, Australia, New Zealand, Japan, South Korea,
+  Singapore, Switzerland, Norway, Israel;
+- individual developers — only the USA and Canada;
+- identity validation in the Azure portal is required, usually 1–20 business days;
+- Public Trust is not available for Russia.
 
-Подпись Azure даёт базовую репутацию в SmartScreen, но не гарантирует отсутствие предупреждений
-для нового издателя.
+An Azure signature gives a baseline reputation in SmartScreen but does not guarantee the absence of
+warnings for a new publisher.
 
-### 2.4. Коммерческий сертификат OV/EV
+### 2.4. Commercial OV/EV certificate
 
-Сертификат от DigiCert, Sectigo, SSL.com, Certum и других CA. OV (Organization Validation)
-дешевле, репутация набирается постепенно; EV (Extended Validation) даёт более высокую стартовую
-репутацию, но стоит заметно дороже. Ориентировочная цена — от нескольких сотен долларов в год.
+A certificate from DigiCert, Sectigo, SSL.com, Certum and other CAs. OV (Organization Validation) is
+cheaper and the reputation accumulates gradually; EV (Extended Validation) gives a higher initial
+reputation but costs noticeably more. The approximate price is from a few hundred dollars per year.
 
-С 2023 года приватный ключ должен храниться на аппаратном носителе (HSM/токен) или в облачном
-сервисе подписи (DigiCert KeyLocker, SSL.com eSigner, Sectigo). Обычный `.pfx` в CI использовать
-нельзя. Для CI выбирают облачный HSM и авторизацию по API.
+Since 2023 the private key must be stored on a hardware device (HSM/token) or in a cloud signing
+service (DigiCert KeyLocker, SSL.com eSigner, Sectigo). A regular `.pfx` cannot be used in CI. For CI
+a cloud HSM and API authorization are chosen.
 
 ### 2.5. GitHub artifact attestations
 
-Бесплатные attestations GitHub подтверждают, что артефакт собран из указанного workflow и
-коммита. Проверяются командой `gh attestation verify`. Это полезно для supply-chain безопасности,
-но **не заменяет Authenticode**: SmartScreen и «Unknown publisher» от этого не меняются.
+Free GitHub attestations confirm that the artifact was built from the specified workflow and commit.
+They are verified with the `gh attestation verify` command. This is useful for supply-chain security
+but **does not replace Authenticode**: SmartScreen and "Unknown publisher" do not change because of
+it.
 
-## 3. Что подписывать
+## 3. What to sign
 
-1. `bin\qtranslate.exe` — до упаковки, чтобы подпись попала и в ZIP, и в установленную версию.
-2. `qtranslate-<версия>-win64-setup.exe` — после сборки Inno Setup.
-3. Деинсталлятор — через `SignedUninstaller=yes` и `SignTool` в `.iss`. Для SignPath это требует
-   отдельной настройки, потому что подпись выполняется после сборки, а не внутри компилятора Inno.
-4. `SHA256SUMS.txt` остаётся отдельным ассетом релиза, но не рекламируется. Для установщика
-   достаточно Authenticode; подписывать нужно сам exe и установщик, а не checksum-файл.
+1. `bin\qtranslate.exe` — before packaging, so the signature gets into both the ZIP and the installed
+   version.
+2. `qtranslate-<version>-win64-setup.exe` — after the Inno Setup build.
+3. The uninstaller — through `SignedUninstaller=yes` and `SignTool` in the `.iss`. For SignPath this
+   requires separate setup, because signing is performed after the build, not inside the Inno
+   compiler.
+4. `SHA256SUMS.txt` remains a separate release asset but is not advertised. Authenticode is enough
+   for the installer; the exe and the installer need signing, not the checksum file.
 
-Пример для `signtool` (сертификат в хранилище или HSM):
+Example for `signtool` (certificate in the store or an HSM):
 
 ```powershell
 signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 `
@@ -107,39 +112,43 @@ signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 `
 signtool verify /pa /all build\artifacts\qtranslate-0.9.2-win64-setup.exe
 ```
 
-Для Inno Setup:
+For Inno Setup:
 
 ```ini
 SignTool=signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $f
 SignedUninstaller=yes
 ```
 
-Для Azure Artifact Signing команда `signtool` использует `/dlib` и metadata-файл профиля; ключ и
-сертификат в файловую систему не выгружаются.
+For Azure Artifact Signing the `signtool` command uses `/dlib` and a profile metadata file; the key
+and the certificate are not exported to the file system.
 
-## 4. Внедрение в CI
+## 4. CI integration
 
-- Все секреты и доступы к HSM хранятся в GitHub Actions secrets или в федеративной
-  авторизации Azure; приватный ключ никогда не коммитится.
-- Подпись выполняется после сборки и тестов, но до упаковки ZIP и установщика — чтобы внутри
-  установщика уже лежал подписанный exe.
-- Для SignPath используется GitHub Action, который отправляет артефакт, ждёт одобрения approver'а
-  и возвращает подписанный файл; workflow должен падать, если подпись не получена.
-- После подписи обязательна проверка `signtool verify /pa /all` и проверка timestamp.
-- Подпись не должна менять содержимое ZIP после его упаковки; порядок:
-  сборка → подпись exe → упаковка ZIP/установщика → подпись установщика → `SHA256SUMS.txt`.
+- All secrets and HSM access are stored in GitHub Actions secrets or in Azure federated authorization;
+  the private key is never committed.
+- Signing is performed after the build and tests, but before packaging the ZIP and the installer — so
+  that the installer already contains a signed exe.
+- For SignPath a GitHub Action is used that submits the artifact, waits for approver approval and
+  returns the signed file; the workflow must fail if the signature is not obtained.
+- After signing, `signtool verify /pa /all` and a timestamp check are mandatory.
+- Signing must not change the ZIP content after it is packaged; the order is: build → sign exe →
+  package ZIP/installer → sign installer → `SHA256SUMS.txt`.
 
-## 5. Решение и следующие шаги
+## 5. Decision and next steps
 
-Рекомендуемый путь для qtranslate — **SignPath Foundation**:
+The recommended path for qtranslate is **SignPath Foundation**:
 
-1. Выбрать и добавить OSI-лицензию (`LICENSE`).
-2. Добавить в README раздел **Code signing policy** с ролями, MFA и ссылками на участников.
-3. Подать заявку в SignPath Foundation; приложить ссылку на репозиторий и релизы.
-4. После одобрения добавить signing workflow, подписывать `qtranslate.exe` и установщик, проверять
-   подпись в CI.
-5. Обновить `README`, `doc/roadmap/qtranslate/plan.md`, `doc/architecture.md` и заметки к релизу.
+1. Choose and add an OSI license (`LICENSE`).
+2. Add a **Code signing policy** section to the README with the roles, MFA and links to the
+   participants.
+3. Apply to SignPath Foundation; attach a link to the repository and the releases.
+4. After approval, add the signing workflow, sign `qtranslate.exe` and the installer, and verify the
+   signature in CI.
+5. Update `README`, the active roadmap [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md),
+   [`architecture.md`](architecture.md) and the release notes. The history stays in the archive
+   [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md), which is not updated.
 
-Если SignPath не одобрит проект или нужен издатель с именем владельца, остается Azure Artifact
-Signing (при доступности страны) или коммерческий OV/EV. До внедрения подписи релизы остаются
-неподписанными, а предупреждение SmartScreen считается известным ограничением.
+If SignPath does not approve the project or a publisher with the owner's name is needed, Azure
+Artifact Signing (if the country is available) or a commercial OV/EV certificate remains. Until
+signing is implemented, the releases remain unsigned and the SmartScreen warning is considered a
+known limitation.
