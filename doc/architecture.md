@@ -1817,7 +1817,7 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 - Code comments and source files are not touched, except the one approved comment line in
   `src/platform/selectiongrabber_win.cpp` that now points to the archive. Any other documentation
   change that would require a code comment change is deferred to a separate task.
-- The migration is documentation-only. A build is not required. If a change accidentally touches code or tests, run the relevant Debug and Release checks and all 23 tests.
+- The migration is documentation-only except the one approved comment line in `src/platform/selectiongrabber_win.cpp`, which needs no build; any other code or test change requires the relevant Debug and Release checks and all 23 tests.
 
 ### 11.8. Verification
 
@@ -1845,13 +1845,13 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 | Legacy manual checks | Record in `doc/handoff.md` as known gaps | Releases already shipped; they do not block new work | New acceptance stage; ignore them |
 | Jira key | None | Personal project; user confirmed | Invent a key; ask the user again |
 | Commit and push | Follow `AGENTS.md`; no push without explicit request | Project rules; GitHub Actions load | Push every commit; push automatically |
-| Verification | Link check, English review, frontmatter check, no code changes except the one approved comment line | Documentation-only migration | Full build and test; not needed for docs |
+| Verification | Link check, English review, frontmatter check, no code changes except the one approved comment line | Documentation-only migration, except the one approved comment line | Full build and test; not needed for docs |
 
 ### 11.10. Risks and mitigations
 
 - **Translation inaccuracies.** Technical English may change a nuance. Keep the Russian archive as the original wording and ask the user to spot-check the architecture and handoff.
 - **Broken links after the move.** Update every relative link in the archive and active docs, then run a link check.
-- **Mixed language during migration.** The architecture document is mixed until stage 1 finishes. Keep the migration in one stage and prioritise the architecture and handoff.
+- **Mixed language during migration.** The architecture document was mixed while the migration ran; keeping the migration in one stage and prioritising the architecture and handoff limited that period.
 - **Stale `AGENTS.md`.** It is loaded in every session. Update it in stage 1 and search for old paths.
 - **Archive mistaken for the active plan.** Add a clear English header and list the archive in the map README and `AGENTS.md`.
 - **Translation volume.** The active docs total roughly 4,000 lines. Split the work into tasks; start with the architecture and handoff, then the design notes, then `i18n/README.md`.
@@ -1865,7 +1865,7 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 
 - **Branch.** The lead asks whether to continue on `main` or create a branch. The user decides.
 - **Commit and push policy.** The lead asks and follows `AGENTS.md`. No push without an explicit request.
-- **Archive name and location.** Proposed as `doc/roadmap/qtranslate/legacy-plan.md`; the user can change it before stage 1 moves the file.
+- **Archive name and location.** The archive is `doc/roadmap/qtranslate/legacy-plan.md`; stage 1 moved the file there.
 - **Translation glossary.** Use technical English and preserve identifiers, commands, paths, and product names. The user can spot-check and request terminology changes.
 - **No Jira key.** Confirmed by the user. The lead must not ask for a Jira number.
 - **Stage order.** Migration first, then the old order. Confirmed by the user. If Linux is blocked, the lead may ask to start independent stages earlier.

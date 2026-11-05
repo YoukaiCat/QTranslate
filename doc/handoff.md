@@ -3,8 +3,8 @@
 Date: 2026-11-05. Repository: `C:\projects\qtranslate`, branch `main`.
 
 The active roadmap is [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md); the old plan is
-archived at [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); active
-documents are being translated in stage 1 of the migration.
+archived at [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); the active
+documentation is English. The migration to the tree roadmap and the English baseline is complete.
 
 ## Git
 
