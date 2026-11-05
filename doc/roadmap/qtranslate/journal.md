@@ -2,9 +2,9 @@
 
 ## Where we left off
 
-Current node: `01-documentation-migration/01-archive-legacy-plan` (task, `done`). The old flat plan is archived at `doc/roadmap/qtranslate/legacy-plan.md` with an English header, and active references point to the roadmap or the archive. Next: start the coordinator for `02-architecture-core`; tasks 04-06 are also unblocked, and 07 waits for all of them. Stage 1 remains `in-progress` with `base: 94d3ec2`.
+Current node: `01-documentation-migration/02-architecture-core` (task, `done`). The architecture title and sections 1-4.7.2 are English; sections 4.8-10 and 11 remain Russian for task 03. Next: start the coordinator for `03-architecture-runtime`; tasks 04-06 are also unblocked, and 07 waits for all of them.
 
-No question is waiting for the user. The working tree is clean after the task commit; the commits stay local (no push).
+No question is waiting for the user. The working tree is clean after the task commit; task 01 is `done` as `a194f23`. Stage 1 remains `in-progress` with `base: 94d3ec2`; the commits stay local (no push).
 
 ## Journal
 
@@ -12,4 +12,6 @@ No question is waiting for the user. The working tree is clean after the task co
 - 2026-11-05 — Committed the roadmap preparation as `94d3ec2` (architecture section 11, map root, seven stage nodes, journal, map README). Local only; no push. Stage 1 set to `in-progress` with `base: 94d3ec2`.
 - 2026-11-05 — The planner split stage 1 into seven tasks: archive and references first; then architecture sections 1-4.7 and 4.8-10; handoff with code-signing; provider and proofreading notes; LLM, dictionary, and i18n; verification last. Dependencies: 03 after 02, 04-06 after 01, 07 after all. Committed as `99ac5af`.
 - 2026-11-05 — The session ended while the coordinator for `01-archive-legacy-plan` was working; its edits stayed uncommitted in the working tree. A new coordinator is finishing the task from that state instead of redoing it.
+- 2026-11-05 — Task `01-archive-legacy-plan` done as `a194f23`: archive moved with history, English archive header, references repointed, `AGENTS.md` updated. Deferred and recorded in the task outcome: the source comment at `src/platform/selectiongrabber_win.cpp:248` still says `doc/plan.md`; architecture §11.7 defers code comments to a separate task, so a later one-line fix plus build is needed. No replan of stage 1: the remaining tasks still match their premises.
 - 2026-11-05 — Task `01-archive-legacy-plan` done and committed locally. Moved `doc/plan.md` to `doc/roadmap/qtranslate/legacy-plan.md` with `git mv`, added the English archive header, rewrote the six relative links, and repointed active references in the root plan, map README, `AGENTS.md`, `doc/handoff.md`, `doc/code-signing.md`, and `doc/dictionary.md`. Verification: the old-path grep finds only allowed places; `git diff --name-only` is documentation-only; no build. The interrupted work was verified and finished, not redone. No push.
+- 2026-11-05 — Task `02-architecture-core` done and committed with this entry. Translated the title and sections 1-4.7.2 of `doc/architecture.md`; 4.8-10 and 11 remain byte-identical for task 03. Updated the `doc/` subtree in 3.1 to the migrated layout, stage references (`roadmap stage 2 (old stage 11)`, `old plan stage 2/6`), and UI labels to their English source strings. Kept Russian UI labels: none. Review found no issues. Deferred and recorded in the task outcome: the 3.1 tree still misses `src/ai`, `uilanguages`, the DeepL web and OpenAI-compatible services, platform stubs, and newer tests; 3.2 misses `tst_translations`/`tst_uilanguages`; §11.1 still calls `doc/plan.md` active; `src/platform/selectiongrabber_win.cpp:248` still points to the old plan. Stage 1 stays `in-progress`; no replan. No push.

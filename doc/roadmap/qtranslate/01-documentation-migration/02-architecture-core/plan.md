@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 depends: [01-archive-legacy-plan]
 ---
@@ -41,3 +41,22 @@ Translate the first part of `doc/architecture.md` to English: the title and sect
 - Russian UI labels can be legitimate; do not replace them with guessed English labels when the label itself is the subject.
 - Do not touch section 11: it is the English migration policy and stays as is.
 - Other parts of the directory tree (for example `src/ai`) may already be stale; note them in the outcome but do not audit the whole tree in this task.
+
+## Outcome
+
+Translated the title and sections 1-4.7.2 of `doc/architecture.md` to English. Sections 4.8-10 and 11 are untouched byte for byte, so the document stays intentionally mixed until task 03. Technical identifiers, paths, settings keys, endpoints, JSON fields, numbers, code blocks, and class/method/signal names are unchanged; comments inside snippets were translated and string literals kept.
+
+- The ASCII diagram in section 2 keeps its frames, arrows, and module names; Russian annotations inside it were translated, and the pre-existing one-character offset of the `main.cpp` box was fixed so the borders line up.
+- The `doc/` subtree in 3.1 now shows the migrated layout: `architecture.md`, `handoff.md`, `code-signing.md`, `dictionary.md`, `free-endpoints.md`, `llm-actions.md`, `local-translation.md`, `proofreading.md`, `releases/0.11.0.md`, and `roadmap/{README.md,qtranslate/{plan.md,legacy-plan.md,journal.md,01-documentation-migration/plan.md}}`. There is no `doc/plan.md`.
+- Stage references: Linux in 1.3/1.4 is `roadmap stage 2 (old stage 11)`; 4.6 uses `old plan stage 2` and `old plan stage 6`.
+- Kept Russian UI labels: none. The quoted labels were replaced with their English source strings from `src/ui/settingsdialog.cpp` and `src/ui/trayicon.cpp`: `Hotkeys`, `Check key`, `Load models`, `Pause hotkeys`, and `Restore clipboard after copying the selection`. No Cyrillic remains before `### 4.8.`.
+- Verification: the tail from `### 4.8.` is identical to `HEAD`; heading, table row/column, list, blockquote, and code-fence counts match; `git diff --check` is clean; there are no relative Markdown links in the changed range and the existing links elsewhere in the file resolve; only `doc/architecture.md` changed; no build was required.
+
+Found but not fixed, because the task does not audit the rest of the tree:
+
+- The 3.1 tree still omits `src/ai/openaichat.*`, `core/uilanguages`, `services/{deeplwebparser,deeplwebservice,openaicompatibleservice}`, the `platform/` stubs (`autostart_stub.cpp`, `secretprotector_stub.cpp`), and the newer tests (`tst_appinfo`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_hotkeymanager`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_translations`, `tst_uilanguages`).
+- The 3.2 test list does not mention `tst_translations` and `tst_uilanguages` even though they exist.
+- `src/platform/selectiongrabber_win.cpp:248` still points to the removed `doc/plan.md`; section 11.7 defers code-comment changes to a separate task.
+- Section 11.1 still describes `doc/plan.md` as an active document; section 11 is the untouched migration policy.
+
+Remaining for the stage: sections 4.8-10 in task 03.
