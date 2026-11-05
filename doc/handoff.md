@@ -7,10 +7,11 @@
 - `origin/main` = `1e3e6b5` «Keep SHA256SUMS as an unlisted release asset»; тег `v0.10.0`
   указывает на `726dac0`.
 - История: релиз 0.10.0, удаление checksum-ссылок и возврат `SHA256SUMS.txt` как unlisted asset.
-- Текущая работа — OpenAI-совместимый перевод (OpenRouter): локальный коммит `bb71456`
-  «Add OpenAI-compatible translation via OpenRouter», **не запушен**. Push — только по просьбе
-  пользователя или при выпуске согласованного релиза.
-- Рабочее дерево после завершения должно быть чистым; процесс `qtranslate` не запущен.
+- Текущая работа — OpenAI-совместимый перевод (OpenRouter) и объединение DeepL free web в один
+  сервис: локальные коммиты `bb71456`, `b212f6e`, `df3dd80`, **не запушены**. Push — только по
+  просьбе пользователя или при выпуске согласованного релиза.
+- Для live smoke запущен `build\dist\bin\qtranslate.exe` с `--verbose`; после проверки закрыть.
+- Рабочее дерево после завершения должно быть чистым.
 
 ## Релизы
 
@@ -70,7 +71,8 @@
   используются внутри `DeepLService` при `deepl.mode=free-web`. Ключ не нужен; в списке сервисов
   один «DeepL», в его настройках комбобокс «API / Free web»; поле ключа блокируется в free-web,
   показывается предупреждение о неофициальности. Старый `service=deepl-web` мигрирует
-  в `service=deepl` + `deepl.mode=free-web`.
+  в `service=deepl` + `deepl.mode=free-web`. Проверено: в списке сервисов ровно Google Translate,
+  DeepL, OpenRouter; отдельной группы DeepL (free web) нет.
 - `POST https://oneshot-free.www.deepl.com/v1/translate`, `Authorization: None`, JSON;
   5000 символов на часть, запросы сериализуются и идут не чаще раза в 2 с, на `429` — одна
   повторная попытка через 3 с. `403` → `RateLimited`, `413` → `TooLong`, `5xx` → `Network`.
