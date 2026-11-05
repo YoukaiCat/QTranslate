@@ -1,9 +1,13 @@
 ---
 kind: stage
-status: todo
+status: blocked
 ---
 
 # Local offline translation (old stage 14)
+
+## Blocked
+
+Blocked by the user decision on 2026-11-05: the stage is design-only and not sufficiently worked out. The user is not ready to implement Argos Translate/CTranslate2 now; the LLM path through OpenAI-compatible providers (OpenRouter, Ollama, and other local or remote providers) covers the current need. Unblock when the user approves the engine and model licences, the distribution model, the acceptable quality threshold, and the first language pairs.
 
 ## Goal
 

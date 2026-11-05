@@ -37,7 +37,7 @@ Old stages 13 (free web endpoints) and 16 (LLM actions) are partially implemente
 1. [Documentation migration and English baseline](01-documentation-migration/plan.md) — migrate to the tree roadmap and translate all active documentation to English; no code changes except one approved comment line.
 2. [Linux support (old stage 11)](02-linux/plan.md) — Linux x86_64 build, X11 as the full target, Wayland limited with clear warnings.
 3. [Free web endpoints (old stage 13)](03-free-web-endpoints/plan.md) — MyMemory, Mozhi, and other no-key endpoints as optional fallbacks.
-4. [Local offline translation (old stage 14)](04-local-offline-translation/plan.md) — Argos Translate through CTranslate2 with model downloads.
+4. [Local offline translation (old stage 14)](04-local-offline-translation/plan.md) — blocked: design only; Argos Translate through CTranslate2 is not being implemented now, and LLM providers cover the need.
 5. [Proofreading (old stage 15)](05-proofreading/plan.md) — separate spelling, grammar, and punctuation checking mode.
 6. [LLM actions (old stage 16)](06-llm-actions/plan.md) — summarise, rewrite, explain, pronounce, and structured proofreading.
 7. [Dictionary and glossaries (old stage 17)](07-dictionary/plan.md) — dictionary mode, local glossaries, and additional sources.
