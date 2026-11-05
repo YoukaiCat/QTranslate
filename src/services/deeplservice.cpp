@@ -261,12 +261,12 @@ QString DeepLService::displayName() const
 
 bool DeepLService::isConfigured() const
 {
-    return m_mode == QStringLiteral("free-web") || !m_apiKey.trimmed().isEmpty();
+    return m_mode == Mode::FreeWeb || !m_apiKey.trimmed().isEmpty();
 }
 
 QString DeepLService::configurationError() const
 {
-    if (m_mode != QStringLiteral("free-web"))
+    if (m_mode != Mode::FreeWeb)
         return tr("DeepL needs an API key.");
     return {};
 }
@@ -283,8 +283,7 @@ QStringList DeepLService::targetLanguages() const
 
 void DeepLService::applySettings(const AppSettings &settings)
 {
-    m_mode = settings.deepl.mode == QStringLiteral("free-web") ? QStringLiteral("free-web")
-                                                               : QStringLiteral("api");
+    m_mode = settings.deepl.mode == QStringLiteral("free-web") ? Mode::FreeWeb : Mode::Api;
     m_apiKey = settings.deepl.apiKey;
     m_englishVariant = settings.deepl.englishVariant == QStringLiteral("EN-GB")
         ? QStringLiteral("EN-GB")
@@ -295,7 +294,7 @@ void DeepLService::applySettings(const AppSettings &settings)
 
 TranslationReply *DeepLService::translate(const TranslationRequest &request)
 {
-    if (m_mode == QStringLiteral("free-web") && m_web)
+    if (m_mode == Mode::FreeWeb && m_web)
         return m_web->translate(request);
 
     if (!isConfigured()) {

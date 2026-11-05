@@ -18,6 +18,8 @@ class DeepLService : public TranslationService
 public:
     using KeyCheckCallback = std::function<void(bool ok, const QString &message)>;
 
+    enum class Mode { Api, FreeWeb };
+
     explicit DeepLService(NetworkManager *network, QObject *parent = nullptr);
 
     QString id() const override;
@@ -48,7 +50,7 @@ private:
 
     NetworkManager *m_network = nullptr;
     DeepLWebService *m_web = nullptr;
-    QString m_mode = QStringLiteral("api");
+    Mode m_mode = Mode::Api;
     QString m_apiKey;
     QString m_englishVariant = QStringLiteral("EN-US");
     QUrl m_endpointOverride;
