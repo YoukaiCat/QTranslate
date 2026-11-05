@@ -860,8 +860,10 @@ Cloud-URL с ключом `includeDetails = false` оставляет тольк
 
 После `applyProxy` вызывается `nam->clearConnectionCache()`, чтобы уже открытые keep-alive
 соединения не продолжали идти мимо нового прокси. `testProxy` использует такой же временный QNAM,
-те же таймаут/User-Agent и считает успехом любой HTTP-ответ; в UI проверка идёт на
-`https://translate.googleapis.com/`.
+те же таймаут/User-Agent и считает успехом любой HTTP-ответ (кроме `407 Proxy Authentication
+Required`); в UI проверка идёт на `https://www.gstatic.com/generate_204`. Раньше использовался
+`https://translate.googleapis.com/`, который отвечает `404`, и проверка ошибочно считала рабочий
+прокси неисправным.
 
 **О «HTTPS-прокси» (решение принято).** Под HTTPS-прокси в проекте понимается HTTP-прокси,
 через который идут https-запросы (туннель `CONNECT`). Отдельного типа для этого нет: тип `Http`

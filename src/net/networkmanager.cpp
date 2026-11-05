@@ -92,10 +92,15 @@ void NetworkManager::testProxy(const ProxySettings &settings, const QUrl &url,
     QNetworkReply *reply = nam->get(makeRequest(url));
     connect(reply, &QNetworkReply::finished, this, [this, reply, nam, callback] {
         const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        if (reply->error() != QNetworkReply::NoError) {
+        // A 404/403 from the test URL still proves that the proxy forwarded
+        // the request. Only a proxy-level failure (407) or no HTTP response at
+        // all means the proxy does not work.
+        if (reply->error() == QNetworkReply::ProxyAuthenticationRequiredError) {
             callback(false, describeNetworkError(reply));
         } else if (status > 0) {
             callback(true, tr("Proxy connection works (HTTP %1).").arg(status));
+        } else if (reply->error() != QNetworkReply::NoError) {
+            callback(false, describeNetworkError(reply));
         } else {
             callback(false, tr("The proxy test returned no HTTP response."));
         }

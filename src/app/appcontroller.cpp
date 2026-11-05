@@ -570,7 +570,7 @@ void AppController::showSettings()
             return;
         const NetworkSettings network = dialogGuard->settings().network;
         m_network->testProxy(
-            toProxySettings(network), QUrl(QStringLiteral("https://translate.googleapis.com/")),
+            toProxySettings(network), QUrl(QStringLiteral("https://www.gstatic.com/generate_204")),
             [dialogGuard](bool ok, const QString &message) {
                 if (dialogGuard)
                     dialogGuard->showProxyTestResult(ok, message);

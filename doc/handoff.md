@@ -7,8 +7,9 @@
 - `origin/main` = `1e3e6b5` «Keep SHA256SUMS as an unlisted release asset»; тег `v0.10.0`
   указывает на `726dac0`.
 - История: релиз 0.10.0, удаление checksum-ссылок и возврат `SHA256SUMS.txt` как unlisted asset.
-- Текущая работа — OpenAI-совместимый перевод (OpenRouter): локальные изменения, ещё не закоммичены
-  и не запушены. Push — только по просьбе пользователя или при выпуске согласованного релиза.
+- Текущая работа — OpenAI-совместимый перевод (OpenRouter): локальный коммит `bb71456`
+  «Add OpenAI-compatible translation via OpenRouter», **не запушен**. Push — только по просьбе
+  пользователя или при выпуске согласованного релиза.
 - Рабочее дерево после завершения должно быть чистым; процесс `qtranslate` не запущен.
 
 ## Релизы
@@ -132,8 +133,10 @@
 - `settings.llm` в INI — `[llm]`; смена модели/base URL очищает кэш переводов.
 - Тесты: `tst_openaichat`, `tst_openaicompatibleservice`; Debug и Release — 23/23, `/W4` без
   предупреждений.
-- Живой smoke OpenRouter ещё не выполнен: нужен ключ, введённый в настройках, и прокси
-  `127.0.0.1:2080` (OpenRouter доступен только через него).
+- Живой smoke OpenRouter выполнен через SOCKS5-прокси `127.0.0.1:2080`: `Hello, world` →
+  `Привет, мир`, HTTP 200 за 6,6 с, модель `openrouter/free` (tokens 125 + 301). Прокси-тест в
+  приложении исправлен: старый URL `translate.googleapis.com` отдавал 404 и давал ложную ошибку;
+  теперь `https://www.gstatic.com/generate_204`, а любой HTTP-ответ кроме 407 считается успехом.
 - `doc/llm-actions.md` обновлён: перевод считается готовым, остальные действия запланированы.
 - Словарь вынесен в отдельный дизайн [`dictionary.md`](dictionary.md) и этап 17: LLM,
   Google `dt=bd`, CSV-глоссарий, Wiktionary; `DictionaryService`, не `TranslationService`.
@@ -186,8 +189,8 @@ Qt-переводы для 13 языков добавляют ~2,4 МБ в dist,
 
 ## Следующий релиз (когда пользователь согласует)
 
-1. Ввести ключ OpenRouter и прокси `127.0.0.1:2080` в настройках, выполнить живой smoke:
-   загрузка моделей, перевод `Hello, world` → русский/немецкий, ошибки ключа и модели.
+1. ~~Ввести ключ OpenRouter и прокси `127.0.0.1:2080`, выполнить живой smoke~~ — выполнено:
+   загрузка моделей и перевод `Hello, world` → `Привет, мир` через SOCKS5.
 2. Желательно выборочно проверить переводы носителями (особенно арабский RTL и длинные строки).
 3. Поднять версию, например до `0.11.0` (новая возможность): `CMakeLists.txt`
    (`project(VERSION ...)`) и `resources/qtranslate.rc` (`FileVersion`/`ProductVersion`).
@@ -220,6 +223,9 @@ Qt-переводы для 13 языков добавляют ~2,4 МБ в dist,
 - Быстрая локальная сборка: `cmd /c build\cli-build.cmd Debug` / `Release`. Скрипт
   `build/cli-build.cmd` не в git и жёстко зашит на `C:\projects\qtranslate`, Qt 6.12 и VS 2022.
   В worktree его не использовать.
+- Голый `build\cli-Release\qtranslate.exe` не запускается двойным кликом без Qt в `PATH`
+  (Entry Point Not Found). Для ручного запуска использовать `build\dist\bin\qtranslate.exe`
+  после `package.ps1` или добавить `C:\Qt\6.12.0\msvc2022_64\bin` в `PATH`.
 - Один тест: `ctest --test-dir build/cli-Release -R tst_name --output-on-failure`.
 - CI использует Qt 6.8.3 LTS, потому что aqtinstall 3.3.0 не ставит Qt 6.12.
 - `packaging/windows/qtranslate.iss` — UTF-8 с BOM; не терять BOM.

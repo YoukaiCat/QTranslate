@@ -299,6 +299,39 @@ private slots:
         reply->deleteLater();
     }
 
+    void proxyTestAcceptsAnyHttpResponse()
+    {
+        QTcpServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+        connect(&server, &QTcpServer::newConnection, this, [&server] {
+            while (QTcpSocket *socket = server.nextPendingConnection()) {
+                connect(socket, &QTcpSocket::readyRead, socket, [socket] {
+                    socket->readAll();
+                    socket->write("HTTP/1.1 404 Not Found\r\n"
+                                  "Content-Length: 0\r\n"
+                                  "Connection: close\r\n\r\n");
+                    socket->disconnectFromHost();
+                });
+                connect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
+            }
+        });
+
+        ProxySettings settings;
+        settings.mode = ProxyMode::None;
+        NetworkManager manager;
+        bool called = false;
+        bool ok = false;
+        manager.testProxy(settings,
+                          QUrl(QStringLiteral("http://127.0.0.1:%1/missing")
+                                   .arg(server.serverPort())),
+                          [&called, &ok](bool success, const QString &) {
+                              called = true;
+                              ok = success;
+                          });
+        QTRY_VERIFY_WITH_TIMEOUT(called, 5000);
+        QVERIFY(ok);
+    }
+
     void httpProxyAuthentication()
     {
         HttpProxy proxy(true);
