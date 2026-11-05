@@ -19,9 +19,9 @@ translation directly in the active input field.
   field, which is convenient for replying in chats.
 - **Ctrl+W** opens the main window with the selection translated.
 - Google Translate (free endpoint or Cloud API) and DeepL (API key or unofficial free web mode),
-  plus OpenRouter or another OpenAI-compatible provider. OpenRouter offers
-  free models such as `openrouter/free`; any compatible endpoint works, including local Ollama,
-  LM Studio or llama.cpp. The server URL and model are configurable.
+  plus OpenRouter or another OpenAI-compatible provider. OpenRouter offers free models such as
+  `openrouter/free`; any compatible endpoint works, including local Ollama, LM Studio or
+  llama.cpp. See [Translation providers](#translation-providers) for setup.
 - Automatic source language detection, smart switching to the additional language, in-memory
   translation cache and automatic translation while typing.
 - System/manual HTTP and SOCKS5 proxies with optional authentication.
@@ -73,6 +73,37 @@ qtranslate [--minimized] [--verbose]
   `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
 - Portable mode: put an empty `qtranslate.ini` next to `qtranslate.exe` and the application will
   use it instead of `%APPDATA%\qtranslate\qtranslate.ini`.
+
+## Translation providers
+
+- **Google Translate** — free public endpoint or Cloud Translation API with a key. Choose the mode
+  in **Settings → Services → Google Translate**.
+- **DeepL** — official API with a key or the unofficial free web mode without a key. Both modes are
+  in **Settings → Services → DeepL**.
+- **OpenAI-compatible provider** — the default server is [OpenRouter](https://openrouter.ai)
+  (`https://openrouter.ai/api/v1`). OpenRouter **requires a key**; it offers free models such as
+  `openrouter/free` and paid models. Paste the key, keep or change the model, and press
+  **Load models** if needed.
+  The same server URL field accepts any OpenAI-compatible endpoint: OpenAI
+  (`https://api.openai.com/v1`), TeamRouter, LM Studio, llama.cpp, or a local Ollama server. The
+  model name must match the model exposed by that server.
+
+### Ollama (local, no key)
+
+1. Install [Ollama](https://ollama.com) for Windows, macOS or Linux.
+2. Start it and download a model, for example:
+   ```bat
+   ollama pull llama3.2
+   ```
+3. In qtranslate open **Settings → Services → OpenAI-compatible provider** and set:
+   - Server URL: `http://localhost:11434/v1`
+   - API key: leave empty
+   - Model: the name from `ollama list`, for example `llama3.2`
+4. Press **Load models** or type the model name, then **OK**. Select **Local LLM** in the service list.
+
+Ollama usually listens on `http://localhost:11434`; if the server is not running, start it with
+`ollama serve`. Its OpenAI-compatible API is under `/v1`. More details:
+[Ollama OpenAI compatibility](https://docs.ollama.com/api/openai-compatibility).
 
 ## Build
 
@@ -140,5 +171,6 @@ ctest --test-dir build --output-on-failure
   remain English.
 - Linux support is not ready yet; see the build section above.
 
-The text being translated is sent to the selected online service (Google or DeepL). qtranslate
+The text being translated is sent to the selected provider: Google, DeepL, OpenRouter or another
+OpenAI-compatible server. A local server such as Ollama keeps the text on your machine. qtranslate
 does not write the texts to its log.
