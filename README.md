@@ -163,6 +163,30 @@ xvfb-run -a ctest --test-dir build --output-on-failure
 The package list matches `packaging/linux/trixie.Dockerfile`; `xvfb-run` is needed because
 `tst_hotkeysequence` opens a window and a bare `ctest` has no display.
 
+#### Astra Linux: global hotkeys
+
+Astra Linux's XPARSEC X11 protection denies passive `XGrabKey` grabs to untrusted binaries, so
+global hotkeys do not work in a normally installed package until the X server trusts the binary.
+Once QTranslate is installed from the package, add `/usr/bin/qtranslate` to the trusted-client list
+as root:
+
+```bash
+sudo mkdir -p /etc/X11/trusted.d
+echo '/usr/bin/qtranslate(KBD_R)' | sudo tee /etc/X11/trusted.d/qtranslate
+sudo chown root:root /etc/X11/trusted.d/qtranslate
+sudo chmod 644 /etc/X11/trusted.d/qtranslate
+sudo /usr/bin/fly-set-execid.sh
+getfattr -n security.exec_id /usr/bin/qtranslate   # from attr; expect 0sEA== (0x10, KBD_R)
+```
+
+Restart QTranslate; log out and back in if the X server has already cached the client list.
+
+`KBD_R` allows the process to read and grab all keyboard input — exactly the capability XPARSEC
+restricts. Grant it only to the root-owned `/usr/bin/qtranslate` from the package and only with the
+security policy's approval. To revoke it, run
+`sudo setfattr -x security.exec_id /usr/bin/qtranslate` and remove
+`/etc/X11/trusted.d/qtranslate`.
+
 ## Known limitations
 
 - Selection capture does not work in windows of processes started as administrator.

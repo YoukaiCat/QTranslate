@@ -166,6 +166,30 @@ xvfb-run -a ctest --test-dir build --output-on-failure
 Список пакетов совпадает с `packaging/linux/trixie.Dockerfile`; `xvfb-run` нужен, потому что
 `tst_hotkeysequence` открывает окно, а у обычного `ctest` нет дисплея.
 
+#### Astra Linux: глобальные горячие клавиши
+
+Защита XPARSEC в X-сервере Astra Linux запрещает пассивные захваты `XGrabKey` непроверенным
+бинарникам, поэтому в обычной установке пакета глобальные горячие клавиши не работают, пока
+X-сервер не доверяет бинарнику. После установки QTranslate из пакета добавьте
+`/usr/bin/qtranslate` в список доверенных клиентов от root:
+
+```bash
+sudo mkdir -p /etc/X11/trusted.d
+echo '/usr/bin/qtranslate(KBD_R)' | sudo tee /etc/X11/trusted.d/qtranslate
+sudo chown root:root /etc/X11/trusted.d/qtranslate
+sudo chmod 644 /etc/X11/trusted.d/qtranslate
+sudo /usr/bin/fly-set-execid.sh
+getfattr -n security.exec_id /usr/bin/qtranslate   # из пакета attr; ожидается 0sEA== (0x10, KBD_R)
+```
+
+Перезапустите QTranslate; если X-сервер уже закэшировал список клиентов, перезайдите в сессию.
+
+`KBD_R` разрешает процессу читать и захватывать весь ввод с клавиатуры — ровно то, что
+ограничивает XPARSEC. Выдавайте её только root-owned `/usr/bin/qtranslate` из пакета и только по
+согласованию с политикой безопасности. Чтобы отозвать, выполните
+`sudo setfattr -x security.exec_id /usr/bin/qtranslate` и удалите
+`/etc/X11/trusted.d/qtranslate`.
+
 ## Известные ограничения
 
 - Захват выделения не работает в окнах процессов, запущенных от имени администратора.
