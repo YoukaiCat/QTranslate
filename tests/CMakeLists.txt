@@ -74,3 +74,15 @@ if(WIN32)
     )
     target_link_libraries(tst_secretprotector PRIVATE crypt32)
 endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    qtranslate_add_test(tst_hotkeymanager_x11
+        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager.h
+        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager_x11.cpp
+    )
+    target_link_libraries(tst_hotkeymanager_x11 PRIVATE X11::X11)
+    if(X11_XTest_FOUND)
+        target_link_libraries(tst_hotkeymanager_x11 PRIVATE X11::Xtst)
+        target_compile_definitions(tst_hotkeymanager_x11 PRIVATE QTRANSLATE_HAVE_XTEST)
+    endif()
+endif()

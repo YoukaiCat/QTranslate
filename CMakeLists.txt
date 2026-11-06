@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Network LinguistTools)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(X11 REQUIRED)
+endif()
+
 qt_standard_project_setup()
 
 option(QTRANSLATE_BUILD_TESTS "Build unit tests" ON)
@@ -82,6 +86,15 @@ if(WIN32)
         src/platform/selectiongrabber_win.cpp
         src/platform/windowactivation_win.cpp
     )
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_sources(qtranslate PRIVATE
+        src/platform/autostart_stub.cpp
+        src/platform/hotkeymanager_x11.cpp
+        src/platform/secretprotector_stub.cpp
+        src/platform/selectiongrabber_stub.cpp
+        src/platform/windowactivation_stub.cpp
+    )
+    target_link_libraries(qtranslate PRIVATE X11::X11)
 else()
     target_sources(qtranslate PRIVATE
         src/platform/autostart_stub.cpp

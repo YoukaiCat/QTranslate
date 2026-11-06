@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 ---
 
@@ -255,3 +255,85 @@ does not synthesize input.
 - The `registrationFailed` reason is still only logged, and `AppController`'s tray text stays "is
   already used by another program". On Wayland that text is misleading; the user-facing Wayland
   warning belongs to `02-wayland-globalshortcuts` (and task 05 for the CLI fallback), not here.
+
+## Outcome
+
+Done. The Linux tree now has an X11 hotkey backend behind the unchanged `HotkeyManager` API, and the
+X11 gate passes in the `debian:trixie` container.
+
+- Files: new `src/platform/hotkeymanager_x11.cpp` and `tests/tst_hotkeymanager_x11.cpp`;
+  `CMakeLists.txt` selects the X11 file and links `X11::X11` into `qtranslate` only;
+  `src/platform/hotkeymanager.h` moves the Windows-only members behind `Q_OS_WIN` and adds the X11
+  state behind `Q_OS_LINUX`; `src/platform/hotkeymanager_stub.cpp` now documents the remaining
+  non-Windows platforms; `tests/CMakeLists.txt` adds the Linux test. `qtranslate_core` stays
+  X11-free, the Windows block and the Windows test are byte-identical, and the public API, signals,
+  `core/hotkeysequence.*`, `hotkeymanager_win.cpp`, `AppController`, and the UI are unchanged.
+- Behaviour: the manager owns a dedicated `Display*` and a `QSocketNotifier`; it grabs each
+  combination on the root window for the four Lock/Mod2 variants, detects `BadAccess` with a scoped
+  Xlib error handler plus `XSync`, ungrabs on unregister, suspend, and destruction, re-grabs on
+  resume, and suppresses auto-repeat with a pressed-key set. Sequences are mapped to keysyms and
+  keycodes in the platform file (letters, digits, keypad, F1-F24, navigation, punctuation and their
+  shifted forms, keypad operators); empty, modifier-only, multi-chord, unknown, and
+  layout-unresolvable sequences fail with a non-empty `registrationFailed` reason.
+- Wayland: the backend never opens an X display when `WAYLAND_DISPLAY` is non-empty,
+  `XDG_SESSION_TYPE` is `wayland`, or the Qt platform name starts with `wayland`; `registerHotkey`
+  stores the sequence and returns false with a portal/CLI reason. This includes an XWayland session
+  with `QT_QPA_PLATFORM=xcb`, as the stage requires. The env-based rule and the reason are covered by
+  the unit test.
+- Deviations from the plan text, both deliberate:
+  - `XkbSetDetectableAutoRepeat(display, True, nullptr)` is enabled on the manager's connection. The
+    plan assumed auto-repeat arrives as repeated `KeyPress`; without XKB it arrives as
+    `KeyRelease`/`KeyPress` pairs, which the pressed-key set cannot suppress. Detectable auto-repeat
+    is client-local; servers without XKB keep the documented repeat limitation.
+  - The Wayland check runs before the suspended check, so on a Wayland session `registerHotkey`
+    always returns false with the portal/CLI reason, even while suspended. This follows the stage
+    rule "on Wayland `registerHotkey` returns false with a reason" and does not change the X11
+    suspend/resume semantics. `registerNative` repeats the Wayland guard so a resume cannot open a
+    display.
+- Verification:
+  - `debian:trixie` (Qt 6.8.2, GCC 14.2), clean Debug and Release builds from the read-only source
+    mount: 0 `warning:` lines with `-Wall -Wextra`; `timeout 300 xvfb-run -a ctest` 21/21 in both;
+    `-R tst_hotkeymanager_x11` 1/1; the new test reports 16 passed, 0 failed, 0 skipped (14 test
+    functions plus init/cleanup), so XTest drives a real activation.
+  - Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2), native Debug and Release in `build/linux-debug` and
+    `build/linux-release`: 0 warnings; CTest 21/21, of which the 20 shared tests pass and
+    `tst_hotkeymanager_x11` `QSKIP`s in `initTestCase` with the Parsec message
+    (`XPARSEC: keylogger-grabber` is in the Xvfb log). A Clang 16 Debug build is clean and shows the
+    same 20 + skip.
+  - Valgrind in a trixie container: 0 definitely/indirectly/possibly lost and `ERROR SUMMARY: 0` for
+    the new test. On Astra the test is skipped before the backend runs, so Valgrind only confirms
+    the skip.
+  - Weston headless with a private `XDG_RUNTIME_DIR` and `QT_QPA_PLATFORM=wayland`: the app starts,
+    logs the portal/CLI reason, `strace` shows no connect to `/tmp/.X11-unix`, and the Parsec line is
+    absent. The full portal path remains task `02-wayland-globalshortcuts`.
+  - The manual `xdotool` check on the real Astra X11 session was not performed: Parsec denies
+    passive grabs. The XTest test covers the same path up to `activated`. Recorded as blocked by the
+    environment, not as passed.
+- Known limitations and deferred items:
+  - The `activated` signal is emitted from inside `X11State::readEvents()`. A slot that calls
+    `unregisterAll()` or deletes the manager synchronously would free the state under the event
+    loop; no caller in the project does that today (`AppController` only starts asynchronous work),
+    so the edge is left as is. Closing it safely needs the notifier/X11State lifetime to be
+    deferred.
+  - In `xtestActivation()` any failed registration is still reported as "combination unavailable"
+    and skipped without checking the reason. The F-key mapping is covered by
+    `mapsRepresentativeKeys()`, so the risk is a masked regression only for that one combination.
+  - One concurrent trixie run (Debug CTest started while Release was building) hit `XOpenDisplay`
+    failures in `suspendedRegistrationIsDeferred`; 30 isolated runs of the new test and 3 isolated
+    full CTest runs were clean, and an isolated `XOpenDisplay` loop failed in the same environment.
+    This is an Xvfb/Xlib environment flake under load, not a backend defect; keep the test run
+    isolated in CI.
+  - `SettingsDialog::validate` still uses the Win32 `HotkeySequence` helper on Linux. The supported
+    key set matches; layout-unresolvable combinations pass dialog validation and fail at
+    registration, which the plan allows.
+- Facts for the documentation (not edited here): the backend is
+  `src/platform/hotkeymanager_x11.cpp` and the test `tests/tst_hotkeymanager_x11.cpp`; Linux has 21
+  tests, Windows keeps 23; the build needs `find_package(X11)` (`libx11-dev`, and `libxtst-dev` for
+  the test), the runtime needs `libx11-6` (already pulled by Qt's xcb plugin); the Wayland rule is
+  env-based; Astra's Parsec policy blocks passive grabs; Xvfb maps F1-F12 only and the server
+  reserves `Ctrl+Alt+F1-F12`, so the tests use `Ctrl+Alt+Shift+F9/F10/F11`; the stage text says
+  `tst_hotkeymanager` on Linux while the actual name is `tst_hotkeymanager_x11` (architecture §4.14
+  "Windows platform tests are replaced by Linux analogues").
+- Windows Debug/Release and the 23 Windows tests were not performed: this machine has no MSVC or
+  Windows toolchain; the header diff and the `if(WIN32)` blocks were reviewed by inspection only.
+- Committed locally after review; nothing was pushed.

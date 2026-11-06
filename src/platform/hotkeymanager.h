@@ -8,6 +8,10 @@
 #include <QObject>
 #include <QString>
 
+#if defined(Q_OS_LINUX)
+#include <memory>
+#endif
+
 enum class HotkeyAction {
     TranslateToPopup,
     TranslateAndReplace,
@@ -17,8 +21,9 @@ enum class HotkeyAction {
 
 Q_DECLARE_METATYPE(HotkeyAction)
 
-// Global hotkeys through RegisterHotKey (see doc/architecture.md, §4.3).
-// The header has no WinAPI types; the implementation is hotkeymanager_win.cpp.
+// Global hotkeys (see doc/architecture.md, §4.3).
+// The header has no native types; the implementation is hotkeymanager_win.cpp on
+// Windows and hotkeymanager_x11.cpp on Linux.
 class HotkeyManager : public QObject, public QAbstractNativeEventFilter
 {
     Q_OBJECT
@@ -52,14 +57,27 @@ private:
     struct Registration
     {
         QKeySequence sequence;
+#if defined(Q_OS_WIN)
         HotkeySequence::Hotkey hotkey;
+#elif defined(Q_OS_LINUX)
+        quint32 keycode = 0;
+        quint32 modifiers = 0;
+#endif
         bool registered = false;
     };
 
+#if defined(Q_OS_WIN)
     static int idForAction(HotkeyAction action);
+#elif defined(Q_OS_LINUX)
+    struct X11State;
+#endif
     bool registerNative(HotkeyAction action, Registration &registration);
 
     QHash<int, Registration> m_registrations; // keyed by int(action)
+#if defined(Q_OS_WIN)
     QHash<int, HotkeyAction> m_actionsById;
+#elif defined(Q_OS_LINUX)
+    std::unique_ptr<X11State> m_x11;
+#endif
     bool m_suspended = false;
 };
