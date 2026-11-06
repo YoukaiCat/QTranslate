@@ -2,7 +2,7 @@
 
 ## Where we left off
 
-Current node: `02-linux/02-global-hotkeys/02-wayland-globalshortcuts` (task, `todo`) — next after `01-x11-xgrabkey` (`done`, 2026-11-06). The user accepted the Astra Parsec limitation: X11 tests gate on Debian 13 (21/21), the Astra X11 test `QSKIP`s with the Parsec log evidence, and CLI/desktop-shortcut binding remains the fallback. Then tasks `03-x11-selection-and-inplace` and `04-xdg-autostart-and-secrets`; stop after task 04. Do not start task 05.
+Current node: `02-linux/02-global-hotkeys/02-wayland-globalshortcuts` (task, `todo`) — next after `01-x11-xgrabkey` (`done`, `5ef937e`). Before starting it, the user superseded the earlier "accept the Astra limitation" decision: apply the `KBD_R` trusted-client exception and verify for real. Add `build/linux-release/qtranslate` and `build/linux-release/tests/tst_hotkeymanager_x11` to `/etc/X11/trusted.d`, run `sudo /usr/bin/fly-set-execid.sh`, rerun `timeout 300 xvfb-run -a ctest` on Astra (expect 21/21, no QSKIP), and update the task outcome and stage acceptance. Then `02-wayland-globalshortcuts`, tasks `03-x11-selection-and-inplace` and `04-xdg-autostart-and-secrets`; stop after task 04. After the whole Linux stage, publish the first release in the recreated GitHub repo (no releases or tags); agree the version and scope first.
 
 Stage `02-linux` is `in-progress`, `base: 584e722`; it has seven children: `01-linux-build-baseline` (task), `02-global-hotkeys` (stage with `01-x11-xgrabkey` and `02-wayland-globalshortcuts`), `03-x11-selection-and-inplace`, `04-xdg-autostart-and-secrets`, `05-cli-and-desktop-integration`, `06-packaging-and-ci`, and `07-verification`.
 
