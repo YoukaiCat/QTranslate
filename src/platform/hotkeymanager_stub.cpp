@@ -1,7 +1,7 @@
 #include "platform/hotkeymanager.h"
 
 // Stub for the remaining non-Windows platforms that have no native backend
-// (macOS and other Unix systems; Linux uses hotkeymanager_x11.cpp). The target
+// (macOS and other Unix systems; Linux uses hotkeymanager_linux.cpp). The target
 // still builds there so that the core and UI can be compiled and tested.
 
 HotkeyManager::HotkeyManager(QObject *parent)

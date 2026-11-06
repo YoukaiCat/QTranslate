@@ -423,12 +423,16 @@ void TestHotkeyManagerX11::waylandSessionIsRejected()
     EnvironmentGuard waylandDisplay("WAYLAND_DISPLAY");
     EnvironmentGuard sessionType("XDG_SESSION_TYPE");
     EnvironmentGuard display("DISPLAY");
+    EnvironmentGuard busAddress("DBUS_SESSION_BUS_ADDRESS");
     const QByteArray realDisplay = qgetenv("DISPLAY");
     qputenv("WAYLAND_DISPLAY", "wayland-0");
     qputenv("XDG_SESSION_TYPE", "wayland");
     // An unused display: if the backend tried to open it, the reason would be a
     // display error instead of the Wayland one.
     qputenv("DISPLAY", ":77");
+    // Do not contact a real portal on a portal-capable desktop; the Wayland
+    // backend must report the missing session bus and the CLI fallback.
+    qputenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/tmp/qtranslate-no-bus");
 
     HotkeyManager manager;
     QSignalSpy failures(&manager, &HotkeyManager::registrationFailed);

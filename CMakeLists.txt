@@ -8,6 +8,9 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Network LinguistTools)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(X11 REQUIRED)
+    # QtDBus is only used by the GlobalShortcuts portal backend; Windows has no
+    # QtDBus, so it must not move to the top-level find_package.
+    find_package(Qt6 REQUIRED COMPONENTS DBus)
 endif()
 
 qt_standard_project_setup()
@@ -89,12 +92,12 @@ if(WIN32)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_sources(qtranslate PRIVATE
         src/platform/autostart_stub.cpp
-        src/platform/hotkeymanager_x11.cpp
+        src/platform/hotkeymanager_linux.cpp
         src/platform/secretprotector_stub.cpp
         src/platform/selectiongrabber_stub.cpp
         src/platform/windowactivation_stub.cpp
     )
-    target_link_libraries(qtranslate PRIVATE X11::X11)
+    target_link_libraries(qtranslate PRIVATE X11::X11 Qt6::DBus)
 else()
     target_sources(qtranslate PRIVATE
         src/platform/autostart_stub.cpp

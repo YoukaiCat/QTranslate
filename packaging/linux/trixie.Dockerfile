@@ -25,6 +25,9 @@ RUN apt-get update \
         libx11-dev \
         libxtst-dev \
         libsecret-1-dev \
+        # dbus-daemon is the private session bus for tst_hotkeymanager_wayland;
+        # in trixie the daemon is the separate dbus-daemon package.
+        dbus \
         # xvfb only Recommends xauth, but xvfb-run requires it.
         xvfb \
         xauth \

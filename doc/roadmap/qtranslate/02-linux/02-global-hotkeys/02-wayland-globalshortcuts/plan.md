@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-x11-xgrabkey]
 ---
@@ -357,3 +357,98 @@ rely on CLI commands bound in the desktop settings.
 - `AppController`'s tray text still says "already used by another program" for any failure, which is
   misleading on Wayland; task 05 adds the one-time Wayland warning and the CLI fallback. This task
   must not change `AppController` or the UI.
+
+## Outcome
+
+Done. `HotkeyManager` has a Wayland backend through the `org.freedesktop.portal.GlobalShortcuts`
+portal behind the unchanged public API; the X11 code moved unchanged and dispatches by the
+constructor-cached session type. The Linux suite is 22 tests in `debian:trixie` and on Astra.
+
+- Files: `src/platform/hotkeymanager_x11.cpp` renamed with `git mv` to
+  `src/platform/hotkeymanager_linux.cpp` (one translation unit owning every `HotkeyManager` method
+  and dispatching X11/portal); new `src/platform/portalshortcut.h` (`PortalShortcut`, `(sa{sv})`
+  operators and metatype registration shared with the mock portal); `src/platform/hotkeymanager.h`
+  (Linux-private `WaylandState`, `m_wayland`, `m_waylandSession`, `Registration::desktopAssigned`;
+  `Q_OS_WIN` block, public methods, signals and `HotkeyAction` unchanged); `CMakeLists.txt`
+  (`find_package(Qt6 ... DBus)` and `Qt6::DBus` only in the Linux `qtranslate` block,
+  `qtranslate_core` stays D-Bus-free); `tests/CMakeLists.txt` (both Linux hotkey tests compile the
+  same translation unit and link `X11::X11` and `Qt6::DBus`; new `tst_hotkeymanager_wayland`);
+  `tests/tst_hotkeymanager_x11.cpp` (the Wayland function points `DBUS_SESSION_BUS_ADDRESS` at a
+  non-existent bus; 14 functions unchanged); `packaging/linux/trixie.Dockerfile` (`dbus` for
+  `dbus-daemon`); a stale comment in `src/platform/hotkeymanager_stub.cpp`; new
+  `tests/tst_hotkeymanager_wayland.cpp`. The extra `portalshortcut.h` is not in step 11's file list;
+  it keeps the `a(sa{sv})` type single-defined for the application and the test (a duplicated type
+  would be an ODR/metatype hazard).
+- Behaviour: the backend checks the session bus, `org.freedesktop.portal.Desktop` and
+  `GlobalShortcuts` version >= 1, creating the session with `QUuid::Id128` handle/session tokens and
+  token-derived request paths; `Request::Response` is subscribed before the call. Four stable IDs
+  (`translate-popup`, `translate-replace`, `translate-main-window`, `show-main-window`) carry English
+  `QStringLiteral` descriptions and the `preferred_trigger` built from `mapSequence`
+  (`CTRL`/`ALT`/`SHIFT`/`LOGO`, `KP_*`, shifted punctuation). The four startup registrations coalesce
+  into one session and one batched `BindShortcuts` through a zero-timer; a changed sequence closes the
+  session and rebinds the current set in one new request; `unregisterHotkey` rebinds the remainder or
+  closes the session, and `unregisterAll`/the destructor close it with `Session.Close` (1 s) and
+  disconnect all subscriptions. `Activated` maps the ID back to `HotkeyAction` and ignores stale
+  sessions, unknown IDs, unregistered actions and logical suspension; `Deactivated` only logs.
+  `ShortcutsChanged` replaces the registered set, marks returned IDs `desktopAssigned` and reports
+  removed ones through `registrationFailed`. Only returned IDs are registered; `hotkey()` is empty
+  once the desktop owns the trigger and the stored sequence otherwise. The X11 backend is not created
+  and `XOpenDisplay` is not called on a Wayland session; no synthetic input is added.
+- Asynchronous bind: after the request is queued `registerHotkey` returns true; a non-zero response, a
+  D-Bus error, a missing/shortcut subset or a 60 s timeout emits `registrationFailed` per affected
+  action, leaves `registered=false` and keeps the application running. `registerHotkey` returns false
+  synchronously only for a missing bus/portal/interface, version < 1 or a failed `CreateSession`
+  (3 s). The availability check (bus owner + version property) shares one 3 s budget. There is no
+  blocking GUI wait for the portal answer.
+- Reentrancy: the synchronous waits (`checkPortal`, `CreateSession`, `Session.Close`) run nested event
+  loops, so `unregisterAll()` arriving from one (for example the tray Quit over StatusNotifierItem)
+  is deferred instead of resetting `m_wayland`/`m_registrations` under the active stack; the teardown
+  finishes after the wait returns (or at destruction). `Registration` references are never held across
+  the waits, `m_sessionOpen` clears before `Session.Close`, and `m_portalChecked` is published after
+  the check. A `CreateSession` failure reports only actions that lost a real binding, so four failed
+  startup registrations produce four signals, not ten.
+- Test hook: `QTRANSLATE_TEST_BIND_TIMEOUT_MS` (default 60000) lets `tst_hotkeymanager_wayland` verify
+  the bind timeout in milliseconds; the production behaviour is the 60 s timer. This is the only
+  production-code seam added for tests.
+- Verification:
+  - `debian:trixie` (Qt 6.8.2, GCC 14) clean Debug and Release from the read-only mount: 0
+    `warning:` with `-Wall -Wextra`; `timeout 300 xvfb-run -a ctest` 22/22 in both; both hotkey tests
+    alone pass (`tst_hotkeymanager_x11` 16 passed, `tst_hotkeymanager_wayland` 20 passed, no skips).
+  - Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) native Debug and Release in `build/linux-debug` and
+    `build/linux-release`: 0 warnings, CTest 22/22; after `sudo /usr/bin/fly-set-execid.sh` the X11
+    test is 16/16 (the Parsec `KBD_R` trusted-client caveat: rerun the script after every rebuild)
+    and the Wayland test 20/20. One first Debug run after a rebuild failed once in
+    `tst_hotkeymanager_x11::xtestActivation` and passed on immediate rerun and in isolated runs; this
+    is the known Xvfb/XTest/Parsec flake also recorded in the X11 task, not a code regression.
+  - The mock portal is the automated happy-path gate: a private `dbus-daemon` with
+    `org.freedesktop.portal.Desktop` (`version=2`, `CreateSession`, `BindShortcuts`, the three
+    signals, `Request::Response` and `Session.Close`); the test covers missing bus/portal/interface,
+    version 0, happy path with the four IDs and triggers, cancel/error/timeout/subset, a
+    `CreateSession` failure with one signal per action, `ShortcutsChanged`, session close on
+    `unregisterAll` and destruction, a same-sequence no-op, a changed-sequence rebind, the
+    unregister+register coalescing, logical suspend without a rebind, a stale session's `Activated`,
+    and `unregisterAll` deferred inside a delayed `CreateSession`.
+  - Weston headless (`weston --backend=headless-backend.so`, `QT_QPA_PLATFORM=wayland`, no session
+    bus): `qtranslate --verbose` starts, logs the portal+CLI reason, `strace -f -e connect` shows no
+    connection to `/tmp/.X11-unix`, and no `ydotool`/`wtype`/XTest/RemoteDesktop is attempted; the
+    tray is unavailable under headless Weston, as expected. The log file is written under
+    `$XDG_DATA_HOME`/`~/.local/share/qtranslate`; the test used a private `XDG_DATA_HOME`.
+  - A real KDE/GNOME Wayland portal was not performed: the host is Astra X11 and Weston headless has
+    no portal. Windows Debug/Release and the 23 tests were not performed (no MSVC); the `Q_OS_WIN`
+    header block and the `if(WIN32)` CMake/test blocks were reviewed by diff and are unchanged.
+- Accepted review remarks (fixed): the deferred-shutdown reentrancy guard above; the duplicate
+  `registrationFailed` on a failed `CreateSession`; one shared 3 s availability budget; test
+  assertions on the `registerHotkey` return values, a `CreateSession` failure test, and a `QSKIP`
+  only when `dbus-daemon` is not installed (other failures now fail loudly). Rejected: a fully
+  asynchronous availability check (impossible while `registerHotkey` must return false
+  synchronously), changing `AppController`/the tray text (task 05), and a general operation queue for
+  every reentrant `registerHotkey`/`unregisterHotkey`.
+- Limitations for the lead's documentation: the portal descriptions are English (i18n remains a
+  separate pass; `tst_translations` would need 14 `.ts` files), `trigger_description` is
+  human-readable and locale-dependent and is never converted back to a `QKeySequence`, Wayland
+  suspension is logical (the portal keeps the shortcut, other applications do not get it), and the
+  desktop may reassign `preferred_trigger`. A deferred shutdown that starts outside the handled
+  checkpoints (for example `CreateSession` from `rebuildSession`) does not crash but finishes at the
+  next registration/unregistration or in the destructor. `libqt6dbus6` becomes a runtime dependency
+  for task 06 and `dbus`/`dbus-daemon` is a test dependency; the Wayland test needs `dbus-daemon`
+  only, not a desktop portal.

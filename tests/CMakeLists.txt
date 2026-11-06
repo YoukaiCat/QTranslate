@@ -76,13 +76,25 @@ if(WIN32)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # Both Linux hotkey tests compile the same translation unit (X11 plus the
+    # GlobalShortcuts portal backend), so both link X11 and QtDBus.
     qtranslate_add_test(tst_hotkeymanager_x11
         ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager.h
-        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager_x11.cpp
+        ${PROJECT_SOURCE_DIR}/src/platform/portalshortcut.h
+        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager_linux.cpp
     )
-    target_link_libraries(tst_hotkeymanager_x11 PRIVATE X11::X11)
+    target_link_libraries(tst_hotkeymanager_x11 PRIVATE X11::X11 Qt6::DBus)
     if(X11_XTest_FOUND)
         target_link_libraries(tst_hotkeymanager_x11 PRIVATE X11::Xtst)
         target_compile_definitions(tst_hotkeymanager_x11 PRIVATE QTRANSLATE_HAVE_XTEST)
     endif()
+
+    qtranslate_add_test(tst_hotkeymanager_wayland
+        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager.h
+        ${PROJECT_SOURCE_DIR}/src/platform/portalshortcut.h
+        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager_linux.cpp
+    )
+    # The X11 symbols are linked because the translation unit contains the X11
+    # backend, but the Wayland test never opens a display.
+    target_link_libraries(tst_hotkeymanager_wayland PRIVATE X11::X11 Qt6::DBus)
 endif()

@@ -23,7 +23,8 @@ Q_DECLARE_METATYPE(HotkeyAction)
 
 // Global hotkeys (see doc/architecture.md, §4.3).
 // The header has no native types; the implementation is hotkeymanager_win.cpp on
-// Windows and hotkeymanager_x11.cpp on Linux.
+// Windows and hotkeymanager_linux.cpp on Linux (X11 and the
+// org.freedesktop.portal.GlobalShortcuts portal).
 class HotkeyManager : public QObject, public QAbstractNativeEventFilter
 {
     Q_OBJECT
@@ -62,6 +63,10 @@ private:
 #elif defined(Q_OS_LINUX)
         quint32 keycode = 0;
         quint32 modifiers = 0;
+        // The desktop owns the trigger after a successful GlobalShortcuts bind;
+        // hotkey() then reports an empty sequence because the portal never
+        // returns a machine-readable trigger.
+        bool desktopAssigned = false;
 #endif
         bool registered = false;
     };
@@ -70,6 +75,11 @@ private:
     static int idForAction(HotkeyAction action);
 #elif defined(Q_OS_LINUX)
     struct X11State;
+    struct WaylandState;
+    bool registerWayland(HotkeyAction action, const QKeySequence sequence);
+    // A reentrant unregisterAll() during a synchronous portal wait is completed
+    // after that wait returns.
+    bool finishDeferredShutdown();
 #endif
     bool registerNative(HotkeyAction action, Registration &registration);
 
@@ -78,6 +88,10 @@ private:
     QHash<int, HotkeyAction> m_actionsById;
 #elif defined(Q_OS_LINUX)
     std::unique_ptr<X11State> m_x11;
+    std::unique_ptr<WaylandState> m_wayland;
+    // The backend is chosen once per manager: a changing environment must not
+    // mix an X11 display with a portal session.
+    bool m_waylandSession = false;
 #endif
     bool m_suspended = false;
 };
