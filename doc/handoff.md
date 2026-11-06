@@ -9,9 +9,9 @@ documentation is English. The migration to the tree roadmap and the English base
 ## Git
 
 - The local history was rewritten on 2026-11-06 to replace a wrong author/committer address; all
-  local commits now use the GitHub noreply identity. The remote `origin/main` still has the
-  pre-rewrite history and was **not** force-pushed; do not push without a decision. The local
-  `origin/main` reference was removed and the old objects pruned.
+  local commits now use the GitHub noreply identity. `origin/main` was then force-pushed with
+  `--force-with-lease` to the rewritten history, and `main` tracks it; the old commits may remain
+  reachable on GitHub by SHA until GitHub collects the unreachable objects. No other push was made.
 - The published tags are unchanged: the annotated `v0.11.0` points to `f50c1da`, the old `v0.10.0`
   points to `726dac0`.
 - History: release 0.10.0, removal of the checksum links and return of `SHA256SUMS.txt` as an
