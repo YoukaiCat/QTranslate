@@ -1,6 +1,6 @@
 ---
 kind: task
-status: blocked
+status: in-progress
 detailed: true
 depends: [01-x11-xgrabkey]
 ---
@@ -357,12 +357,3 @@ rely on CLI commands bound in the desktop settings.
 - `AppController`'s tray text still says "already used by another program" for any failure, which is
   misleading on Wayland; task 05 adds the one-time Wayland warning and the CLI fallback. This task
   must not change `AppController` or the UI.
-
-## Open question
-
-`BindShortcuts` may show a portal dialog and answers asynchronously, while `registerHotkey` returns a
-`bool` synchronously and `AppController` calls it four times at startup. The plan assumes the
-asynchronous variant: `registerHotkey` returns false only for a missing portal/interface/old version or
-a failed `CreateSession`, and a bind rejection or error arrives through `registrationFailed`. The user
-is asked to confirm this, or to choose a synchronous wait (freezes the GUI) or a hybrid that waits
-only for the first batch. See Risks.
