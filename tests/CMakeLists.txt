@@ -76,8 +76,8 @@ if(WIN32)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    # Both Linux hotkey tests compile the same translation unit (X11 plus the
-    # GlobalShortcuts portal backend), so both link X11 and QtDBus.
+    # The Linux hotkey tests compile the same translation unit (X11 plus the
+    # GlobalShortcuts portal backend), so they link X11 and QtDBus.
     qtranslate_add_test(tst_hotkeymanager_x11
         ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager.h
         ${PROJECT_SOURCE_DIR}/src/platform/portalshortcut.h
@@ -107,6 +107,22 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     )
     target_link_libraries(tst_selectiongrabber_linux PRIVATE Qt::Widgets X11::X11 X11::Xtst)
     set_tests_properties(tst_selectiongrabber_linux PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=xcb")
+
+    # The integration test wires the real HotkeyManager to the real
+    # SelectionGrabber, so it compiles both Linux backends. QtDBus is linked
+    # because the hotkey translation unit contains the portal backend.
+    qtranslate_add_test(tst_hotkey_selection_x11
+        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager.h
+        ${PROJECT_SOURCE_DIR}/src/platform/portalshortcut.h
+        ${PROJECT_SOURCE_DIR}/src/platform/hotkeymanager_linux.cpp
+        ${PROJECT_SOURCE_DIR}/src/platform/selectiongrabber.h
+        ${PROJECT_SOURCE_DIR}/src/platform/sessiontype.h
+        ${PROJECT_SOURCE_DIR}/src/platform/selectiongrabber_linux.cpp
+    )
+    target_link_libraries(tst_hotkey_selection_x11 PRIVATE
+        Qt::Widgets X11::X11 X11::Xtst Qt6::DBus)
+    set_tests_properties(tst_hotkey_selection_x11 PROPERTIES
         ENVIRONMENT "QT_QPA_PLATFORM=xcb")
 
     qtranslate_add_test(tst_windowactivation_linux

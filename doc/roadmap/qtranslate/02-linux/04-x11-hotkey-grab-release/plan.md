@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [02-global-hotkeys, 03-x11-selection-and-inplace]
 ---
@@ -260,3 +260,77 @@ result). The user approved an API change if needed; it is not needed here.
 - `doc/handoff.md`, README, architecture and the journal are the lead's; do not update them in this
   task. The final report is the only place for the new counts, the pre-fix evidence and the Astra
   caveat.
+
+## Outcome
+
+Done. The X11 grab-release defect is fixed in `SelectionGrabber::LinuxState` without changing the
+public API; Linux has 25 tests, Windows keeps 23.
+
+- Files: `src/platform/selectiongrabber_linux.cpp` (the fix), new `tests/tst_hotkey_selection_x11.cpp`,
+  and the Linux block of `tests/CMakeLists.txt` (the new target). `selectiongrabber.h`,
+  `hotkeymanager.*`, `appcontroller.*`, the `*_win.cpp` files, the application `CMakeLists.txt`, the
+  `if(WIN32)` block, docs and the handoff are untouched; `qtranslate_core` stays X11-free.
+- Mechanism: `LinuxState` snapshots the non-modifier keycodes that are down at `grab()` start with
+  `XQueryKeymap` (normally the activating Q/W) and `poll()` waits for both the modifiers and those
+  keys before sending Ctrl+C. The passive `XGrabKey` therefore ends naturally on the main-key release,
+  the synthetic copy reaches the focused application, and the manager keeps its auto-repeat
+  suppression and the `KeyRelease` that clears `pressedKeys`. The 300 ms modifier path still calls
+  `releaseModifiers()`, returns, and re-checks on the next 10 ms tick; it never calls `startCopy()` in
+  the same tick. `startCopy()`, the 400 ms clipboard wait, the snapshot/restore and `cancel()` are
+  unchanged. On Wayland the snapshot is not taken and no display or synthetic input is used.
+- Test: `tst_hotkey_selection_x11` uses a real `HotkeyManager` connected to a real `SelectionGrabber`
+  and a focused `QTextEdit` under `xvfb-run` with `QT_QPA_PLATFORM=xcb`. It covers Ctrl+Shift+Q and
+  Ctrl+Q with the modifiers released first, the whole combination held past 300 ms, the normal
+  release order, and a second activation after a capture. It probes a spare passive grab and `QSKIP`s
+  with the Parsec reason when the server denies grabs; `registerHotkey` failures are `QSKIP` only for
+  an "another program" conflict and fail otherwise.
+- Pre-fix gate: the new target built against `HEAD`'s grabber in `qtranslate-trixie` failed with
+  `4 passed, 3 failed`; `releasesModifiersBeforeMainKeyReplace`, `releasesModifiersBeforeMainKeyPopup`
+  and `holdsCombinationPastModifierTimeout` failed on `grabber.isBusy()` being false after 600/800 ms
+  (the old code sent Ctrl+C into the still-active grab and reported an empty selection). The reviewer
+  independently rebuilt the same combination and reproduced 4/3. The two regression functions passed
+  before the fix as designed. Evidence: `/tmp/opencode/trixie-prefix-gate.log`.
+- Verification:
+  - `debian:trixie` (Qt 6.8.2, GCC 14.2) Debug and Release from the read-only mount with
+    `-Wall -Wextra`: 0 warnings; `timeout 300 xvfb-run -a ctest` 25/25 in both configurations;
+    `tst_hotkey_selection_x11` 7/7 with 0 skips, `tst_hotkeymanager_x11` 16/16,
+    `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12 and
+    `tst_windowactivation_linux` 13/13.
+  - Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) native `build/linux-debug` and `build/linux-release`:
+    0 warnings; CTest 25/25 in both configurations; the same 7/7, 16/16, 20/20, 12/12 and 13/13
+    counts. The new test binary is trusted: two lines were appended to
+    `/etc/X11/trusted.d/qtranslate` (the host change approved by the user) and
+    `sudo /usr/bin/fly-set-execid.sh` was rerun after every rebuild. Without that step the new target
+    would `QSKIP` on Parsec; this is recorded, not hidden.
+  - Clang 16 Debug builds clean with 0 warnings; its CTest was not run because that binary is not in
+    `trusted.d`. It is not the gate.
+  - Manual check on the real Astra X11 `:0` session (Fly desktop, `kate`, the release binary, and
+    `xdotool` to send the key sequences): Ctrl+Shift+Q and Ctrl+Q with (a) Ctrl/Shift released first
+    and Q held about 1 s, (b) Q released first, (c) the whole combination held 0.8 s. All six cases
+    grabbed the 44-character selection, translated it (replace: the kate text was replaced; popup:
+    the popup was shown), restored the clipboard marker and left no repeated `q` in kate. The verbose
+    log shows `Non-modifier keys held at grab start: 1` and, for the (c) cases, `Modifiers are still
+    down after 300 ms` followed by a successful grab after Q was released. Evidence:
+    `/tmp/opencode/manual-qtranslate-full.log` and the popup screenshots under `/tmp/opencode`. One
+    first attempt failed because the X focus had moved to Firefox; the rerun checked
+    `xdotool getactivewindow` before each case. The original clipboard text was restored afterwards
+    (only the text format; the pre-check clipboard had other formats that a text-only copy cannot
+    restore). qtranslate and kate were stopped.
+- Review: no real defects or regressions; the reviewer reproduced the pre-fix 4/3 failure, the
+  trixie Debug/Release 25/25 and all counts. One accepted remark fixed the `tests/CMakeLists.txt`
+  comment that called the hotkey tests "Both" (three targets now compile that translation unit). The
+  unused `EnvironmentGuard` helper in the new test was rejected: the plan asked for that pattern and
+  it has no behavioral impact.
+- Known limitations (as planned): the trigger set is inferred from `XQueryKeymap`, so any other
+  non-modifier key held at grab start delays the capture until it is released; there is no timeout
+  for the main key by design (a stuck key blocks the capture until release; a stuck-key guard would
+  need a separate decision). Right-side modifiers and other held keys are conservatively included;
+  the left-only modifier table is unchanged. The same-owner identical-text clipboard limitation is
+  unchanged.
+- Windows: Debug/Release and the 23 tests were not performed (no MSVC); the diff review confirms no
+  public header, `hotkeymanager_win.cpp`, `selectiongrabber_win.cpp`, `if(WIN32)`, `AppController` or
+  application CMake change.
+- Facts for the documentation (not edited here): Linux has 25 tests and Windows 23; the new
+  `tst_hotkey_selection_x11` binary must be added to `/etc/X11/trusted.d/qtranslate` and followed by
+  `sudo /usr/bin/fly-set-execid.sh` for an Astra pass, otherwise it `QSKIP`s on Parsec; the trixie
+  `xvfb-run` gate is the automated evidence.

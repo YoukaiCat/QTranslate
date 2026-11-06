@@ -3,6 +3,7 @@
 
 #include <QClipboard>
 #include <QGuiApplication>
+#include <QList>
 #include <QLoggingCategory>
 #include <QMimeData>
 #include <QStringList>
@@ -70,6 +71,11 @@ struct SelectionGrabber::LinuxState
     KeyCode superLeft = 0;
     KeyCode superRight = 0;
     KeyCode c = 0;
+    // Non-modifier keys that were down when grab() started, normally the
+    // hotkey's main key. A passive XGrabKey starts an active keyboard grab on
+    // HotkeyManager's X client that ends only when the activating key is
+    // released, so the copy has to wait for these keys as well.
+    QList<KeyCode> triggerKeys;
     bool xtest = false;
     bool unavailable = false;
     bool clipboardChanged = false;
@@ -77,6 +83,8 @@ struct SelectionGrabber::LinuxState
     bool ensureDisplay(SelectionGrabber *grabber);
     bool anyModifierDown() const;
     void releaseModifiers() const;
+    void captureTriggerKeys();
+    bool triggerKeysDown() const;
     bool sendCopy() const;
 };
 
@@ -150,6 +158,46 @@ void SelectionGrabber::LinuxState::releaseModifiers() const
     XSync(display, False);
 }
 
+// A passive XGrabKey activates an active keyboard grab owned by the X client
+// that called XGrabKey, which is HotkeyManager's display here. The grabber's
+// own display cannot end it with XUngrabKeyboard, and must not: the active
+// grab suppresses keyboard auto-repeat, and its end delivers the final
+// KeyRelease to the manager, which clears its pressedKeys set. Snapshotting the
+// non-modifier keys that are down at grab start (normally the hotkey's main
+// key) and waiting for them lets the grab end naturally before Ctrl+C is sent.
+void SelectionGrabber::LinuxState::captureTriggerKeys()
+{
+    triggerKeys.clear();
+    if (!display)
+        return;
+
+    char keys[32] = {};
+    XQueryKeymap(display, keys);
+    for (int code = 8; code <= 255; ++code) {
+        if (code == int(control) || code == int(shift) || code == int(alt)
+            || code == int(superLeft) || code == int(superRight)) {
+            continue;
+        }
+        if (keyIsDown(keys, KeyCode(code)))
+            triggerKeys.append(KeyCode(code));
+    }
+    qCDebug(lcGrab) << "Non-modifier keys held at grab start:" << triggerKeys.size();
+}
+
+bool SelectionGrabber::LinuxState::triggerKeysDown() const
+{
+    if (!display || triggerKeys.isEmpty())
+        return false;
+
+    char keys[32] = {};
+    XQueryKeymap(display, keys);
+    for (KeyCode code : triggerKeys) {
+        if (keyIsDown(keys, code))
+            return true;
+    }
+    return false;
+}
+
 bool SelectionGrabber::LinuxState::sendCopy() const
 {
     if (!display || !xtest || control == 0 || c == 0)
@@ -208,10 +256,12 @@ void SelectionGrabber::grab(Callback callback)
     m_callback = std::move(callback);
     m_snapshot.reset();
     m_linux->clipboardChanged = false;
+    m_linux->triggerKeys.clear();
 
     if (m_linux->wayland) {
         // The user copied the selection manually. The first timer tick reads
-        // the clipboard; there is no snapshot, no X11 and no synthetic input.
+        // the clipboard; there is no trigger-key capture, no X11 and no
+        // synthetic input.
         m_state = State::WaitingForClipboard;
         m_elapsed.start();
         m_timer.start();
@@ -221,6 +271,9 @@ void SelectionGrabber::grab(Callback callback)
     if (!m_linux->ensureDisplay(this))
         return; // finish() already reported the empty selection
 
+    // Wait for the key that activated the hotkey as well as for the modifiers;
+    // see captureTriggerKeys() for why the grab cannot be ended directly.
+    m_linux->captureTriggerKeys();
     m_state = State::WaitingForRelease;
     m_elapsed.start();
     m_timer.start();
@@ -243,6 +296,7 @@ void SelectionGrabber::cancel()
         m_snapshot.reset();
     m_callback = nullptr;
     m_linux->clipboardChanged = false;
+    m_linux->triggerKeys.clear();
 }
 
 void SelectionGrabber::setMaxLength(int length)
@@ -253,13 +307,18 @@ void SelectionGrabber::setMaxLength(int length)
 void SelectionGrabber::poll()
 {
     if (m_state == State::WaitingForRelease) {
-        if (!m_linux->anyModifierDown()) {
-            startCopy();
-        } else if (m_elapsed.elapsed() >= kMaxReleaseWaitMs) {
+        const bool modifiersDown = m_linux->anyModifierDown();
+        if (modifiersDown && m_elapsed.elapsed() >= kMaxReleaseWaitMs) {
+            // The modifiers have to be out of the synthetic Ctrl+C. Releasing
+            // them does not end the active grab: a passive XGrabKey stays
+            // active until the key that triggered it is released, so the next
+            // tick still waits for triggerKeysDown().
             qCDebug(lcGrab) << "Modifiers are still down after" << kMaxReleaseWaitMs << "ms";
             m_linux->releaseModifiers();
-            startCopy();
+            return;
         }
+        if (!modifiersDown && !m_linux->triggerKeysDown())
+            startCopy();
         return;
     }
 
@@ -324,6 +383,7 @@ void SelectionGrabber::finish(const QString &text)
     m_timer.stop();
     m_state = State::Idle;
     m_linux->clipboardChanged = false;
+    m_linux->triggerKeys.clear();
     m_snapshot.reset();
 
     auto callback = std::move(m_callback);
