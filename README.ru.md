@@ -97,12 +97,12 @@ qtranslate [--minimized] [--verbose]
 1. Установите [Ollama](https://ollama.com) для Windows, macOS или Linux.
 2. Запустите её и скачайте модель, например:
    ```bat
-   ollama pull llama3.2
+   ollama pull bonsai-2:latest
    ```
 3. В QTranslate откройте **Настройки → Сервисы → Провайдер с поддержкой OpenAI** и укажите:
    - Адрес сервера: `http://localhost:11434/v1`
    - API-ключ: оставьте пустым
-   - Модель: имя из `ollama list`, например `llama3.2`
+   - Модель: имя из `ollama list`, например `bonsai-2:latest`
 4. Нажмите **Загрузить модели** или введите имя вручную, затем **OK**. В списке сервисов выберите
    **«Локальная LLM»**.
 
