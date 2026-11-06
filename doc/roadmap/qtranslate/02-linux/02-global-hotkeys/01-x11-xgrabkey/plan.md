@@ -296,19 +296,19 @@ X11 gate passes in the `debian:trixie` container.
     `-R tst_hotkeymanager_x11` 1/1; the new test reports 16 passed, 0 failed, 0 skipped (14 test
     functions plus init/cleanup), so XTest drives a real activation.
   - Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2), native Debug and Release in `build/linux-debug` and
-    `build/linux-release`: 0 warnings; CTest 21/21, of which the 20 shared tests pass and
-    `tst_hotkeymanager_x11` `QSKIP`s in `initTestCase` with the Parsec message
-    (`XPARSEC: keylogger-grabber` is in the Xvfb log). A Clang 16 Debug build is clean and shows the
-    same 20 + skip.
+    `build/linux-release`: 0 warnings; CTest 21/21. In the original run `tst_hotkeymanager_x11`
+    `QSKIP`ped in `initTestCase` with the Parsec message (`XPARSEC: keylogger-grabber` is in the
+    Xvfb log); after the `KBD_R` trusted-client follow-up below it passes 16/16 on both configs. A
+    Clang 16 Debug build before the follow-up was clean and showed the same 20 + skip.
   - Valgrind in a trixie container: 0 definitely/indirectly/possibly lost and `ERROR SUMMARY: 0` for
-    the new test. On Astra the test is skipped before the backend runs, so Valgrind only confirms
-    the skip.
+    the new test. On Astra the pre-follow-up run was skipped before the backend ran, so Valgrind only
+    confirmed the skip; the trusted-client run was not repeated under Valgrind.
   - Weston headless with a private `XDG_RUNTIME_DIR` and `QT_QPA_PLATFORM=wayland`: the app starts,
     logs the portal/CLI reason, `strace` shows no connect to `/tmp/.X11-unix`, and the Parsec line is
     absent. The full portal path remains task `02-wayland-globalshortcuts`.
-  - The manual `xdotool` check on the real Astra X11 session was not performed: Parsec denies
-    passive grabs. The XTest test covers the same path up to `activated`. Recorded as blocked by the
-    environment, not as passed.
+  - The manual `xdotool` check on the real Astra X11 session was blocked by Parsec in the original
+    run; the `KBD_R` follow-up below performed it successfully on `:0` (Ctrl+W and Ctrl+Q reached
+    `AppController`). The XTest test covers the same path up to `activated`.
 - Known limitations and deferred items:
   - The `activated` signal is emitted from inside `X11State::readEvents()`. A slot that calls
     `unregisterAll()` or deletes the manager synchronously would free the state under the event
@@ -330,10 +330,33 @@ X11 gate passes in the `debian:trixie` container.
   `src/platform/hotkeymanager_x11.cpp` and the test `tests/tst_hotkeymanager_x11.cpp`; Linux has 21
   tests, Windows keeps 23; the build needs `find_package(X11)` (`libx11-dev`, and `libxtst-dev` for
   the test), the runtime needs `libx11-6` (already pulled by Qt's xcb plugin); the Wayland rule is
-  env-based; Astra's Parsec policy blocks passive grabs; Xvfb maps F1-F12 only and the server
+  env-based; Astra's Parsec policy blocks passive grabs unless the binary carries the `KBD_R`
+  `security.exec_id` (see the follow-up); Xvfb maps F1-F12 only and the server
   reserves `Ctrl+Alt+F1-F12`, so the tests use `Ctrl+Alt+Shift+F9/F10/F11`; the stage text says
   `tst_hotkeymanager` on Linux while the actual name is `tst_hotkeymanager_x11` (architecture §4.14
   "Windows platform tests are replaced by Linux analogues").
 - Windows Debug/Release and the 23 Windows tests were not performed: this machine has no MSVC or
   Windows toolchain; the header diff and the `if(WIN32)` blocks were reviewed by inspection only.
 - Committed locally after review; nothing was pushed.
+
+### Follow-up: `KBD_R` trusted-client exception on Astra (2026-11-06)
+
+The user superseded the earlier "accept the Astra limitation" decision and asked to apply the
+trusted-client exception, so the X11 path is now verified on the real Astra host, not only in the
+trixie container.
+
+- Host setup: `/etc/X11/trusted.d/qtranslate` lists
+  `build/linux-{debug,release}/qtranslate` and `build/linux-{debug,release}/tests/tst_hotkeymanager_x11`
+  with the `KBD_R` role; `sudo /usr/bin/fly-set-execid.sh` sets `security.exec_id` to `0x10` (`KBD_R`)
+  on each binary.
+- Astra Linux 1.8.7, Debug and Release: CTest 21/21, and `tst_hotkeymanager_x11` reports
+  16 passed, 0 failed, 0 skipped. The Xvfb log shows `client '<pid>' role=10 by execid` instead of
+  `XPARSEC: keylogger-grabber`; the test's `QSKIP` guard stays for untrusted hosts.
+- Manual end-to-end on the real X11 session `:0`: `build/linux-release/qtranslate --verbose`
+  registers Ctrl+Q (popup), Ctrl+Shift+Q (replace) and Ctrl+W (main window; `showMainWindow` has no
+  default); `xdotool key ctrl+w` logs `Hotkey activated: 2`, `xdotool key ctrl+q` logs
+  `Hotkey activated: 0` and `Popup shown (nothing selected) in 10 ms`. No `BadAccess`.
+- Environment caveat: `security.exec_id` belongs to the build artifact and is lost when the binary is
+  rebuilt; re-run `sudo /usr/bin/fly-set-execid.sh` after a rebuild. The `/etc/X11/trusted.d/qtranslate`
+  entry is persistent. This is host setup, not repository content: no code, test, or CMake change.
+- The verification was made from the task commit `5ef937e`; documentation only.

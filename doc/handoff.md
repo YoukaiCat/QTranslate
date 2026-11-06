@@ -45,6 +45,12 @@ documentation is English. The migration to the tree roadmap and the English base
 - `cmake --install` on Linux logs a CMake warning that `DEPLOY_TOOL_OPTIONS` has no effect with the
   generic deployment tool; no `if(WIN32)` guard was added. One `xvfb-run -a` run hung before the
   command started in the container; task 06 should wrap CI tests in `timeout`.
+- Astra Linux Parsec denies passive `XGrabKey` for untrusted binaries. The user approved the `KBD_R`
+  trusted-client exception: `/etc/X11/trusted.d/qtranslate` lists
+  `build/linux-{debug,release}/qtranslate` and `build/linux-{debug,release}/tests/tst_hotkeymanager_x11`,
+  and `sudo /usr/bin/fly-set-execid.sh` sets `security.exec_id`. With the attribute set, Debug and
+  Release pass 21/21, the X11 hotkey test passes 16/16 on Astra, and the real `:0` session registers
+  and activates the hotkeys. The attribute is lost on rebuild; re-run the script after building.
 - Roadmap stage 2 continues with hotkeys, selection, autostart/secrets, CLI/desktop, packaging, and
   verification. The READMEs and `architecture.md` now state the Linux baseline.
 
