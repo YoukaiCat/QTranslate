@@ -52,8 +52,8 @@ not performed (Astra X11; Weston has no portal) and is covered by the mock DBus 
 reviewed by diff only (no MSVC). The acceptance made no commits; the tree was clean at `bd7410b`.
 
 Known gaps and follow-ups: the tray text still says "already used by another program" for a missing
-Wayland portal (task 05); the tray tooltip can show the configured sequence before an asynchronous bind
-completes or after the desktop reassigns it (task 05/06); two latent signal-reentrancy edges remain
+Wayland portal (task 06); the tray tooltip can show the configured sequence before an asynchronous bind
+completes or after the desktop reassigns it (task 06/07); two latent signal-reentrancy edges remain
 (`activated` on X11 and `registrationFailed` on Wayland, no current caller); the X11 `xtestActivation`
 still masks a registration failure as a skip; `XOpenDisplay` can flake under load; `SettingsDialog`'s
 validator still uses the Win32 helper on Linux; and the `setSuspended` header comment describes
@@ -61,6 +61,6 @@ X11/Windows, not the logical Wayland pause.
 
 Facts for the remaining work: Linux has 22 tests, Windows keeps 23; `Qt6::DBus` is Linux-only in
 `qtranslate` and the tests, while `qtranslate_core` stays D-Bus-free; `libqt6dbus6` is the runtime
-dependency for task 06 and `dbus`/`dbus-daemon` the test dependency; `libx11-6` comes with Qt's xcb
+dependency for task 07 and `dbus`/`dbus-daemon` the test dependency; `libx11-6` comes with Qt's xcb
 plugin, and `libx11-dev`/`libxtst-dev` are build/test dependencies. After every rebuild on Astra run
 `sudo /usr/bin/fly-set-execid.sh`, otherwise `tst_hotkeymanager_x11` skips on Parsec.

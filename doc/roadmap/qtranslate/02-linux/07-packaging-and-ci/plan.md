@@ -1,7 +1,7 @@
 ---
 kind: task
 status: todo
-depends: [01-linux-build-baseline, 02-global-hotkeys, 03-x11-selection-and-inplace, 04-xdg-autostart-and-secrets, 05-cli-and-desktop-integration]
+depends: [01-linux-build-baseline, 02-global-hotkeys, 03-x11-selection-and-inplace, 04-x11-hotkey-grab-release, 05-xdg-autostart-and-secrets, 06-cli-and-desktop-integration]
 ---
 
 # Debian 13 (trixie) packages and CI

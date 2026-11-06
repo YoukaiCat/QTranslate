@@ -37,7 +37,7 @@ rely on CLI commands bound in the desktop settings.
      `qtranslate_core`.
    - `packaging/linux/trixie.Dockerfile`: add `dbus` under the test tools (it provides
      `dbus-daemon` for the mock portal test); `qt6-base-dev` already provides the QtDBus headers.
-     Keep the existing task 06 packaging note.
+     Keep the existing task 07 packaging note.
    - Update the stale `hotkeymanager_x11.cpp` references in the header comment and
      `tests/CMakeLists.txt` to the new name.
 
@@ -258,7 +258,7 @@ rely on CLI commands bound in the desktop settings.
       `tests/tst_hotkeymanager_wayland.cpp`, `CMakeLists.txt`, `tests/CMakeLists.txt`,
       `src/platform/hotkeymanager.h`, `packaging/linux/trixie.Dockerfile`.
     - Build: `Qt6::DBus` in `qtranslate` and the tests only, `qtranslate_core` stays D-Bus-free;
-      `libqt6dbus6` is a runtime dependency for task 06; `dbus` is a test dependency.
+      `libqt6dbus6` is a runtime dependency for task 07; `dbus` is a test dependency.
     - Behaviour: portal version >= 1, stable IDs and descriptions, one session and one batched
       BindShortcuts, asynchronous bind failure through `registrationFailed`, logical suspend, an
       empty `hotkey()` after the desktop assigns triggers, the session closed on
@@ -355,7 +355,7 @@ rely on CLI commands bound in the desktop settings.
 - The Windows build cannot be compiled here. Keep the `Q_OS_WIN` header branch and the `if(WIN32)`
   CMake/test blocks byte-identical and review the diff.
 - `AppController`'s tray text still says "already used by another program" for any failure, which is
-  misleading on Wayland; task 05 adds the one-time Wayland warning and the CLI fallback. This task
+  misleading on Wayland; task 06 adds the one-time Wayland warning and the CLI fallback. This task
   must not change `AppController` or the UI.
 
 ## Outcome
@@ -441,7 +441,7 @@ constructor-cached session type. The Linux suite is 22 tests in `debian:trixie` 
   assertions on the `registerHotkey` return values, a `CreateSession` failure test, and a `QSKIP`
   only when `dbus-daemon` is not installed (other failures now fail loudly). Rejected: a fully
   asynchronous availability check (impossible while `registerHotkey` must return false
-  synchronously), changing `AppController`/the tray text (task 05), and a general operation queue for
+  synchronously), changing `AppController`/the tray text (task 06), and a general operation queue for
   every reentrant `registerHotkey`/`unregisterHotkey`.
 - Limitations for the lead's documentation: the portal descriptions are English (i18n remains a
   separate pass; `tst_translations` would need 14 `.ts` files), `trigger_description` is
@@ -450,5 +450,5 @@ constructor-cached session type. The Linux suite is 22 tests in `debian:trixie` 
   desktop may reassign `preferred_trigger`. A deferred shutdown that starts outside the handled
   checkpoints (for example `CreateSession` from `rebuildSession`) does not crash but finishes at the
   next registration/unregistration or in the destructor. `libqt6dbus6` becomes a runtime dependency
-  for task 06 and `dbus`/`dbus-daemon` is a test dependency; the Wayland test needs `dbus-daemon`
+  for task 07 and `dbus`/`dbus-daemon` is a test dependency; the Wayland test needs `dbus-daemon`
   only, not a desktop portal.

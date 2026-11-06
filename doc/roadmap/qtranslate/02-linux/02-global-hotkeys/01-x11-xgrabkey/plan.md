@@ -254,7 +254,7 @@ does not synthesize input.
   analogues". Report it so the lead can align the stage text.
 - The `registrationFailed` reason is still only logged, and `AppController`'s tray text stays "is
   already used by another program". On Wayland that text is misleading; the user-facing Wayland
-  warning belongs to `02-wayland-globalshortcuts` (and task 05 for the CLI fallback), not here.
+  warning belongs to `02-wayland-globalshortcuts` (and task 06 for the CLI fallback), not here.
 
 ## Outcome
 

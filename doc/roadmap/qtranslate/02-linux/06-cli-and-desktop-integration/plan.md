@@ -1,7 +1,7 @@
 ---
 kind: task
 status: todo
-depends: [02-global-hotkeys, 03-x11-selection-and-inplace, 04-xdg-autostart-and-secrets]
+depends: [02-global-hotkeys, 03-x11-selection-and-inplace, 04-x11-hotkey-grab-release, 05-xdg-autostart-and-secrets]
 ---
 
 # CLI commands and Linux desktop integration

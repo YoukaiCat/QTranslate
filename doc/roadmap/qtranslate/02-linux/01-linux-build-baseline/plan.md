@@ -32,7 +32,7 @@ instead of editing `doc/`, the READMEs, or `doc/architecture.md` §4.14.
    configure or `cmake --install` fails because of the Windows-specific `qt_generate_deploy_app_script`
    options (`NO_COMPILER_RUNTIME`, `DEPLOY_TOOL_OPTIONS` with `--no-system-d3d-compiler`,
    `--no-opengl-sw`, `--translations`), guard the whole deploy block with `if(WIN32)` and report the
-   change; the Linux packaging path is task 06's script. Do not delete the Windows block.
+   change; the Linux packaging path is task 07's script. Do not delete the Windows block.
 3. Enable GCC/Clang warnings in `qtranslate_set_compile_options()`: add `-Wall -Wextra` under
    `elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")`; keep MSVC `/utf-8 /W4 /permissive-`. Do not
    add `-Werror`; the stage requires no warnings, so inspect the log. Fix every warning in shared
@@ -41,9 +41,9 @@ instead of editing `doc/`, the READMEs, or `doc/architecture.md` §4.14.
 4. Add a reproducible trixie build container, `packaging/linux/trixie.Dockerfile`, based on
    `debian:trixie` and installing `build-essential`, `cmake`, `ninja-build`, `git`,
    `ca-certificates`, `qt6-base-dev`, `qt6-tools-dev`, `qt6-tools-dev-tools`, `libx11-dev`,
-   `libxtst-dev`, `libsecret-1-dev`, and `xvfb`. Keep it minimal; task 06 adds `dpkg-dev`,
+   `libxtst-dev`, `libsecret-1-dev`, and `xvfb`. Keep it minimal; task 07 adds `dpkg-dev`,
    `desktop-file-utils`, and the AppImage tooling. If a Dockerfile is overkill, a documented
-   `docker run` command is acceptable, but the CI job in task 06 must use the same package list.
+   `docker run` command is acceptable, but the CI job in task 07 must use the same package list.
 5. Build Debug in the container from a read-only source mount and a `/tmp` build directory, so the
    container does not leave root-owned files in the repository:
    `docker build -f packaging/linux/trixie.Dockerfile -t qtranslate-trixie .`, then
@@ -87,7 +87,7 @@ instead of editing `doc/`, the READMEs, or `doc/architecture.md` §4.14.
 - Do not lower Qt to 6.4: Debian 12 is no longer the target, trixie has Qt 6.8.2, and Qt 6.5+ stays
   the project minimum. Debian 12 may be mentioned as optional compatibility only, not as a required
   build.
-- The current deploy block configures on trixie with Qt 6.8.2. If `cmake --install` (task 06) fails
+- The current deploy block configures on trixie with Qt 6.8.2. If `cmake --install` (task 07) fails
   because of the Windows deploy options, guard the block with `if(WIN32)` then; do not pre-emptively
   change the Windows behaviour.
 - `-Wall -Wextra` may surface warnings in shared code that were not visible with MSVC `/W4`; fix them

@@ -29,7 +29,7 @@ The two platform files are one Linux translation unit each and dispatch on the s
 name) is currently private to the hotkey backend and is needed by all three files, so it moves to a
 small platform-private header instead of being copied. The Wayland in-place fallback is a small
 `AppController` change and reuses existing translated messages; the one-time manual-copy warning
-belongs to `05-cli-and-desktop-integration` and is not added here.
+belongs to `06-cli-and-desktop-integration` and is not added here.
 
 ## Steps
 
@@ -158,7 +158,7 @@ belongs to `05-cli-and-desktop-integration` and is not added here.
    - No new `tr()` strings: both messages already exist in the `AppController` context and in all
      14 `i18n/qtranslate_*.ts` files, so `tst_translations` and the `.ts` files are untouched. The
      one-time Wayland warning that explains the manual copy step is
-     `05-cli-and-desktop-integration`, not this task.
+     `06-cli-and-desktop-integration`, not this task.
    - Windows/X11 behavior for a real target is unchanged. The only shared change is the null-target
      corner case: a silent abort becomes a clipboard copy plus the existing notification; review it
      for Windows by diff (no MSVC here). Do not change `pasteTranslation()` or the 500 ms restore.
@@ -311,7 +311,7 @@ belongs to `05-cli-and-desktop-integration` and is not added here.
   clipboard the user copied manually, and the controller copies the translation to the clipboard
   with the existing clear message instead of pasting or aborting. No synthetic input and no new
   `tr()` strings are added; the 14 `.ts` files and `tst_translations` are unchanged, and the
-  one-time manual-copy warning stays in `05-cli-and-desktop-integration`.
+  one-time manual-copy warning stays in `06-cli-and-desktop-integration`.
 - New headless tests under `xvfb-run` in Debian 13 (trixie) cover the grabber state machine,
   clipboard snapshot/restore and `cancel()` (a focused `QTextEdit` is the target), the Wayland
   clipboard read without XTest, and the window helpers (dummy windows with
@@ -349,7 +349,7 @@ belongs to `05-cli-and-desktop-integration` and is not added here.
   raw test windows); in that case do not try to exclude our own process.
 - The Wayland clipboard fallback can read a stale clipboard and the same-owner change is not
   observable; the UI warning must make the manual copy step explicit. That warning is
-  `05-cli-and-desktop-integration`, so this task must not expand the UI or the `.ts` files. Do not
+  `06-cli-and-desktop-integration`, so this task must not expand the UI or the `.ts` files. Do not
   try to detect the selection without a portal or synthetic input.
 - `XKeysymToKeycode(display, XK_c)` can return 0 on a non-Latin layout, so Ctrl+C capture would fail
   where Windows uses a virtual key. Log the reason, return an empty selection and document the
@@ -411,7 +411,7 @@ Windows keeps 23.
   and shows the existing `tr("Could not paste automatically; the translation is on the clipboard.")`.
   The "active window changed" branch and `pasteTranslation()`/the 500 ms restore are unchanged, and
   no `tr()` strings, `.ts` files, or `tst_translations` were touched. The one-time manual-copy warning
-  remains in `05-cli-and-desktop-integration`.
+  remains in `06-cli-and-desktop-integration`.
 - Build: the Linux `qtranslate` block selects the two Linux files, adds `sessiontype.h`, links
   `X11::X11 X11::Xtst Qt6::DBus`, and fails configure with a clear `FATAL_ERROR` when the XTest
   imported target is missing. The five stubs remain in the `else()` branch for macOS and other
@@ -453,7 +453,7 @@ Windows keeps 23.
   - The plan's accepted risks remain: a same-owner re-copy of identical text may not emit
     `QClipboard::changed`; `XKeysymToKeycode(XK_c)` can return 0 on a non-Latin layout (empty
     selection, warning logged); the Wayland clipboard can be stale, and the explanatory warning is
-    task 05.
+    task 06.
   - The optional Weston headless/`strace` check was not performed; the Wayland guard is covered by the
     unit tests. A real Wayland desktop was not available (Astra runs X11), so the real Wayland Ctrl+Q
     path is not performed.

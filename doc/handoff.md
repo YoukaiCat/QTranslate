@@ -1,6 +1,6 @@
 # Handoff: work state
 
-Date: 2026-11-05. Repository: `C:\projects\qtranslate`, branch `main`.
+Date: 2026-11-06. Repository: `C:\projects\qtranslate`, branch `main`.
 
 The active roadmap is [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md); the old plan is
 archived at [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); the active
@@ -36,31 +36,37 @@ documentation is English. The migration to the tree roadmap and the English base
 
 ## Linux baseline (2026-11-06)
 
-- The Linux tree builds, links, and passes 20 of 20 tests in Debug and Release on Debian 13
+- The Linux tree builds, links, and passes 24 of 24 tests in Debug and Release on Debian 13
   (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2; Clang 16.0.6), with
   `-Wall -Wextra` and no warnings. `qtranslate --version` works. Windows builds and the 23 tests
   were not performed here.
 - `packaging/linux/trixie.Dockerfile` reproduces the container; it includes `xauth` because
-  `xvfb-run` needs it. Task 06 must keep the package list and add the packaging tools.
+  `xvfb-run` needs it. Task 07 must keep the package list and add the packaging tools.
 - `cmake --install` on Linux logs a CMake warning that `DEPLOY_TOOL_OPTIONS` has no effect with the
   generic deployment tool; no `if(WIN32)` guard was added. One `xvfb-run -a` run hung before the
-  command started in the container; task 06 should wrap CI tests in `timeout`.
+  command started in the container; task 07 should wrap CI tests in `timeout`.
 - Astra Linux Parsec denies passive `XGrabKey` for untrusted binaries. The user approved the `KBD_R`
   trusted-client exception: `/etc/X11/trusted.d/qtranslate` lists
   `build/linux-{debug,release}/qtranslate` and `build/linux-{debug,release}/tests/tst_hotkeymanager_x11`,
   and `sudo /usr/bin/fly-set-execid.sh` sets `security.exec_id`. With the attribute set, Debug and
-  Release pass 21/21, the X11 hotkey test passes 16/16 on Astra, and the real `:0` session registers
+  Release pass 24/24, the X11 hotkey test passes 16/16 on Astra, and the real `:0` session registers
   and activates the hotkeys. The attribute is lost on rebuild; re-run the script after building.
 - Linux hotkeys: X11 `XGrabKey` and the Wayland `GlobalShortcuts` portal are implemented behind the
   unchanged `HotkeyManager` API. The portal creates one session, batches `BindShortcuts`, reports
   asynchronous bind failures through `registrationFailed`, keeps suspend logical, and returns an empty
   `hotkey()` after the desktop assigns triggers. `Qt6::DBus` is Linux-only in `qtranslate` and the
   tests; `libqt6dbus6` is the runtime dependency for packaging and `dbus`/`dbus-daemon` the test
-  dependency. Linux has 22 tests; `tst_hotkeymanager_x11` is 16/16 and `tst_hotkeymanager_wayland`
+  dependency. Linux has 24 tests; `tst_hotkeymanager_x11` is 16/16 and `tst_hotkeymanager_wayland`
   20/20 in trixie and on Astra (after `fly-set-execid.sh`). Known gaps: the tray text and tooltip on
-  Wayland (task 05) and two latent signal-reentrancy edges with no current caller.
-- Roadmap stage 2 continues with selection, autostart/secrets, CLI/desktop, packaging, and
-  verification. The READMEs and `architecture.md` now state the Linux baseline.
+  Wayland (task 06) and two latent signal-reentrancy edges with no current caller.
+- X11 selection capture and the window helpers are implemented; Wayland reads the manually copied
+  clipboard and never synthesizes input. `tst_selectiongrabber_linux` (12) and
+  `tst_windowactivation_linux` (13) were added, and the manual `:0` check passed with `kate`
+  (Ctrl+Q popup, Ctrl+Shift+Q replace, Ctrl+W main window, clipboard restore). A known release-order
+  defect remains: releasing Ctrl/Shift before Q leaves the passive grab active and the synthetic
+  Ctrl+C goes to QTranslate; task 04 fixes it before autostart.
+- Roadmap stage 2 continues with the X11 grab-release follow-up, autostart/secrets, CLI/desktop,
+  packaging, and verification. The READMEs and `architecture.md` now state the Linux baseline.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
