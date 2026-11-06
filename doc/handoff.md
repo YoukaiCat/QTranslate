@@ -8,12 +8,14 @@ documentation is English. The migration to the tree roadmap and the English base
 
 ## Git
 
+- The GitHub repository was recreated on 2026-11-06; the new repository contains only the clean
+  local history (`main` tracks `origin/main`) and no old commits, tags, or releases. The old
+  repository's history and activity are gone.
 - The local history was rewritten on 2026-11-06 to replace a wrong author/committer address; all
-  local commits now use the GitHub noreply identity. `origin/main` was then force-pushed with
-  `--force-with-lease` to the rewritten history, and `main` tracks it; the old commits may remain
-  reachable on GitHub by SHA until GitHub collects the unreachable objects. No other push was made.
-- The published tags are unchanged: the annotated `v0.11.0` points to `f50c1da`, the old `v0.10.0`
-  points to `726dac0`.
+  local commits use the GitHub noreply identity. The rewritten history was pushed to the new
+  repository; no other push was made.
+- The local tags are unchanged: `v0.11.0` points to `f50c1da`, `v0.10.0` to `726dac0`; they were
+  not pushed to the new repository.
 - History: release 0.10.0, removal of the checksum links and return of `SHA256SUMS.txt` as an
   unlisted asset, then 0.11.0: OpenAI-compatible translation, merged DeepL, QTranslate branding.
 - After 0.11.0, a hotkey fix for games and the autopause setting were added to `main`. The change
@@ -265,6 +267,11 @@ CI assets built from the tag. Do not upload the local files manually.
 6. Release: https://github.com/youkaicat/QTranslate/releases/tag/v0.10.0
 
 ## Next release (when the user agrees)
+
+The GitHub repository was recreated on 2026-11-06 and has no releases or tags. After Linux support
+(roadmap stage 2) is complete, publish the first release in the new repository; agree the version
+and scope with the user first. Do not push the old `v0.9.0`-`v0.11.0` tags or recreate the old
+releases; ship the new work as a new version.
 
 1. Selective native-speaker review of the translations is desirable (especially Arabic RTL and long
    strings).
