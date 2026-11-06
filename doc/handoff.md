@@ -51,7 +51,15 @@ documentation is English. The migration to the tree roadmap and the English base
   and `sudo /usr/bin/fly-set-execid.sh` sets `security.exec_id`. With the attribute set, Debug and
   Release pass 21/21, the X11 hotkey test passes 16/16 on Astra, and the real `:0` session registers
   and activates the hotkeys. The attribute is lost on rebuild; re-run the script after building.
-- Roadmap stage 2 continues with hotkeys, selection, autostart/secrets, CLI/desktop, packaging, and
+- Linux hotkeys: X11 `XGrabKey` and the Wayland `GlobalShortcuts` portal are implemented behind the
+  unchanged `HotkeyManager` API. The portal creates one session, batches `BindShortcuts`, reports
+  asynchronous bind failures through `registrationFailed`, keeps suspend logical, and returns an empty
+  `hotkey()` after the desktop assigns triggers. `Qt6::DBus` is Linux-only in `qtranslate` and the
+  tests; `libqt6dbus6` is the runtime dependency for packaging and `dbus`/`dbus-daemon` the test
+  dependency. Linux has 22 tests; `tst_hotkeymanager_x11` is 16/16 and `tst_hotkeymanager_wayland`
+  20/20 in trixie and on Astra (after `fly-set-execid.sh`). Known gaps: the tray text and tooltip on
+  Wayland (task 05) and two latent signal-reentrancy edges with no current caller.
+- Roadmap stage 2 continues with selection, autostart/secrets, CLI/desktop, packaging, and
   verification. The READMEs and `architecture.md` now state the Linux baseline.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)

@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 11742fd
 depends: [01-linux-build-baseline]
 ---
@@ -32,3 +32,35 @@ the fallback. Do not synthesize keyboard input on Wayland.
   Wayland. No X11 display is opened on a Wayland session.
 - The 20 shared tests and both Linux hotkey tests (22 total) pass, the build has no warnings, and
   Windows is reviewed for `#ifdef` safety but not compiled here.
+
+## Outcome
+
+Accepted. Both children are done: X11 `XGrabKey` (`5ef937e`) and the Wayland `GlobalShortcuts` portal
+(`1fbc6e3`). The public `HotkeyManager` API, signals, `HotkeyAction`, `core/hotkeysequence.*`,
+`hotkeymanager_win.cpp`, `AppController`, and the UI are unchanged; the X11 code moved
+byte-equivalently to `src/platform/hotkeymanager_linux.cpp` and dispatches by the constructor-cached
+session type. The portal backend creates one session with `QUuid::Id128` tokens, sends one batched
+`BindShortcuts` for the four stable IDs, handles `Activated`/`Deactivated`/`ShortcutsChanged`, reports
+asynchronous bind failures through `registrationFailed`, treats suspend logically, returns an empty
+`hotkey()` after the desktop assigns triggers, and closes the session on `unregisterAll`/destruction.
+No synthetic input is added, and `XOpenDisplay` is not called on a Wayland session.
+
+Verification: trixie Debug/Release 22/22 with 0 warnings; Astra Debug/Release 22/22 after
+`sudo /usr/bin/fly-set-execid.sh`; `tst_hotkeymanager_x11` 16/16 and `tst_hotkeymanager_wayland` 20/20;
+Weston headless starts with the portal+CLI reason and no X11 connection. The real KDE/GNOME portal was
+not performed (Astra X11; Weston has no portal) and is covered by the mock DBus test; Windows was
+reviewed by diff only (no MSVC). The acceptance made no commits; the tree was clean at `bd7410b`.
+
+Known gaps and follow-ups: the tray text still says "already used by another program" for a missing
+Wayland portal (task 05); the tray tooltip can show the configured sequence before an asynchronous bind
+completes or after the desktop reassigns it (task 05/06); two latent signal-reentrancy edges remain
+(`activated` on X11 and `registrationFailed` on Wayland, no current caller); the X11 `xtestActivation`
+still masks a registration failure as a skip; `XOpenDisplay` can flake under load; `SettingsDialog`'s
+validator still uses the Win32 helper on Linux; and the `setSuspended` header comment describes
+X11/Windows, not the logical Wayland pause.
+
+Facts for the remaining work: Linux has 22 tests, Windows keeps 23; `Qt6::DBus` is Linux-only in
+`qtranslate` and the tests, while `qtranslate_core` stays D-Bus-free; `libqt6dbus6` is the runtime
+dependency for task 06 and `dbus`/`dbus-daemon` the test dependency; `libx11-6` comes with Qt's xcb
+plugin, and `libx11-dev`/`libxtst-dev` are build/test dependencies. After every rebuild on Astra run
+`sudo /usr/bin/fly-set-execid.sh`, otherwise `tst_hotkeymanager_x11` skips on Parsec.
