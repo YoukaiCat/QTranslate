@@ -289,31 +289,33 @@ CI assets built from the tag. Do not upload the local files manually.
    downloaded and verified.
 6. Release: https://github.com/youkaicat/QTranslate/releases/tag/v0.10.0
 
-## Next release (when the user agrees)
+## Next release
 
-The GitHub repository was recreated on 2026-11-06 and has no releases or tags. After Linux support
-(roadmap stage 2) is complete, publish the first release in the new repository; agree the version
-and scope with the user first. Do not push the old `v0.9.0`-`v0.11.0` tags or recreate the old
-releases; ship the new work as a new version.
+The GitHub repository was recreated on 2026-11-06 and has no releases or tags. The user chose
+**0.11.1 from `ef09e8c` now**, then **0.12.0 after the Linux stage**. `ef09e8c` is the commit the
+user personally tested; it is three commits after `v0.11.0` (`a6482e7` record, `d7d4d05` release
+hotkeys for fullscreen, `ef09e8c` fullscreen pause setting). 0.11.1 is a Windows patch and must not
+include the documentation migration or the Linux work on current `main`; 0.12.0 comes from `main`
+after tasks 05-08.
 
-1. Selective native-speaker review of the translations is desirable (especially Arabic RTL and long
-   strings).
-2. Bump the version to `0.11.1` for the hotkey fix: `CMakeLists.txt` (`project(VERSION ...)`) and
-   `resources/qtranslate.rc` (`FileVersion`/`ProductVersion`). Agree the version and the release scope
-   with the user in advance.
-3. Update for the version: `README.md`, `README.ru.md` (status, file names/links),
-   `releases/<version>.md`, [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md),
-   [`architecture.md`](architecture.md).
-4. Build and verify:
-   - `cmd /c build\cli-build.cmd Debug`
-   - `cmd /c build\cli-build.cmd Release`
-   - `packaging/windows/package.ps1 -BuildDir build\cli-Release`
-5. Verify the slim installer: launch without `opengl32sw.dll`, the checkboxes/autostart/Run, the
-   uninstall, language switching, the OpenRouter key and the proxy. Keep `SHA256SUMS.txt` as an asset
-   but do not add it to README/Downloads.
-6. **Ask the user and get explicit approval for the release and the push.**
-7. After approval: push `main`, a new annotated tag `vX.Y.Z`, push the tag; CI publishes the assets.
-   Do not touch old tags/releases.
+1. Create a release branch from `ef09e8c` (for example `release/0.11.1`); do not tag current `main`.
+2. Bump the version to `0.11.1` in `CMakeLists.txt` (`project(VERSION ...)`) and
+   `resources/qtranslate.rc` (`FileVersion`/`ProductVersion`). The build-file change goes through a
+   coordinator per the project rules.
+3. Add `doc/releases/0.11.1.md` with Windows notes: fullscreen hotkey pause, the manual **Pause
+   hotkeys** tray item and `hotkeys/pauseInFullscreen`; download links point to the new repository's
+   `v0.11.1`; no Linux claims; keep `SHA256SUMS.txt` as an unlisted asset.
+4. Update `README.md` and `README.ru.md` on the release branch (status, exact file names as links,
+   brief style); do not bring in the docs migration or Linux documentation.
+5. Build and verify: Windows/MSVC is unavailable in this Linux environment, so record Debug,
+   Release, `package.ps1` and the installer checks as not performed and rely on the tag CI
+   (`.github/workflows/build.yml` reads `doc/releases/<version>.md`). Do not claim local Windows
+   checks.
+6. **Ask the user for final approval before pushing.** Push the release branch and an annotated
+   `v0.11.1` tag; CI publishes the installer, ZIP and `SHA256SUMS.txt`. Do not push the old
+   `v0.9.0`-`v0.11.0` tags or recreate the old releases.
+7. After the release, resume Linux task `05-xdg-autostart-and-secrets`; 0.12.0 is released from
+   `main` after the Linux stage, with the version and scope agreed again.
 
 ## User rules
 
