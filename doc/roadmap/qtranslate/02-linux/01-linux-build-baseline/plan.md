@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 ---
 
@@ -96,3 +96,52 @@ instead of editing `doc/`, the READMEs, or `doc/architecture.md` §4.14.
   not a test defect. Use `xvfb-run` everywhere.
 - The trixie container build runs as root; mount the source read-only and build in `/tmp` so no
   root-owned files appear in the repository.
+
+## Outcome
+
+Done. The Linux tree builds, links, and passes the full suite without warnings on Debian 13
+(trixie) with Qt 6.8.2 and on Astra Linux with Qt 6.10.2. The Qt 6.5+ minimum is unchanged, no
+deploy guard was needed, and the Windows deploy block is untouched.
+
+- Build fix: `src/platform/selectiongrabber_stub.cpp` includes `<QMimeData>`. The stub's out-of-line
+  destructor instantiates `std::unique_ptr<QMimeData>`, so the complete type is required. No other
+  stub needed the same fix: `appcontroller.cpp` and `selectiongrabber_win.cpp` already include the
+  header before using the type.
+- Warnings: `qtranslate_set_compile_options()` adds `-Wall -Wextra` under
+  `elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")`; MSVC keeps `/utf-8 /W4 /permissive-`, and
+  `-Werror` is not added. Two warnings surfaced in shared code and were fixed there, with no
+  behaviour change: the `numpad` test now builds
+  `QKeySequence(QKeyCombination(Qt::ControlModifier | Qt::KeypadModifier, Qt::Key_1))` (same
+  combination; removes a GCC ISO-ambiguity warning), and the unused `VkF24` constant is removed
+  (Clang `-Wunused-const-variable`). All 81 compile commands carry the flags.
+- trixie runs: Debian 13.7, GCC 14.2.0, Qt 6.8.2, CMake 3.31.6, Ninja 1.12.1. Source mounted
+  read-only; Debug and Release built in `/tmp/build-debug` and `/tmp/build-release`:
+  `cmake -S /src -B /tmp/build-<config> -G Ninja -DCMAKE_BUILD_TYPE=<Config>`,
+  `cmake --build ... --parallel`, `xvfb-run -a ctest --test-dir ... --output-on-failure`,
+  `xvfb-run -a .../qtranslate --version`. Both configs: 20/20 tests passed, 0 `warning:` lines,
+  `QTranslate 0.11.0`.
+- Astra runs: Astra Linux 1.8.7, GCC 12.2.0, Qt 6.10.2, CMake 3.31.6, Ninja 1.13.0. Clean Debug and
+  Release builds in the gitignored `build/linux-debug` and `build/linux-release` with
+  `-DCMAKE_PREFIX_PATH=/usr`; `xvfb-run -a ctest` 20/20 in both, 0 warnings,
+  `QTranslate 0.11.0`. A Clang 16.0.6 Debug build also had 0 warnings and 20/20.
+- 20 tests is the correct Linux count: `tst_hotkeymanager`, `tst_autostart`, and
+  `tst_secretprotector` are Windows-only and are not built on Linux; the Windows total stays 23.
+- Container: `packaging/linux/trixie.Dockerfile` uses `debian:trixie`, `--no-install-recommends`,
+  the package list from the plan, and removes the apt lists. `xauth` was added: `xvfb` only
+  recommends it, and `xvfb-run` fails with "xauth command not found" without it. Task 06 must keep
+  the same package list (including `xauth`) and add the packaging tooling.
+- Deploy block: no `if(WIN32)` guard was added. Configure succeeds on trixie, and
+  `cmake --install` (not required by this task) also completes; the deploy script logs a CMake
+  warning that `DEPLOY_TOOL_OPTIONS` has no effect with the generic deployment tool. Task 06
+  decides whether the install log needs a guard then. The Windows deploy block and MSVC branches
+  are unchanged.
+- Windows Debug/Release builds and the 23 tests were not performed: this machine has no
+  Windows/MSVC toolchain. The Windows code paths were reviewed by inspection only.
+- One `xvfb-run -a` invocation in the container hung before starting the command (the
+  `xvfb-run`/`Xvfb` race); reruns passed, including with `timeout`. Task 06 should wrap the CI
+  test run in `timeout`.
+- Facts for the documentation, not edited here: Debian 13 (trixie) ships Qt 6.8.2; Astra Linux
+  1.8.7 has Qt 6.10.2; the project minimum stays Qt 6.5+; on Linux the deploy block needs no guard
+  for configure/install, only the install-log warning above. Build logs were kept outside the
+  repository in `/tmp/opencode/qt-logs/`; no build artifacts are committed.
+- Committed locally after review; nothing was pushed.

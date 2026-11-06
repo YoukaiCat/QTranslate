@@ -1,5 +1,7 @@
 #include "platform/selectiongrabber.h"
 
+#include <QMimeData>
+
 // Non-Windows stub: there is no global selection or clipboard injection here.
 // The application is Windows-only; this keeps the target buildable elsewhere.
 

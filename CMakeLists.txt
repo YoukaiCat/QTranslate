@@ -13,6 +13,8 @@ option(QTRANSLATE_BUILD_TESTS "Build unit tests" ON)
 function(qtranslate_set_compile_options target)
     if(MSVC)
         target_compile_options(${target} PRIVATE /utf-8 /W4 /permissive-)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${target} PRIVATE -Wall -Wextra)
     endif()
 endfunction()
 

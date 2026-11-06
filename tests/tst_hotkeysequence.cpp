@@ -27,7 +27,6 @@ constexpr quint32 VkNumPad1 = 0x61;
 constexpr quint32 VkF1 = 0x70;
 constexpr quint32 VkF4 = 0x73;
 constexpr quint32 VkF12 = 0x7B;
-constexpr quint32 VkF24 = 0x87;
 constexpr quint32 VkOem1 = 0xBA;
 constexpr quint32 VkOemPlus = 0xBB;
 constexpr quint32 VkOem2 = 0xBF;
@@ -130,7 +129,8 @@ private slots:
 
     void numpad()
     {
-        const QKeySequence sequence(Qt::CTRL | Qt::KeypadModifier | Qt::Key_1);
+        const QKeySequence sequence(
+            QKeyCombination(Qt::ControlModifier | Qt::KeypadModifier, Qt::Key_1));
         QCOMPARE(HotkeySequence::fromKeySequence(sequence), (Hotkey{ModControl, VkNumPad1}));
         QCOMPARE(HotkeySequence::fromKeySequence(QKeySequence(Qt::KeypadModifier | Qt::Key_Plus)),
                  (Hotkey{0, VkAdd}));
