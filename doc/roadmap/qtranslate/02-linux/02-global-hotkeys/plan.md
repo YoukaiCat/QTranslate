@@ -21,12 +21,14 @@ the fallback. Do not synthesize keyboard input on Wayland.
   sequences, suspension releases and restores the grabs, and the existing `HotkeyManager` contract
   and signals stay unchanged.
 - On Wayland with a `GlobalShortcuts` portal, the actions bind and `Activated` emits the same
-  `HotkeyManager::activated`; without the portal or when a session/bind fails, registration returns
-  false with a clear reason and the application keeps working through CLI commands.
-- `tst_hotkeymanager` on Linux passes under `xvfb-run` in Debian 13 (trixie); the Wayland fallback is
-  verified under a headless Wayland compositor (Weston), and the portal happy path with a mock DBus
-  service or on a portal-capable desktop, otherwise recorded as not performed with the reason.
+  `HotkeyManager::activated`; without the portal or when a session fails, registration returns false
+  with a clear reason, a bind failure after the asynchronous request is reported through
+  `registrationFailed`, and the application keeps working through CLI commands.
+- `tst_hotkeymanager_x11` and `tst_hotkeymanager_wayland` pass under `xvfb-run` in Debian 13
+  (trixie); the Wayland fallback is verified under a headless Wayland compositor (Weston), and the
+  portal happy path with the mock DBus service; a real portal-capable desktop is recorded as not
+  performed with the reason when unavailable.
 - No `ydotool`, `wtype`, RemoteDesktop portal, XTest, or other synthetic input is added under
   Wayland. No X11 display is opened on a Wayland session.
-- The 20 shared tests still pass, the build has no warnings, and Windows is reviewed for `#ifdef`
-  safety but not compiled here.
+- The 20 shared tests and both Linux hotkey tests (22 total) pass, the build has no warnings, and
+  Windows is reviewed for `#ifdef` safety but not compiled here.
