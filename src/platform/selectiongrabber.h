@@ -9,11 +9,12 @@
 
 class QMimeData;
 
-// Grabs the text selected in the active Windows application through the
-// clipboard: waits for the hotkey to be released, sends Ctrl+C, reads the
-// result and restores the previous clipboard contents (see
-// doc/architecture.md, §4.4). Asynchronous; the callback is called exactly
-// once per successful grab().
+// Grabs the text selected in the active application through the clipboard:
+// waits for the hotkey to be released, sends Ctrl+C, reads the result and
+// restores the previous clipboard contents (see doc/architecture.md, §4.4).
+// Windows uses SendInput (selectiongrabber_win.cpp); Linux uses XTest on X11
+// and the manually copied clipboard on Wayland (selectiongrabber_linux.cpp).
+// Asynchronous; the callback is called exactly once per successful grab().
 class SelectionGrabber : public QObject
 {
     Q_OBJECT
@@ -53,4 +54,9 @@ private:
     quint32 m_sequenceNumber = 0;
     int m_maxLength = 20000;
     bool m_restoreClipboard = true;
+
+#if defined(Q_OS_LINUX)
+    struct LinuxState;
+    std::unique_ptr<LinuxState> m_linux;
+#endif
 };

@@ -1,5 +1,6 @@
 #include "platform/hotkeymanager.h"
 #include "platform/portalshortcut.h"
+#include "platform/sessiontype.h"
 
 #include <QDBusConnection>
 #include <QDBusError>
@@ -44,21 +45,6 @@ int x11ErrorHandler(Display *, XErrorEvent *event)
 // Caps Lock and Num Lock must not break a hotkey, so each combination is
 // grabbed four times: as is and with either lock mask added.
 constexpr unsigned int kLockVariants[] = {0, LockMask, Mod2Mask, LockMask | Mod2Mask};
-
-bool isWaylandSession()
-{
-    if (!qEnvironmentVariableIsEmpty("WAYLAND_DISPLAY"))
-        return true;
-    if (qEnvironmentVariable("XDG_SESSION_TYPE").compare(QLatin1String("wayland"),
-                                                         Qt::CaseInsensitive)
-        == 0) {
-        return true;
-    }
-    // The GUI application reports the selected platform plugin. The guiless
-    // hotkey test has no QGuiApplication, so this check is skipped there.
-    return qGuiApp && qGuiApp->platformName().startsWith(QLatin1String("wayland"),
-                                                         Qt::CaseInsensitive);
-}
 
 // GlobalShortcuts portal names. The interface is versioned; version 1 is the
 // first release that supports BindShortcuts.
@@ -1433,7 +1419,7 @@ void HotkeyManager::WaylandState::onShortcutsChanged(
 
 HotkeyManager::HotkeyManager(QObject *parent)
     : QObject(parent)
-    , m_waylandSession(isWaylandSession())
+    , m_waylandSession(Platform::isWaylandSession())
 {
     // No display is opened and no native event filter is installed here: the
     // implementation owns a dedicated Xlib connection and a QSocketNotifier.

@@ -755,12 +755,11 @@ void AppController::translateSelectionInPlace()
     m_inPlaceReply = nullptr;
 
     // The window is captured before the grab: it is the window the user is
-    // typing in and it must still be foreground when the answer arrives.
+    // typing in and it must still be foreground when the answer arrives. On
+    // Wayland (and when X11 focus is PointerRoot/None) there is no handle; the
+    // grabber reads the manually copied clipboard and the answer is put on the
+    // clipboard instead of being pasted.
     const quintptr target = Platform::foregroundWindow();
-    if (target == 0) {
-        qCWarning(lcApp) << "Translate-and-replace: no foreground window";
-        return;
-    }
 
     m_grabber->grab([this, target](const QString &text) {
         if (text.isEmpty()) {
@@ -786,6 +785,16 @@ void AppController::translateSelectionInPlace()
                 return;
             if (!result.ok()) {
                 showInPlaceMessage(TranslationErrorText::forResult(result));
+                return;
+            }
+
+            if (m_inPlaceTarget == 0) {
+                // No window handle: Wayland, or X11 focus is PointerRoot/None.
+                // There is no safe target for synthetic input, so leave the
+                // translation on the clipboard.
+                QGuiApplication::clipboard()->setText(result.translatedText);
+                showInPlaceMessage(
+                    tr("Could not paste automatically; the translation is on the clipboard."));
                 return;
             }
 

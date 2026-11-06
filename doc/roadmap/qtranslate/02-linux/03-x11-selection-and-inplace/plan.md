@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-linux-build-baseline]
 ---
@@ -373,3 +373,94 @@ belongs to `05-cli-and-desktop-integration` and is not added here.
   `Q_OS_WIN` header layout and the `if(WIN32)` CMake/test blocks byte-identical and review only.
 - A rebuild on Astra loses `security.exec_id`; re-run `sudo /usr/bin/fly-set-execid.sh` before the
   X11 hotkey test, otherwise it `QSKIP`s. This is host setup, not repository content.
+
+## Outcome
+
+Done. Linux now has X11 implementations of `SelectionGrabber` and the window helpers; the Wayland
+path reads the manually copied clipboard and never performs synthetic input. Linux has 24 tests,
+Windows keeps 23.
+
+- Files: new `src/platform/sessiontype.h`, `src/platform/selectiongrabber_linux.cpp`,
+  `src/platform/windowactivation_linux.cpp`, `tests/tst_selectiongrabber_linux.cpp`, and
+  `tests/tst_windowactivation_linux.cpp`. Modified: `src/platform/hotkeymanager_linux.cpp` (the
+  anonymous session rule is replaced by `Platform::isWaylandSession()`), `src/platform/selectiongrabber.h`
+  (Linux-only `LinuxState` member), `src/platform/selectiongrabber_stub.cpp` and
+  `src/platform/windowactivation.h` (comments), `src/app/appcontroller.cpp` (null-target fallback),
+  `CMakeLists.txt`, and `tests/CMakeLists.txt`. `qtranslate_core` stays X11-free; the Windows block,
+  `selectiongrabber_win.cpp`, and `windowactivation_win.cpp` are untouched.
+- Grabber: `XQueryKeymap` polls Control/Shift/Alt/Super every 10 ms, starts Ctrl+C with XTest when
+  they are up, and after the 300 ms cap sends a synthetic release for the mouse modifiers still held
+  before copying. `QClipboard::changed` plus a 400 ms timeout detects the result; a timeout returns
+  an empty selection and never the pre-existing clipboard text. All `QMimeData` formats are
+  snapshotted when `restoreClipboard` is true and restored after the read; `restoreClipboard=false`
+  leaves the copied text in place. The text is trimmed and limited to `maxLength` without splitting a
+  surrogate pair. `cancel()` restores the snapshot when the grab was waiting for the clipboard and is
+  idempotent; `finish()` calls the callback exactly once. On Wayland the grabber sets
+  `WaitingForClipboard`, reads `QClipboard::text()` on the first tick, and does not open a display or
+  snapshot anything.
+- Window helpers: a process-lifetime `Display*` is opened lazily only outside a Wayland session.
+  `foregroundWindow()` reads `_NET_ACTIVE_WINDOW`, validates it with `XGetWindowAttributes`, and falls
+  back to `XGetInputFocus` (0 for `None`, `PointerRoot`, and the root). `isFullscreenForegroundWindow()`
+  excludes our own `_NET_WM_PID`, requires `_NET_WM_STATE_FULLSCREEN`, and requires `IsViewable`.
+  `sendPasteShortcut()` sends XTest Ctrl+V; `allowAnyProcessToActivate()` is a no-op. Property reads
+  and window validation use a scoped `XSetErrorHandler`, so stale ids, missing EWMH properties, and a
+  missing WM return 0/false without an X protocol error or a crash. On Wayland every function returns
+  0/false before any X11 call.
+- Wayland and `AppController`: the early `target == 0` return is gone; after a successful translation
+  the null-target branch copies `result.translatedText` with `QGuiApplication::clipboard()->setText()`
+  and shows the existing `tr("Could not paste automatically; the translation is on the clipboard.")`.
+  The "active window changed" branch and `pasteTranslation()`/the 500 ms restore are unchanged, and
+  no `tr()` strings, `.ts` files, or `tst_translations` were touched. The one-time manual-copy warning
+  remains in `05-cli-and-desktop-integration`.
+- Build: the Linux `qtranslate` block selects the two Linux files, adds `sessiontype.h`, links
+  `X11::X11 X11::Xtst Qt6::DBus`, and fails configure with a clear `FATAL_ERROR` when the XTest
+  imported target is missing. The five stubs remain in the `else()` branch for macOS and other
+  non-Linux platforms; the Windows block is byte-identical. `tests/CMakeLists.txt` adds
+  `tst_selectiongrabber_linux` and `tst_windowactivation_linux`, compiles the platform files, links
+  `Qt::Widgets X11::X11 X11::Xtst`, and sets `QT_QPA_PLATFORM=xcb`.
+- Verification:
+  - `debian:trixie` (Qt 6.8.2, GCC 14.2), clean Debug and Release builds from the read-only source
+    mount with `-Wall -Wextra`: 0 `warning:` lines; `timeout 300 xvfb-run -a ctest` 24/24 in both
+    configurations. `tst_selectiongrabber_linux` 12 passed, `tst_windowactivation_linux` 13 passed,
+    `tst_hotkeymanager_x11` 16 passed, `tst_hotkeymanager_wayland` 20 passed; no skips. The 22
+    pre-existing tests still pass.
+  - Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2), native Debug and Release in `build/linux-debug` and
+    `build/linux-release`: 0 warnings; after `sudo /usr/bin/fly-set-execid.sh`, CTest 24/24 in both
+    configurations, the new tests 12/12 and 13/13, and the hotkey tests 16/16 and 20/20 without
+    `QSKIP`. Clang 16 Debug builds the new tests clean (12/12 and 13/13); `tst_hotkeymanager_x11`
+    `QSKIP`s there only because the Clang binary is not in `/etc/X11/trusted.d/qtranslate`.
+  - Valgrind on `tst_windowactivation_linux`: 0 definitely/indirectly lost bytes. The only reported
+    issue is an uninitialised byte in a Qt xcb `writev` during screen initialisation, not in the new
+    code.
+  - Manual check on the real Astra X11 session `:0` with `kate` as the editor and temporary
+    `XDG_CONFIG_HOME`/`XDG_STATE_HOME`: Ctrl+Q logged `Hotkey activated: 0`, grabbed 76 characters,
+    Google returned HTTP 200, and the popup opened in 38 ms; Ctrl+Shift+Q logged a 44-character grab,
+    translated, and replaced the selection; Ctrl+W logged `Hotkey activated: 2`, grabbed 39
+    characters, and opened the main window. The marker clipboard was restored after each scenario.
+    With `restoreClipboard=false`, Ctrl+Q left the copied selection on the clipboard instead of the
+    marker. The application and editor were stopped afterwards.
+- Known limitations and review notes:
+  - If the user releases the hotkey modifiers before the main key (for example, Ctrl and Shift before
+    Q), the passive `XGrabKey` is still active, so the synthetic Ctrl+C is delivered to the grab
+    client, the clipboard does not change, and the 400 ms timeout reports "nothing is selected". This
+    is why `xdotool key ctrl+shift+q` fails while the natural release order (Q first) works. The 300 ms
+    path releases only modifiers. Fixing it needs the hotkey keycode passed from `HotkeyManager` to
+    the grabber or an explicit ungrab, both of which change the frozen `HotkeyManager` API/behavior,
+    so it is recorded as a known limitation instead of a code change. The reviewer confirmed the same
+    scenario; its two test-coverage suggestions (asserting that Wayland opens no display and a test
+    for the null-target `AppController` branch) were declined: the first is covered by code inspection
+    and the behavioural Wayland test, and the second is outside the plan's diff-review gate.
+  - The plan's accepted risks remain: a same-owner re-copy of identical text may not emit
+    `QClipboard::changed`; `XKeysymToKeycode(XK_c)` can return 0 on a non-Latin layout (empty
+    selection, warning logged); the Wayland clipboard can be stale, and the explanatory warning is
+    task 05.
+  - The optional Weston headless/`strace` check was not performed; the Wayland guard is covered by the
+    unit tests. A real Wayland desktop was not available (Astra runs X11), so the real Wayland Ctrl+Q
+    path is not performed.
+- Windows: Debug/Release and the 23 Windows tests were not performed (no MSVC). The `Q_OS_LINUX`
+  header additions, the `AppController` null-target branch, the `if(WIN32)` CMake/test blocks, and the
+  untouched `*_win.cpp` files were reviewed by diff only.
+- Facts for the documentation (not edited here): Linux has 24 tests and Windows 23; XTest
+  (`libxtst-dev`) is a hard build dependency of the Linux application; the two GUI tests need
+  `QT_QPA_PLATFORM=xcb` under `xvfb-run`; `tst_translations` and all 14 `.ts` files are unchanged; on
+  Astra, re-run `sudo /usr/bin/fly-set-execid.sh` after every rebuild for the X11 hotkey test.

@@ -97,4 +97,24 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # The X11 symbols are linked because the translation unit contains the X11
     # backend, but the Wayland test never opens a display.
     target_link_libraries(tst_hotkeymanager_wayland PRIVATE X11::X11 Qt6::DBus)
+
+    # The GUI tests need the xcb platform plugin even when CI exports
+    # QT_QPA_PLATFORM=offscreen; they run under xvfb-run.
+    qtranslate_add_test(tst_selectiongrabber_linux
+        ${PROJECT_SOURCE_DIR}/src/platform/selectiongrabber.h
+        ${PROJECT_SOURCE_DIR}/src/platform/sessiontype.h
+        ${PROJECT_SOURCE_DIR}/src/platform/selectiongrabber_linux.cpp
+    )
+    target_link_libraries(tst_selectiongrabber_linux PRIVATE Qt::Widgets X11::X11 X11::Xtst)
+    set_tests_properties(tst_selectiongrabber_linux PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=xcb")
+
+    qtranslate_add_test(tst_windowactivation_linux
+        ${PROJECT_SOURCE_DIR}/src/platform/windowactivation.h
+        ${PROJECT_SOURCE_DIR}/src/platform/sessiontype.h
+        ${PROJECT_SOURCE_DIR}/src/platform/windowactivation_linux.cpp
+    )
+    target_link_libraries(tst_windowactivation_linux PRIVATE Qt::Widgets X11::X11 X11::Xtst)
+    set_tests_properties(tst_windowactivation_linux PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=xcb")
 endif()

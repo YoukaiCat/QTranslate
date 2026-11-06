@@ -2,8 +2,9 @@
 
 #include <QMimeData>
 
-// Non-Windows stub: there is no global selection or clipboard injection here.
-// The application is Windows-only; this keeps the target buildable elsewhere.
+// Non-Linux stub: there is no global selection or clipboard injection here.
+// It serves the remaining non-Linux platforms (macOS and others) and keeps the
+// target buildable there.
 
 SelectionGrabber::SelectionGrabber(QObject *parent)
     : QObject(parent)

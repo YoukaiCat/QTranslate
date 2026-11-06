@@ -90,14 +90,21 @@ if(WIN32)
         src/platform/windowactivation_win.cpp
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # XTest is a hard dependency of the Linux application: without it the
+    # grabber cannot copy the selection and the in-place path cannot paste.
+    if(NOT TARGET X11::Xtst)
+        message(FATAL_ERROR
+            "XTest is required for the Linux build; install libxtst-dev.")
+    endif()
     target_sources(qtranslate PRIVATE
         src/platform/autostart_stub.cpp
         src/platform/hotkeymanager_linux.cpp
         src/platform/secretprotector_stub.cpp
-        src/platform/selectiongrabber_stub.cpp
-        src/platform/windowactivation_stub.cpp
+        src/platform/selectiongrabber_linux.cpp
+        src/platform/windowactivation_linux.cpp
+        src/platform/sessiontype.h
     )
-    target_link_libraries(qtranslate PRIVATE X11::X11 Qt6::DBus)
+    target_link_libraries(qtranslate PRIVATE X11::X11 X11::Xtst Qt6::DBus)
 else()
     target_sources(qtranslate PRIVATE
         src/platform/autostart_stub.cpp
