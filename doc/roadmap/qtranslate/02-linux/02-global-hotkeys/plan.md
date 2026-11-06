@@ -1,6 +1,7 @@
 ---
 kind: stage
-status: todo
+status: in-progress
+base: 11742fd
 depends: [01-linux-build-baseline]
 ---
 
