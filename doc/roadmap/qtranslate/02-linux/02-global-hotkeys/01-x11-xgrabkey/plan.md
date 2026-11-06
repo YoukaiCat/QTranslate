@@ -1,18 +1,10 @@
 ---
 kind: task
-status: blocked
+status: todo
 detailed: true
 ---
 
 # X11 XGrabKey backend
-
-## Blocked
-
-Waiting for the user's decision on the Astra Linux security policy: the Parsec-patched X server
-denies passive `XGrabKey` grabs for untrusted binaries, so global hotkeys cannot be verified on
-this machine without a policy exception. The plan below gates the X11 tests on Debian 13 (trixie)
-and records an Astra `QSKIP` with the Parsec log evidence unless the user chooses to pursue the
-exception; see the journal.
 
 ## Task
 
