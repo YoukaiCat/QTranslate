@@ -20,7 +20,7 @@ the migration policy, or touch any other code. The audit sources are the working
 `CMakeLists.txt`, `tests/CMakeLists.txt`, `doc/releases/`, and `i18n/`; read them, never modify
 them.
 
-Line numbers below are from `4e34ff1`; re-locate the text if the files have moved.
+Line numbers below are from `d22976f`; re-locate the text if the files have moved.
 
 ## Steps
 
@@ -55,7 +55,7 @@ Line numbers below are from `4e34ff1`; re-locate the text if the files have move
      (`CMakeLists.txt:22-23`).
 
 3. `doc/architecture.md` 11 — correct the stale facts and record the user-approved code exception
-   (lines are from `4e34ff1`).
+   (lines are from `d22976f`).
    - 11.1 (line 1660): it opens with "The project documentation is currently Russian and
      authoritative" and names `doc/plan.md`. After stage 1 this is false. Rewrite that sentence in
      the past tense and mark it as the state before the migration. Keep the

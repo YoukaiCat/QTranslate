@@ -146,18 +146,25 @@ ctest --test-dir build/release --output-on-failure
 
 ### Linux (в разработке)
 
-Порт под Linux пока не завершён. Ядро, сетевой слой и интерфейс на Qt Widgets спроектированы
-переносимыми, но платформенные модули сейчас — заглушки: глобальные горячие клавиши, захват
-выделения, вставка в активное окно и автозагрузка не реализованы. Полноценный порт запланирован
-на следующий релиз; CI пока собирает только Windows.
+Порт под Linux пока не завершён. Дерево собирается, компонуется и проходит 20 из 20 тестов на
+Debian 13 (trixie, Qt 6.8.2) и Astra Linux 1.8.7 (Qt 6.10.2) с `-Wall -Wextra` и без
+предупреждений; платформенные модули пока — заглушки: глобальные горячие клавиши, захват
+выделения, вставка в активное окно и автозагрузка не реализованы. CI пока собирает только
+Windows.
 
-Чтобы собрать текущее дерево под Linux для разработки:
+Чтобы собрать текущее дерево под Linux для разработки (Qt 6.5+; пакеты ниже — для Debian 13 и
+Astra):
 
 ```bash
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/path/to/Qt/6.8.3/gcc_64
+sudo apt install build-essential cmake ninja-build qt6-base-dev qt6-tools-dev \
+  qt6-tools-dev-tools libx11-dev libxtst-dev libsecret-1-dev xvfb xauth
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
-ctest --test-dir build --output-on-failure
+xvfb-run -a ctest --test-dir build --output-on-failure
 ```
+
+Список пакетов совпадает с `packaging/linux/trixie.Dockerfile`; `xvfb-run` нужен, потому что
+`tst_hotkeysequence` открывает окно, а у обычного `ctest` нет дисплея.
 
 ## Известные ограничения
 

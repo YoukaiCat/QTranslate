@@ -1,7 +1,7 @@
 ---
 kind: stage
 status: done
-base: 94d3ec2
+base: 2bec883
 ---
 
 # Documentation migration and English baseline
@@ -43,8 +43,8 @@ The user has decided to continue on `main` and approved the archive name and loc
 
 Done. The flat Russian plan is archived as `doc/roadmap/qtranslate/legacy-plan.md`, the tree roadmap is in
 place, and the active documentation is English. The stage was delivered in eight task commits on `main`
-(`a194f23`, `5a57dfd`, `aab459b`, `7195339`, `9216ff7`, `4e34ff1`, `45a2cf6`, `b53f412`), preceded by the
-preparation and planner-split commits `94d3ec2` (the stage base) and `99ac5af`.
+(`340b05d`, `2d00bf4`, `29ca124`, `d490c64`, `7573e81`, `d22976f`, `31709d7`, `cc96568`), preceded by the
+preparation and planner-split commits `2bec883` (the stage base) and `ae12938`.
 
 - Tasks 01-06 moved the archive and translated the architecture, handoff, code-signing, provider,
   proofreading, LLM, dictionary, and i18n documents; stage references use the new roadmap numbers with the
@@ -72,7 +72,7 @@ preparation and planner-split commits `94d3ec2` (the stage base) and `99ac5af`.
 - Deferred, pre-existing documentation gaps found during the review and not changed here: `architecture.md`
   §4.14 says "the other 14 tests are shared" while the suite has 20 shared tests, the §8 test table
   describes 20 of the 23 tests, and `README.md` calls Linux support "in development" while stage 2 is
-  `todo`. These come from before the migration and do not block it. Commit `99ac5af` has a Russian body;
+  `todo`. These come from before the migration and do not block it. Commit `ae12938` has a Russian body;
   rewriting local history for it was not considered worth the churn.
 - User decisions: continue on `main`; archive at `doc/roadmap/qtranslate/legacy-plan.md`; the one-line
   comment exception; no Jira key; the spot-check of `doc/architecture.md` and `doc/handoff.md` was

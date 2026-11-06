@@ -1235,15 +1235,17 @@ buttons and menus for Hindi remain English.
 
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
 `*_win.cpp`; for other platforms there is `*_stub.cpp`. `qtranslate_core`, `net/`, `services/`, and
-the UI do not use WinAPI. Thanks to this, `CMakeLists.txt` is designed to build the skeleton on Linux,
-but actual testing and real platform actions will appear only in roadmap stage 2 (old stage 11):
-currently all Linux implementations are stubs.
+the UI do not use WinAPI. Thanks to this, the Linux tree configures, builds, and links: 20 of 20
+tests pass under `xvfb-run` on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7 (Qt 6.10.2), and
+the GCC/Clang build is clean with `-Wall -Wextra`. The project minimum stays Qt 6.5+. Linux platform
+actions are still stubs; they arrive in roadmap stage 2 (old stage 11) tasks 02-04, and the table
+below is the target.
 
 | Module | Windows (current) | Linux X11 (plan) | Linux Wayland (plan) |
 |---|---|---|---|
 | Hotkeys | `RegisterHotKey` | `XGrabKey` via xcb/Xlib | the `org.freedesktop.portal.GlobalShortcuts` portal; if unavailable — CLI commands bound in the DE |
 | Selection capture | `SendInput` Ctrl+C | XTest + `QClipboard` | synthetic input is unavailable; the user copies manually |
-| Translation insertion | `SendInput` Ctrl+V | XTest Ctrl+V | not reliably available; at most `wtype`/`ydotool` as an external dependency |
+| Translation insertion | `SendInput` Ctrl+V | XTest Ctrl+V | not reliably available; the translation is put on the clipboard with a message (no synthetic input) |
 | Active window | `GetForegroundWindow` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus` | no reliable API; "in-field" mode is not guaranteed |
 | Autostart | `Run` registry | `~/.config/autostart/qtranslate.desktop` | same |
 | Secrets | DPAPI | libsecret | libsecret; fallback — a 0600 file + warning |

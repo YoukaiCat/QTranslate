@@ -8,8 +8,12 @@ documentation is English. The migration to the tree roadmap and the English base
 
 ## Git
 
-- `origin/main` = `a6482e7` "Record the published 0.11.0 release"; the annotated tag `v0.11.0`
-  points to `f50c1da`. The old `v0.10.0` points to `726dac0` and is not changed.
+- The local history was rewritten on 2026-11-06 to replace a wrong author/committer address; all
+  local commits now use the GitHub noreply identity. The remote `origin/main` still has the
+  pre-rewrite history and was **not** force-pushed; do not push without a decision. The local
+  `origin/main` reference was removed and the old objects pruned.
+- The published tags are unchanged: the annotated `v0.11.0` points to `f50c1da`, the old `v0.10.0`
+  points to `726dac0`.
 - History: release 0.10.0, removal of the checksum links and return of `SHA256SUMS.txt` as an
   unlisted asset, then 0.11.0: OpenAI-compatible translation, merged DeepL, QTranslate branding.
 - After 0.11.0, a hotkey fix for games and the autopause setting were added to `main`. The change
@@ -27,6 +31,20 @@ documentation is English. The migration to the tree roadmap and the English base
   and step-by-step Ollama setup.
 - The working tree must be clean after completion; to verify the fix, `build\dist\bin\qtranslate.exe`
   was started with `--verbose`.
+
+## Linux baseline (2026-11-06)
+
+- The Linux tree builds, links, and passes 20 of 20 tests in Debug and Release on Debian 13
+  (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2; Clang 16.0.6), with
+  `-Wall -Wextra` and no warnings. `qtranslate --version` works. Windows builds and the 23 tests
+  were not performed here.
+- `packaging/linux/trixie.Dockerfile` reproduces the container; it includes `xauth` because
+  `xvfb-run` needs it. Task 06 must keep the package list and add the packaging tools.
+- `cmake --install` on Linux logs a CMake warning that `DEPLOY_TOOL_OPTIONS` has no effect with the
+  generic deployment tool; no `if(WIN32)` guard was added. One `xvfb-run -a` run hung before the
+  command started in the container; task 06 should wrap CI tests in `timeout`.
+- Roadmap stage 2 continues with hotkeys, selection, autostart/secrets, CLI/desktop, packaging, and
+  verification. The READMEs and `architecture.md` now state the Linux baseline.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
@@ -276,6 +294,8 @@ CI assets built from the tag. Do not upload the local files manually.
 - README: Main features before the screenshots; exact file names must be links; keep the style brief.
 - Do not list `SHA256SUMS.txt` and other checksum files in README/Downloads; keep the file itself in
   the release assets for those who need the hashes.
+- Commit with `Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>`; the project-local
+  `user.email` is set to it. Never use a work address in commits or tags.
 
 ## Known manual gaps
 

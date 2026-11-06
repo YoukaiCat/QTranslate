@@ -144,18 +144,24 @@ these artifacts; the tag must match the version in `CMakeLists.txt`.
 
 ### Linux (in progress)
 
-The Linux port is not finished yet. The core, network layer and Qt Widgets UI are designed to be
-portable, but the platform modules are currently stubs: global hotkeys, selection capture, paste
-into the active window and autostart are not implemented. A full Linux port is planned for a later
-release; CI currently builds Windows only.
+The Linux port is not finished yet. The tree builds, links, and passes 20 of 20 tests on Debian 13
+(trixie, Qt 6.8.2) and Astra Linux 1.8.7 (Qt 6.10.2) with `-Wall -Wextra` and no warnings; the
+platform modules are still stubs: global hotkeys, selection capture, paste into the active window
+and autostart are not implemented. CI currently builds Windows only.
 
-To build the current Linux tree for development:
+To build the current Linux tree for development (Qt 6.5+; the packages below are for Debian 13 and
+Astra):
 
 ```bash
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/path/to/Qt/6.8.3/gcc_64
+sudo apt install build-essential cmake ninja-build qt6-base-dev qt6-tools-dev \
+  qt6-tools-dev-tools libx11-dev libxtst-dev libsecret-1-dev xvfb xauth
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
-ctest --test-dir build --output-on-failure
+xvfb-run -a ctest --test-dir build --output-on-failure
 ```
+
+The package list matches `packaging/linux/trixie.Dockerfile`; `xvfb-run` is needed because
+`tst_hotkeysequence` opens a window and a bare `ctest` has no display.
 
 ## Known limitations
 

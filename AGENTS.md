@@ -43,6 +43,8 @@
 - Do not modify old releases or old tags. Fixes and improvements go into the next release/tag.
 - Do not push automatically after changing READMEs, docs, installer options or code; batch changes
   locally until the user asks for a push.
+- Commit as `Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>`; the repository-local
+  `user.email` is set to this address. Never use a work address in commits or tags.
 
 ## Versioning and release
 

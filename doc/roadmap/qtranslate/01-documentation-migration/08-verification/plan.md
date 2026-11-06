@@ -42,7 +42,7 @@ translate new material.
    `src/platform/selectiongrabber_win.cpp:248` must now point to
    `doc/roadmap/qtranslate/legacy-plan.md`; if it still says `doc/plan.md`, treat it as a regression
    of task 07 and fix that comment line only.
-5. No unintended code changes: `git diff --name-only` against the stage base `94d3ec2` and the
+5. No unintended code changes: `git diff --name-only` against the stage base `2bec883` and the
    working tree must contain only `doc/**`, `AGENTS.md`, `i18n/README.md`,
    `README.md`/`README.ru.md` if a link changed, and `src/platform/selectiongrabber_win.cpp` (the
    user-approved comment line). `git diff -- src/` must show exactly one changed comment line and no
@@ -65,7 +65,7 @@ translate new material.
    factual discrepancy appears, correct it in the affected document, re-run the link and Cyrillic
    checks, and record it in the outcome; do not expand into new translation work.
 8. Close the residual contradictions left after task 07; these are documentation edits, no new
-   translation, and no other policy changes. Line numbers are from `45a2cf6` (after task 07); locate
+   translation, and no other policy changes. Line numbers are from `31709d7` (after task 07); locate
    by heading if they have shifted.
    - `doc/architecture.md` 11.7, last bullet (line 1820): "The migration is documentation-only. A
      build is not required. If a change accidentally touches code or tests, run ..." now
@@ -171,7 +171,7 @@ user-approved comment line.
 - Old-plan references: only the archive, architecture §11, release history, map nodes, the journal,
   and this task's own text mention `doc/plan.md`; the comment at
   `src/platform/selectiongrabber_win.cpp:248` points to `doc/roadmap/qtranslate/legacy-plan.md`.
-- Code scope: `git diff --name-only 94d3ec2` lists only documentation, `AGENTS.md`, `i18n/README.md`,
+- Code scope: `git diff --name-only 2bec883` lists only documentation, `AGENTS.md`, `i18n/README.md`,
   and `src/platform/selectiongrabber_win.cpp`; `git diff -- src/` is exactly one comment line with no
   behavior change.
 - English completeness: `doc/architecture.md`, `doc/handoff.md`, the design notes, `i18n/README.md`,
