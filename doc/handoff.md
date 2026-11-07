@@ -92,8 +92,10 @@ documentation is English. The migration to the tree roadmap and the English base
   releasing Ctrl/Shift first, releasing Q first and holding the combination all work; the new
   `tst_hotkey_selection_x11` is 7/7 and is listed in `trusted.d`. The original clipboard's non-text
   formats are not restored by the manual check.
-- Roadmap stage 2 continues with CLI/desktop integration, packaging, and verification. The READMEs
-  and `architecture.md` now state the Linux baseline.
+- Roadmap stage 2 continues with CLI/desktop integration (task 06 is detailed and in progress:
+  `--translate-popup`/`--translate-main`/`--translate-inplace`, single-instance forwarding, no-tray
+  and Wayland warnings), packaging, and verification. The READMEs and `architecture.md` now state
+  the Linux baseline.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
