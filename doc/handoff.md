@@ -131,8 +131,8 @@ documentation is English. The migration to the tree roadmap and the English base
   `share/applications` are task 07.
 - Roadmap stage 2 continues with packaging: task 07 is a stage with six children (desktop/install,
   tar.gz, `.deb`, AppImage, native Astra artifacts, CI); children 01-02 are done and child 03 is
-  next. Task 08 is the final Linux gate. The READMEs and `architecture.md` still need the Linux
-  install and limitation updates at task 08.
+  detailed and ready for the coordinator (it has not started). Task 08 is the final Linux gate. The
+  READMEs and `architecture.md` still need the Linux install and limitation updates at task 08.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 

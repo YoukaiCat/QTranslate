@@ -1,6 +1,7 @@
 ---
 kind: task
-status: todo
+status: in-progress
+detailed: true
 depends: [01-desktop-entry-and-install, 02-portable-tarball]
 ---
 
@@ -59,8 +60,9 @@ Contract:
   unstripped copy.
 - Update `SHA256SUMS-linux.txt` in the output directory to contain both the tar.gz and the `.deb`
   lines. Do not create the Windows `SHA256SUMS.txt`.
-- Record `dpkg-deb --info`, `dpkg-deb --contents`, and `dpkg-deb --field qtranslate Depends` in the
-  task outcome. Install/remove on trixie: `dpkg -i`, `dpkg -L qtranslate`,
+- Record `dpkg-deb --info`, `dpkg-deb --contents`, `dpkg-deb --ctrl-tarfile` (only `./control`),
+  and `dpkg-deb --field <deb> Depends` in the task outcome. Install/remove on trixie: `dpkg -i`,
+  `dpkg -L qtranslate`,
   `desktop-file-validate /usr/share/applications/qtranslate.desktop`,
   `xvfb-run -a qtranslate --version`, `dpkg -r qtranslate`; run this in the packaging container or
   a throwaway trixie container, not on the development host.
@@ -71,51 +73,263 @@ Contract:
   `package.sh`, check `readelf -d` has no `libsecret-1.so.0`, and check `Depends` has no
   `libsecret-1-0`. Do not add a `Recommends`/`Suggests` to hide the difference.
 
+## Steps
+
+1. Add `dpkg-dev` to the trixie packaging image.
+   - `packaging/linux/trixie.Dockerfile`: add `dpkg-dev` as an explicit entry with a comment that
+     `dpkg-shlibdeps` computes the `.deb` `Depends`. `build-essential` already pulls it in, but the
+     packaging tool must be visible. Update the header comment, which currently says a later child
+     adds `dpkg-dev`.
+   - Rebuild `docker build -f packaging/linux/trixie.Dockerfile -t qtranslate-trixie .`; confirm
+     `dpkg-deb --version` and `dpkg-shlibdeps --version` (measured 1.22.22 in trixie) and that
+     `dpkg-dev` is installed. Do not add `fakeroot` or `lintian`.
+   - When child 06 moves the inline package list to `packaging/linux/trixie-packages.txt`, it must
+     carry `dpkg-dev` over.
+
+2. Extend `package.sh`'s contract and tool gate.
+   - Header comment and `usage()`: the script now produces the portable archive and
+     `qtranslate_<version>_amd64.deb`; list both artifacts and add `dpkg-deb`, `dpkg-shlibdeps`,
+     and `du` to the required-tools paragraph.
+   - `check_tools`: add `dpkg-deb:dpkg`, `dpkg-shlibdeps:dpkg-dev`, and `du:coreutils` to the
+     literal list; keep the single missing-tool message that names the trixie package.
+   - Add globals `deb_root=`, `deb_artifact=`, `deb_size=`, `deb_sha=`, `deb_depends=`, and
+     `deb_installed_size=`. Do not add a new CLI option; `--version` keeps the `X.Y.Z` regex
+     (child 05's `+astra1` suffix is out of scope).
+   - `main`: call `build_deb` after `pack_tarball` and before `write_checksums`; `print_summary`
+     prints both artifacts. Keep the existing function boundaries: this child extends the script,
+     it does not restructure it.
+
+3. Stage the `.deb` root from the same install tree.
+   - In `build_deb()`: `deb_root="$stage/deb"`; `mkdir -p "$deb_root/usr"`;
+     `cp -a "$install_root/." "$deb_root/usr/"`. This yields exactly `usr/bin/qtranslate`,
+     `usr/share/applications/qtranslate.desktop`, and
+     `usr/share/icons/hicolor/256x256/apps/qtranslate.png`; the install tree stays bundle-free.
+   - Assert `-x usr/bin/qtranslate`, regular desktop and icon files, modes `0755`, `0644`, and
+     `0644`, no `usr/bin/qt.conf`, no `usr/share/qt6`, and no `usr/lib`, `usr/plugins`, or
+     `usr/translations`; print the sorted file list. Do not copy from `bundle_root`: it carries the
+     Qt libraries, plugins, translations, and `qt.conf`.
+   - `mkdir -p "$deb_root/DEBIAN"` **before** the `dpkg-shlibdeps` call. Measured with dpkg
+     1.22.22: with `DEBIAN/` present, `dpkg-shlibdeps` emits no stderr; without it, it prints a
+     `$ORIGIN ... lack of DEBIAN sub-directory` warning per NEEDED library plus the `binaries to
+     analyze should already be installed` warning. The warnings are cosmetic, but the clean staging
+     root is the better gate.
+   - Do not strip the binary: the `.deb` ships the same `bin/qtranslate` as the tar.gz. Record
+     `sha256sum` of `install_root/bin/qtranslate` and the staged copy and require equality before
+     and after `dpkg-deb`; the builder does not modify the source file.
+
+4. Compute `Depends` with `dpkg-shlibdeps`.
+   - Create `$stage/dpkg/debian/control` (outside `$deb_root`, so it is never packaged; the
+     staging directory is removed on the next run; never create a `debian/` tree in the
+     repository) with exactly:
+
+     ```
+     Source: qtranslate
+     Section: utils
+     Priority: optional
+     Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>
+
+     Package: qtranslate
+     Architecture: any
+     Description: QTranslate - fast desktop translator
+     ```
+
+   - Run `( cd "$stage/dpkg" && dpkg-shlibdeps -O -e"$deb_root/usr/bin/qtranslate" )`; extract
+     only the `shlibs:Depends=` line and strip its prefix; die if the result is empty. Do not append
+     `libsecret-1-0`, `libqt6dbus6`, or any other entry by hand.
+   - Measured output for the staged 0.11.0 binary:
+     `libc6 (>= 2.34), libgcc-s1 (>= 3.0), libglib2.0-0t64 (>= 2.12.0), libqt6core6t64 (>= 6.8.2),
+     libqt6dbus6 (>= 6.8.2), libqt6gui6 (>= 6.1.2), libqt6network6 (>= 6.7.2),
+     libqt6widgets6 (>= 6.3.0), libsecret-1-0 (>= 0.7), libstdc++6 (>= 5), libx11-6,
+     libxtst6 (>= 2:1.2.5)`.
+   - Assert that `libc6 (>= 2.34)`, `libqt6core6t64`, `libqt6dbus6`, and `libxtst6` are present.
+     Conditional libsecret gate: if `readelf -d "$deb_root/usr/bin/qtranslate"` contains
+     `libsecret-1.so.0`, `Depends` must contain `libsecret-1-0`; otherwise it must not.
+     `libglib2.0-0t64` is in the list because the libsecret link pulls in glib; do not treat it as
+     a hand-written entry.
+   - If `dpkg-shlibdeps` fails with missing dependency information, the image lacks the runtime
+     package whose shlibs file is needed; install it in the image. Do not fall back to a manual
+     list.
+
+5. Write `DEBIAN/control` and build the `.deb`.
+   - `deb_installed_size=$(du -sk "$deb_root/usr")`; strip the path; the result must be a positive
+     integer. This is `Installed-Size` in KiB (unpacked files only, not the artifact size; the
+     `DEBIAN` directory is excluded). Measured on the current tree: about `1360` KiB after `cp -a`;
+     the exact value can vary with block allocation, so record the run's value.
+   - Write `$deb_root/DEBIAN/control` with exactly the fields from `## Task`, in this order:
+     `Package`, `Version`, `Architecture: amd64`, `Maintainer`, `Installed-Size`, `Depends`,
+     `Section: utils`, `Priority: optional`, `Homepage`, `Description`. Use an unquoted heredoc for
+     `$version`, `$deb_depends`, and `$deb_installed_size`, and **do not escape `@`** in the
+     Maintainer: measured, `\@` appears literally in `dpkg-deb --field`. Set mode `0644` and keep
+     the trailing newline. The extended description:
+     ```
+     Description: QTranslate - fast desktop translator
+      QTranslate translates text selected in other applications with a global
+      hotkey. It supports Google Translate, DeepL, and OpenAI-compatible
+      providers, and keeps its settings per user.
+     ```
+   - `dpkg-deb --build --root-owner-group "$deb_root" "$output_dir/qtranslate_${version}_amd64.deb"`;
+     no `fakeroot`; the name must be exactly `qtranslate_<version>_amd64.deb`; record the size.
+   - Self-check with `dpkg-deb --field`: `Maintainer` has no backslash and is the exact identity,
+     `Version`, `Architecture`, `Section`, `Priority`, and `Homepage` match, `Installed-Size`
+     equals the computed value, and `Depends` equals `$deb_depends`. `dpkg-deb --contents` lists
+     only the three files plus directories; `dpkg-deb --ctrl-tarfile` lists only `./control`, so the
+     package has no `postinst` or `prerm`.
+
+6. Update the checksums and the summary.
+   - `write_checksums`: rewrite `SHA256SUMS-linux.txt` with both lines from the output directory:
+     `sha256sum "qtranslate-$version-linux-x86_64.tar.gz" "qtranslate_${version}_amd64.deb" >
+     SHA256SUMS-linux.txt`; set both `artifact_sha` and `deb_sha`. Never create `SHA256SUMS.txt`.
+   - `print_summary`: add `deb: $deb_artifact`, `deb size`, `deb sha256`, `depends`, and
+     `installed size`; keep the existing archive fields.
+   - The tar is packed before `build_deb`, so `DEBIAN`, `deb/`, and `dpkg/` must not appear in
+     `tar -tzf`; assert the archive still has one top-level bundle directory.
+
+7. Verify the positive path on trixie.
+   - Rebuild the image (step 1); configure Release in a container as the host UID with
+     `--user "$(id -u):$(id -g)"`, `-e HOME=/tmp`, and `-e LANG=C.UTF-8`; build and run
+     `./packaging/linux/package.sh --build-dir <build> --output-dir build/artifacts-linux`.
+   - Record the exact output of `dpkg-deb --info`, `dpkg-deb --contents`,
+     `dpkg-deb --ctrl-tarfile` (list the entries and require only `./control`), and
+     `dpkg-deb --field <deb> Depends`, `Installed-Size`, `Maintainer`, `Homepage`, and
+     `Description`.
+   - Confirm `sha256sum -c SHA256SUMS-linux.txt` passes from the output directory; the sentinel
+     file from child 02 survives; the only new entries are the staging directory, both artifacts,
+     and the checksum file; nothing is written outside `build/`.
+   - Confirm the tar.gz still has the child 02 layout (one top-level directory, no
+     `DEBIAN`/`deb`/`dpkg` entries); `desktop-file-validate` on the install tree passes.
+
+8. Install and remove on trixie in a throwaway container.
+   - `docker run --rm -v "$PWD/build/artifacts-linux:/artifacts:ro" qtranslate-trixie bash -lc
+     '...'` — a disposable instance of the packaging image, which has the trixie runtime packages
+     and `desktop-file-utils`. Do not install on the development host or Astra; make sure no
+     `qtranslate` is running.
+   - Inside: `dpkg -i /artifacts/qtranslate_<version>_amd64.deb`; `dpkg -L qtranslate`;
+     `desktop-file-validate /usr/share/applications/qtranslate.desktop`; with temporary
+     `HOME`/`XDG_CONFIG_HOME`/`XDG_STATE_HOME`/`XDG_RUNTIME_DIR`,
+     `xvfb-run -a qtranslate --version` prints `QTranslate <version>`; `dpkg -r qtranslate`;
+     assert `/usr/bin/qtranslate`, the desktop file, and the icon are gone and `dpkg -s qtranslate`
+     reports not installed.
+   - The log may show `Processing triggers for desktop-file-utils`; that trigger comes from the
+     image, not from the package (the package has no maintainer scripts). Record the exact
+     install/remove output.
+
+9. Prove the optional libsecret dependency with a no-libsecret build.
+   - In a throwaway container, remove the development package (`dpkg -r libsecret-1-dev`; the
+     runtime `libsecret-1-0` stays), configure a separate Release build under `/tmp` (for example
+     `/tmp/trixie-nosecret`), build it, and assert `readelf -d .../qtranslate` has no
+     `libsecret-1.so.0` and `LIBSECRET_FOUND` is not `TRUE` in `CMakeCache.txt`.
+   - Run the same `package.sh` with `--build-dir /tmp/trixie-nosecret --output-dir
+     /tmp/artifacts-linux-nosecret`; `dpkg-deb --field <deb> Depends` must have no
+     `libsecret-1-0`, and the conditional gate in step 4 must pass. Install/remove this `.deb` in
+     the throwaway container; it must install on trixie.
+   - Do not use `-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON`: measured, it breaks Qt 6.8's
+     `FindXKB.cmake` with `Unknown CMake command "pkg_check_modules"`. Do not add
+     `Recommends`/`Suggests`; do not ship this build.
+
+10. Record the Astra expectation, run the regression, and report.
+    - Astra Linux 1.8.7: run `dpkg -i` on the trixie `.deb` with `sudo` if available and capture
+      the exact failure. Expected: unsatisfied `libglib2.0-0t64` and `libxtst6 (>= 2:1.2.5)`. Do
+      not edit `Depends`; never report it as passing. If `sudo` is unavailable, record the exact
+      command, the package `Depends`, and `dpkg-query -W libglib2.0-0t64 libglib2.0-0 libxtst6`
+      as not performed; child 05 covers the native Astra `.deb`.
+    - Trixie regression: Debug and Release configure/build with `-Wall -Wextra`, no warnings, and
+      `timeout 300 xvfb-run -a ctest --test-dir <build> --output-on-failure` 28/28 in both. Astra:
+      28/28 in the existing build trees, after `sudo /usr/bin/fly-set-execid.sh` if anything was
+      rebuilt. Windows Debug/Release and the 23 tests: not performed (no MSVC), reviewed by diff.
+    - Negative paths: `--help` lists the `.deb` and the new tools; a reduced `PATH` names
+      `dpkg-deb` and `dpkg-shlibdeps` in the missing-tool error; an invalid `--version`, a missing
+      `CMakeCache.txt`, and a Debug cache still fail with the existing messages; the Astra host
+      gate still prints the docker command before the tool gate.
+    - `git diff --check`; only `packaging/linux/package.sh` and `packaging/linux/trixie.Dockerfile`
+      changed; no documentation or map files. Report: `Maintainer`, `Homepage`, the exact synopsis
+      and extended Description, the `Depends` string, `Installed-Size`, `.deb` size and SHA256,
+      the install/remove evidence, the no-libsecret result, the Astra failure, and the
+      not-performed checks.
+
 ## Done when
 
 - `qtranslate_<version>_amd64.deb` is produced by the same `package.sh` run as the tar.gz and
-  contains exactly `usr/bin/qtranslate`, `usr/share/applications/qtranslate.desktop`, and
-  `usr/share/icons/hicolor/256x256/apps/qtranslate.png` (plus `DEBIAN/control` internally); no
-  autostart file, no system config, no postinst/prerm.
-- `dpkg-deb --field qtranslate Depends` is the `dpkg-shlibdeps` result; for the current trixie
-  build it contains `libqt6core6t64`, `libqt6gui6`, `libqt6widgets6`, `libqt6network6`,
-  `libqt6dbus6`, `libsecret-1-0`, `libx11-6`, `libxtst6`, and `libc6 (>= 2.34)`. A build without
+  contains exactly `usr/bin/qtranslate` (mode `0755`), `usr/share/applications/qtranslate.desktop`
+  (mode `0644`), and `usr/share/icons/hicolor/256x256/apps/qtranslate.png` (mode `0644`), all owned
+  `root/root` in the archive, plus `DEBIAN/control`; no autostart file, no system config, no
+  `postinst`/`prerm`, no menu entry, and no `lib/`, `plugins/`, `translations/`, or `bin/qt.conf`.
+- `dpkg-deb --field <deb> Depends` is exactly the `dpkg-shlibdeps -O` result with the
+  `shlibs:Depends=` prefix removed and nothing appended. For the current trixie build it contains
+  `libc6 (>= 2.34)`, `libqt6core6t64`, `libqt6gui6`, `libqt6widgets6`, `libqt6network6`,
+  `libqt6dbus6`, `libsecret-1-0`, `libx11-6`, and `libxtst6 (>= 2:1.2.5)`. A build without
   libsecret has no `libsecret-1-0` entry and still installs on trixie.
-- `dpkg-deb --info` and `dpkg-deb --contents` are recorded; on trixie `dpkg -i` succeeds,
-  `qtranslate --version` prints the version under `xvfb-run`, the desktop file passes
-  `desktop-file-validate` from `/usr/share/applications`, and `dpkg -r qtranslate` removes the
-  package and its files.
-- The output directory contains `SHA256SUMS-linux.txt` with both artifact lines, and
-  `sha256sum -c` passes. The Windows `SHA256SUMS.txt` name is not used.
+- `Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>` and
+  `Homepage: https://github.com/youkaicat/QTranslate` are exact (no backslash in the email);
+  `Version`, `Architecture: amd64`, `Section: utils`, `Priority: optional`, and the multi-line
+  English `Description` from step 5 are present; `Installed-Size` equals `du -sk` of `usr`.
+- `dpkg-deb --info`, `dpkg-deb --contents`, and `dpkg-deb --ctrl-tarfile` (only `./control`) are
+  recorded; in a throwaway `qtranslate-trixie` container (not the development host or Astra)
+  `dpkg -i` succeeds, `dpkg -L qtranslate` lists the three files, `desktop-file-validate` passes on
+  `/usr/share/applications/qtranslate.desktop`, `xvfb-run -a qtranslate --version` prints
+  `QTranslate <version>`, and `dpkg -r qtranslate` removes the package and its files; no
+  `qtranslate` is running during the check.
+- The no-libsecret build (a separate Release build in a throwaway container without
+  `libsecret-1-dev`) has no `libsecret-1.so.0` in `readelf -d` and no `libsecret-1-0` in
+  `dpkg-deb --field <deb> Depends`; its `.deb` installs on trixie; `Recommends`/`Suggests` are not
+  used to hide the difference.
+- `SHA256SUMS-linux.txt` lists both the tar.gz and the `.deb`, `sha256sum -c` passes, and the
+  Windows `SHA256SUMS.txt` name is not created. The tar.gz still contains only the bundle root and
+  no `DEBIAN`/`deb`/`dpkg` entries.
 - On Astra the trixie `.deb` failure is recorded with the exact unsatisfied dependencies
-  (`libglib2.0-0t64`, `libxtst6 (>= 2:1.2.5)`), never as passed; the Astra installation check is
-  deferred to child 05 with the native package.
+  (`libglib2.0-0t64`, `libxtst6 (>= 2:1.2.5)`), never as passed; if `sudo` is unavailable, the
+  command and the dependency facts are recorded as not performed; the Astra installation check is
+  deferred to child 05 with the native package, and `Depends` is not edited by hand.
 - Debian 13 builds Debug/Release with no warnings and CTest 28/28; Astra still builds 28/28 after
-  `fly-set-execid.sh`; Windows 23 tests are recorded as not performed; no documentation is edited.
+  `fly-set-execid.sh` if anything was rebuilt; Windows 23 tests are recorded as not performed; only
+  `packaging/linux/package.sh` and `packaging/linux/trixie.Dockerfile` change; no documentation is
+  edited.
 
 ## Risks
 
 - `dpkg-shlibdeps` needs a `debian/control` file in the working directory; without it, it warns
   about unknown packages or fails. Keep the temporary control outside the repository, or create
   and remove it inside the staging directory; never leave a `debian/` tree in the repository.
+  With `$deb_root/DEBIAN` present, dpkg 1.22.22 emits neither the `$ORIGIN` RUNPATH warning nor the
+  "binaries to analyze" warning (measured); if either appears, check the staging layout first.
 - The trixie `Depends` is not Astra-compatible by design: `libglib2.0-0t64` and
   `libxtst6 (>= 2:1.2.5)` do not exist on Astra 1.8.7. Do not relax or hand-edit the line to make
   `dpkg -i` pass; that would hide a real dependency difference and contradicts the separate
   Astra build decision.
 - `libsecret` is optional in the build. On trixie the normal build links it, so the `.deb` must
   carry `libsecret-1-0`; a no-libsecret build must not. Check `readelf -d`/`ldd` and the generated
-  `Depends`, not assumptions.
+  `Depends`, not assumptions. Do not use `-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON` for the
+  no-libsecret check: it breaks Qt 6.8's `FindXKB.cmake` (measured). Remove `libsecret-1-dev` in a
+  throwaway container instead.
 - `dpkg-deb --build --root-owner-group` requires dpkg 1.19+ (trixie has 1.22); do not add
   `fakeroot`. Ensure the binary is `0755`, the desktop file `0644`, and the icon `0644`; `dpkg-deb`
-  preserves the staging permissions.
+  preserves the staging permissions. The `cmake --install` tree should already carry these modes;
+  assert them instead of applying a blanket `chmod`.
+- The `Maintainer` email must be written literally. Measured: escaping `@` as `\@` in the control
+  heredoc leaves a backslash in `dpkg-deb --field Maintainer`. Verify the field after building.
 - Installing the package inside the build container writes to `/usr`; remove it with
-  `dpkg -r qtranslate` in the same container, and do not run it on the Astra desktop for the
-  trixie artifact. The package must not be installed while another `qtranslate` is running.
-- `Installed-Size` must be the installed size in KiB, not the artifact size; use `du -sk` on the
-  staged root (excluding `DEBIAN` or including it consistently, as dpkg does).
+  `dpkg -r qtranslate` in the same disposable container, and do not run it on the Astra desktop for
+  the trixie artifact. The package must not be installed while another `qtranslate` is running.
+  `Processing triggers for desktop-file-utils` in the log is an image trigger, not a package
+  maintainer script; `dpkg-deb --ctrl-tarfile` must list only `./control`.
+- `Installed-Size` must be the installed size in KiB, not the artifact size; use `du -sk` on
+  `$deb_root/usr` (excluding `DEBIAN`). The value can vary with filesystem block allocation between
+  runs; record the run's value in the outcome.
 - The `Maintainer` and `Homepage` values are user-facing package metadata. Use the project identity
-  above and report them to the lead; do not invent a different maintainer.
+  above and report them to the lead; do not invent a different maintainer. The exact synopsis and
+  extended `Description` are in step 5; report them as written.
 - `SHA256SUMS-linux.txt` must list both artifacts and must not collide with the Windows
-  `SHA256SUMS.txt` in the release job. Do not reuse the Windows name even temporarily.
+  `SHA256SUMS.txt` in the release job. Do not reuse the Windows name even temporarily. Child 04
+  will append the AppImage line to the same file.
 - The package does not install the icon in other hicolor sizes; the single 256x256 file is
   enough, and `Icon=qtranslate` matches it. Do not add a second icon name.
+- The `--version` regex stays `X.Y.Z` in this child. Child 05's native Astra package version
+  `+astra1` and its artifact naming are a separate change; do not preemptively relax the regex or
+  add an Astra mode to this script.
+- Child 06 later moves the inline package list to `packaging/linux/trixie-packages.txt`; that list
+  must include `dpkg-dev` (for `dpkg-shlibdeps`) alongside the existing `patchelf`, `qt6-wayland`,
+  and `qt6-translations-l10n` entries.
+- A bare `debian:trixie` container cannot pass `dpkg -i` for this package without first installing
+  the runtime dependencies; use a throwaway instance of `qtranslate-trixie` for the install/remove
+  gate, or install the dependencies first and record the exact command. Do not claim a bare image
+  install as passing. The `.deb` is not distribution-independent; it targets trixie's package
+  names.
