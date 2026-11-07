@@ -368,7 +368,8 @@ the commit the user personally tested; it is three commits after `v0.11.0` (`a64
 `d7d4d05` release hotkeys for fullscreen, `ef09e8c` fullscreen pause setting).
 
 1. The release branch `release/0.11.1` was created from `ef09e8c`; current `main` was not tagged
-   and the documentation migration/Linux work is not included.
+   and the documentation migration/Linux work is not included. The branch was deleted after
+   publication; the tag and release stay on `a0f7d5e`.
 2. `a0f7d5e` bumped the version in `CMakeLists.txt` and `resources/qtranslate.rc`, added
    `doc/releases/0.11.1.md` (fullscreen hotkey pause, the manual **Pause hotkeys** tray item,
    `hotkeys/pauseInFullscreen`, no Linux claims) and updated `README.md`/`README.ru.md`.
@@ -378,12 +379,16 @@ the commit the user personally tested; it is three commits after `v0.11.0` (`a64
    portable ZIP and `SHA256SUMS.txt` (unlisted). No old tag was pushed or recreated.
 5. Release: https://github.com/YoukaiCat/QTranslate/releases/tag/v0.11.1
 
+User decision (2026-11-08): leave 0.11.1 exactly as published; do not re-tag or re-release it.
+Releases are tag-driven. When 0.12.0 is published, delete the old 0.11.1 GitHub release.
+
 ## Next release
 
 **0.12.0 after the Linux stage**, from `main`, with the version and scope agreed again. It follows
 the same release flow: version bump, `doc/releases/0.12.0.md`, README links, local checks where
-possible, tag CI as the build gate, and an explicit user approval before the push. Do not reuse the
-`release/0.11.1` branch.
+possible, tag CI as the build gate, and an explicit user approval before the push. The 0.11.1
+branch is deleted; do not recreate it. When 0.12.0 is published, delete the old 0.11.1 GitHub
+release.
 
 ## User rules
 
