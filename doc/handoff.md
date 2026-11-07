@@ -83,6 +83,14 @@ documentation is English. The migration to the tree roadmap and the English base
   `QGuiApplication::setDesktopFileName("qtranslate")` fixes the Wayland app id; the Linux install
   tree has only `bin/qtranslate`, the desktop file and the icon, and keeps
   `RUNPATH $ORIGIN:$ORIGIN/../lib`.
+- Portable archive (task 07.02, `23840c6`): `packaging/linux/package.sh` builds
+  `qtranslate-<version>-linux-x86_64.tar.gz` with bundled Qt 6.8.2, 17 plugins, 13 Qt
+  translations, a script-written `qt.conf`, `patchelf` RPATH (`$ORIGIN` on libraries,
+  `$ORIGIN/../../lib` on plugins) and `SHA256SUMS-linux.txt`. The trixie image adds `patchelf`,
+  `qt6-wayland` and `qt6-translations-l10n`. Known issues: `ctest` as uid 1000 in the image fails
+  `tst_hotkeymanager_wayland` because `/etc/passwd` has no entry for the uid (CI runs as root), and
+  plugin presence is checked per directory, not per file. The READMEs still say 20/20 tests
+  (task 08).
 - Astra Linux Parsec denies passive `XGrabKey` for untrusted binaries. The user approved the `KBD_R`
   trusted-client exception: `/etc/X11/trusted.d/qtranslate` lists
   `build/linux-{debug,release}/qtranslate`, `build/linux-{debug,release}/tests/tst_hotkeymanager_x11`
@@ -122,8 +130,8 @@ documentation is English. The migration to the tree roadmap and the English base
   forwarding and the legacy wire (20/20). The `.desktop` file, hicolor icons and
   `share/applications` are task 07.
 - Roadmap stage 2 continues with packaging: task 07 is a stage with six children (desktop/install,
-  tar.gz, `.deb`, AppImage, native Astra artifacts, CI); child 01 is done and child 02 is in
-  progress. Task 08 is the final Linux gate. The READMEs and `architecture.md` still need the Linux
+  tar.gz, `.deb`, AppImage, native Astra artifacts, CI); children 01-02 are done and child 03 is
+  next. Task 08 is the final Linux gate. The READMEs and `architecture.md` still need the Linux
   install and limitation updates at task 08.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
