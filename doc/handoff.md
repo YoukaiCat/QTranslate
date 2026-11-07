@@ -9,18 +9,17 @@ documentation is English. The migration to the tree roadmap and the English base
 ## Git
 
 - The GitHub repository was recreated on 2026-11-06; the new repository contains only the clean
-  local history (`main` tracks `origin/main`) and no old commits, tags, or releases. The old
-  repository's history and activity are gone.
+  local history and no pre-recreation commits, tags, or releases. Its only release is 0.11.1
+  (tag `v0.11.1`). The old repository's history and activity are gone.
 - The local history was rewritten on 2026-11-06 to replace a wrong author/committer address; all
   local commits use the GitHub noreply identity. The rewritten history was pushed to the new
   repository; no other push was made.
-- The local tags are unchanged: `v0.11.0` points to `f50c1da`, `v0.10.0` to `726dac0`; they were
-  not pushed to the new repository.
+- The old local tags are unchanged: `v0.11.0` points to `f50c1da`, `v0.10.0` to `726dac0`; they
+  were not pushed to the new repository. Only `v0.11.1` is on the remote.
 - History: release 0.10.0, removal of the checksum links and return of `SHA256SUMS.txt` as an
   unlisted asset, then 0.11.0: OpenAI-compatible translation, merged DeepL, QTranslate branding.
-- After 0.11.0, a hotkey fix for games and the autopause setting were added to `main`. The change
-  was **pushed without a new tag and without a release**; the version stays 0.11.0. A 0.11.1 patch
-  release comes only after separate approval.
+- After 0.11.0, a hotkey fix for games and the autopause setting were added to `main`; they were
+  released as the 0.11.1 Windows patch from `ef09e8c` (see Release 0.11.1).
 - Inside `DeepLService` the mode is stored as `enum class Mode { Api, FreeWeb }`, and in the INI as
   the string `deepl.mode=api|free-web`. The **Services** tab in settings scrolls (`QScrollArea`) so
   the bottom hint is not cut off at 150% scaling.
@@ -85,8 +84,8 @@ documentation is English. The migration to the tree roadmap and the English base
 - Verified on a borderless-fullscreen window: the log shows
   `Fullscreen foreground app detected; hotkeys paused`, after closing —
   `Fullscreen foreground app ended; hotkeys resumed`.
-- Debug and Release: 23/23. The version stays 0.11.0; do not touch the published tag/assets. The fix
-  will be pushed to `main` but **without a release**; ship it as 0.11.1 only after separate approval.
+- Debug and Release: 23/23. The fix shipped in the 0.11.1 Windows patch from `ef09e8c`; do not
+  touch the published tag or assets.
 
 ## Releases
 
@@ -119,6 +118,15 @@ documentation is English. The migration to the tree roadmap and the English base
   - CI run of the tag: https://github.com/youkaicat/QTranslate/actions/runs/41943741295
   - CI run of `main`: https://github.com/youkaicat/QTranslate/actions/runs/41943729918
   - `SHA256SUMS.txt` remains an unlisted asset; there is no link in README/Downloads.
+- `v0.11.1` — published: https://github.com/YoukaiCat/QTranslate/releases/tag/v0.11.1
+  - Windows patch from `ef09e8c`, the commit the user personally tested; branch `release/0.11.1`,
+    release commit `a0f7d5e`, annotated tag `v0.11.1`.
+  - Fullscreen hotkey pause, the manual **Pause hotkeys** tray item and `hotkeys/pauseInFullscreen`;
+    no Linux or documentation-migration content.
+  - Local Windows Debug/Release, `package.ps1` and installer checks were not performed (no MSVC);
+    the tag CI built setup 11 176 182 bytes, ZIP 13 797 473 bytes and the unlisted
+    `SHA256SUMS.txt`.
+  - CI run of the tag: https://github.com/youkaicat/QTranslate/actions/runs/42303477455
 
 ## Localization (old stage 12, completed)
 
@@ -289,33 +297,29 @@ CI assets built from the tag. Do not upload the local files manually.
    downloaded and verified.
 6. Release: https://github.com/youkaicat/QTranslate/releases/tag/v0.10.0
 
+## Release 0.11.1 (2026-11-07)
+
+The user chose **0.11.1 from `ef09e8c` now**, then **0.12.0 after the Linux stage**. `ef09e8c` is
+the commit the user personally tested; it is three commits after `v0.11.0` (`a6482e7` record,
+`d7d4d05` release hotkeys for fullscreen, `ef09e8c` fullscreen pause setting).
+
+1. The release branch `release/0.11.1` was created from `ef09e8c`; current `main` was not tagged
+   and the documentation migration/Linux work is not included.
+2. `a0f7d5e` bumped the version in `CMakeLists.txt` and `resources/qtranslate.rc`, added
+   `doc/releases/0.11.1.md` (fullscreen hotkey pause, the manual **Pause hotkeys** tray item,
+   `hotkeys/pauseInFullscreen`, no Linux claims) and updated `README.md`/`README.ru.md`.
+3. Local Windows Debug/Release, `package.ps1` and installer checks were not performed (no MSVC);
+   the tag CI was the build gate.
+4. The branch and the annotated tag `v0.11.1` were pushed; CI succeeded and published the installer,
+   portable ZIP and `SHA256SUMS.txt` (unlisted). No old tag was pushed or recreated.
+5. Release: https://github.com/YoukaiCat/QTranslate/releases/tag/v0.11.1
+
 ## Next release
 
-The GitHub repository was recreated on 2026-11-06 and has no releases or tags. The user chose
-**0.11.1 from `ef09e8c` now**, then **0.12.0 after the Linux stage**. `ef09e8c` is the commit the
-user personally tested; it is three commits after `v0.11.0` (`a6482e7` record, `d7d4d05` release
-hotkeys for fullscreen, `ef09e8c` fullscreen pause setting). 0.11.1 is a Windows patch and must not
-include the documentation migration or the Linux work on current `main`; 0.12.0 comes from `main`
-after tasks 05-08.
-
-1. Create a release branch from `ef09e8c` (for example `release/0.11.1`); do not tag current `main`.
-2. Bump the version to `0.11.1` in `CMakeLists.txt` (`project(VERSION ...)`) and
-   `resources/qtranslate.rc` (`FileVersion`/`ProductVersion`). The build-file change goes through a
-   coordinator per the project rules.
-3. Add `doc/releases/0.11.1.md` with Windows notes: fullscreen hotkey pause, the manual **Pause
-   hotkeys** tray item and `hotkeys/pauseInFullscreen`; download links point to the new repository's
-   `v0.11.1`; no Linux claims; keep `SHA256SUMS.txt` as an unlisted asset.
-4. Update `README.md` and `README.ru.md` on the release branch (status, exact file names as links,
-   brief style); do not bring in the docs migration or Linux documentation.
-5. Build and verify: Windows/MSVC is unavailable in this Linux environment, so record Debug,
-   Release, `package.ps1` and the installer checks as not performed and rely on the tag CI
-   (`.github/workflows/build.yml` reads `doc/releases/<version>.md`). Do not claim local Windows
-   checks.
-6. **Ask the user for final approval before pushing.** Push the release branch and an annotated
-   `v0.11.1` tag; CI publishes the installer, ZIP and `SHA256SUMS.txt`. Do not push the old
-   `v0.9.0`-`v0.11.0` tags or recreate the old releases.
-7. After the release, resume Linux task `05-xdg-autostart-and-secrets`; 0.12.0 is released from
-   `main` after the Linux stage, with the version and scope agreed again.
+**0.12.0 after the Linux stage**, from `main`, with the version and scope agreed again. It follows
+the same release flow: version bump, `doc/releases/0.12.0.md`, README links, local checks where
+possible, tag CI as the build gate, and an explicit user approval before the push. Do not reuse the
+`release/0.11.1` branch.
 
 ## User rules
 
