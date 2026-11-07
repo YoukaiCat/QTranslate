@@ -12,7 +12,7 @@ Build QTranslate for Linux x86_64 with the same scenarios as Windows where the p
 
 ## What to do, what is touched
 
-Linux implementations of `platform/*` (XDG autostart, X11 `XGrabKey`, the Wayland `GlobalShortcuts` portal where the desktop provides it, X11 XTest and clipboard selection capture, active-window activation, libsecret with a 0600-file fallback); CLI commands `--translate-popup`, `--translate-main`, `--translate-inplace`; `.desktop`, hicolor icons, `share/applications`; `tar.gz`, `.deb`, and AppImage built for Debian 13 (trixie) in a `debian:trixie` container (`tar.gz` and AppImage are distro-independent), with installation and launch checked on Astra Linux; a `debian:trixie` container job in CI with `xvfb-run`; README and architecture updates for installation and platform limitations. The old plan's stage 11 lists the detailed scope.
+Linux implementations of `platform/*` (XDG autostart, X11 `XGrabKey`, the Wayland `GlobalShortcuts` portal where the desktop provides it, X11 XTest and clipboard selection capture, active-window activation, libsecret with a 0600-file fallback); CLI commands `--translate-popup`, `--translate-main`, `--translate-inplace`; `.desktop`, hicolor icons, `share/applications`; `tar.gz`, `.deb`, and AppImage built for Debian 13 (trixie) in a `debian:trixie` container, with installation and launch checked on Astra Linux using native Astra artifacts; a `debian:trixie` container job in CI with `xvfb-run`; README and architecture updates for installation and platform limitations. The trixie `tar.gz` and AppImage bundle Qt but inherit trixie's glibc baseline, so they are not claimed on Astra. The old plan's stage 11 lists the detailed scope.
 
 ## Done when
 
@@ -24,7 +24,7 @@ Linux implementations of `platform/*` (XDG autostart, X11 `XGrabKey`, the Waylan
 
 ## Depends on
 
-None technically; follows stage 1 in the old order. The primary distro is Debian 13 (trixie) with Debian 13 dependencies; trixie ships Qt 6.8.2, so the project's Qt 6.5+ minimum stays unchanged. Astra Linux (Qt 6.10.2) is mandatory for build, launch, and `.deb` checks; if a trixie `.deb` cannot satisfy Astra's dependencies, the portable `tar.gz`/AppImage or a separate Astra build covers it, and Astra support must not be dropped. X11 is the full target; Wayland is limited to the `GlobalShortcuts` portal where available, manual copying, CLI commands, and explicit warnings.
+None technically; follows stage 1 in the old order. The primary distro is Debian 13 (trixie) with Debian 13 dependencies; trixie ships Qt 6.8.2, so the project's Qt 6.5+ minimum stays unchanged. Astra Linux (Qt 6.10.2) is mandatory for build, launch, and `.deb` checks; the trixie `.deb` cannot satisfy Astra's dependencies (measured: `libglib2.0-0t64`, `libxtst6 (>= 2:1.2.5)`), and the trixie `tar.gz`/AppImage cannot run there because the bundled Qt needs `GLIBC_2.38` while Astra has 2.36, so a separate native Astra build covers Astra and support must not be dropped. X11 is the full target; Wayland is limited to the `GlobalShortcuts` portal where available, manual copying, CLI commands, and explicit warnings.
 
 ## Risks and what is needed from the user
 

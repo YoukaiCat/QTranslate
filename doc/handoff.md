@@ -41,6 +41,15 @@ documentation is English. The migration to the tree roadmap and the English base
   were not performed here.
 - `packaging/linux/trixie.Dockerfile` reproduces the container; it includes `xauth` because
   `xvfb-run` needs it. Task 07 must keep the package list and add the packaging tools.
+- Packaging measurement (task 07 planning): trixie Qt 6.8.2 `libQt6Gui`/`libQt6Network` require
+  `GLIBC_2.38`, while Astra 1.8.7 has glibc 2.36; `dpkg-shlibdeps` produces `libglib2.0-0t64` and
+  `libxtst6 (>= 2:1.2.5)`, while Astra has `libglib2.0-0` 2.74.6 and `libxtst6` 2:1.2.3. The trixie
+  `.deb`, tar.gz and AppImage therefore cannot serve Astra; only a native Astra build works. Task 07
+  is a stage with six children: desktop/install, tar.gz, `.deb`, AppImage, native Astra artifacts,
+  and CI. Only trixie artifacts are CI-published; the Astra artifacts are local verification
+  artifacts, because release artifacts stay CI-built. Qt's Linux deploy script copies no Qt
+  libraries and writes a trixie `qt.conf`, so it is guarded with `if(WIN32)` and `package.sh` owns
+  the layout.
 - Per-user paths, autostart and secrets are implemented (task 05, `aed4028`). `src/core/apppaths.h`
   reads `XDG_CONFIG_HOME`/`XDG_STATE_HOME` directly (empty and relative values ignored) and appends
   lowercase `qtranslate`; settings are `<config>/qtranslate/qtranslate.ini` and the log
@@ -105,8 +114,9 @@ documentation is English. The migration to the tree roadmap and the English base
   in-place messages use a non-modal message box. `tst_cli` covers the parser, two-process
   forwarding and the legacy wire (20/20). The `.desktop` file, hicolor icons and
   `share/applications` are task 07.
-- Roadmap stage 2 continues with packaging (task 07: `.deb`/`tar.gz`/AppImage, `.desktop`/icons,
-  CI) and verification (task 08). The READMEs and `architecture.md` now state the Linux baseline.
+- Roadmap stage 2 continues with packaging: task 07 is a stage with six children (desktop/install,
+  tar.gz, `.deb`, AppImage, native Astra artifacts, CI); child 01 is in progress. Task 08 is the
+  final Linux gate. The READMEs and `architecture.md` now state the Linux baseline.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
