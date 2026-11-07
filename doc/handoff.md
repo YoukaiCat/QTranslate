@@ -46,7 +46,9 @@ documentation is English. The migration to the tree roadmap and the English base
   lowercase `qtranslate`; settings are `<config>/qtranslate/qtranslate.ini` and the log
   `<state>/qtranslate/qtranslate.log`, while a portable `qtranslate.ini` next to the executable
   still wins. Autostart writes `$XDG_CONFIG_HOME/autostart/qtranslate.desktop` with Desktop Entry
-  quoting, `--minimized`, repair and removal. Secrets use libsecret when `libsecret-1` is found at
+  quoting, `--minimized`, repair and removal; the writer is native Qt, no GLib/GIO or KDE/KF6
+  dependency is added, and libsecret stays the only optional transitive GLib dependency (user
+  decision). Secrets use libsecret when `libsecret-1` is found at
   build time and `org.freedesktop.secrets` is available (`l:<uuid>`), otherwise a `0600` file under
   `<config>/qtranslate/secrets` with a `0700` directory (`f:<uuid>`) and a visible warning in the
   settings dialog; a capability drop during save shows a message box.

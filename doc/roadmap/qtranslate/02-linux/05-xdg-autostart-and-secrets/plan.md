@@ -362,7 +362,9 @@ secrets through libsecret with a visible 0600-file fallback. Linux has 27 tests,
   `"<path>" --minimized`, a `[Desktop Entry]` with `Type=Application`, `Name=QTranslate`, `Exec=`,
   `Icon=qtranslate`, `Terminal=false` and `X-GNOME-Autostart-enabled=true` under
   `$XDG_CONFIG_HOME/autostart/qtranslate.desktop`; `sync(true)` repairs a moved path, `sync(false)`
-  removes the file, `isEnabled()` is the file existence and `isApproved()` is true.
+  removes the file, `isEnabled()` is the file existence and `isApproved()` is true. The writer uses
+  native Qt only (`QFile`/`QString`); no GLib/GIO or KDE/KF6 dependency is added, and the only
+  transitive GLib dependency in the build is the optional libsecret backend (user decision).
 - Secrets: libsecret (`l:<uuid>`, schema `org.qtranslate.Secret`, attributes `application`/`id`)
   when `QTRANSLATE_HAVE_LIBSECRET` is defined and the capability probe (a registered or activatable
   `org.freedesktop.secrets` over D-Bus, 1 s cap, no `secret_service_get_sync`) is true; otherwise an
@@ -423,7 +425,8 @@ secrets through libsecret with a visible 0600-file fallback. Linux has 27 tests,
   activatable; the settings hint is based on `isAvailable()`, so a stored `f:` token is not
   highlighted when the keyring is otherwise available (it migrates on the next save); a token that
   cannot be decoded (a no-libsecret build or a transient keyring failure at load) is removed from
-  the INI on the next save; a literal backslash is written as `\\` and GLib does not load `%%` in
+  the INI on the next save; a literal backslash is written as `\\` and the GNOME parser (GLib's
+  `GDesktopAppInfo`) does not load `%%` in
   `Exec`, so an install path containing `\` or `%` can fail to autostart; Astra keyring test entries
   remain; the live `:0` X11 tests occasionally flake under an active desktop (they were stable
   under `xvfb-run` and are not touched by this task).
