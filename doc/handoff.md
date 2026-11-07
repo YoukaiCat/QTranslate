@@ -122,9 +122,9 @@ documentation is English. The migration to the tree roadmap and the English base
   forwarding and the legacy wire (20/20). The `.desktop` file, hicolor icons and
   `share/applications` are task 07.
 - Roadmap stage 2 continues with packaging: task 07 is a stage with six children (desktop/install,
-  tar.gz, `.deb`, AppImage, native Astra artifacts, CI); child 01 is done and child 02 is next.
-  Task 08 is the final Linux gate. The READMEs and `architecture.md` still need the Linux install
-  and limitation updates at task 08.
+  tar.gz, `.deb`, AppImage, native Astra artifacts, CI); child 01 is done and child 02 is in
+  progress. Task 08 is the final Linux gate. The READMEs and `architecture.md` still need the Linux
+  install and limitation updates at task 08.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 

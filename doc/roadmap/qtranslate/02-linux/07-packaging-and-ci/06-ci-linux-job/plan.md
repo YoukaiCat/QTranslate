@@ -19,8 +19,8 @@ Contract:
 - Keep one apt package list for the local image and CI. Create
   `packaging/linux/trixie-packages.txt` (one package per line, `#` comments allowed) containing the
   full set: `git ca-certificates build-essential cmake ninja-build qt6-base-dev qt6-tools-dev
-  qt6-tools-dev-tools libx11-dev libxtst-dev libsecret-1-dev dbus xvfb xauth desktop-file-utils
-  dpkg-dev patchelf qt6-wayland file curl`. `packaging/linux/trixie.Dockerfile` installs from this
+  qt6-tools-dev-tools qt6-translations-l10n libx11-dev libxtst-dev libsecret-1-dev dbus xvfb xauth
+  desktop-file-utils dpkg-dev patchelf qt6-wayland file curl`. `packaging/linux/trixie.Dockerfile` installs from this
   file (copy it into the image and use `xargs apt-get install`), and the Linux CI job installs from
   the same file after checkout. Do not duplicate the list in the workflow.
 - The Linux job:
