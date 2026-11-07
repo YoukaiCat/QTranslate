@@ -8,8 +8,9 @@
 #        && xvfb-run -a ctest --test-dir /tmp/build --output-on-failure'
 #
 # Stage 07-packaging-and-ci adds the packaging tooling as its tasks need it:
-# this task adds desktop-file-utils; later ones add dpkg-dev, patchelf, file,
-# curl, and the AppImage tools.
+# desktop-file-utils and patchelf, plus qt6-wayland and qt6-translations-l10n
+# for the portable archive; later ones add dpkg-dev, file, curl, and the
+# AppImage tools.
 FROM debian:trixie
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -35,6 +36,13 @@ RUN apt-get update \
         xauth \
         # desktop-file-validate is the gate for packaging/linux/qtranslate.desktop.
         desktop-file-utils \
+        # patchelf rewrites the RUNPATH of the bundled Qt libraries and plugins.
+        patchelf \
+        # qt6-wayland provides the Wayland platform, shell-integration, and
+        # graphics-integration plugins bundled into the portable archive.
+        qt6-wayland \
+        # qt6-translations-l10n provides the qt_<lang>.qm files for the bundle.
+        qt6-translations-l10n \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src

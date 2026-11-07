@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-desktop-entry-and-install]
 ---
@@ -425,3 +425,99 @@ Contract:
   `stage/qtranslate-<version>-linux-x86_64`). Child 03 stages the `.deb` from the install tree and
   must not inherit `lib/`, `plugins/`, `translations/`, or `bin/qt.conf`; merging the two trees
   now would force a rewrite there.
+
+## Outcome
+
+- `packaging/linux/package.sh` exists (mode 100755, 602 lines, `set -euo pipefail`, `umask 022`) and
+  implements the contract: `--build-dir`/`--output-dir`/`--version`/`--help` with the documented
+  defaults, space-separated values only, `die()` → `package.sh: error:` and exit 1, usage errors exit
+  2; the repository-root, host, tool, architecture, `CMAKE_BUILD_TYPE:STRING=Release`, and Qt checks
+  run before any file is written; the host gate reads `/etc/os-release` with `sed`/`tr` and refuses
+  anything except `ID=debian` with `trixie`/`13`, printing the `docker run --rm -v "$PWD:/src" -w
+  /src qtranslate-trixie ...` command built from the passed values (shell-quoted with `%q`, plus
+  `--version` when it was given) and creating nothing. The staging layout is
+  `<output-dir>/.qtranslate-staging` with `install/` (the bundle-free tree for child 03) and
+  `qtranslate-<version>-linux-x86_64/`; only the staging directory is removed, and a pre-existing
+  unrelated file in the output directory survives every run.
+- `packaging/linux/trixie.Dockerfile` adds `patchelf`, `qt6-wayland`, and `qt6-translations-l10n`
+  with short comments and updates the header; every earlier entry, including `desktop-file-utils`,
+  is unchanged. The rebuilt `qtranslate-trixie` image has `patchelf 0.18.0`, 283 Qt translation
+  files with all 13 required names, and the Wayland platform/shell-integration/
+  graphics-integration plugins, and still builds and tests the project.
+- The bundle is the measured set, not a glob: 21 versioned libraries with SONAME symlinks — the six
+  `libQt6*` (`Core`, `Gui`, `Widgets`, `Network`, `DBus`, `XcbQpa`), ICU 76
+  (`libicui18n`/`libicuuc`/`libicudata`), `libdouble-conversion.so.3`, `libb2.so.1`,
+  `libpcre2-16.so.0`, `libpcre2-8.so.0`, `libzstd.so.1`, and the Wayland set
+  (`libQt6WaylandClient`, `libQt6WaylandEglClientHwIntegration`, `libQt6WlShellIntegration`,
+  `libQt6OpenGL`, `libwayland-client`, `libwayland-cursor`, `libwayland-egl`); 17 plugins
+  (`platforms/` xcb/offscreen/minimal/wayland-generic/wayland-egl, both `tls/` backends, gif/ico/jpeg
+  image formats, five `wayland-shell-integration/` plugins and the two graphics-integration
+  plugins); 13 `qt_<lang>.qm` files plus the 26 `qtbase_<lang>.qm`/`qtmultimedia_<lang>.qm`
+  dependency catalogs. `qt.conf` is written by the script with exactly `Prefix = ..`,
+  `Plugins = plugins`, `Translations = translations` and no host path; `patchelf --set-rpath
+  '$ORIGIN'` is applied to every file in `lib/`, `'$ORIGIN/../../lib'` to every plugin, and the
+  executable is untouched (`RUNPATH` stays `$ORIGIN:$ORIGIN/../lib`).
+- Decision found in the work: in Qt 6.8.2 the 13 `qt_<lang>.qm` files are 91-102-byte meta-catalogs
+  (`qt_de.qm` references `qtbase_de` and `qtmultimedia_de`), so `QTranslator::load` fails without
+  the dependency catalogs and the required `Loaded Qt translation "qt_de.qm" from
+  "<extract>/translations"` log line is unreachable. The script copies those two catalogs per
+  language as well, warns and continues on any missing file, and keeps `Qt translations: 13/13` as
+  the gate. Other deviations from the literal plan: the host gate runs before the tool gate so an
+  Astra run prints the docker command despite the missing `patchelf`; the tool list also names
+  `readelf`, `ldd`, `cat`, `tail`, `sort`, and `stat`, which the script uses; and an extra Qt
+  symbol-version check (`readelf --version-info`, e.g. `Qt_6.10` vs `Qt_6.8`) catches an Astra
+  build dir, because the plan's `realpath` comparison cannot distinguish the two Qt installations
+  (both under `/usr/lib/x86_64-linux-gnu`).
+- Artifact from the final run: `build/artifacts-linux/qtranslate-0.11.0-linux-x86_64.tar.gz`,
+  28 637 141 bytes, SHA256
+  `c978159ca0737bb3b0b882c1d6edfa728fde2e1149bd187fcd73917ce4e794d5`, with
+  `SHA256SUMS-linux.txt` holding that line; `sha256sum -c` passes from the output directory. The
+  archive has 118 entries, one top-level `qtranslate-0.11.0-linux-x86_64/` directory, numeric
+  ownership, and the Qt SONAME/version links preserved as symlinks (`libQt6Core.so.6 ->
+  libQt6Core.so.6.8.2`, `libicuuc.so.76 -> libicuuc.so.76.1`). The bytes are not reproducible
+  across runs because `patchelf` updates library mtimes and tar records them; the recorded SHA
+  belongs to this run, and the plan does not require reproducibility.
+- Verification in `debian:trixie` (Qt 6.8.2, GCC 14.2): Debug and Release rebuild in `/tmp` with no
+  `-Wall -Wextra` warnings and CTest 28/28 in both; the Release tree `build/trixie-release` packages
+  cleanly. Astra Linux 1.8.7 (Qt 6.10.2) reports 28/28 in the existing `build/linux-debug` and
+  `build/linux-release` trees; nothing was rebuilt, so `fly-set-execid.sh` was not needed.
+- Extracted-archive evidence (with `LD_LIBRARY_PATH` unset, temporary `HOME`/XDG dirs and
+  `QT_QPA_PLATFORM=offscreen`): `bin/qtranslate --version` prints `QTranslate 0.11.0`; `ldd` reports
+  no `not found` for the binary, every bundled library, and every plugin, and resolves Qt/ICU inside
+  the extract (`libicui18n.so.76 => <extract>/lib/libicui18n.so.76`); `patchelf --print-rpath`
+  reports `$ORIGIN` for the libraries and `$ORIGIN/../../lib` for the plugins;
+  `QT_DEBUG_PLUGINS=1` shows `<extract>/plugins/platforms/libqoffscreen.so`, and
+  `QT_QPA_PLATFORM=wayland` loads `libqwayland-generic.so` and then fails only on
+  `Failed to create wl_display`, with no `cannot open shared object file`; the `uiLanguage=de` +
+  `--verbose` run logs `Loaded Qt translation "qt_de.qm" from "<extract>/translations"`;
+  `desktop-file-validate` exits 0 on the archived desktop file. On the Astra host the same archive
+  fails before `main` with `version 'GLIBC_2.38' not found` from the bundled trixie Qt, which is the
+  documented baseline fact, not a packaging defect.
+- Negative paths: `--help` exits 0; an unknown option, a missing value, and `--version 1.2` exit 2
+  with `package.sh: error:`; a missing `CMakeCache.txt` and a Debug cache exit 1 with the Release
+  configure hint; a reduced `PATH` produces one message naming every missing tool with its trixie
+  package (including `patchelf`); the Astra host gate exits 1 with the docker command (and
+  `--version` only when it was passed) without creating the output directory; a spaced path is
+  quoted so the printed command copies correctly.
+- System requirements recorded for the archive: `libsecret-1-0` and glib are direct `NEEDED`
+  dependencies of the binary; `libssl3`/`libcrypto3` and `ca-certificates` for the OpenSSL TLS
+  backend; the X11 stack (X11/XCB/XTest/xkbcommon/SM/ICE) and the Wayland driver libraries
+  (`libEGL`, `libGLX`, `libOpenGL`, `libGLdispatch`); fontconfig/freetype/harfbuzz/graphite2/
+  libpng/zlib; `libjpeg62-turbo` for the JPEG plugin; `libdbus-1`, `libproxy` and the rest of the
+  target's network stack. The script prints the measured list (`System libraries resolved from the
+  host:`, 94 names). Bundled trixie Qt needs `GLIBC_2.38`, so the archive runs on trixie and later,
+  not on Astra 1.8.7 (glibc 2.36); the trixie archive is never claimed to be
+  distribution-independent beyond that baseline. The no-libsecret build stays the fallback.
+- Not performed: Windows Debug/Release and the 23 Windows tests (no MSVC; the change is Linux-only
+  and was reviewed by diff); a real Wayland session (no compositor in the image; plugin-load only),
+  a run on a clean machine (the trixie image has the full Qt and an `ld.so.cache`; the gates were the
+  resolved `ldd` paths, `QT_DEBUG_PLUGINS=1` and the translation log line), and a run of the trixie
+  archive on Astra (glibc baseline; child 05 builds the native Astra artifact).
+- Notes for later children: the `.deb` staging root (`$stage/install`) is ready and bundle-free;
+  child 06's `trixie-packages.txt` must carry `patchelf`, `qt6-wayland`, and
+  `qt6-translations-l10n` in addition to the existing entries; CTest run as uid 1000 in the current
+  image fails `tst_hotkeymanager_wayland` because the image has no `/etc/passwd` entry and
+  `dbus-daemon` refuses (CI runs as root, or the image needs a user), and the `ldd` gate
+  intentionally enforces only Qt/ICU inside the bundle while other system libraries are recorded;
+  per-file assertions for the `tls`/`imageformats`/`wayland-shell-integration` plugin names are not
+  implemented, so a package change that drops one plugin after the directory check would not warn.
