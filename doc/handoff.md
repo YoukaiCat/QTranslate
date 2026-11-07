@@ -33,14 +33,35 @@ documentation is English. The migration to the tree roadmap and the English base
 - The working tree must be clean after completion; to verify the fix, `build\dist\bin\qtranslate.exe`
   was started with `--verbose`.
 
-## Linux baseline (2026-11-06)
+## Linux baseline (2026-11-06, updated 2026-11-07)
 
-- The Linux tree builds, links, and passes 25 of 25 tests in Debug and Release on Debian 13
+- The Linux tree builds, links, and passes 27 of 27 tests in Debug and Release on Debian 13
   (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2; Clang 16.0.6), with
   `-Wall -Wextra` and no warnings. `qtranslate --version` works. Windows builds and the 23 tests
   were not performed here.
 - `packaging/linux/trixie.Dockerfile` reproduces the container; it includes `xauth` because
   `xvfb-run` needs it. Task 07 must keep the package list and add the packaging tools.
+- Per-user paths, autostart and secrets are implemented (task 05, `aed4028`). `src/core/apppaths.h`
+  reads `XDG_CONFIG_HOME`/`XDG_STATE_HOME` directly (empty and relative values ignored) and appends
+  lowercase `qtranslate`; settings are `<config>/qtranslate/qtranslate.ini` and the log
+  `<state>/qtranslate/qtranslate.log`, while a portable `qtranslate.ini` next to the executable
+  still wins. Autostart writes `$XDG_CONFIG_HOME/autostart/qtranslate.desktop` with Desktop Entry
+  quoting, `--minimized`, repair and removal. Secrets use libsecret when `libsecret-1` is found at
+  build time and `org.freedesktop.secrets` is available (`l:<uuid>`), otherwise a `0600` file under
+  `<config>/qtranslate/secrets` with a `0700` directory (`f:<uuid>`) and a visible warning in the
+  settings dialog; a capability drop during save shows a message box.
+  `SecretProtector::canReuse()` keeps an unchanged `l:` token through a transient keyring outage,
+  migrates `f:` to libsecret and re-protects missing or corrupt tokens. Task 07 must add
+  `libsecret-1-0` as a runtime dependency when the package is built with libsecret; a build without
+  it remains supported.
+- Known task 05 issues not fixed in this task: an undecodable or unknown token is dropped from the
+  INI on the next save (a no-libsecret build or a transient keyring failure at load); the fallback
+  hint does not highlight an already stored `f:` token while the keyring is available (it migrates
+  on the next save); test entries accumulate in the Astra keyring (no delete API); a path containing
+  `\` or `%` can break the autostart `Exec=` parser (the plan-prescribed escaping was kept). Also:
+  the fallback file stays under XDG config in portable mode, old keyring/file entries remain after
+  an overwrite or migration, and the D-Bus probe can be a false negative when the service is
+  installed but not running or activatable.
 - `cmake --install` on Linux logs a CMake warning that `DEPLOY_TOOL_OPTIONS` has no effect with the
   generic deployment tool; no `if(WIN32)` guard was added. One `xvfb-run -a` run hung before the
   command started in the container; task 07 should wrap CI tests in `timeout`.
@@ -49,16 +70,18 @@ documentation is English. The migration to the tree roadmap and the English base
   `build/linux-{debug,release}/qtranslate`, `build/linux-{debug,release}/tests/tst_hotkeymanager_x11`
   and `build/linux-{debug,release}/tests/tst_hotkey_selection_x11`, and
   `sudo /usr/bin/fly-set-execid.sh` sets `security.exec_id`. With the attribute set, Debug and
-  Release pass 25/25, the X11 hotkey test passes 16/16 on Astra, and the real `:0` session registers
+  Release pass 27/27, the X11 hotkey test passes 16/16 on Astra, and the real `:0` session registers
   and activates the hotkeys. The attribute is lost on rebuild; re-run the script after building.
 - Linux hotkeys: X11 `XGrabKey` and the Wayland `GlobalShortcuts` portal are implemented behind the
   unchanged `HotkeyManager` API. The portal creates one session, batches `BindShortcuts`, reports
   asynchronous bind failures through `registrationFailed`, keeps suspend logical, and returns an empty
   `hotkey()` after the desktop assigns triggers. `Qt6::DBus` is Linux-only in `qtranslate` and the
   tests; `libqt6dbus6` is the runtime dependency for packaging and `dbus`/`dbus-daemon` the test
-  dependency. Linux has 25 tests; `tst_hotkeymanager_x11` is 16/16 and `tst_hotkeymanager_wayland`
-  20/20 in trixie and on Astra (after `fly-set-execid.sh`). Known gaps: the tray text and tooltip on
-  Wayland (task 06) and two latent signal-reentrancy edges with no current caller.
+  dependency. Linux has 27 tests; `tst_hotkeymanager_x11` is 16/16 and `tst_hotkeymanager_wayland`
+  20/20 in trixie and on Astra (after `fly-set-execid.sh`), and `tst_autostart` is 6/6;
+  `tst_secretprotector` is 7 passed + 1 skipped in trixie (no session keyring, recorded as not
+  performed) and 8/8 on Astra with the real libsecret round-trip. Known gaps: the tray text and
+  tooltip on Wayland (task 06) and two latent signal-reentrancy edges with no current caller.
 - X11 selection capture and the window helpers are implemented; Wayland reads the manually copied
   clipboard and never synthesizes input. `tst_selectiongrabber_linux` (12) and
   `tst_windowactivation_linux` (13) were added, and the manual `:0` check passed with `kate`
@@ -67,8 +90,8 @@ documentation is English. The migration to the tree roadmap and the English base
   releasing Ctrl/Shift first, releasing Q first and holding the combination all work; the new
   `tst_hotkey_selection_x11` is 7/7 and is listed in `trusted.d`. The original clipboard's non-text
   formats are not restored by the manual check.
-- Roadmap stage 2 continues with autostart/secrets, CLI/desktop, packaging, and verification. The
-  READMEs and `architecture.md` now state the Linux baseline.
+- Roadmap stage 2 continues with CLI/desktop integration, packaging, and verification. The READMEs
+  and `architecture.md` now state the Linux baseline.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
