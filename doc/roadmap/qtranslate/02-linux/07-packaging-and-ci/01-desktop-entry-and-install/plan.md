@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -187,3 +187,62 @@ shows it); `cmake --install` on Linux currently writes `bin/qt.conf` with
   commands in step 6, not by CTest.
 - The `.deb` and tar.gz later stage from this install prefix. Do not add a second copy of the
   desktop file or icon to a packaging script; one CMake layout must feed both.
+
+## Outcome
+
+Done. The Linux install layout now carries the desktop entry and the 256x256 icon, and Linux no
+longer runs the Windows deploy script. Linux stays at 28 tests; Windows keeps 23.
+
+- Files: new `packaging/linux/qtranslate.desktop`; modified `CMakeLists.txt`, `src/main.cpp` and
+  `packaging/linux/trixie.Dockerfile`. The READMEs, architecture, `AGENTS.md`, the handoff, the map
+  files, `i18n/`, `tests/` and `packaging/windows/` are unchanged.
+- Desktop entry: `Type=Application`, `Name=QTranslate`, `GenericName=Translator`,
+  `Comment=Translate the selected text in a popup, in the main window, or in place`,
+  `Exec=qtranslate`, `Icon=qtranslate`, `Terminal=false`, `Categories=Utility;TextTools;`,
+  `Keywords=translate;translation;translator;language;dictionary;`, `StartupNotify=false`,
+  `StartupWMClass=QTranslate`. No `%U`/`%F`, `MimeType` or `Version`. The file is UTF-8 (ASCII
+  bytes), LF, with a trailing newline. The text is desktop metadata, not `tr()` UI strings, so no
+  `.ts` or i18n change was needed.
+- CMake: the Linux-only block after `install(TARGETS qtranslate ...)` installs
+  `${CMAKE_INSTALL_DATADIR}/applications/qtranslate.desktop` and
+  `${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps/qtranslate.png` (`install(FILES ... RENAME)`
+  copies `resources/icons/app.png` unchanged, not resized). `cmake --install` on trixie and Astra
+  produces exactly those three files plus `bin/qtranslate`; the installed PNG is byte-identical to
+  the source and `desktop-file-validate` accepts both the source and the installed copy
+  (0.28 in trixie, 0.27 on Astra). `${CMAKE_INSTALL_DATADIR}` resolves to `share` under `/usr` and
+  `/usr/local`; it is never hardcoded.
+- Deploy guard: `qt_generate_deploy_app_script(...)` and `install(SCRIPT ${deploy_script})` are
+  wrapped in `if(WIN32)` without reindenting or changing the options, comments or Windows behavior
+  (byte-identical to the previous block; the MSVC CRT block keeps its own `if(MSVC)`). Reason:
+  on Linux that script is the generic deploy tool, which logs `DEPLOY_TOOL_OPTIONS has no effect`,
+  copies no Qt libraries, writes a trixie-specific `bin/qt.conf`, and would copy
+  `share/qt6/translations`. The packaging script in child 02 owns the Linux bundle and writes its
+  own `qt.conf`; the install log now has no `DEPLOY_TOOL_OPTIONS` warning.
+- Installed binary: `RUNPATH` stays `$ORIGIN:$ORIGIN/../lib` on both systems; the install tree has
+  no `bin/qt.conf` and no `share/qt6`.
+- App identity: `QGuiApplication::setDesktopFileName(QStringLiteral("qtranslate"))` after
+  `setApplicationVersion` makes the Wayland app id `qtranslate`, matching the desktop file name; no
+  extra include was needed because `QApplication` already includes `QGuiApplication`. Under Xvfb the
+  Release binary with a temporary `HOME` and `[app] startMinimized=false` reports
+  `WM_CLASS(STRING) = "qtranslate", "QTranslate"`, so the observed class still matches
+  `StartupWMClass=QTranslate` and `setDesktopFileName` changes no X11 behavior. The line is a no-op
+  on Windows; the only shared-code change in the diff.
+- Dockerfile: `desktop-file-utils` is installed (provides `desktop-file-validate`), and the header
+  comment now names stage `07-packaging-and-ci` and lists what later children add (`dpkg-dev`,
+  `patchelf`, `file`, `curl`, the AppImage tools) instead of attributing everything to one old task.
+- Verification: `debian:trixie` (Qt 6.8.2, GCC 14.2) Debug and Release rebuild with no
+  `-Wall -Wextra` warnings, CTest 28/28 in both (`tst_hotkeymanager_x11` 16/16,
+  `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
+  `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
+  `tst_secretprotector` 7 passed + 1 skipped without a session keyring, `tst_cli` 20/20). Astra
+  Linux 1.8.7 (Qt 6.10.2, GCC 12.2) Debug and Release come out clean and 28/28 after
+  `sudo /usr/bin/fly-set-execid.sh` (secret 8/8; the other counters unchanged). Windows
+  Debug/Release and the 23 tests were not performed (no MSVC); the diff review confirms the deploy
+  block, MSVC CRT block, Windows install target and `if(WIN32)` branches are unchanged apart from
+  the new wrapper.
+- Not performed: a real Wayland compositor was not available, so the app-id-to-desktop-file
+  association is verified only by the code and by the unchanged X11 `WM_CLASS`; no test was added
+  for the desktop file (the plan checks it with `desktop-file-validate` and the install tree).
+- Later children: the `.deb`/tar.gz must stage from this one CMake install layout and must not add
+  a second copy of the desktop file or icon. `Icon=qtranslate` and the installed
+  `qtranslate.png` stay in sync; smaller hicolor sizes are optional and were not added.

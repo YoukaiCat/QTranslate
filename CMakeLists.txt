@@ -170,6 +170,15 @@ install(TARGETS qtranslate
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    install(FILES packaging/linux/qtranslate.desktop
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+    install(FILES resources/icons/app.png
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps
+        RENAME qtranslate.png)
+endif()
+
+if(WIN32)
 qt_generate_deploy_app_script(
     TARGET qtranslate
     OUTPUT_SCRIPT deploy_script
@@ -190,6 +199,7 @@ qt_generate_deploy_app_script(
         ru,es,de,fr,pt_BR,it,pl,uk,tr,zh_CN,ja,ko,ar
 )
 install(SCRIPT ${deploy_script})
+endif()
 
 # windeployqt cannot find the compiler runtime when VCINSTALLDIR is not set
 # (e.g. cmake --install from a plain shell), so bundle the MSVC CRT explicitly.

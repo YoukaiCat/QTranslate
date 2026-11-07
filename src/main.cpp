@@ -34,6 +34,9 @@ int main(int argc, char *argv[])
     // No organization name on purpose: data then lives in %APPDATA%\qtranslate.
     QApplication::setApplicationName(AppInfo::name());
     QApplication::setApplicationVersion(AppInfo::version());
+    // The Wayland app id is the desktop file name; keep it in sync with
+    // share/applications/qtranslate.desktop.
+    QGuiApplication::setDesktopFileName(QStringLiteral("qtranslate"));
     // The app lives in the tray; hiding the last window must not quit it.
     QApplication::setQuitOnLastWindowClosed(false);
 

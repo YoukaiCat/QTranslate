@@ -7,7 +7,9 @@
 #        && cmake --build /tmp/build --parallel \
 #        && xvfb-run -a ctest --test-dir /tmp/build --output-on-failure'
 #
-# Task 06 adds the packaging tooling (dpkg-dev, desktop-file-utils, AppImage).
+# Stage 07-packaging-and-ci adds the packaging tooling as its tasks need it:
+# this task adds desktop-file-utils; later ones add dpkg-dev, patchelf, file,
+# curl, and the AppImage tools.
 FROM debian:trixie
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -31,6 +33,8 @@ RUN apt-get update \
         # xvfb only Recommends xauth, but xvfb-run requires it.
         xvfb \
         xauth \
+        # desktop-file-validate is the gate for packaging/linux/qtranslate.desktop.
+        desktop-file-utils \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
