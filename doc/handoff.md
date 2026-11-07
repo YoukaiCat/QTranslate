@@ -73,15 +73,22 @@ documentation is English. The migration to the tree roadmap and the English base
   the fallback file stays under XDG config in portable mode, old keyring/file entries remain after
   an overwrite or migration, and the D-Bus probe can be a false negative when the service is
   installed but not running or activatable.
-- `cmake --install` on Linux logs a CMake warning that `DEPLOY_TOOL_OPTIONS` has no effect with the
-  generic deployment tool; no `if(WIN32)` guard was added. One `xvfb-run -a` run hung before the
-  command started in the container; task 07 should wrap CI tests in `timeout`.
+- The Linux install now guards the Windows deploy block with `if(WIN32)`: the generic deploy tool
+  copies no Qt libraries and writes a trixie-specific `bin/qt.conf`, so the packaging script owns
+  the bundle. One `xvfb-run -a` run hung before the command started in the container; CI should
+  wrap tests in `timeout`.
+- Desktop entry and install layout (task 07.01, `cc5fcac`): `packaging/linux/qtranslate.desktop`
+  passes `desktop-file-validate`; CMake installs it to `share/applications` and
+  `resources/icons/app.png` as `share/icons/hicolor/256x256/apps/qtranslate.png`;
+  `QGuiApplication::setDesktopFileName("qtranslate")` fixes the Wayland app id; the Linux install
+  tree has only `bin/qtranslate`, the desktop file and the icon, and keeps
+  `RUNPATH $ORIGIN:$ORIGIN/../lib`.
 - Astra Linux Parsec denies passive `XGrabKey` for untrusted binaries. The user approved the `KBD_R`
   trusted-client exception: `/etc/X11/trusted.d/qtranslate` lists
   `build/linux-{debug,release}/qtranslate`, `build/linux-{debug,release}/tests/tst_hotkeymanager_x11`
   and `build/linux-{debug,release}/tests/tst_hotkey_selection_x11`, and
   `sudo /usr/bin/fly-set-execid.sh` sets `security.exec_id`. With the attribute set, Debug and
-  Release pass 27/27, the X11 hotkey test passes 16/16 on Astra, and the real `:0` session registers
+  Release pass 28/28, the X11 hotkey test passes 16/16 on Astra, and the real `:0` session registers
   and activates the hotkeys. The attribute is lost on rebuild; re-run the script after building.
 - Linux hotkeys: X11 `XGrabKey` and the Wayland `GlobalShortcuts` portal are implemented behind the
   unchanged `HotkeyManager` API. The portal creates one session, batches `BindShortcuts`, reports
@@ -115,8 +122,9 @@ documentation is English. The migration to the tree roadmap and the English base
   forwarding and the legacy wire (20/20). The `.desktop` file, hicolor icons and
   `share/applications` are task 07.
 - Roadmap stage 2 continues with packaging: task 07 is a stage with six children (desktop/install,
-  tar.gz, `.deb`, AppImage, native Astra artifacts, CI); child 01 is in progress. Task 08 is the
-  final Linux gate. The READMEs and `architecture.md` now state the Linux baseline.
+  tar.gz, `.deb`, AppImage, native Astra artifacts, CI); child 01 is done and child 02 is next.
+  Task 08 is the final Linux gate. The READMEs and `architecture.md` still need the Linux install
+  and limitation updates at task 08.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
