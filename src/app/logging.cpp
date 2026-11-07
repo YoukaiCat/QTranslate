@@ -1,11 +1,12 @@
 #include "app/logging.h"
 
+#include "core/apppaths.h"
+
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QMutex>
-#include <QStandardPaths>
 
 Q_LOGGING_CATEGORY(lcApp, "qtranslate.app", QtWarningMsg)
 
@@ -56,8 +57,7 @@ void initialize(bool verbose)
     if (!verbose)
         return;
 
-    const QString directory =
-        QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    const QString directory = AppPaths::stateDirectory();
     if (!QDir().mkpath(directory)) {
         qWarning("Cannot create log directory %s", qPrintable(directory));
         return;

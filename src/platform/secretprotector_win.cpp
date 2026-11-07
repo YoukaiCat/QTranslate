@@ -54,4 +54,14 @@ QString unprotect(const QByteArray &protectedData)
     return plainText;
 }
 
+bool canReuse(const QByteArray &protectedData)
+{
+    return !protectedData.isEmpty();
+}
+
+bool isAvailable()
+{
+    return true; // DPAPI needs no service
+}
+
 } // namespace SecretProtector

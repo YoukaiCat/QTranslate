@@ -25,7 +25,7 @@ class SettingsDialog : public QDialog
 public:
     SettingsDialog(const AppSettings &settings, const QStringList &sourceLanguages,
                    const QStringList &targetLanguages, bool autostartApproved,
-                   QWidget *parent = nullptr);
+                   bool secretStorageFallback = false, QWidget *parent = nullptr);
     ~SettingsDialog() override;
 
     // Exposed for tests: the current widget values as AppSettings.
@@ -60,7 +60,8 @@ protected:
 
 private:
     void buildUi(const QStringList &sourceLanguages);
-    void loadValues(const AppSettings &settings, bool autostartApproved);
+    void loadValues(const AppSettings &settings, bool autostartApproved,
+                    bool secretStorageFallback);
     void updateHotkeyEditing();
     void setHotkeyEditing(bool editing);
     bool anyHotkeyEditFocused() const;
@@ -75,6 +76,7 @@ private:
 
     QCheckBox *m_autostart = nullptr;
     QLabel *m_autostartHint = nullptr;
+    QLabel *m_secretStorageHint = nullptr;
     QCheckBox *m_startMinimized = nullptr;
     QCheckBox *m_restoreClipboard = nullptr;
     QCheckBox *m_autoClosePopup = nullptr;

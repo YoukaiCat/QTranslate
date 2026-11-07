@@ -29,7 +29,7 @@
 SettingsDialog::SettingsDialog(const AppSettings &settings,
                                const QStringList &sourceLanguages,
                                const QStringList &targetLanguages, bool autostartApproved,
-                               QWidget *parent)
+                               bool secretStorageFallback, QWidget *parent)
     : QDialog(parent)
     , m_initial(settings)
     , m_targetLanguages(targetLanguages)
@@ -39,7 +39,7 @@ SettingsDialog::SettingsDialog(const AppSettings &settings,
     resize(600, 600);
 
     buildUi(sourceLanguages);
-    loadValues(settings, autostartApproved);
+    loadValues(settings, autostartApproved, secretStorageFallback);
 
     connect(qApp, &QApplication::focusChanged, this,
             [this](QWidget *, QWidget *) { updateHotkeyEditing(); });
@@ -64,14 +64,26 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
         m_uiLanguage->addItem(language.nativeName, language.code);
     generalForm->addRow(tr("Interface language:"), m_uiLanguage);
     generalLayout->addLayout(generalForm);
+#if defined(Q_OS_WIN)
     m_autostart = new QCheckBox(tr("Start %1 when Windows starts").arg(AppInfo::name()),
                                 generalPage);
+#else
+    m_autostart = new QCheckBox(tr("Start %1 when you log in").arg(AppInfo::name()),
+                                generalPage);
+#endif
     m_autostart->setObjectName(QStringLiteral("autostart"));
     m_autostartHint = new QLabel(tr("Autostart is disabled in Windows Task Manager."),
                                  generalPage);
     m_autostartHint->setObjectName(QStringLiteral("autostartHint"));
     m_autostartHint->setWordWrap(true);
     m_autostartHint->setStyleSheet(QStringLiteral("color: #d32f2f;"));
+    m_secretStorageHint = new QLabel(
+        tr("Secrets are stored unencrypted in a file readable only by your user "
+           "because the system keyring is unavailable."),
+        generalPage);
+    m_secretStorageHint->setObjectName(QStringLiteral("secretStorageHint"));
+    m_secretStorageHint->setWordWrap(true);
+    m_secretStorageHint->setStyleSheet(QStringLiteral("color: #d32f2f;"));
     m_startMinimized = new QCheckBox(tr("Start minimized in the system tray"), generalPage);
     m_startMinimized->setObjectName(QStringLiteral("startMinimized"));
     m_restoreClipboard =
@@ -83,6 +95,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
 
     generalLayout->addWidget(m_autostart);
     generalLayout->addWidget(m_autostartHint);
+    generalLayout->addWidget(m_secretStorageHint);
     generalLayout->addWidget(m_startMinimized);
     generalLayout->addWidget(m_restoreClipboard);
     generalLayout->addWidget(m_autoClosePopup);
@@ -366,7 +379,8 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     layout->addWidget(buttons);
 }
 
-void SettingsDialog::loadValues(const AppSettings &settings, bool autostartApproved)
+void SettingsDialog::loadValues(const AppSettings &settings, bool autostartApproved,
+                                bool secretStorageFallback)
 {
     m_autostart->setChecked(settings.general.autostart);
     m_startMinimized->setChecked(settings.general.startMinimized);
@@ -380,6 +394,8 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     };
     connect(m_autostart, &QCheckBox::toggled, this, updateAutostartHint);
     updateAutostartHint();
+
+    m_secretStorageHint->setVisible(secretStorageFallback);
 
     m_popupHotkey->setKeySequence(settings.hotkeys.popup);
     m_replaceSelectionHotkey->setKeySequence(settings.hotkeys.replaceSelection);

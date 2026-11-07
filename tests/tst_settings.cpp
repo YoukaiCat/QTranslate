@@ -1,3 +1,4 @@
+#include "core/apppaths.h"
 #include "core/languages.h"
 #include "core/settings.h"
 
@@ -33,6 +34,34 @@ QByteArray readFile(const QString &path)
         return {};
     return file.readAll();
 }
+
+#if defined(Q_OS_LINUX)
+// Saves and restores an environment variable even when an assertion ends the
+// test function early.
+class EnvironmentGuard
+{
+public:
+    explicit EnvironmentGuard(const char *name)
+        : m_name(name)
+        , m_value(qgetenv(name))
+        , m_wasSet(qEnvironmentVariableIsSet(name))
+    {
+    }
+
+    ~EnvironmentGuard()
+    {
+        if (m_wasSet)
+            qputenv(m_name, m_value);
+        else
+            qunsetenv(m_name);
+    }
+
+private:
+    const char *m_name;
+    QByteArray m_value;
+    bool m_wasSet;
+};
+#endif
 
 } // namespace
 
@@ -297,6 +326,29 @@ private slots:
                  QDir::cleanPath(portable));
     }
 
+#if defined(Q_OS_LINUX)
+    void settingsPathUsesXdgConfigHome()
+    {
+        EnvironmentGuard configHome("XDG_CONFIG_HOME");
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+
+        qputenv("XDG_CONFIG_HOME", dir.path().toUtf8());
+
+        const QString expectedConfig = QDir(dir.path()).filePath(QStringLiteral("qtranslate"));
+        QCOMPARE(AppPaths::configDirectory(), expectedConfig);
+        QCOMPARE(SettingsStore::defaultFilePath(QString(), expectedConfig),
+                 QDir(expectedConfig).filePath(QStringLiteral("qtranslate.ini")));
+
+        // A relative XDG value is invalid and must fall back to ~/.config.
+        qputenv("XDG_CONFIG_HOME", QByteArrayLiteral("relative/config"));
+        const QString fallback =
+            QDir(QDir::homePath()).filePath(QStringLiteral(".config/qtranslate"));
+        QCOMPARE(AppPaths::configDirectory(), fallback);
+        QVERIFY(QDir::isAbsolutePath(AppPaths::configDirectory()));
+    }
+#endif
+
     void secretsRequireCodec()
     {
         QTemporaryDir dir;
@@ -314,6 +366,194 @@ private slots:
         SettingsStore loaded(path, SecretCodec{});
         loaded.load();
         QVERIFY(loaded.current().google.apiKey.isEmpty());
+    }
+
+    void unchangedSecretsAreNotReprotected()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        {
+            SettingsStore store(path, fakeCodec());
+            AppSettings settings = store.current();
+            settings.google.apiKey = QStringLiteral("google-secret");
+            settings.llm.apiKey = QStringLiteral("llm-secret");
+            store.save(settings);
+        }
+
+        QString googleToken;
+        QString llmToken;
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            googleToken = raw.value(QStringLiteral("google/apiKey")).toString();
+            llmToken = raw.value(QStringLiteral("llm/apiKey")).toString();
+        }
+        QVERIFY(!googleToken.isEmpty());
+        QVERIFY(!llmToken.isEmpty());
+
+        int protectCalls = 0;
+        const SecretCodec countingCodec{
+            [&protectCalls](const QString &plainText) {
+                ++protectCalls;
+                return QByteArrayLiteral("P:") + plainText.toUtf8().toBase64();
+            },
+            [](const QByteArray &protectedData) {
+                if (!protectedData.startsWith(QByteArrayLiteral("P:")))
+                    return QString();
+                return QString::fromUtf8(
+                    QByteArray::fromBase64(protectedData.mid(2)));
+            },
+        };
+
+        {
+            SettingsStore store(path, countingCodec);
+            store.load();
+            QCOMPARE(store.current().google.apiKey, QStringLiteral("google-secret"));
+            QCOMPARE(store.current().llm.apiKey, QStringLiteral("llm-secret"));
+
+            AppSettings settings = store.current();
+            settings.mainWindow.geometry = QByteArray::fromHex("00112233");
+            store.save(settings);
+            QCOMPARE(protectCalls, 0);
+        }
+
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            QCOMPARE(raw.value(QStringLiteral("google/apiKey")).toString(), googleToken);
+            QCOMPARE(raw.value(QStringLiteral("llm/apiKey")).toString(), llmToken);
+        }
+
+        {
+            SettingsStore store(path, countingCodec);
+            store.load();
+            AppSettings settings = store.current();
+            settings.google.apiKey = QStringLiteral("google-secret-2");
+            store.save(settings);
+            QCOMPARE(protectCalls, 1);
+        }
+
+        {
+            SettingsStore store(path, countingCodec);
+            store.load();
+            QCOMPARE(store.current().google.apiKey, QStringLiteral("google-secret-2"));
+            QCOMPARE(store.current().llm.apiKey, QStringLiteral("llm-secret"));
+        }
+
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            QVERIFY(raw.value(QStringLiteral("google/apiKey")).toString() != googleToken);
+            QCOMPARE(raw.value(QStringLiteral("llm/apiKey")).toString(), llmToken);
+        }
+    }
+
+    void fallbackSecretIsMigratedWhenBackendChanges()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        const SecretCodec oldCodec{
+            [](const QString &plainText) {
+                return QByteArrayLiteral("O:") + plainText.toUtf8().toBase64();
+            },
+            [](const QByteArray &protectedData) {
+                if (!protectedData.startsWith(QByteArrayLiteral("O:")))
+                    return QString();
+                return QString::fromUtf8(
+                    QByteArray::fromBase64(protectedData.mid(2)));
+            },
+        };
+
+        {
+            SettingsStore store(path, oldCodec);
+            AppSettings settings = store.current();
+            settings.google.apiKey = QStringLiteral("google-secret");
+            store.save(settings);
+        }
+
+        int protectCalls = 0;
+        const SecretCodec newCodec{
+            [&protectCalls](const QString &plainText) {
+                ++protectCalls;
+                return QByteArrayLiteral("N:") + plainText.toUtf8().toBase64();
+            },
+            [](const QByteArray &protectedData) {
+                if (!protectedData.startsWith(QByteArrayLiteral("O:"))
+                    && !protectedData.startsWith(QByteArrayLiteral("N:"))) {
+                    return QString();
+                }
+                return QString::fromUtf8(
+                    QByteArray::fromBase64(protectedData.mid(2)));
+            },
+            [](const QByteArray &protectedData) {
+                return protectedData.startsWith(QByteArrayLiteral("N:"));
+            },
+        };
+
+        // The old token is readable but the new backend cannot reuse it, so the
+        // unchanged secret is protected again and migrated to the new format.
+        {
+            SettingsStore store(path, newCodec);
+            store.load();
+            QCOMPARE(store.current().google.apiKey, QStringLiteral("google-secret"));
+
+            store.save(store.current());
+            QCOMPARE(protectCalls, 1);
+        }
+
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            const QByteArray stored = QByteArray::fromBase64(
+                raw.value(QStringLiteral("google/apiKey")).toString().toLatin1());
+            QVERIFY(stored.startsWith(QByteArrayLiteral("N:")));
+        }
+
+        // Once migrated, the new token is reused and the secret is not
+        // protected again.
+        {
+            SettingsStore store(path, newCodec);
+            store.load();
+            QCOMPARE(store.current().google.apiKey, QStringLiteral("google-secret"));
+
+            store.save(store.current());
+            QCOMPARE(protectCalls, 1);
+        }
+    }
+
+    void failedProtectRetriesOnNextSave()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        SettingsStore store(path, SecretCodec{
+                                       [](const QString &) { return QByteArray(); },
+                                       [](const QByteArray &) { return QString(); },
+                                   });
+        AppSettings settings = store.current();
+        settings.google.apiKey = QStringLiteral("retry-me");
+        store.save(settings);
+
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            QVERIFY(!raw.contains(QStringLiteral("google/apiKey")));
+        }
+        // The plaintext stays in memory even though the protect failure
+        // removed the key from the file.
+        QCOMPARE(store.current().google.apiKey, QStringLiteral("retry-me"));
+
+        store.setSecretCodec(fakeCodec());
+        store.save(store.current());
+
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            QVERIFY(raw.contains(QStringLiteral("google/apiKey")));
+        }
+
+        SettingsStore loaded(path, fakeCodec());
+        loaded.load();
+        QCOMPARE(loaded.current().google.apiKey, QStringLiteral("retry-me"));
     }
 
     void futureVersionUsesDefaults()

@@ -76,6 +76,21 @@ if(WIN32)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    qtranslate_add_test(tst_autostart
+        ${PROJECT_SOURCE_DIR}/src/platform/autostart.h
+        ${PROJECT_SOURCE_DIR}/src/platform/autostart_linux.cpp
+    )
+
+    qtranslate_add_test(tst_secretprotector
+        ${PROJECT_SOURCE_DIR}/src/platform/secretprotector.h
+        ${PROJECT_SOURCE_DIR}/src/platform/secretprotector_linux.cpp
+    )
+    target_link_libraries(tst_secretprotector PRIVATE Qt6::DBus)
+    if(LIBSECRET_FOUND)
+        target_link_libraries(tst_secretprotector PRIVATE PkgConfig::LIBSECRET)
+        target_compile_definitions(tst_secretprotector PRIVATE QTRANSLATE_HAVE_LIBSECRET)
+    endif()
+
     # The Linux hotkey tests compile the same translation unit (X11 plus the
     # GlobalShortcuts portal backend), so they link X11 and QtDBus.
     qtranslate_add_test(tst_hotkeymanager_x11

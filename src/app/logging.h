@@ -10,7 +10,9 @@ Q_DECLARE_LOGGING_CATEGORY(lcApp)
 namespace Logging {
 
 // Enables verbose qtranslate logging and duplicates it to
-// %LOCALAPPDATA%\qtranslate\qtranslate.log. No-op when `verbose` is false.
+// %LOCALAPPDATA%\qtranslate\qtranslate.log on Windows and
+// $XDG_STATE_HOME/qtranslate/qtranslate.log on Linux. No-op when `verbose` is
+// false.
 void initialize(bool verbose);
 
 QString filePath();

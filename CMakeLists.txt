@@ -11,6 +11,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # QtDBus is only used by the GlobalShortcuts portal backend; Windows has no
     # QtDBus, so it must not move to the top-level find_package.
     find_package(Qt6 REQUIRED COMPONENTS DBus)
+
+    # libsecret is optional: without the development package the Linux
+    # SecretProtector uses its 0600-file fallback.
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(LIBSECRET QUIET IMPORTED_TARGET libsecret-1)
+    endif()
 endif()
 
 qt_standard_project_setup()
@@ -31,6 +38,7 @@ endfunction()
 qt_add_library(qtranslate_core STATIC
     src/ai/openaichat.cpp                   src/ai/openaichat.h
     src/core/appinfo.cpp                    src/core/appinfo.h
+    src/core/apppaths.h
     src/core/hotkeysequence.cpp             src/core/hotkeysequence.h
     src/core/languages.cpp                  src/core/languages.h
     src/core/popupplacement.cpp             src/core/popupplacement.h
@@ -97,14 +105,18 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
             "XTest is required for the Linux build; install libxtst-dev.")
     endif()
     target_sources(qtranslate PRIVATE
-        src/platform/autostart_stub.cpp
+        src/platform/autostart_linux.cpp
         src/platform/hotkeymanager_linux.cpp
-        src/platform/secretprotector_stub.cpp
+        src/platform/secretprotector_linux.cpp
         src/platform/selectiongrabber_linux.cpp
         src/platform/windowactivation_linux.cpp
         src/platform/sessiontype.h
     )
     target_link_libraries(qtranslate PRIVATE X11::X11 X11::Xtst Qt6::DBus)
+    if(LIBSECRET_FOUND)
+        target_link_libraries(qtranslate PRIVATE PkgConfig::LIBSECRET)
+        target_compile_definitions(qtranslate PRIVATE QTRANSLATE_HAVE_LIBSECRET)
+    endif()
 else()
     target_sources(qtranslate PRIVATE
         src/platform/autostart_stub.cpp

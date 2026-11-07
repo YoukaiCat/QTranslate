@@ -1,7 +1,6 @@
 #include "platform/secretprotector.h"
 
-// Non-Windows target: no platform secret protection yet, so secrets are not
-// stored at all.
+// Platforms without a secret backend: secrets are not stored at all.
 namespace SecretProtector {
 
 QByteArray protect(const QString &)
@@ -12,6 +11,16 @@ QByteArray protect(const QString &)
 QString unprotect(const QByteArray &)
 {
     return {};
+}
+
+bool canReuse(const QByteArray &)
+{
+    return false;
+}
+
+bool isAvailable()
+{
+    return false;
 }
 
 } // namespace SecretProtector

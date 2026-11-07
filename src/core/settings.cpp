@@ -1,5 +1,6 @@
 #include "core/settings.h"
 
+#include "core/apppaths.h"
 #include "core/languages.h"
 #include "core/uilanguages.h"
 
@@ -8,7 +9,6 @@
 #include <QFileInfo>
 #include <QLoggingCategory>
 #include <QSettings>
-#include <QStandardPaths>
 
 #include <utility>
 
@@ -73,11 +73,23 @@ QString readSecret(const QSettings &settings, const QString &key, const SecretCo
 }
 
 void writeSecret(QSettings &settings, const QString &key, const QString &value,
-                 const SecretCodec &codec)
+                 const QString &oldValue, const SecretCodec &codec)
 {
     if (value.isEmpty()) {
         settings.remove(key);
         return;
+    }
+    // Never rewrite an unchanged secret that the current backend can still
+    // use: re-encrypting would rewrite the keyring entry, and a transient
+    // outage must not downgrade an encrypted token to the plaintext fallback.
+    // A token the backend cannot use (for example an f: file after the keyring
+    // became available) is protected again and migrated.
+    const QString storedText = settings.value(key).toString();
+    if (value == oldValue && !storedText.isEmpty()) {
+        if (!codec.canReuse)
+            return;
+        if (codec.canReuse(QByteArray::fromBase64(storedText.toLatin1())))
+            return;
     }
     if (!codec.protect) {
         qCWarning(lcSettings) << "No secret codec; not storing" << key;
@@ -196,7 +208,7 @@ SettingsStore::SettingsStore(const QString &filePath, const SecretCodec &codec, 
 {
     const QString applicationDir =
         QCoreApplication::instance() ? QCoreApplication::applicationDirPath() : QString();
-    QString appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString appDataDir = AppPaths::configDirectory();
     if (appDataDir.isEmpty())
         appDataDir = QDir::home().filePath(QStringLiteral(".qtranslate"));
 
@@ -420,18 +432,21 @@ void SettingsStore::save(const AppSettings &settings)
 
     out.beginGroup(QStringLiteral("google"));
     out.setValue(QStringLiteral("mode"), normalized.google.mode);
-    writeSecret(out, QStringLiteral("apiKey"), normalized.google.apiKey, m_codec);
+    writeSecret(out, QStringLiteral("apiKey"), normalized.google.apiKey,
+                old.google.apiKey, m_codec);
     out.endGroup();
 
     out.beginGroup(QStringLiteral("deepl"));
     out.setValue(QStringLiteral("mode"), normalized.deepl.mode);
-    writeSecret(out, QStringLiteral("apiKey"), normalized.deepl.apiKey, m_codec);
+    writeSecret(out, QStringLiteral("apiKey"), normalized.deepl.apiKey,
+                old.deepl.apiKey, m_codec);
     out.setValue(QStringLiteral("englishVariant"), normalized.deepl.englishVariant);
     out.endGroup();
 
     out.beginGroup(QStringLiteral("llm"));
     out.setValue(QStringLiteral("baseUrl"), normalized.llm.baseUrl);
-    writeSecret(out, QStringLiteral("apiKey"), normalized.llm.apiKey, m_codec);
+    writeSecret(out, QStringLiteral("apiKey"), normalized.llm.apiKey,
+                old.llm.apiKey, m_codec);
     out.setValue(QStringLiteral("model"), normalized.llm.model);
     out.endGroup();
 
@@ -443,7 +458,7 @@ void SettingsStore::save(const AppSettings &settings)
     out.setValue(QStringLiteral("proxyAuth"), normalized.network.proxyAuth);
     out.setValue(QStringLiteral("proxyUser"), normalized.network.proxyUser);
     writeSecret(out, QStringLiteral("proxyPassword"), normalized.network.proxyPassword,
-                m_codec);
+                old.network.proxyPassword, m_codec);
     out.setValue(QStringLiteral("timeoutMs"), normalized.network.timeoutMs);
     out.endGroup();
 

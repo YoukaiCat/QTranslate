@@ -106,6 +106,10 @@ struct SecretCodec
 {
     std::function<QByteArray(const QString &)> protect;
     std::function<QString(const QByteArray &)> unprotect;
+    // Optional: whether an existing protected value can stay as-is when its
+    // plaintext did not change. Empty keeps the old behavior (reuse unchanged
+    // non-empty values).
+    std::function<bool(const QByteArray &)> canReuse = {};
 };
 
 // Loads and saves AppSettings as an INI file (see doc/architecture.md, §4.11).

@@ -382,6 +382,25 @@ private slots:
                                       Qt::CaseInsensitive));
     }
 
+    void secretStorageHint()
+    {
+        {
+            SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                                  {QStringLiteral("de"), QStringLiteral("en")}, true);
+            auto *hint = dialog.findChild<QLabel *>(QStringLiteral("secretStorageHint"));
+            QVERIFY(hint);
+            QVERIFY(hint->isHidden());
+        }
+        {
+            SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                                  {QStringLiteral("de"), QStringLiteral("en")}, true, true);
+            auto *hint = dialog.findChild<QLabel *>(QStringLiteral("secretStorageHint"));
+            QVERIFY(hint);
+            QVERIFY(!hint->isHidden());
+            QVERIFY(hint->text().contains(QStringLiteral("unencrypted")));
+        }
+    }
+
     void deepLKeyCheck()
     {
         SettingsDialog dialog(AppSettings{}, {QStringLiteral("en"), QStringLiteral("ru")},

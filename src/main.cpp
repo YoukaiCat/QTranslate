@@ -64,6 +64,9 @@ int main(int argc, char *argv[])
         {[](const QString &plainText) { return SecretProtector::protect(plainText); },
          [](const QByteArray &protectedData) {
              return SecretProtector::unprotect(protectedData);
+         },
+         [](const QByteArray &protectedData) {
+             return SecretProtector::canReuse(protectedData);
          }});
     settings.load();
 

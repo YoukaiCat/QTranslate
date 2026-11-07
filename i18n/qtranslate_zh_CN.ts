@@ -4,59 +4,65 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="124"/>
-        <location filename="../src/app/appcontroller.cpp" line="536"/>
+        <location filename="../src/app/appcontroller.cpp" line="126"/>
+        <location filename="../src/app/appcontroller.cpp" line="538"/>
         <source>Autostart</source>
         <translation>自动启动</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="125"/>
-        <location filename="../src/app/appcontroller.cpp" line="537"/>
+        <location filename="../src/app/appcontroller.cpp" line="127"/>
+        <location filename="../src/app/appcontroller.cpp" line="539"/>
         <source>Could not update the autostart entry.</source>
         <translation>无法更新自动启动条目。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="215"/>
+        <location filename="../src/app/appcontroller.cpp" line="217"/>
         <source>Hotkey unavailable</source>
         <translation>热键不可用</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="216"/>
+        <location filename="../src/app/appcontroller.cpp" line="218"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 已被另一个程序使用。关闭该程序或在设置中选择其他组合。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="277"/>
+        <location filename="../src/app/appcontroller.cpp" line="279"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="570"/>
+        <location filename="../src/app/appcontroller.cpp" line="574"/>
         <source>DeepL is not available.</source>
         <translation>DeepL 不可用。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="585"/>
+        <location filename="../src/app/appcontroller.cpp" line="589"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI 兼容提供程序不可用。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="767"/>
+        <location filename="../src/app/appcontroller.cpp" line="633"/>
+        <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
+        <translation>由于系统密钥环不可用，机密信息将以未加密方式存储在只有您的用户才能读取的文件中。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="779"/>
         <source>Nothing is selected.</source>
         <translation>未选择任何内容。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="796"/>
+        <location filename="../src/app/appcontroller.cpp" line="818"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>活动窗口发生变化；翻译已复制到剪贴板。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="833"/>
+        <location filename="../src/app/appcontroller.cpp" line="810"/>
+        <location filename="../src/app/appcontroller.cpp" line="855"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>无法自动粘贴；翻译在剪贴板上。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="857"/>
+        <location filename="../src/app/appcontroller.cpp" line="879"/>
         <source>Translate and replace</source>
         <translation>翻译和替换</translation>
     </message>
@@ -995,7 +1001,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="37"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="612"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="628"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
@@ -1010,378 +1016,388 @@
         <translation>界面语言：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="70"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="71"/>
+        <source>Start %1 when you log in</source>
+        <translation>登录时启动 %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="75"/>
         <source>Autostart is disabled in Windows Task Manager.</source>
         <translation>Windows 任务管理器已禁用自动启动。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="75"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="81"/>
+        <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
+        <translation>由于系统密钥环不可用，机密信息将以未加密方式存储在只有您的用户才能读取的文件中。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="87"/>
         <source>Start minimized in the system tray</source>
         <translation>启动时最小化到系统托盘</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="78"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="90"/>
         <source>Restore clipboard after copying the selection</source>
         <translation>复制选择后恢复剪贴板</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="81"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="93"/>
         <source>Close the popup when it loses focus</source>
         <translation>失去焦点时关闭弹出窗口</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="103"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="116"/>
         <source>Translate in a popup:</source>
         <translation>在弹出窗口中翻译：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="104"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="117"/>
         <source>Replace the selected text with the translation:</source>
         <translation>将所选文本替换为翻译：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="106"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="119"/>
         <source>Translate in the main window:</source>
         <translation>在主窗口中翻译：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="107"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="120"/>
         <source>Show the main window:</source>
         <translation>显示主窗口：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="109"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="122"/>
         <source>Pause global hotkeys in fullscreen apps</source>
         <translation>在全屏应用中暂停全局快捷键</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="112"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="125"/>
         <source>Global hotkeys are disabled while a key combination field is focused. Leave a field empty to disable that action.</source>
         <translation>当组合键字段处于焦点状态时，全局热键将被禁用。将字段留空以禁用该操作。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="138"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="151"/>
         <source> characters</source>
         <translation> 字符</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="143"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="156"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="338"/>
         <source> ms</source>
         <translation> 毫秒</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="144"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="157"/>
         <source>Off</source>
         <translation>离开</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="146"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="159"/>
         <source>Source language:</source>
         <translation>源语言：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="147"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="160"/>
         <source>Primary language:</source>
         <translation>主要语言：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="148"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="161"/>
         <source>Additional language:</source>
         <translation>附加语言：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="149"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="162"/>
         <source>Maximum text length:</source>
         <translation>最大文本长度：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="150"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="163"/>
         <source>Auto-translate delay:</source>
         <translation>自动翻译延迟：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="152"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="165"/>
         <source>The additional language is used automatically when the detected text is already in the primary language.</source>
         <translation>当检测到的文本已经是主要语言时，会自动使用附加语言。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="160"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="173"/>
         <source>General</source>
         <translation>一般的</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="161"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="174"/>
         <source>Hotkeys</source>
         <translation>热键</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="162"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="175"/>
         <source>Translation</source>
         <translation>翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="175"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="188"/>
         <source>Google Translate</source>
         <translation>Google 翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="179"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="192"/>
         <source>Free endpoint (no key)</source>
         <translation>免费端点（无密钥）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="180"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="193"/>
         <source>Cloud Translation API (key required)</source>
         <translation>云翻译API（需要密钥）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="185"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="198"/>
         <source>Google Cloud API key</source>
         <translation>Google 云 API 密钥</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="186"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="223"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="199"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="236"/>
         <source>Mode:</source>
         <translation>模式：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="187"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="224"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="263"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="200"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="237"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="276"/>
         <source>API key:</source>
         <translation>API 密钥：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="189"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="202"/>
         <source>The free mode uses the public endpoint and needs no key. The Cloud API requires a key with the Translation API enabled.</source>
         <translation>免费模式使用公共端点，不需要密钥。云 API 需要启用翻译 API 的密钥。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="197"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="210"/>
         <source>DeepL</source>
         <translation>DeepL</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="201"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="214"/>
         <source>API (key required)</source>
         <translation>API（需要密钥）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="202"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="215"/>
         <source>Free web (unofficial, no key)</source>
         <translation>免费网页版（非官方，无需密钥）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="206"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="219"/>
         <source>DeepL API key (ends with :fx for Free)</source>
         <translation>DeepL API 密钥（以 :fx 结尾免费）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="211"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="224"/>
         <source>Check key</source>
         <translation>检查密钥</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="225"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="238"/>
         <source>English target:</source>
         <translation>英语目标：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="233"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="278"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="354"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="246"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="291"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="367"/>
         <source>Checking…</source>
         <translation>检查…</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="218"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="231"/>
         <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
         <translation>无需 API 密钥。此非官方端点可能停止工作、限制请求频率或阻止请求；文本会发送至 DeepL。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="67"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="68"/>
         <source>Start %1 when Windows starts</source>
         <translation>Windows 启动时启动 %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="238"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="251"/>
         <source>OpenAI-compatible provider</source>
         <translation>OpenAI 兼容提供程序</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="246"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="259"/>
         <source>API key</source>
         <translation>API 密钥</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="254"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="267"/>
         <source>Model ID, for example openai/gpt-4o-mini</source>
         <translation>模型 ID，例如 openai/gpt-4o-mini</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="256"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="269"/>
         <source>Load models</source>
         <translation>加载模型</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="262"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="275"/>
         <source>Server URL:</source>
         <translation>服务器 URL：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="264"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="277"/>
         <source>Model:</source>
         <translation>模型：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="268"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="281"/>
         <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key. The text is sent to the selected provider.</source>
         <translation>使用与 OpenAI 兼容的 Chat Completions API。默认服务器为 OpenRouter；URL 可指向其他兼容端点，例如 OpenAI、Ollama、llama.cpp 或 TeamRouter。模型必须可用于你的密钥。文本将发送给所选提供程序。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="290"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
         <source>Services</source>
         <translation>服务</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="298"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="311"/>
         <source>No proxy</source>
         <translation>无代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="312"/>
         <source>System proxy</source>
         <translation>系统代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="300"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="313"/>
         <source>Manual proxy</source>
         <translation>手动代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="304"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="307"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="320"/>
         <source>Proxy host</source>
         <translation>代理主机</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="311"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="324"/>
         <source>Not set</source>
         <translation>未设置</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="312"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
         <source>The proxy requires authentication</source>
         <translation>代理需要身份验证</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="329"/>
         <source>User name</source>
         <translation>用户名</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="320"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="326"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
         <source>Test connection</source>
         <translation>测试连接</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="346"/>
         <source>Proxy mode:</source>
         <translation>代理模式：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="334"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="347"/>
         <source>Proxy type:</source>
         <translation>代理类型：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="335"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="348"/>
         <source>Host:</source>
         <translation>主持人：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="336"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="349"/>
         <source>Port:</source>
         <translation>港口：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="338"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="351"/>
         <source>User name:</source>
         <translation>用户名：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="352"/>
         <source>Password:</source>
         <translation>密码：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="340"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="353"/>
         <source>Request timeout:</source>
         <translation>请求超时：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="345"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="358"/>
         <source>Network</source>
         <translation>网络</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
         <source>Translate in a popup</source>
         <translation>在弹出窗口中翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="553"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
         <source>Replace the selected text with the translation</source>
         <translation>用翻译替换所选文本</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="554"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="570"/>
         <source>Translate in the main window</source>
         <translation>在主窗口中翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="555"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
         <source>Show the main window</source>
         <translation>显示主窗口</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="563"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="579"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>“%1”使用多个组合键。全局热键支持单一组合。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>“%1”不能用作全局热键。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="584"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="600"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>同一组合键被分配多次：%1。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="595"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="611"/>
         <source>The primary and additional languages must differ.</source>
         <translation>主要语言和附加语言必须不同。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="602"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="618"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>输入代理主机和端口，或选择其他代理模式。</translation>
     </message>

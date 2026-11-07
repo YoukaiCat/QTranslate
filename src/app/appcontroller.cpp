@@ -11,6 +11,7 @@
 #include "net/networkmanager.h"
 #include "platform/autostart.h"
 #include "platform/hotkeymanager.h"
+#include "platform/secretprotector.h"
 #include "platform/selectiongrabber.h"
 #include "platform/windowactivation.h"
 #include "services/deeplservice.h"
@@ -31,6 +32,7 @@
 #include <QElapsedTimer>
 #include <QEvent>
 #include <QLibraryInfo>
+#include <QMessageBox>
 #include <QMimeData>
 #include <QSessionManager>
 #include <QTimer>
@@ -549,10 +551,12 @@ void AppController::showSettings()
         return;
 
     const TranslationService *service = m_translations->activeService();
+    const bool secretStorageAvailable = SecretProtector::isAvailable();
     SettingsDialog dialog(m_settings->current(),
                           service ? service->sourceLanguages() : QStringList(),
                           service ? service->targetLanguages() : QStringList(),
-                          Autostart::isApproved(), m_mainWindow.get());
+                          Autostart::isApproved(), !secretStorageAvailable,
+                          m_mainWindow.get());
     if (m_hotkeys) {
         connect(&dialog, &SettingsDialog::hotkeyEditingChanged, this,
                 [this](bool editing) {
@@ -619,8 +623,17 @@ void AppController::showSettings()
             });
     });
 
-    if (dialog.exec() == QDialog::Accepted)
+    if (dialog.exec() == QDialog::Accepted) {
         m_settings->save(dialog.settings());
+        // A keyring that worked when the dialog opened and failed during the
+        // save must not switch to plaintext silently.
+        if (secretStorageAvailable && !SecretProtector::isAvailable()) {
+            QMessageBox::warning(
+                m_mainWindow.get(), QString(),
+                tr("Secrets are stored unencrypted in a file readable only by your user "
+                   "because the system keyring is unavailable."));
+        }
+    }
 
     if (m_hotkeys) {
         m_hotkeyEditing = false;

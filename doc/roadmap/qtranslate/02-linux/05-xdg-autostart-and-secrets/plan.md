@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-linux-build-baseline]
 ---
@@ -337,3 +337,98 @@ dialog. Plain text must never be written silently. Make libsecret optional in CM
 - `doc/handoff.md`, the READMEs, `AGENTS.md`, `doc/architecture.md`, the stage and the journal are
   the lead's; do not update them in this task. The final report carries the new counts, the
   user-visible strings, the Astra/trixie results and the libsecret not-performed reason.
+
+## Outcome
+
+Done. Linux now uses the XDG user paths, writes `~/.config/autostart/qtranslate.desktop`, and stores
+secrets through libsecret with a visible 0600-file fallback. Linux has 27 tests, Windows keeps 23.
+
+- Files: new `src/core/apppaths.h`, `src/platform/autostart_linux.cpp` and
+  `src/platform/secretprotector_linux.cpp`; modified `CMakeLists.txt`, `src/core/settings.{h,cpp}`,
+  `src/main.cpp`, `src/app/logging.{h,cpp}`, `src/app/appcontroller.cpp`,
+  `src/platform/autostart.h`, `src/platform/secretprotector{.h,_stub.cpp,_win.cpp}`,
+  `src/ui/settingsdialog.{h,cpp}`, `tests/CMakeLists.txt`, `tests/tst_autostart.cpp`,
+  `tests/tst_secretprotector.cpp`, `tests/tst_settings.cpp`, `tests/tst_settingsdialog.cpp`, and all
+  14 `i18n/qtranslate_*.ts`. `qtranslate_core` stays free of libsecret, D-Bus and WinAPI;
+  `autostart_win.cpp`, `selectiongrabber_win.cpp`, the `if(WIN32)` blocks and the Windows paths are
+  unchanged, and the shared code only gains the `SecretProtector` capability queries.
+- Paths: `AppPaths::configDirectory()`/`stateDirectory()` read `XDG_CONFIG_HOME`/`XDG_STATE_HOME`
+  directly on Linux, ignore empty and relative values, fall back to `~/.config`/`~/.local/state`
+  and append the lowercase `qtranslate`; other platforms return the previous
+  `QStandardPaths::AppDataLocation`/`AppLocalDataLocation`. Settings use
+  `<config>/qtranslate/qtranslate.ini` and the log `<state>/qtranslate/qtranslate.log` (5 MB
+  rotation kept); the portable `qtranslate.ini` next to the executable still wins.
+- Autostart: Desktop Entry quoting (escape `\`, `"`, `` ` ``, `$`, a literal `%` as `%%`) with
+  `"<path>" --minimized`, a `[Desktop Entry]` with `Type=Application`, `Name=QTranslate`, `Exec=`,
+  `Icon=qtranslate`, `Terminal=false` and `X-GNOME-Autostart-enabled=true` under
+  `$XDG_CONFIG_HOME/autostart/qtranslate.desktop`; `sync(true)` repairs a moved path, `sync(false)`
+  removes the file, `isEnabled()` is the file existence and `isApproved()` is true.
+- Secrets: libsecret (`l:<uuid>`, schema `org.qtranslate.Secret`, attributes `application`/`id`)
+  when `QTRANSLATE_HAVE_LIBSECRET` is defined and the capability probe (a registered or activatable
+  `org.freedesktop.secrets` over D-Bus, 1 s cap, no `secret_service_get_sync`) is true; otherwise an
+  `f:<uuid>` file under `<config>/qtranslate/secrets` with a `0700` directory and a `0600` file, no
+  plaintext in the token or the log, and empty returns for missing or corrupt tokens.
+  `isAvailable()` reports the fallback, including after a libsecret failure (`g_libsecretFailed`).
+- Save behavior: `writeSecret()` keeps an unchanged secret's existing token instead of re-protecting
+  it, and `SecretProtector::canReuse()` decides: an `l:` token is kept through a transient outage
+  (never downgraded to plaintext), an `f:` token is migrated to libsecret once the keyring is
+  available, and unknown or corrupt tokens or a missing key are protected again. This closes the
+  silent plaintext write on `prepareForQuit()`/`selectService()` saves.
+- UI: `SettingsDialog` takes `bool secretStorageFallback` before `QWidget *parent` and shows the red
+  word-wrapped `secretStorageHint`; `AppController` passes `!SecretProtector::isAvailable()` and
+  shows a `QMessageBox::warning` when the capability was true before an accepted save and false
+  after. The Windows Task Manager hint stays for Windows and is hidden on Linux.
+- CMake: `find_package(PkgConfig QUIET)` and `pkg_check_modules(LIBSECRET QUIET IMPORTED_TARGET
+  libsecret-1)` only on Linux; `PkgConfig::LIBSECRET` and `QTRANSLATE_HAVE_LIBSECRET` only on the
+  Linux `qtranslate` target and `tst_secretprotector`, so a build without libsecret still configures
+  and builds the fallback. The stub stays in the final `else()` branch.
+- Tests: `tst_autostart` covers the Desktop Entry quoting and write/read/repair/remove with a
+  temporary `XDG_CONFIG_HOME`; `tst_secretprotector` covers the forced fallback (`f:`, plaintext
+  only in the file, `0600`/`0700`), the libsecret round-trip (QSKIP without a keyring), malformed
+  tokens and `canReuse`; `tst_settings` covers the XDG path (including relative values),
+  unchanged-secret reuse, migration and the failed-protect retry; `tst_settingsdialog` covers the
+  hidden and visible warning.
+- Verification:
+  - `debian:trixie` (Qt 6.8.2, GCC 14.2), read-only mount, Debug and Release: 0 warnings;
+    `timeout 300 xvfb-run -a ctest` 27/27 in both; `tst_settings` 15/15, `tst_autostart` 6/6,
+    `tst_settingsdialog` 20/20, `tst_translations` 4/4; `tst_secretprotector` 7 passed + 1 skipped
+    (`The org.freedesktop.secrets service is not registered or activatable`), recorded as not
+    performed. A build with a `pkg-config` shim that hides `libsecret-1` also configured and built
+    with 0 warnings and the same 7+1 (skip reason `libsecret support is not compiled in`).
+  - Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2), native `build/linux-debug`/`build/linux-release`:
+    0 warnings; CTest 27/27 in both; `tst_settings` 15/15, `tst_secretprotector` 8/8 (real
+    libsecret round-trip), `tst_autostart` 6/6, `tst_settingsdialog` 20/20, `tst_translations` 4/4;
+    the existing X11 counts are unchanged (16/16, 20/20, 12/12, 13/13, 7/7). The rebuild was
+    followed by `sudo /usr/bin/fly-set-execid.sh`.
+  - Headless application check with a temporary `XDG_CONFIG_HOME`/`XDG_STATE_HOME`: `autostart=true`
+    wrote the desktop file with the required keys and `Exec="<release path>" --minimized`,
+    `autostart=false` removed it, and the settings and log landed in the XDG directories. GUI
+    clicks were not performed because xvfb has no tray; the dialog is covered by
+    `tst_settingsdialog`.
+- Translations: `SettingsDialog` `Start %1 when you log in` and the fallback warning in the
+  `SettingsDialog` and `AppController` contexts were added through `lupdate` and translated in all
+  14 `.ts` files with no `type="unfinished"`; `%1` is preserved and the existing `Start %1 when
+  Windows starts` and Task Manager hint stay. READMEs, architecture, `AGENTS.md`, `i18n/README.md`
+  and the handoff were not edited.
+- Review: accepted and fixed — the silent plaintext fallback on non-dialog saves, the
+  backend-aware reuse/migration (`canReuse`), relative XDG values, the failed-protect retry, and the
+  test environment guard. Rejected as plan-prescribed or out of scope — the Desktop Entry
+  string-level backslash/`%%` parser edge cases, keyring test entries accumulating, and the trixie
+  keyring skip. Windows Debug/Release and the 23 tests were not performed (no MSVC); the diff review
+  confirms the Windows files and `if(WIN32)` blocks are unchanged apart from `SecretProtector`
+  gaining `isAvailable() == true` and `canReuse()`.
+- Known limitations: the fallback file lives under the XDG config directory even in portable mode;
+  old keyring entries/fallback files remain when a secret is overwritten or migrated (no delete
+  API); the D-Bus probe can be a false negative when the service is installed but not running or
+  activatable; the settings hint is based on `isAvailable()`, so a stored `f:` token is not
+  highlighted when the keyring is otherwise available (it migrates on the next save); a token that
+  cannot be decoded (a no-libsecret build or a transient keyring failure at load) is removed from
+  the INI on the next save; a literal backslash is written as `\\` and GLib does not load `%%` in
+  `Exec`, so an install path containing `\` or `%` can fail to autostart; Astra keyring test entries
+  remain; the live `:0` X11 tests occasionally flake under an active desktop (they were stable
+  under `xvfb-run` and are not touched by this task).
+- Facts for the documentation (not edited here): Linux has 27 tests and Windows 23; the trixie
+  `xvfb-run` gate is the automated evidence, the Astra run needs `sudo /usr/bin/fly-set-execid.sh`
+  after every rebuild; the new user-visible strings and their contexts are `SettingsDialog`
+  `Start %1 when you log in`, and the fallback warning in `SettingsDialog` and `AppController`.
+  The portable rule still applies only to `qtranslate.ini`, not to the secret fallback directory.
