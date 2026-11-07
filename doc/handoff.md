@@ -35,7 +35,7 @@ documentation is English. The migration to the tree roadmap and the English base
 
 ## Linux baseline (2026-11-06, updated 2026-11-07)
 
-- The Linux tree builds, links, and passes 27 of 27 tests in Debug and Release on Debian 13
+- The Linux tree builds, links, and passes 28 of 28 tests in Debug and Release on Debian 13
   (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2; Clang 16.0.6), with
   `-Wall -Wextra` and no warnings. `qtranslate --version` works. Windows builds and the 23 tests
   were not performed here.
@@ -79,11 +79,13 @@ documentation is English. The migration to the tree roadmap and the English base
   asynchronous bind failures through `registrationFailed`, keeps suspend logical, and returns an empty
   `hotkey()` after the desktop assigns triggers. `Qt6::DBus` is Linux-only in `qtranslate` and the
   tests; `libqt6dbus6` is the runtime dependency for packaging and `dbus`/`dbus-daemon` the test
-  dependency. Linux has 27 tests; `tst_hotkeymanager_x11` is 16/16 and `tst_hotkeymanager_wayland`
-  20/20 in trixie and on Astra (after `fly-set-execid.sh`), and `tst_autostart` is 6/6;
-  `tst_secretprotector` is 7 passed + 1 skipped in trixie (no session keyring, recorded as not
-  performed) and 8/8 on Astra with the real libsecret round-trip. Known gaps: the tray text and
-  tooltip on Wayland (task 06) and two latent signal-reentrancy edges with no current caller.
+  dependency. Linux has 28 tests; `tst_hotkeymanager_x11` is 16/16 and `tst_hotkeymanager_wayland`
+  20/20 in trixie and on Astra (after `fly-set-execid.sh`), `tst_autostart` is 6/6, and `tst_cli`
+  is 20/20; `tst_secretprotector` is 7 passed + 1 skipped in trixie (no session keyring, recorded
+  as not performed) and 8/8 on Astra with the real libsecret round-trip. Known gaps: the tray
+  tooltip can show the configured sequence before an asynchronous bind completes or after a desktop
+  reassignment (task 05/06, still open) and two latent signal-reentrancy edges with no current
+  caller.
 - X11 selection capture and the window helpers are implemented; Wayland reads the manually copied
   clipboard and never synthesizes input. `tst_selectiongrabber_linux` (12) and
   `tst_windowactivation_linux` (13) were added, and the manual `:0` check passed with `kate`
@@ -92,10 +94,19 @@ documentation is English. The migration to the tree roadmap and the English base
   releasing Ctrl/Shift first, releasing Q first and holding the combination all work; the new
   `tst_hotkey_selection_x11` is 7/7 and is listed in `trusted.d`. The original clipboard's non-text
   formats are not restored by the manual check.
-- Roadmap stage 2 continues with CLI/desktop integration (task 06 is detailed and in progress:
-  `--translate-popup`/`--translate-main`/`--translate-inplace`, single-instance forwarding, no-tray
-  and Wayland warnings), packaging, and verification. The READMEs and `architecture.md` now state
-  the Linux baseline.
+- CLI and desktop behaviour (task 06, `760ae0b`): `--translate-popup`, `--translate-main`,
+  `--translate-inplace` are parsed by `src/app/commandline.*` and forwarded over the
+  `SingleInstance` socket (`activate`/`noop` byte-exact); they combine with `--minimized` and
+  `--verbose`, positional arguments are ignored, and unknown options exit 1. A command start does
+  not show the main window before the grab; with a tray it stays in the tray, and without a tray
+  the popup, main window, or in-place feedback appears as the scenario allows. One
+  `Limited Wayland support` warning is shown per start and per-hotkey tray messages are suppressed
+  on Wayland; a normal start without a tray shows one `System tray unavailable` warning, and
+  in-place messages use a non-modal message box. `tst_cli` covers the parser, two-process
+  forwarding and the legacy wire (20/20). The `.desktop` file, hicolor icons and
+  `share/applications` are task 07.
+- Roadmap stage 2 continues with packaging (task 07: `.deb`/`tar.gz`/AppImage, `.desktop`/icons,
+  CI) and verification (task 08). The READMEs and `architecture.md` now state the Linux baseline.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
