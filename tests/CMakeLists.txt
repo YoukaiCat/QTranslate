@@ -148,4 +148,19 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(tst_windowactivation_linux PRIVATE Qt::Widgets X11::X11 X11::Xtst)
     set_tests_properties(tst_windowactivation_linux PROPERTIES
         ENVIRONMENT "QT_QPA_PLATFORM=xcb")
+
+    # The CLI test is guiless: it parses the shared options and drives the
+    # real single-instance socket with a child process, so it needs no display.
+    qtranslate_add_test(tst_cli
+        ${PROJECT_SOURCE_DIR}/src/app/commandline.cpp
+        ${PROJECT_SOURCE_DIR}/src/app/commandline.h
+        ${PROJECT_SOURCE_DIR}/src/app/singleinstance.cpp
+        ${PROJECT_SOURCE_DIR}/src/app/singleinstance.h
+        ${PROJECT_SOURCE_DIR}/src/app/logging.cpp
+        ${PROJECT_SOURCE_DIR}/src/app/logging.h
+        ${PROJECT_SOURCE_DIR}/src/platform/sessiontype.h
+        ${PROJECT_SOURCE_DIR}/src/platform/windowactivation.h
+        ${PROJECT_SOURCE_DIR}/src/platform/windowactivation_linux.cpp
+    )
+    target_link_libraries(tst_cli PRIVATE X11::X11 X11::Xtst)
 endif()

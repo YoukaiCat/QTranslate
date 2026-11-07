@@ -4,65 +4,86 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="126"/>
-        <location filename="../src/app/appcontroller.cpp" line="538"/>
+        <location filename="../src/app/appcontroller.cpp" line="158"/>
+        <location filename="../src/app/appcontroller.cpp" line="612"/>
         <source>Autostart</source>
         <translation>تشغيل تلقائي</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="127"/>
-        <location filename="../src/app/appcontroller.cpp" line="539"/>
+        <location filename="../src/app/appcontroller.cpp" line="159"/>
+        <location filename="../src/app/appcontroller.cpp" line="613"/>
         <source>Could not update the autostart entry.</source>
         <translation>تعذر تحديث إدخال التشغيل التلقائي.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="217"/>
+        <location filename="../src/app/appcontroller.cpp" line="291"/>
         <source>Hotkey unavailable</source>
         <translation>مفتاح التشغيل السريع غير متاح</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="218"/>
+        <location filename="../src/app/appcontroller.cpp" line="292"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 مستخدم بالفعل بواسطة برنامج آخر. أغلق هذا البرنامج أو اختر مجموعة أخرى في الإعدادات.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="279"/>
+        <location filename="../src/app/appcontroller.cpp" line="353"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="574"/>
+        <location filename="../src/app/appcontroller.cpp" line="648"/>
         <source>DeepL is not available.</source>
         <translation>DeepL غير متوفر.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="589"/>
+        <location filename="../src/app/appcontroller.cpp" line="663"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>مزوّد الخدمة المتوافق مع OpenAI غير متاح.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="633"/>
+        <location filename="../src/app/appcontroller.cpp" line="707"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>تُخزَّن الأسرار دون تشفير في ملف لا يمكن قراءته إلا من قبل المستخدم الخاص بك لأن حلقة مفاتيح النظام غير متاحة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="779"/>
+        <location filename="../src/app/appcontroller.cpp" line="859"/>
         <source>Nothing is selected.</source>
         <translation>لم يتم تحديد أي شيء.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="818"/>
+        <location filename="../src/app/appcontroller.cpp" line="901"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>تغيرت النافذة النشطة. تم نسخ الترجمة إلى الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="810"/>
-        <location filename="../src/app/appcontroller.cpp" line="855"/>
+        <location filename="../src/app/appcontroller.cpp" line="982"/>
+        <source>System tray unavailable</source>
+        <translation>علبة النظام غير متاحة</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="983"/>
+        <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
+        <translation>علبة النظام غير متاحة، لذلك لا يمكن للتطبيق البقاء في الخلفية. إغلاق النافذة ينهي التطبيق.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="892"/>
+        <location filename="../src/app/appcontroller.cpp" line="940"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>لا يمكن اللصق تلقائيًا؛ الترجمة موجودة في الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="879"/>
+        <location filename="../src/app/appcontroller.cpp" line="136"/>
+        <source>Limited Wayland support</source>
+        <translation>دعم محدود لـ Wayland</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="138"/>
+        <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
+        <translation>تتطلب اختصارات لوحة المفاتيح العامة بوابة GlobalShortcuts. إذا لم يوفر سطح المكتب هذه البوابة، فانسخ النص المحدد باستخدام Ctrl+C واستخدم أوامر CLI أو اختصارًا على سطح المكتب؛ حيث ينسخ الاستبدال في المكان الترجمة إلى الحافظة بدلاً من لصقها.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="964"/>
+        <location filename="../src/app/appcontroller.cpp" line="967"/>
         <source>Translate and replace</source>
         <translation>ترجمة واستبدال</translation>
     </message>
@@ -1491,19 +1512,39 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="40"/>
+        <location filename="../src/main.cpp" line="41"/>
         <source>Fast desktop translator.</source>
         <translation>مترجم سطح مكتب سريع.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="45"/>
+        <location filename="../src/app/commandline.cpp" line="8"/>
         <source>Start hidden in the system tray.</source>
         <translation>ابدأ مخفيًا في علبة النظام.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="49"/>
+        <location filename="../src/app/commandline.cpp" line="11"/>
         <source>Write verbose logs to the application log file.</source>
         <translation>كتابة سجلات مطولة إلى ملف سجل التطبيق.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="15"/>
+        <source>Translate the selected text in a popup window.</source>
+        <translation>ترجمة النص المحدد في نافذة منبثقة.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="19"/>
+        <source>Translate the selected text in the main window.</source>
+        <translation>ترجمة النص المحدد في النافذة الرئيسية.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="23"/>
+        <source>Translate the selected text and replace it.</source>
+        <translation>ترجمة النص المحدد واستبداله.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="43"/>
+        <source>The --translate-popup, --translate-main and --translate-inplace options are mutually exclusive.</source>
+        <translation>خيارات --translate-popup و--translate-main و--translate-inplace متنافية.</translation>
     </message>
 </context>
 </TS>

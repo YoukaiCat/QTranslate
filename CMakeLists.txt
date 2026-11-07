@@ -72,6 +72,7 @@ qt_add_executable(qtranslate
     WIN32
     src/main.cpp
     src/app/appcontroller.cpp       src/app/appcontroller.h
+    src/app/commandline.cpp         src/app/commandline.h
     src/app/logging.cpp             src/app/logging.h
     src/app/singleinstance.cpp      src/app/singleinstance.h
     src/platform/autostart.h

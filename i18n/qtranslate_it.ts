@@ -4,65 +4,86 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="126"/>
-        <location filename="../src/app/appcontroller.cpp" line="538"/>
+        <location filename="../src/app/appcontroller.cpp" line="158"/>
+        <location filename="../src/app/appcontroller.cpp" line="612"/>
         <source>Autostart</source>
         <translation>Avvio automatico</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="127"/>
-        <location filename="../src/app/appcontroller.cpp" line="539"/>
+        <location filename="../src/app/appcontroller.cpp" line="159"/>
+        <location filename="../src/app/appcontroller.cpp" line="613"/>
         <source>Could not update the autostart entry.</source>
         <translation>Impossibile aggiornare la voce di avvio automatico.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="217"/>
+        <location filename="../src/app/appcontroller.cpp" line="291"/>
         <source>Hotkey unavailable</source>
         <translation>Tasto di scelta rapida non disponibile</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="218"/>
+        <location filename="../src/app/appcontroller.cpp" line="292"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 è già utilizzato da un altro programma. Chiudi quel programma o scegli un&apos;altra combinazione nelle impostazioni.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="279"/>
+        <location filename="../src/app/appcontroller.cpp" line="353"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="574"/>
+        <location filename="../src/app/appcontroller.cpp" line="648"/>
         <source>DeepL is not available.</source>
         <translation>DeepL non è disponibile.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="589"/>
+        <location filename="../src/app/appcontroller.cpp" line="663"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>Il provider compatibile con OpenAI non è disponibile.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="633"/>
+        <location filename="../src/app/appcontroller.cpp" line="707"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>I segreti vengono memorizzati senza crittografia in un file leggibile solo dal tuo utente perché il portachiavi di sistema non è disponibile.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="779"/>
+        <location filename="../src/app/appcontroller.cpp" line="859"/>
         <source>Nothing is selected.</source>
         <translation>Nessun testo selezionato.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="818"/>
+        <location filename="../src/app/appcontroller.cpp" line="901"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>La finestra attiva è cambiata; la traduzione è stata copiata negli appunti.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="810"/>
-        <location filename="../src/app/appcontroller.cpp" line="855"/>
+        <location filename="../src/app/appcontroller.cpp" line="982"/>
+        <source>System tray unavailable</source>
+        <translation>Barra delle applicazioni non disponibile</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="983"/>
+        <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
+        <translation>La barra delle applicazioni non è disponibile, quindi l&apos;applicazione non può rimanere in background. La chiusura della finestra termina l&apos;applicazione.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="892"/>
+        <location filename="../src/app/appcontroller.cpp" line="940"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>Impossibile incollare automaticamente; la traduzione è negli appunti.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="879"/>
+        <location filename="../src/app/appcontroller.cpp" line="136"/>
+        <source>Limited Wayland support</source>
+        <translation>Supporto Wayland limitato</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="138"/>
+        <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
+        <translation>Le scorciatoie da tastiera globali richiedono il portale GlobalShortcuts. Se questo desktop non lo fornisce, copia il testo selezionato con Ctrl+C e usa i comandi della CLI o una scorciatoia del desktop; la sostituzione sul posto copia la traduzione negli appunti invece di incollarla.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="964"/>
+        <location filename="../src/app/appcontroller.cpp" line="967"/>
         <source>Translate and replace</source>
         <translation>Traduci e sostituisci</translation>
     </message>
@@ -1018,7 +1039,7 @@
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="71"/>
         <source>Start %1 when you log in</source>
-        <translation>Avvia %1 all'accesso</translation>
+        <translation>Avvia %1 all&apos;accesso</translation>
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="75"/>
@@ -1491,19 +1512,39 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="40"/>
+        <location filename="../src/main.cpp" line="41"/>
         <source>Fast desktop translator.</source>
         <translation>Traduttore desktop veloce.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="45"/>
+        <location filename="../src/app/commandline.cpp" line="8"/>
         <source>Start hidden in the system tray.</source>
         <translation>Avvia nascosto nella barra delle applicazioni.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="49"/>
+        <location filename="../src/app/commandline.cpp" line="11"/>
         <source>Write verbose logs to the application log file.</source>
         <translation>Scrivi log dettagliati nel file di log dell&apos;applicazione.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="15"/>
+        <source>Translate the selected text in a popup window.</source>
+        <translation>Traduci il testo selezionato in una finestra popup.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="19"/>
+        <source>Translate the selected text in the main window.</source>
+        <translation>Traduci il testo selezionato nella finestra principale.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="23"/>
+        <source>Translate the selected text and replace it.</source>
+        <translation>Traduci il testo selezionato e sostituiscilo.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="43"/>
+        <source>The --translate-popup, --translate-main and --translate-inplace options are mutually exclusive.</source>
+        <translation>Le opzioni --translate-popup, --translate-main e --translate-inplace si escludono a vicenda.</translation>
     </message>
 </context>
 </TS>

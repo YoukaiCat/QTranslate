@@ -1,5 +1,7 @@
 #pragma once
 
+#include "app/singleinstance.h"
+
 #include <QObject>
 #include <QPointer>
 #include <QString>
@@ -16,7 +18,6 @@ class QMimeData;
 class QTimer;
 class SelectionGrabber;
 class SettingsStore;
-class SingleInstance;
 class TranslationManager;
 class TranslationReply;
 class TrayIcon;
@@ -38,6 +39,7 @@ public:
     struct Options
     {
         bool startHidden = false; // --minimized
+        SingleInstance::Command command = SingleInstance::Command::None; // startup scenario
     };
 
     AppController(SingleInstance *instance, SettingsStore *settings, const Options &options,
@@ -50,6 +52,7 @@ public:
 private:
     void createTranslation();
     void createHotkeys();
+    void executeCommand(SingleInstance::Command command);
     void initMainWindowLanguages();
     void updateLanguageConfiguration();
     void updateServiceSelectors();
@@ -70,6 +73,8 @@ private:
     void pasteTranslation(const QString &text);
     void restoreClipboardAfterPaste();
     void showInPlaceMessage(const QString &message);
+    void finishInPlaceCommand();
+    void showTrayUnavailableWarning();
     std::unique_ptr<QMimeData> snapshotClipboard() const;
     void openPopupInMainWindow(const TranslationRequest &request,
                                const TranslationResult &result);
@@ -82,7 +87,11 @@ private:
     SettingsStore *m_settings = nullptr;
     Options m_options;
     bool m_trayAvailable = false;
+    bool m_waylandSession = false;
     bool m_quitting = false;
+    // A startup --translate-inplace command without a tray shows the main
+    // window after the operation, so the result stays visible.
+    bool m_showMainWindowAfterInPlace = false;
 
     NetworkManager *m_network = nullptr;
     TranslationManager *m_translations = nullptr;

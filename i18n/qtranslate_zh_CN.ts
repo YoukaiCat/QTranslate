@@ -4,65 +4,86 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="126"/>
-        <location filename="../src/app/appcontroller.cpp" line="538"/>
+        <location filename="../src/app/appcontroller.cpp" line="158"/>
+        <location filename="../src/app/appcontroller.cpp" line="612"/>
         <source>Autostart</source>
         <translation>自动启动</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="127"/>
-        <location filename="../src/app/appcontroller.cpp" line="539"/>
+        <location filename="../src/app/appcontroller.cpp" line="159"/>
+        <location filename="../src/app/appcontroller.cpp" line="613"/>
         <source>Could not update the autostart entry.</source>
         <translation>无法更新自动启动条目。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="217"/>
+        <location filename="../src/app/appcontroller.cpp" line="291"/>
         <source>Hotkey unavailable</source>
         <translation>热键不可用</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="218"/>
+        <location filename="../src/app/appcontroller.cpp" line="292"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 已被另一个程序使用。关闭该程序或在设置中选择其他组合。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="279"/>
+        <location filename="../src/app/appcontroller.cpp" line="353"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="574"/>
+        <location filename="../src/app/appcontroller.cpp" line="648"/>
         <source>DeepL is not available.</source>
         <translation>DeepL 不可用。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="589"/>
+        <location filename="../src/app/appcontroller.cpp" line="663"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI 兼容提供程序不可用。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="633"/>
+        <location filename="../src/app/appcontroller.cpp" line="707"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>由于系统密钥环不可用，机密信息将以未加密方式存储在只有您的用户才能读取的文件中。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="779"/>
+        <location filename="../src/app/appcontroller.cpp" line="859"/>
         <source>Nothing is selected.</source>
         <translation>未选择任何内容。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="818"/>
+        <location filename="../src/app/appcontroller.cpp" line="901"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>活动窗口发生变化；翻译已复制到剪贴板。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="810"/>
-        <location filename="../src/app/appcontroller.cpp" line="855"/>
+        <location filename="../src/app/appcontroller.cpp" line="982"/>
+        <source>System tray unavailable</source>
+        <translation>系统托盘不可用</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="983"/>
+        <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
+        <translation>系统托盘不可用，因此应用程序无法在后台运行。关闭窗口将退出应用程序。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="892"/>
+        <location filename="../src/app/appcontroller.cpp" line="940"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>无法自动粘贴；翻译在剪贴板上。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="879"/>
+        <location filename="../src/app/appcontroller.cpp" line="136"/>
+        <source>Limited Wayland support</source>
+        <translation>Wayland 支持有限</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="138"/>
+        <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
+        <translation>全局热键需要 GlobalShortcuts 门户。如果此桌面不提供该门户，请用 Ctrl+C 复制所选文本，并使用 CLI 命令或桌面快捷方式；就地替换会将翻译复制到剪贴板，而不是粘贴。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="964"/>
+        <location filename="../src/app/appcontroller.cpp" line="967"/>
         <source>Translate and replace</source>
         <translation>翻译和替换</translation>
     </message>
@@ -1491,19 +1512,39 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="40"/>
+        <location filename="../src/main.cpp" line="41"/>
         <source>Fast desktop translator.</source>
         <translation>快速桌面翻译器。</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="45"/>
+        <location filename="../src/app/commandline.cpp" line="8"/>
         <source>Start hidden in the system tray.</source>
         <translation>启动隐藏在系统托盘中。</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="49"/>
+        <location filename="../src/app/commandline.cpp" line="11"/>
         <source>Write verbose logs to the application log file.</source>
         <translation>将详细日志写入应用程序日志文件。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="15"/>
+        <source>Translate the selected text in a popup window.</source>
+        <translation>在弹出的窗口中翻译所选文本。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="19"/>
+        <source>Translate the selected text in the main window.</source>
+        <translation>在主窗口中翻译所选文本。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="23"/>
+        <source>Translate the selected text and replace it.</source>
+        <translation>翻译所选文本并替换它。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="43"/>
+        <source>The --translate-popup, --translate-main and --translate-inplace options are mutually exclusive.</source>
+        <translation>--translate-popup、--translate-main 和 --translate-inplace 选项互斥。</translation>
     </message>
 </context>
 </TS>

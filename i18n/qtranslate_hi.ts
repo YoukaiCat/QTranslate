@@ -4,65 +4,86 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="126"/>
-        <location filename="../src/app/appcontroller.cpp" line="538"/>
+        <location filename="../src/app/appcontroller.cpp" line="158"/>
+        <location filename="../src/app/appcontroller.cpp" line="612"/>
         <source>Autostart</source>
         <translation>ऑटो स्टार्ट</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="127"/>
-        <location filename="../src/app/appcontroller.cpp" line="539"/>
+        <location filename="../src/app/appcontroller.cpp" line="159"/>
+        <location filename="../src/app/appcontroller.cpp" line="613"/>
         <source>Could not update the autostart entry.</source>
         <translation>ऑटोस्टार्ट प्रविष्टि को अद्यतन नहीं किया जा सका.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="217"/>
+        <location filename="../src/app/appcontroller.cpp" line="291"/>
         <source>Hotkey unavailable</source>
         <translation>हॉटकी अनुपलब्ध</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="218"/>
+        <location filename="../src/app/appcontroller.cpp" line="292"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 पहले से ही किसी अन्य प्रोग्राम द्वारा उपयोग किया जा रहा है। उस प्रोग्राम को बंद करें या सेटिंग्स में कोई अन्य संयोजन चुनें।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="279"/>
+        <location filename="../src/app/appcontroller.cpp" line="353"/>
         <source>%1 — %2</source>
         <translation>%1 - %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="574"/>
+        <location filename="../src/app/appcontroller.cpp" line="648"/>
         <source>DeepL is not available.</source>
         <translation>DeepL उपलब्ध नहीं है.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="589"/>
+        <location filename="../src/app/appcontroller.cpp" line="663"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI-संगत प्रदाता उपलब्ध नहीं है।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="633"/>
+        <location filename="../src/app/appcontroller.cpp" line="707"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>सिस्टम कीरिंग उपलब्ध न होने के कारण रहस्य केवल आपके उपयोगकर्ता द्वारा पढ़ी जा सकने वाली फ़ाइल में बिना एन्क्रिप्शन के संग्रहीत किए जाते हैं।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="779"/>
+        <location filename="../src/app/appcontroller.cpp" line="859"/>
         <source>Nothing is selected.</source>
         <translation>कुछ भी चयनित नहीं है।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="818"/>
+        <location filename="../src/app/appcontroller.cpp" line="901"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>सक्रिय विंडो बदल गई; अनुवाद को क्लिपबोर्ड पर कॉपी किया गया था.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="810"/>
-        <location filename="../src/app/appcontroller.cpp" line="855"/>
+        <location filename="../src/app/appcontroller.cpp" line="982"/>
+        <source>System tray unavailable</source>
+        <translation>सिस्टम ट्रे उपलब्ध नहीं है</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="983"/>
+        <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
+        <translation>सिस्टम ट्रे उपलब्ध नहीं है, इसलिए ऐप बैकग्राउंड में नहीं रह सकता। विंडो बंद करने से ऐप बंद हो जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="892"/>
+        <location filename="../src/app/appcontroller.cpp" line="940"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>स्वचालित रूप से पेस्ट नहीं किया जा सका; अनुवाद क्लिपबोर्ड पर है.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="879"/>
+        <location filename="../src/app/appcontroller.cpp" line="136"/>
+        <source>Limited Wayland support</source>
+        <translation>सीमित Wayland समर्थन</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="138"/>
+        <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
+        <translation>वैश्विक हॉटकी के लिए GlobalShortcuts पोर्टल आवश्यक है। यदि यह डेस्कटॉप इसे प्रदान नहीं करता है, तो चयनित टेक्स्ट को Ctrl+C से कॉपी करें और CLI कमांड या डेस्कटॉप शॉर्टकट का उपयोग करें; इन-प्लेस बदलाव पेस्ट करने के बजाय अनुवाद को क्लिपबोर्ड पर कॉपी करता है।</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="964"/>
+        <location filename="../src/app/appcontroller.cpp" line="967"/>
         <source>Translate and replace</source>
         <translation>अनुवाद करें और बदलें</translation>
     </message>
@@ -1491,19 +1512,39 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="40"/>
+        <location filename="../src/main.cpp" line="41"/>
         <source>Fast desktop translator.</source>
         <translation>तेज़ डेस्कटॉप अनुवादक।</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="45"/>
+        <location filename="../src/app/commandline.cpp" line="8"/>
         <source>Start hidden in the system tray.</source>
         <translation>सिस्टम ट्रे में छुपे हुए प्रारंभ करें.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="49"/>
+        <location filename="../src/app/commandline.cpp" line="11"/>
         <source>Write verbose logs to the application log file.</source>
         <translation>एप्लिकेशन लॉग फ़ाइल में वर्बोज़ लॉग लिखें।</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="15"/>
+        <source>Translate the selected text in a popup window.</source>
+        <translation>चयनित टेक्स्ट को पॉपअप विंडो में अनुवाद करें।</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="19"/>
+        <source>Translate the selected text in the main window.</source>
+        <translation>चयनित टेक्स्ट को मुख्य विंडो में अनुवाद करें।</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="23"/>
+        <source>Translate the selected text and replace it.</source>
+        <translation>चयनित टेक्स्ट का अनुवाद करें और उसे बदलें।</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="43"/>
+        <source>The --translate-popup, --translate-main and --translate-inplace options are mutually exclusive.</source>
+        <translation>--translate-popup, --translate-main और --translate-inplace विकल्प परस्पर अनन्य हैं।</translation>
     </message>
 </context>
 </TS>

@@ -1,4 +1,5 @@
 #include "app/appcontroller.h"
+#include "app/commandline.h"
 #include "app/logging.h"
 #include "app/singleinstance.h"
 #include "core/appinfo.h"
@@ -40,24 +41,32 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription(QApplication::translate("main", "Fast desktop translator."));
     parser.addHelpOption();
     parser.addVersionOption();
-    const QCommandLineOption minimizedOption(
-        QStringLiteral("minimized"),
-        QApplication::translate("main", "Start hidden in the system tray."));
-    parser.addOption(minimizedOption);
-    const QCommandLineOption verboseOption(
-        QStringLiteral("verbose"),
-        QApplication::translate("main", "Write verbose logs to the application log file."));
-    parser.addOption(verboseOption);
+    const CommandLineOptions options;
+    options.addTo(parser);
     parser.process(app);
 
-    const bool startHidden = parser.isSet(minimizedOption);
-    Logging::initialize(parser.isSet(verboseOption));
+    QString scenarioError;
+    const SingleInstance::Command scenario = options.scenario(parser, &scenarioError);
+    if (!scenarioError.isEmpty()) {
+        // QCommandLineParser has no public showError() in Qt 6; print the same
+        // "qtranslate: message" line that process() uses for its own errors.
+        qWarning("%s: %s", qPrintable(QCoreApplication::applicationName()),
+                 qPrintable(scenarioError));
+        return 1;
+    }
+
+    const bool startHidden = options.isStartHidden(parser);
+    Logging::initialize(options.isVerbose(parser));
+
+    // A scenario option wins over the plain "show the window" activation; a
+    // hidden start without a scenario just exits in a running instance.
+    const SingleInstance::Command command = scenario != SingleInstance::Command::None
+        ? scenario
+        : startHidden ? SingleInstance::Command::None : SingleInstance::Command::Activate;
 
     SingleInstance instance(SingleInstance::defaultKey());
-    if (!instance.tryBecomePrimary(startHidden ? SingleInstance::Command::None
-                                               : SingleInstance::Command::Activate)) {
+    if (!instance.tryBecomePrimary(command))
         return 0;
-    }
 
     SettingsStore settings;
     settings.setSecretCodec(
@@ -70,7 +79,7 @@ int main(int argc, char *argv[])
          }});
     settings.load();
 
-    AppController controller(&instance, &settings, AppController::Options{startHidden});
+    AppController controller(&instance, &settings, AppController::Options{startHidden, command});
     controller.start();
     qCInfo(lcApp) << "Started in" << startupTimer.elapsed() << "ms";
 

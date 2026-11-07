@@ -20,6 +20,40 @@ constexpr int kPrimaryWaitMs = 1000;
 
 const QByteArray kActivateMessage = QByteArrayLiteral("activate\n");
 const QByteArray kNoopMessage = QByteArrayLiteral("noop\n");
+const QByteArray kTranslatePopupMessage = QByteArrayLiteral("translate-popup\n");
+const QByteArray kTranslateMainMessage = QByteArrayLiteral("translate-main\n");
+const QByteArray kTranslateInplaceMessage = QByteArrayLiteral("translate-inplace\n");
+
+QByteArray messageFor(SingleInstance::Command command)
+{
+    switch (command) {
+    case SingleInstance::Command::Activate:
+        return kActivateMessage;
+    case SingleInstance::Command::TranslatePopup:
+        return kTranslatePopupMessage;
+    case SingleInstance::Command::TranslateMain:
+        return kTranslateMainMessage;
+    case SingleInstance::Command::TranslateInplace:
+        return kTranslateInplaceMessage;
+    case SingleInstance::Command::None:
+        break;
+    }
+    return kNoopMessage;
+}
+
+SingleInstance::Command commandForMessage(const QByteArray &line)
+{
+    if (line == kActivateMessage)
+        return SingleInstance::Command::Activate;
+    if (line == kTranslatePopupMessage)
+        return SingleInstance::Command::TranslatePopup;
+    if (line == kTranslateMainMessage)
+        return SingleInstance::Command::TranslateMain;
+    if (line == kTranslateInplaceMessage)
+        return SingleInstance::Command::TranslateInplace;
+    // "noop" and unknown lines are ignored.
+    return SingleInstance::Command::None;
+}
 
 QString sanitize(const QString &value)
 {
@@ -41,6 +75,7 @@ SingleInstance::SingleInstance(const QString &key, QObject *parent)
     // file open without FILE_SHARE_DELETE, so a live primary's lock cannot be
     // removed however old it is, while an empty or corrupt lock left by a
     // power loss is cleared after 30 s.
+    qRegisterMetaType<SingleInstance::Command>("SingleInstance::Command");
 }
 
 SingleInstance::~SingleInstance() = default;
@@ -84,7 +119,7 @@ bool SingleInstance::sendToPrimary(Command command)
     if (command == Command::Activate)
         Platform::allowAnyProcessToActivate();
 
-    const QByteArray message = command == Command::Activate ? kActivateMessage : kNoopMessage;
+    const QByteArray message = messageFor(command);
     const QDeadlineTimer deadline(kPrimaryWaitMs);
 
     do {
@@ -111,9 +146,11 @@ void SingleInstance::onNewConnection()
         connect(socket, &QLocalSocket::readyRead, this, [this, socket] {
             while (socket->canReadLine()) {
                 const QByteArray line = socket->readLine();
-                if (line == kActivateMessage)
-                    emit activateRequested();
-                // Unknown commands (and "noop") are ignored.
+                const Command command = commandForMessage(line);
+                if (command == Command::None)
+                    continue;
+                qCInfo(lcApp) << "Received command" << line.trimmed();
+                emit commandRequested(command);
             }
         });
     }

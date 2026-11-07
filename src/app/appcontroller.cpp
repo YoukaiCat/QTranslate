@@ -14,6 +14,10 @@
 #include "platform/secretprotector.h"
 #include "platform/selectiongrabber.h"
 #include "platform/windowactivation.h"
+
+#ifdef Q_OS_LINUX
+#  include "platform/sessiontype.h"
+#endif
 #include "services/deeplservice.h"
 #include "services/googletranslateservice.h"
 #include "services/openaicompatibleservice.h"
@@ -58,6 +62,17 @@ ProxySettings toProxySettings(const NetworkSettings &network)
     return settings;
 }
 
+// A message box must not block the startup command: a nested exec() loop
+// before the grab or the paste would steal the foreground from the
+// application the user is translating in.
+void showNonModalMessage(QWidget *parent, const QString &title, const QString &text,
+                         QMessageBox::Icon icon)
+{
+    auto *box = new QMessageBox(icon, title, text, QMessageBox::Ok, parent);
+    box->setAttribute(Qt::WA_DeleteOnClose);
+    box->open();
+}
+
 } // namespace
 
 AppController::AppController(SingleInstance *instance, SettingsStore *settings,
@@ -73,6 +88,10 @@ AppController::~AppController() = default;
 
 void AppController::start()
 {
+#ifdef Q_OS_LINUX
+    m_waylandSession = Platform::isWaylandSession();
+#endif
+
     const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
 
     const QIcon icon = AppIcon::create();
@@ -113,6 +132,19 @@ void AppController::start()
         QApplication::setQuitOnLastWindowClosed(true);
     }
 
+    if (m_waylandSession) {
+        const QString title = tr("Limited Wayland support");
+        const QString message =
+            tr("Global hotkeys require the GlobalShortcuts portal. If this desktop does not "
+               "provide it, copy the selected text with Ctrl+C and use the CLI commands or a "
+               "desktop shortcut; in-place replacement copies the translation to the clipboard "
+               "instead of pasting it.");
+        if (m_tray)
+            m_tray->showMessage(title, message);
+        else
+            showNonModalMessage(m_mainWindow.get(), title, message, QMessageBox::Information);
+    }
+
     createHotkeys();
     updateServiceSelectors();
 
@@ -128,16 +160,54 @@ void AppController::start()
         }
     }
 
-    connect(m_instance, &SingleInstance::activateRequested, this, &AppController::showMainWindow);
+    connect(m_instance, &SingleInstance::commandRequested, this,
+            &AppController::executeCommand);
 
     // Let the window close for real when the app quits or the session ends.
     connect(qApp, &QCoreApplication::aboutToQuit, this, &AppController::prepareForQuit);
     connect(qApp, &QGuiApplication::commitDataRequest, this,
             [this](QSessionManager &) { prepareForQuit(); });
 
-    const bool startHidden = m_options.startHidden || settings.general.startMinimized;
-    if (!startHidden || !m_trayAvailable)
+    // A normal start forwards Activate, but it still uses the ordinary startup
+    // path below: only a scenario command suppresses the main window and runs
+    // after the tray, hotkeys, autostart, and signal wiring.
+    const bool hasStartupCommand = m_options.command == SingleInstance::Command::TranslatePopup
+        || m_options.command == SingleInstance::Command::TranslateMain
+        || m_options.command == SingleInstance::Command::TranslateInplace;
+    m_showMainWindowAfterInPlace =
+        !m_trayAvailable && m_options.command == SingleInstance::Command::TranslateInplace;
+
+    if (!hasStartupCommand) {
+        const bool startHidden = m_options.startHidden || settings.general.startMinimized;
+        if (!startHidden || !m_trayAvailable) {
+            showMainWindow();
+            if (!m_trayAvailable)
+                showTrayUnavailableWarning();
+        }
+    }
+
+    if (hasStartupCommand)
+        executeCommand(m_options.command);
+}
+
+void AppController::executeCommand(SingleInstance::Command command)
+{
+    switch (command) {
+    case SingleInstance::Command::Activate:
         showMainWindow();
+        break;
+    case SingleInstance::Command::TranslatePopup:
+        translateSelectionInPopup();
+        break;
+    case SingleInstance::Command::TranslateMain:
+        translateSelectionInMainWindow();
+        break;
+    case SingleInstance::Command::TranslateInplace:
+        translateSelectionInPlace();
+        break;
+    case SingleInstance::Command::None:
+        break;
+    }
 }
 
 void AppController::createTranslation()
@@ -213,6 +283,10 @@ void AppController::createHotkeys()
             [this](HotkeyAction, const QKeySequence &sequence, const QString &reason) {
                 const QString keys = sequence.toString(QKeySequence::NativeText);
                 qCWarning(lcApp) << "Hotkey" << keys << "is unavailable:" << reason;
+                // On Wayland the desktop may reject every shortcut because the
+                // portal is missing; the single startup warning explains that.
+                if (m_waylandSession)
+                    return;
                 if (m_tray) {
                     m_tray->showMessage(tr("Hotkey unavailable"),
                                         tr("%1 is already used by another program. "
@@ -719,6 +793,12 @@ void AppController::translateSelectionInPopup()
     timer.start();
 
     m_grabber->grab([this, anchor, timer](const QString &text) {
+        // Without a tray nothing may stay hidden in the background, so the
+        // main window appears once the selection has been copied: before the
+        // grab it would move the focus and break Ctrl+C.
+        if (!m_trayAvailable)
+            showMainWindow();
+
         PopupWindow *popup = ensurePopup();
         if (text.isEmpty()) {
             m_popupReply = nullptr;
@@ -777,6 +857,7 @@ void AppController::translateSelectionInPlace()
     m_grabber->grab([this, target](const QString &text) {
         if (text.isEmpty()) {
             showInPlaceMessage(tr("Nothing is selected."));
+            finishInPlaceCommand();
             return;
         }
 
@@ -798,6 +879,7 @@ void AppController::translateSelectionInPlace()
                 return;
             if (!result.ok()) {
                 showInPlaceMessage(TranslationErrorText::forResult(result));
+                finishInPlaceCommand();
                 return;
             }
 
@@ -808,6 +890,7 @@ void AppController::translateSelectionInPlace()
                 QGuiApplication::clipboard()->setText(result.translatedText);
                 showInPlaceMessage(
                     tr("Could not paste automatically; the translation is on the clipboard."));
+                finishInPlaceCommand();
                 return;
             }
 
@@ -817,10 +900,12 @@ void AppController::translateSelectionInPlace()
                 QGuiApplication::clipboard()->setText(result.translatedText);
                 showInPlaceMessage(tr("The active window changed; the translation was copied "
                                       "to the clipboard."));
+                finishInPlaceCommand();
                 return;
             }
 
             pasteTranslation(result.translatedText);
+            finishInPlaceCommand();
         });
     });
 }
@@ -875,8 +960,29 @@ void AppController::restoreClipboardAfterPaste()
 void AppController::showInPlaceMessage(const QString &message)
 {
     qCDebug(lcApp) << "Translate-and-replace:" << message;
-    if (m_tray)
+    if (m_tray) {
         m_tray->showMessage(tr("Translate and replace"), message);
+        return;
+    }
+    showNonModalMessage(m_mainWindow.get(), tr("Translate and replace"), message,
+                        QMessageBox::Information);
+}
+
+void AppController::finishInPlaceCommand()
+{
+    if (!m_showMainWindowAfterInPlace)
+        return;
+    m_showMainWindowAfterInPlace = false;
+    showMainWindow();
+}
+
+void AppController::showTrayUnavailableWarning()
+{
+    showNonModalMessage(
+        m_mainWindow.get(), tr("System tray unavailable"),
+        tr("The system tray is not available, so the application cannot stay in the background. "
+           "Closing the window quits the application."),
+        QMessageBox::Warning);
 }
 
 std::unique_ptr<QMimeData> AppController::snapshotClipboard() const

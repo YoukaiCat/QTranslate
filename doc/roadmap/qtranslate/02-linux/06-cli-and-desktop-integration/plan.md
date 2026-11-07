@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [02-global-hotkeys, 03-x11-selection-and-inplace, 04-x11-hotkey-grab-release, 05-xdg-autostart-and-secrets]
 ---
@@ -287,3 +287,88 @@ also compile on Windows; the Linux-only warnings are guarded in `src/app/appcont
   shared `main.cpp`/`SingleInstance` changes by diff and record the Windows tests as not performed.
 - The X11 manual checks need the trusted-client attribute on Astra after every rebuild; if the real
   `:0` session is unavailable, use Xvfb and record the real-session check as not performed.
+
+## Outcome
+
+Done. The three CLI commands are parsed by the shared `CommandLineOptions`, forwarded over the
+single-instance socket with the old lines unchanged, and executed by `AppController` through the
+existing hotkey paths. Linux has 28 tests; Windows keeps 23.
+
+- Files: new `src/app/commandline.{h,cpp}` and `tests/tst_cli.cpp`; modified `src/main.cpp`,
+  `src/app/singleinstance.{h,cpp}`, `src/app/appcontroller.{h,cpp}`, `CMakeLists.txt`,
+  `tests/CMakeLists.txt`, and all 14 `i18n/qtranslate_*.ts`. The `.desktop` file, hicolor icons,
+  `share/applications`, dependencies, READMEs, architecture, `AGENTS.md`, the handoff, the map
+  files and `i18n/README.md` are unchanged.
+- CLI: `--translate-popup`, `--translate-main` and `--translate-inplace` are mutually exclusive;
+  each combines with `--minimized` and `--verbose`; `--help` lists them; positional arguments are
+  accepted and ignored (a stray `%U`/`%F` in a desktop entry does not break the command); unknown
+  options keep the `QCommandLineParser` message and exit code 1. `QCommandLineParser` has no public
+  `showError()` in Qt 6, so the mutual-exclusion error is printed as `QTranslate: <message>` with
+  exit 1, the same format `process()` uses.
+- Protocol: `SingleInstance::Command` carries the three commands as `translate-popup\n`,
+  `translate-main\n` and `translate-inplace\n`; `activate\n` and `noop\n` are byte-exact, unknown
+  lines are ignored, the enum is a registered metatype, and the primary logs `Received command` once
+  at info level (never selection or translated text). A secondary forwards and exits 0 before
+  `SettingsStore`/`AppController` are created. `Platform::allowAnyProcessToActivate()` is still
+  called only for `Activate`.
+- Startup: only the three translate commands suppress the main window. A plain start keeps the old
+  path, including `--minimized` and `settings.general.startMinimized`; counting the default
+  `Activate` as a startup command would have bypassed both. With a tray the process stays in the
+  tray after the command. Without a tray, `--translate-main` shows the window from its grab callback,
+  `--translate-popup` shows the main window in both grab branches before the popup, and
+  `--translate-inplace` shows it only after the operation ends (message, error, clipboard fallback or
+  paste), so `Platform::isForegroundWindow(m_inPlaceTarget)` stays valid. No window is activated
+  before the grab or the paste; a duplicate command during a grab is dropped by the existing
+  `isBusy()` guards.
+- Warnings: one `Limited Wayland support` notification after the tray exists (tray balloon with a
+  tray, non-modal message box without it); `registrationFailed` keeps the `qCWarning` but suppresses
+  the per-hotkey tray message on Wayland, while X11 keeps `Hotkey unavailable`. The no-tray normal
+  start shows `System tray unavailable` once after the main window and is not shown on a command
+  start before the grab. `showInPlaceMessage()` uses a non-modal `QMessageBox` when there is no tray
+  and keeps the `Translate and replace` title. All new boxes use `open()` + `WA_DeleteOnClose`, never
+  a nested `exec()`.
+- Tests: `tst_cli` is a guiless Linux-only test with 20 cases: defaults, each scenario, each
+  scenario with `--minimized` and `--verbose`, mutual exclusion, `parse({"--bogus"})` with
+  `errorText()` (no `process()`), positional arguments, two-process forwarding with a unique
+  `qtranslate-test-<pid>-<uuid>` key and `QTRANSLATE_TEST_KEY` (child exits 0, exits 3 if it becomes
+  primary, and is killed on timeout), and a raw `QLocalSocket` that checks `activate\n`,
+  `translate-popup\n`, `translate-main\n` and `translate-inplace\n` byte-exactly plus silent
+  `noop\n` and `future-command\n`. Linux is 28 CTest tests; Windows keeps 23.
+- Verification: `debian:trixie` (Qt 6.8.2, GCC 14.2) Debug and Release 28/28 with
+  `timeout 300 xvfb-run -a ctest`, 0 `warning:`/`error:` lines; Astra Linux 1.8.7 (Qt 6.10.2,
+  GCC 12.2) Debug and Release 28/28, 0 warnings, with `sudo /usr/bin/fly-set-execid.sh` after each
+  rebuild. Counts: `tst_cli` 20, `tst_translations` 4, `tst_hotkeymanager_x11` 16/16,
+  `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
+  `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
+  `tst_secretprotector` 7 + 1 skipped in trixie (no session keyring) and 8/8 on Astra, and the 20
+  shared tests pass. `tst_cli` passed 10/10 repeated runs in trixie and Astra; no leftover processes
+  or `qtranslate-test-*` sockets.
+- Manual checks: on the real `:0` with temporary `USER`/`USERNAME`, `XDG_CONFIG_HOME`,
+  `XDG_STATE_HOME` and `XDG_RUNTIME_DIR`, the three commands work without and with a running
+  instance; the secondary exits 0 and the primary logs exactly three `Received command` lines;
+  `--minimized --translate-popup` stays in the tray; the two-option and `--bogus` invocations exit 1
+  with a clear message; `--help` lists the options; Ctrl+Q, Ctrl+W and Ctrl+Shift+Q are unchanged.
+  Without a tray (a temporary runtime without D-Bus), the warning appears once, the popup leaves the
+  main window visible, and in-place shows its window only after a delayed answer. Wayland was checked
+  on Weston headless (no X11 file descriptors, xcb not loaded) and with `WAYLAND_DISPLAY` + xcb (one
+  `Limited Wayland support` dialog, no hotkey dialogs, in-place clipboard fallback). A real
+  `GlobalShortcuts` portal was not performed.
+- Translations: eight new messages in the `main` context (three option descriptions and the
+  mutual-exclusion error) and the `AppController` context (`Limited Wayland support`, its body,
+  `System tray unavailable`, its body) were added through `lupdate -no-obsolete` and translated in
+  all 14 `.ts` files, with no `type="unfinished"`, empty translations, changed placeholders or
+  leading/trailing spaces. `lupdate` re-escaped apostrophes as `&apos;` in a few existing fr/it/uk
+  translations; the XML semantics are unchanged.
+- Review: accepted and fixed — the raw wire test covered only the old lines, so a symmetric typo in
+  the new mapping would have passed the round-trip; `legacyWireFormat` now sends the three new lines
+  byte-exactly (a mutant test with `translate_popup\n` fails it) and checks silent `noop` and an
+  unknown line. Rejected: none. Known verification caveat: the new X11 counters need the `KBD_R`
+  `security.exec_id` on `tst_hotkeymanager_x11`/`tst_hotkey_selection_x11`; the
+  `/etc/X11/trusted.d/qtranslate` entries cover `build/linux-debug` and `build/linux-release`, so a
+  fresh build tree `QSKIP`s those two tests until `fly-set-execid.sh`/`setfattr` is applied. A full
+  CTest on the live `:0` fails two focus tests by design (the test headers forbid the real session);
+  the gate is `xvfb-run`.
+- Not performed: Windows Debug/Release and the 23 Windows tests (no MSVC; the diff review confirms
+  that the mutex, `windowactivation_win.cpp`, installer and `if(WIN32)` blocks are unchanged and the
+  shared changes are platform-neutral); the real `GlobalShortcuts` portal (no portal-capable
+  desktop); the minimum Qt 6.5 build (the gates used Qt 6.8.2 and 6.10.2).
