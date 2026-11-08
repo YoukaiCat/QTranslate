@@ -1,6 +1,7 @@
 ---
 kind: task
-status: todo
+status: in-progress
+detailed: true
 depends: [02-mymemory-service]
 ---
 
@@ -68,14 +69,85 @@ checking the gate; check the pickers include MyMemory only with the gate on, and
 live smoke (short en→ru and a long multi-chunk text) as not performed unless the user runs it.
 Record Windows Debug/Release and its 26 tests as not performed (no MSVC).
 
+## Steps
+
+1. **Add the `MyMemory` group to `SettingsDialog`.** In `src/ui/settingsdialog.h`, add
+   `class QGroupBox;`, the member `QGroupBox *m_mymemoryGroup = nullptr;` and
+   `void updateMyMemoryControls();`. In `src/ui/settingsdialog.cpp`, create the group after
+   `freeWebGroup` (so the gate checkbox is above it): `auto *myMemoryGroup = new
+   QGroupBox(tr("MyMemory"), servicesContent);`, objectName `mymemoryGroup`, a word-wrapped
+   `QLabel` with objectName `mymemoryHint` and the text
+   `tr("MyMemory is a free translation API and needs no key. Enable free web services above to use "
+   "it. It cannot detect the source language, and long text is sent in several requests. The text "
+   "is sent to a third party.")`; add the hint to the group layout, add the group to
+   `servicesLayout` after `freeWebGroup`, and store it in `m_mymemoryGroup`. Do not add a key,
+   URL, email or settings field. Connect `m_allowFreeServices` `toggled` to
+   `updateMyMemoryControls()`; implement it as `setEnabled(m_allowFreeServices->isChecked())`;
+   call it at the end of `loadValues()` after `m_allowFreeServices->setChecked(...)` so the
+   default-off state starts disabled. No service/parser change.
+
+2. **Extend `tst_settingsdialog`.** In `tests/tst_settingsdialog.cpp`, add `#include <QGroupBox>`
+   and a `myMemoryGroup` case. Find `mymemoryGroup` and `mymemoryHint`; with `AppSettings{}` the
+   group is disabled; the hint is word-wrapped and contains "no key", "source language" and "third
+   party"; the group has no `QLineEdit` child; checking `allowFreeServices` enables the group and
+   unchecking disables it; `dialog.settings()` has no new field and no `de`/URL value. Run
+   `QT_QPA_PLATFORM=offscreen ctest --test-dir build/linux-release -R tst_settingsdialog
+   --output-on-failure` (or the equivalent Debug command).
+
+3. **Update all 14 `.ts` files.** Run `lupdate` over `src` for every file in
+   `QTRANSLATE_TS_FILES` (`CMakeLists.txt:150-165`) with `--no-obsolete`, including
+   `src/platform/hotkeymanager_win.cpp` in the scan (the CMake `QTRANSLATE_LUPDATE_EXTRA_SOURCES`
+   already does this for the target; the direct `lupdate src` command includes it). The two new
+   `SettingsDialog` messages are the group title `MyMemory` and the hint; translate both in all 14
+   `i18n/qtranslate_*.ts`. The message count should go from 299 to 301. `tst_translations` must
+   find no new, unfinished, empty or vanished messages. Service error messages stay English
+   literals and add no `.ts` messages.
+
+4. **Update `doc/architecture.md`.** In §4.5, change the `id()` example to include `mymemory`
+   (`:636`) and the queue paragraph (`:684`) to say that `DeepLWebService` and `MyMemoryService`
+   use `QueuedWebService`, with MyMemory setting 350 ms. Add §4.7.3 `MyMemoryService — free no-key
+   API` after §4.7.2 (`:880`) and before §4.8: endpoint `GET
+   https://api.mymemory.translated.net/get?q=…&langpair=<src>|<dst>&mt=1`, explicit source only
+   (`auto` → `UnsupportedLanguage`), 500-byte `splitUtf8` chunks, sequential chunks inside one
+   queue slot, `responseData.translatedText`/`responseStatus`/`responseDetails`/`quotaFinished`,
+   optional `detectedLanguage`, the error table (429/403, quota, 413/414, 5xx, HTML, malformed,
+   unknown body status), no `de` email, `requiresOptIn()`, and the tests. In §4.8 (`:887-895`), add
+   a MyMemory column/note with `zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`, `nb`→`no`, `fil`→`tl`, and
+   state that there is no `LanguageInfo` field. In §4.9 (`:967-973`), note that MyMemory is the
+   first real opt-in consumer; the gate logic is unchanged. In §8 (`:1579-1610`), add
+   `tst_mymemoryparser` and `tst_mymemoryservice` rows and update the `tst_textchunker` (UTF-8
+   byte split), `tst_languages` (MyMemory codes), `tst_settingsdialog` (MyMemory group) and
+   `tst_translationmanager` (real gated service) descriptions. In §4.14 (`:1325` and `:1367`),
+   change 29→31, 21 shared→23 shared, 24→26 Windows and "the other 20 tests" to "the other 23
+   tests". Do not change the historical 0.12.0 sentence at `:1769`.
+
+5. **Update `doc/free-endpoints.md` and `AGENTS.md`.** In `doc/free-endpoints.md`, update the
+   status line near the top, add an "Implementation in qtranslate" note in §6, mark the
+   implemented values in §8 items 2-4, and make §9 item 2 "implemented". In `AGENTS.md:39`,
+   change "24 Windows tests and all 29 Linux tests" to "26 Windows tests and all 31 Linux tests".
+   Do not touch `README.md`, `README.ru.md`, `doc/handoff.md`, the root `plan.md`, or the
+   `07-fallback-chain` plans; the outcome records 31/26 for the final documentation pass.
+
+6. **Verify and record.** Build Debug and Release on Linux with `-Wall -Wextra`; run the full suite
+   with `xvfb-run -a ctest --test-dir build/linux-release --output-on-failure`; expect 31/31 and
+   zero `warning:` lines. Check the Services page offscreen: with the gate off the group is
+   disabled, with it on it is enabled; no key/URL field. Check the pickers: MyMemory is absent
+   with `allowFreeServices` off and appears when it is on. Check that an INI
+   `translation/service=mymemory` with the gate off keeps Google active and logs "Configured
+   service needs free web services to be enabled". A real UI check is optional; record it as
+   passed or as not performed. Record the optional live smoke (short en→ru and a long multi-chunk
+   text) as not performed unless the user runs it. Record Windows Debug/Release and its 26 tests
+   as not performed (no MSVC). Leave commit and push to the coordinator/lead.
+
 ## Done when
 
 - The settings dialog shows `mymemoryGroup` with `mymemoryHint`, the free/no-key warning, the opt-in
   hint, no key or URL field and no new settings value; the group is disabled while
   `allowFreeServices` is off and enabled when it is checked; `tst_settingsdialog` covers the group,
   the hint, the missing key field and the gate toggle.
-- The 14 `.ts` files contain the two new `SettingsDialog` messages; `tst_translations` finds no new,
-  unfinished or vanished messages; no service error string was moved to `tr()`.
+- The 14 `.ts` files contain the two new `SettingsDialog` messages (299 → 301 messages);
+  `tst_translations` finds no new, unfinished, empty or vanished messages; no service error string
+  was moved to `tr()`.
 - `doc/architecture.md` §4.5/§4.7.3/§4.8/§4.9/§8/§4.14 and `doc/free-endpoints.md` §6/§8/§9 are
   updated with the endpoint, explicit-source rule, 350 ms, 500-byte chunks, error table, language
   codes and tests; `AGENTS.md` has the 26/31 counts.
