@@ -83,10 +83,51 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  linux:
+    name: Linux x64 (trixie)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container: debian:trixie
+    env:
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+      - name: Install checkout prerequisites
+        run: apt-get update && apt-get install -y --no-install-recommends git ca-certificates
+
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Install build and packaging dependencies
+        run: |
+          apt-get update
+          grep -vE '^[[:space:]]*(#|$)' packaging/linux/trixie-packages.txt \
+            | xargs apt-get install -y --no-install-recommends
+
+      - name: Configure
+        run: cmake -S . -B build/ci -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr
+
+      - name: Build
+        run: cmake --build build/ci --parallel
+
+      - name: Test
+        run: timeout 300 xvfb-run -a ctest --test-dir build/ci --output-on-failure
+
+      - name: Package
+        run: ./packaging/linux/package.sh --build-dir build/ci --output-dir build/artifacts-linux
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: qtranslate-linux-x64
+          path: build/artifacts-linux/*
+          if-no-files-found: error
+          retention-days: 14
+
   release:
     name: Publish GitHub release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: windows
+    needs: [windows, linux]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -99,6 +140,12 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: qtranslate-windows-x64
+          path: artifacts
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: qtranslate-linux-x64
           path: artifacts
 
       - name: Create or update the release

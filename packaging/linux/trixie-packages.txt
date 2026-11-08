@@ -1,0 +1,44 @@
+# apt packages for the Debian 13 (trixie) build and packaging environment.
+# Consumed by packaging/linux/trixie.Dockerfile and the Linux CI job.
+# One package per line; blank lines and '#' comment lines are ignored.
+
+# Checkout and TLS: the CI container starts with neither.
+git
+ca-certificates
+
+# Build toolchain.
+build-essential
+cmake
+ninja-build
+
+# Qt 6.8.2 for the build and the bundled runtime.
+qt6-base-dev
+qt6-tools-dev
+qt6-tools-dev-tools
+qt6-wayland
+qt6-translations-l10n
+
+# X11/XTest hotkeys, selection capture, and the in-place path.
+libx11-dev
+libxtst-dev
+
+# Optional Secret Service build dependency (libsecret-1).
+libsecret-1-dev
+
+# Private session bus for tst_hotkeymanager_wayland.
+dbus
+
+# Headless test display; xvfb-run requires xauth.
+xvfb
+xauth
+
+# Packaging gates and tools: desktop-file-validate, dpkg-shlibdeps,
+# patchelf for the bundle RPATH.
+desktop-file-utils
+dpkg-dev
+patchelf
+
+# curl downloads the pinned AppImage tools in package.sh; file is used by
+# the release verification.
+curl
+file
