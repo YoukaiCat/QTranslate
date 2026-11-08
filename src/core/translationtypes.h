@@ -20,6 +20,9 @@ enum class TranslationError {
     Auth,          // invalid or missing API key (HTTP 401/403)
     QuotaExceeded, // DeepL 456, Google Cloud quota
     RateLimited,   // HTTP 429
+    // The endpoint is blocked or temporarily unavailable: the HTML/403 case
+    // of a web endpoint. Not used for the official API paths.
+    ServiceUnavailable,
     TooLong,       // request size limit exceeded
     UnsupportedLanguage,
     BadResponse,   // the response could not be parsed

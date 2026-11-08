@@ -588,6 +588,8 @@ enum class TranslationError {
     Auth,           // invalid/missing API key (HTTP 401/403)
     QuotaExceeded,  // DeepL 456, Google Cloud quota
     RateLimited,    // HTTP 429
+    ServiceUnavailable, // blocked or temporarily unavailable web endpoint (HTML/403);
+                        // gated free service while opt-in is off; not used by official APIs
     TooLong,        // request size limit exceeded
     UnsupportedLanguage,
     BadResponse,    // the response could not be parsed
@@ -635,6 +637,9 @@ public:
     virtual QString configurationError() const { return {}; } // hint if not configured
     virtual QStringList sourceLanguages() const = 0;  // internal codes, without "auto"
     virtual QStringList targetLanguages() const = 0;
+    // true for unofficial/free endpoints: the manager refuses them until the
+    // user enables free web services in settings
+    virtual bool requiresOptIn() const { return false; }
     virtual void applySettings(const AppSettings &s) = 0;   // keys, mode, variant
     // Returns the reply object; the caller owns it (deleteLater after finished)
     virtual TranslationReply *translate(const TranslationRequest &req) = 0;
@@ -650,6 +655,19 @@ public:
   provider settings without recreating the services.
 - `configurationError()` returns a specific hint when `isConfigured() == false` (for example, "The
   provider needs a model."); `TranslationManager` shows it instead of the generic API key message.
+
+The opt-in gate. A service that sends text to an unofficial or free endpoint overrides
+`requiresOptIn()` to return `true`. `TranslationManager` refuses such a service while
+`translation/allowFreeServices` is `false`: before any request it returns `ServiceUnavailable` with
+the message "Enable free web services in Settings → Services." The check lives in the manager, not
+in each service, so a new service cannot forget it. Google, DeepL (including its `free-web` mode),
+and the OpenAI-compatible provider keep the default `false`; the DeepL `free-web` mode remains an
+explicit mode with its own warning and is not gated. `AppController` hides gated services from the
+main-window and tray pickers while the gate is off, and if the gate is turned off while a gated
+service is active, it switches the active service to Google in memory and logs the switch. The
+`translation/service` value in the INI is not rewritten, so enabling the gate again and restarting
+restores the user's choice. `ServiceUnavailable` is also the error kind for a blocked or HTML
+response from a free web endpoint; the official API paths do not use it.
 
 Each service receives a `NetworkManager` pointer (the shared `QNetworkAccessManager` and
 `makeRequest()` with a timeout and `User-Agent`) and does not create its own manager — this way the
@@ -901,6 +919,8 @@ public:
     TranslationService *activeService() const;
     void setActiveService(const QString &id);
     void setMaxLength(int length);                         // 20,000 by default; from settings — old plan stage 5
+    bool freeServicesAllowed() const;                      // translation/allowFreeServices
+    void setFreeServicesAllowed(bool allowed);             // gated services are refused while false
 
     // channel — the request "channel": Popup, MainWindow, or InPlace.
     // A new request in the same channel cancels the previous incomplete one.
@@ -929,8 +949,12 @@ Responsibilities:
 3. **Cache.** LRU of 200 entries, key — `serviceId|src|dst|text`. Re-translating the same
    fragment is instant and does not consume DeepL quota. The cache is in memory only.
 4. **Checks before the network.** Empty text (`EmptyText`), exceeding `maxLength` (`TooLong`),
-   an unconfigured service (`Auth`) — the error is returned immediately, without a request (via
-   `TranslationReply::createFinished`, that is, asynchronously).
+   a service whose `requiresOptIn()` is true while `freeServicesAllowed()` is false
+   (`ServiceUnavailable`, with a message pointing to Settings → Services), an unconfigured service
+   (`Auth`) — the error is returned immediately, without a request (via
+   `TranslationReply::createFinished`, that is, asynchronously). `AppController` keeps
+   `setFreeServicesAllowed()` in sync with `translation/allowFreeServices` and filters gated
+   services from the pickers.
 
 ### 4.10. Network and proxy — `NetworkManager`
 
@@ -1075,6 +1099,7 @@ File keys:
 | `translation/secondaryLang` | string | `en` (or `ru` if the system language is English) |
 | `translation/maxLength` | int | `20000` |
 | `translation/autoTranslateDelayMs` | int | `700` (0 — off) |
+| `translation/allowFreeServices` | bool | `false`; enables services whose `requiresOptIn()` is true |
 | `google/mode` | `free` \| `cloud` | `free` |
 | `google/apiKey` | secret | empty |
 | `deepl/mode` | `api` \| `free-web` | `api`; the old `translation/service=deepl-web` migrates to `deepl` + `free-web` |
@@ -1237,6 +1262,9 @@ applies the changes, "Cancel" changes nothing. Tabs:
    an error). In `free-web` mode, the key field and the check are disabled, and a warning about
    being unofficial is shown; there is no separate "DeepL (free web)" group. The check button does not block the dialog;
    the key is taken from the input field. Keys have been stored via DPAPI since old plan stage 5.
+   At the end of the page, the "Free web services" group has the `allowFreeServices` checkbox and
+   the `freeWebHint` warning: free no-key services are mostly unofficial, may stop working or block
+   requests, and send the text to a third party; the switch is off by default.
 5. **Network** — mode (no proxy/system/manual), type HTTP/SOCKS5, host, port, authentication,
    login, password (password echo), timeout, "Test connection" button with an asynchronous result.
    Fields are enabled only for manual mode; the dialog emits `proxyTestRequested()`, and
@@ -1501,6 +1529,8 @@ A repeated call (`aboutToQuit`, session end) does nothing.
 | Empty text | `TranslationManager` before the request → `EmptyText` | "Nothing to translate" |
 | Invalid key | `Auth` | "Invalid DeepL API key" + "Open settings" link |
 | Quota / frequent requests | `QuotaExceeded`, `RateLimited` | Explanation and advice to switch service |
+| Free web service disabled | `TranslationManager` before the request → `ServiceUnavailable` | "The translation service is unavailable (Enable free web services in Settings → Services.)" |
+| Free web endpoint blocked | service → `ServiceUnavailable` | Same title, details in the log; no retry storm |
 | Unexpected response format | parser → `BadResponse` | "The translation service returned an unexpected response", details in the log |
 | Service not configured | `TranslationManager` before the request | "DeepL requires an API key" + "Open settings" |
 

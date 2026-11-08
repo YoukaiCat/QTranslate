@@ -5,69 +5,69 @@
     <name>AppController</name>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="158"/>
-        <location filename="../src/app/appcontroller.cpp" line="612"/>
+        <location filename="../src/app/appcontroller.cpp" line="640"/>
         <source>Autostart</source>
         <translation>Démarrage automatique</translation>
     </message>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="159"/>
-        <location filename="../src/app/appcontroller.cpp" line="613"/>
+        <location filename="../src/app/appcontroller.cpp" line="641"/>
         <source>Could not update the autostart entry.</source>
         <translation>Impossible de mettre à jour l&apos;entrée de démarrage automatique.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="291"/>
+        <location filename="../src/app/appcontroller.cpp" line="298"/>
         <source>Hotkey unavailable</source>
         <translation>Raccourci clavier indisponible</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="292"/>
+        <location filename="../src/app/appcontroller.cpp" line="299"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 est déjà utilisé par un autre programme. Fermez ce programme ou choisissez une autre combinaison dans les paramètres.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="353"/>
+        <location filename="../src/app/appcontroller.cpp" line="360"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="648"/>
+        <location filename="../src/app/appcontroller.cpp" line="676"/>
         <source>DeepL is not available.</source>
         <translation>DeepL n’est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="663"/>
+        <location filename="../src/app/appcontroller.cpp" line="691"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>Le fournisseur compatible OpenAI n’est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="707"/>
+        <location filename="../src/app/appcontroller.cpp" line="735"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>Les secrets sont stockés sans chiffrement dans un fichier lisible uniquement par votre utilisateur, car le trousseau de clés du système n&apos;est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="859"/>
+        <location filename="../src/app/appcontroller.cpp" line="887"/>
         <source>Nothing is selected.</source>
         <translation>Rien n&apos;est sélectionné.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="901"/>
+        <location filename="../src/app/appcontroller.cpp" line="929"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>La fenêtre active a changé ; la traduction a été copiée dans le presse-papiers.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="982"/>
+        <location filename="../src/app/appcontroller.cpp" line="1010"/>
         <source>System tray unavailable</source>
         <translation>Zone de notification indisponible</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="983"/>
+        <location filename="../src/app/appcontroller.cpp" line="1011"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>La zone de notification n&apos;est pas disponible, l&apos;application ne peut donc pas rester en arrière-plan. Fermer la fenêtre quitte l&apos;application.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="892"/>
-        <location filename="../src/app/appcontroller.cpp" line="940"/>
+        <location filename="../src/app/appcontroller.cpp" line="920"/>
+        <location filename="../src/app/appcontroller.cpp" line="968"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>Impossible de coller automatiquement&#xa0;; la traduction est dans le presse-papiers.</translation>
     </message>
@@ -82,8 +82,8 @@
         <translation>Les raccourcis clavier globaux nécessitent le portail GlobalShortcuts. Si ce bureau ne le fournit pas, copiez le texte sélectionné avec Ctrl+C et utilisez les commandes CLI ou un raccourci du bureau ; le remplacement sur place copie la traduction dans le presse-papiers au lieu de la coller.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="964"/>
-        <location filename="../src/app/appcontroller.cpp" line="967"/>
+        <location filename="../src/app/appcontroller.cpp" line="992"/>
+        <location filename="../src/app/appcontroller.cpp" line="995"/>
         <source>Translate and replace</source>
         <translation>Traduire et remplacer</translation>
     </message>
@@ -1022,7 +1022,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="37"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="628"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="644"/>
         <source>Settings</source>
         <translation>Paramètres</translation>
     </message>
@@ -1103,7 +1103,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="156"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="338"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="352"/>
         <source> ms</source>
         <translation> ms</translation>
     </message>
@@ -1228,7 +1228,7 @@
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="246"/>
         <location filename="../src/ui/settingsdialog.cpp" line="291"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="367"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="381"/>
         <source>Checking…</source>
         <translation>Vérification…</translation>
     </message>
@@ -1278,147 +1278,162 @@
         <translation>Utilise l’API Chat Completions compatible OpenAI. Le serveur par défaut est OpenRouter ; l’URL peut pointer vers un autre point de terminaison compatible, comme OpenAI, Ollama, llama.cpp ou TeamRouter. Le modèle doit être disponible pour votre clé. Le texte est envoyé au fournisseur sélectionné.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="300"/>
+        <source>Free web services</source>
+        <translation>Services web gratuits</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="302"/>
+        <source>Allow free web services</source>
+        <translation>Autoriser les services web gratuits</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="305"/>
+        <source>These services need no API key. Most are unofficial: they may stop working, apply rate limits or block requests, and the text is sent to a third party. The Google and DeepL APIs remain the recommended choice.</source>
+        <translation>Ces services ne nécessitent pas de clé API. La plupart sont non officiels : ils peuvent cesser de fonctionner, appliquer des limites de débit ou bloquer des requêtes, et le texte est envoyé à un tiers. Les API Google et DeepL restent le choix recommandé.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
         <source>Services</source>
         <translation>Services</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="311"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
         <source>No proxy</source>
         <translation>Pas de procuration</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="312"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="326"/>
         <source>System proxy</source>
         <translation>Proxy système</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="313"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="327"/>
         <source>Manual proxy</source>
         <translation>Proxy manuel</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="330"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="331"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="320"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="334"/>
         <source>Proxy host</source>
         <translation>Hôte proxy</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="324"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="338"/>
         <source>Not set</source>
         <translation>Non défini</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
         <source>The proxy requires authentication</source>
         <translation>Le proxy nécessite une authentification</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="329"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="343"/>
         <source>User name</source>
         <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="347"/>
         <source>Password</source>
         <translation>Mot de passe</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="353"/>
         <source>Test connection</source>
         <translation>Tester la connexion</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="346"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="360"/>
         <source>Proxy mode:</source>
         <translation>Mode proxy&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="347"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="361"/>
         <source>Proxy type:</source>
         <translation>Type de mandataire&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="348"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="362"/>
         <source>Host:</source>
         <translation>Hôte:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="349"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="363"/>
         <source>Port:</source>
         <translation>Port:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="351"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="365"/>
         <source>User name:</source>
         <translation>Nom d&apos;utilisateur:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="352"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="366"/>
         <source>Password:</source>
         <translation>Mot de passe:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="353"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="367"/>
         <source>Request timeout:</source>
         <translation>Délai d&apos;expiration de la demande&#xa0;:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="358"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="372"/>
         <source>Network</source>
         <translation>Réseau</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="583"/>
         <source>Translate in a popup</source>
         <translation>Traduire dans une popup</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="585"/>
         <source>Replace the selected text with the translation</source>
         <translation>Remplacer le texte sélectionné par la traduction</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="570"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="586"/>
         <source>Translate in the main window</source>
         <translation>Traduire dans la fenêtre principale</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
         <source>Show the main window</source>
         <translation>Afficher la fenêtre principale</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="579"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="595"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>&quot;%1&quot; utilise plusieurs combinaisons de touches. Les raccourcis clavier globaux prennent en charge une seule combinaison.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="603"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>&quot;%1&quot; ne peut pas être utilisé comme raccourci clavier global.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="600"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="616"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>La même combinaison de touches est attribuée plusieurs fois : %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="611"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="627"/>
         <source>The primary and additional languages must differ.</source>
         <translation>Les langues principales et supplémentaires doivent être différentes.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="618"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="634"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>Entrez l&apos;hôte et le port du proxy, ou choisissez un autre mode proxy.</translation>
     </message>
@@ -1452,28 +1467,41 @@
     </message>
     <message>
         <location filename="../src/ui/translationerrortext.cpp" line="28"/>
+        <source>The translation service is unavailable</source>
+        <translation>Le service de traduction est indisponible</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="31"/>
         <source>The text is too long</source>
         <translation>Le texte est trop long</translation>
     </message>
     <message>
-        <location filename="../src/ui/translationerrortext.cpp" line="30"/>
+        <location filename="../src/ui/translationerrortext.cpp" line="33"/>
         <source>The language is not supported by the translation service</source>
         <translation>La langue n&apos;est pas prise en charge par le service de traduction</translation>
     </message>
     <message>
-        <location filename="../src/ui/translationerrortext.cpp" line="33"/>
+        <location filename="../src/ui/translationerrortext.cpp" line="36"/>
         <source>The translation service returned an unexpected response</source>
         <translation>Le service de traduction a renvoyé une réponse inattendue</translation>
     </message>
     <message>
-        <location filename="../src/ui/translationerrortext.cpp" line="36"/>
+        <location filename="../src/ui/translationerrortext.cpp" line="39"/>
         <source>Translation cancelled</source>
         <translation>Traduction annulée</translation>
     </message>
     <message>
-        <location filename="../src/ui/translationerrortext.cpp" line="38"/>
+        <location filename="../src/ui/translationerrortext.cpp" line="41"/>
         <source>Nothing to translate</source>
         <translation>Rien à traduire</translation>
+    </message>
+</context>
+<context>
+    <name>TranslationManager</name>
+    <message>
+        <location filename="../src/core/translationmanager.cpp" line="203"/>
+        <source>Enable free web services in Settings → Services.</source>
+        <translation>Activez les services web gratuits dans Paramètres → Services.</translation>
     </message>
 </context>
 <context>
@@ -1512,7 +1540,7 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="41"/>
+        <location filename="../src/main.cpp" line="44"/>
         <source>Fast desktop translator.</source>
         <translation>Traducteur de bureau rapide.</translation>
     </message>

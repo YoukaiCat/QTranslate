@@ -24,6 +24,9 @@ const char *title(TranslationError error)
     case TranslationError::RateLimited:
         return QT_TRANSLATE_NOOP("TranslationErrorText",
                                  "Too many requests; try again later or use another service");
+    case TranslationError::ServiceUnavailable:
+        return QT_TRANSLATE_NOOP("TranslationErrorText",
+                                 "The translation service is unavailable");
     case TranslationError::TooLong:
         return QT_TRANSLATE_NOOP("TranslationErrorText", "The text is too long");
     case TranslationError::UnsupportedLanguage:

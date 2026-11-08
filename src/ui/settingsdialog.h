@@ -93,6 +93,7 @@ private:
     LanguageComboBox *m_secondaryLanguage = nullptr;
     QSpinBox *m_maxLength = nullptr;
     QSpinBox *m_autoTranslateDelay = nullptr;
+    QCheckBox *m_allowFreeServices = nullptr;
 
     QComboBox *m_googleMode = nullptr;
     QLineEdit *m_googleApiKey = nullptr;

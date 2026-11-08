@@ -39,6 +39,11 @@ public:
     int maxLength() const { return m_maxLength; }
     void setMaxLength(int length);
 
+    // Whether services with requiresOptIn() are allowed. The manager refuses
+    // them with ServiceUnavailable while this is false.
+    bool freeServicesAllowed() const { return m_freeServicesAllowed; }
+    void setFreeServicesAllowed(bool allowed) { m_freeServicesAllowed = allowed; }
+
     // Primary/secondary languages for the automatic language switch; changing
     // either clears the in-memory cache.
     QString primaryLanguage() const { return m_primaryLanguage; }
@@ -72,6 +77,7 @@ private:
     QList<TranslationService *> m_services;
     TranslationService *m_active = nullptr;
     int m_maxLength = kDefaultMaxLength;
+    bool m_freeServicesAllowed = false;
     QString m_primaryLanguage;
     QString m_secondaryLanguage;
     QHash<QString, TranslationResult> m_cache;

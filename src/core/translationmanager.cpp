@@ -197,6 +197,10 @@ TranslationReply *TranslationManager::translate(const TranslationRequest &reques
                                   QStringLiteral("%1 characters, the limit is %2")
                                       .arg(request.text.size())
                                       .arg(m_maxLength));
+    } else if (m_active->requiresOptIn() && !m_freeServicesAllowed) {
+        reply = finishedWithError(
+            serviceId, TranslationError::ServiceUnavailable,
+            TranslationManager::tr("Enable free web services in Settings → Services."));
     } else if (!m_active->isConfigured()) {
         const QString hint = m_active->configurationError();
         reply = finishedWithError(

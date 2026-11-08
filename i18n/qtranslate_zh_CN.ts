@@ -5,69 +5,69 @@
     <name>AppController</name>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="158"/>
-        <location filename="../src/app/appcontroller.cpp" line="612"/>
+        <location filename="../src/app/appcontroller.cpp" line="640"/>
         <source>Autostart</source>
         <translation>自动启动</translation>
     </message>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="159"/>
-        <location filename="../src/app/appcontroller.cpp" line="613"/>
+        <location filename="../src/app/appcontroller.cpp" line="641"/>
         <source>Could not update the autostart entry.</source>
         <translation>无法更新自动启动条目。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="291"/>
+        <location filename="../src/app/appcontroller.cpp" line="298"/>
         <source>Hotkey unavailable</source>
         <translation>热键不可用</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="292"/>
+        <location filename="../src/app/appcontroller.cpp" line="299"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 已被另一个程序使用。关闭该程序或在设置中选择其他组合。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="353"/>
+        <location filename="../src/app/appcontroller.cpp" line="360"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="648"/>
+        <location filename="../src/app/appcontroller.cpp" line="676"/>
         <source>DeepL is not available.</source>
         <translation>DeepL 不可用。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="663"/>
+        <location filename="../src/app/appcontroller.cpp" line="691"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI 兼容提供程序不可用。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="707"/>
+        <location filename="../src/app/appcontroller.cpp" line="735"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>由于系统密钥环不可用，机密信息将以未加密方式存储在只有您的用户才能读取的文件中。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="859"/>
+        <location filename="../src/app/appcontroller.cpp" line="887"/>
         <source>Nothing is selected.</source>
         <translation>未选择任何内容。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="901"/>
+        <location filename="../src/app/appcontroller.cpp" line="929"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>活动窗口发生变化；翻译已复制到剪贴板。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="982"/>
+        <location filename="../src/app/appcontroller.cpp" line="1010"/>
         <source>System tray unavailable</source>
         <translation>系统托盘不可用</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="983"/>
+        <location filename="../src/app/appcontroller.cpp" line="1011"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>系统托盘不可用，因此应用程序无法在后台运行。关闭窗口将退出应用程序。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="892"/>
-        <location filename="../src/app/appcontroller.cpp" line="940"/>
+        <location filename="../src/app/appcontroller.cpp" line="920"/>
+        <location filename="../src/app/appcontroller.cpp" line="968"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>无法自动粘贴；翻译在剪贴板上。</translation>
     </message>
@@ -82,8 +82,8 @@
         <translation>全局热键需要 GlobalShortcuts 门户。如果此桌面不提供该门户，请用 Ctrl+C 复制所选文本，并使用 CLI 命令或桌面快捷方式；就地替换会将翻译复制到剪贴板，而不是粘贴。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="964"/>
-        <location filename="../src/app/appcontroller.cpp" line="967"/>
+        <location filename="../src/app/appcontroller.cpp" line="992"/>
+        <location filename="../src/app/appcontroller.cpp" line="995"/>
         <source>Translate and replace</source>
         <translation>翻译和替换</translation>
     </message>
@@ -1022,7 +1022,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="37"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="628"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="644"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
@@ -1103,7 +1103,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="156"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="338"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="352"/>
         <source> ms</source>
         <translation> 毫秒</translation>
     </message>
@@ -1228,7 +1228,7 @@
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="246"/>
         <location filename="../src/ui/settingsdialog.cpp" line="291"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="367"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="381"/>
         <source>Checking…</source>
         <translation>检查…</translation>
     </message>
@@ -1278,147 +1278,162 @@
         <translation>使用与 OpenAI 兼容的 Chat Completions API。默认服务器为 OpenRouter；URL 可指向其他兼容端点，例如 OpenAI、Ollama、llama.cpp 或 TeamRouter。模型必须可用于你的密钥。文本将发送给所选提供程序。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="300"/>
+        <source>Free web services</source>
+        <translation>免费网页服务</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="302"/>
+        <source>Allow free web services</source>
+        <translation>允许免费网页服务</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="305"/>
+        <source>These services need no API key. Most are unofficial: they may stop working, apply rate limits or block requests, and the text is sent to a third party. The Google and DeepL APIs remain the recommended choice.</source>
+        <translation>这些服务无需 API 密钥。其中大多数是非官方服务：它们可能停止工作、限制请求频率或阻止请求，文本会发送给第三方。Google 和 DeepL API 仍是推荐选择。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
         <source>Services</source>
         <translation>服务</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="311"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
         <source>No proxy</source>
         <translation>无代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="312"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="326"/>
         <source>System proxy</source>
         <translation>系统代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="313"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="327"/>
         <source>Manual proxy</source>
         <translation>手动代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="330"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="331"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="320"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="334"/>
         <source>Proxy host</source>
         <translation>代理主机</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="324"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="338"/>
         <source>Not set</source>
         <translation>未设置</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
         <source>The proxy requires authentication</source>
         <translation>代理需要身份验证</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="329"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="343"/>
         <source>User name</source>
         <translation>用户名</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="347"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="353"/>
         <source>Test connection</source>
         <translation>测试连接</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="346"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="360"/>
         <source>Proxy mode:</source>
         <translation>代理模式：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="347"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="361"/>
         <source>Proxy type:</source>
         <translation>代理类型：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="348"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="362"/>
         <source>Host:</source>
         <translation>主持人：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="349"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="363"/>
         <source>Port:</source>
         <translation>港口：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="351"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="365"/>
         <source>User name:</source>
         <translation>用户名：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="352"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="366"/>
         <source>Password:</source>
         <translation>密码：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="353"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="367"/>
         <source>Request timeout:</source>
         <translation>请求超时：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="358"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="372"/>
         <source>Network</source>
         <translation>网络</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="583"/>
         <source>Translate in a popup</source>
         <translation>在弹出窗口中翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="585"/>
         <source>Replace the selected text with the translation</source>
         <translation>用翻译替换所选文本</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="570"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="586"/>
         <source>Translate in the main window</source>
         <translation>在主窗口中翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
         <source>Show the main window</source>
         <translation>显示主窗口</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="579"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="595"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>“%1”使用多个组合键。全局热键支持单一组合。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="603"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>“%1”不能用作全局热键。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="600"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="616"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>同一组合键被分配多次：%1。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="611"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="627"/>
         <source>The primary and additional languages must differ.</source>
         <translation>主要语言和附加语言必须不同。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="618"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="634"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>输入代理主机和端口，或选择其他代理模式。</translation>
     </message>
@@ -1452,28 +1467,41 @@
     </message>
     <message>
         <location filename="../src/ui/translationerrortext.cpp" line="28"/>
+        <source>The translation service is unavailable</source>
+        <translation>翻译服务不可用</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/translationerrortext.cpp" line="31"/>
         <source>The text is too long</source>
         <translation>文字太长</translation>
     </message>
     <message>
-        <location filename="../src/ui/translationerrortext.cpp" line="30"/>
+        <location filename="../src/ui/translationerrortext.cpp" line="33"/>
         <source>The language is not supported by the translation service</source>
         <translation>翻译服务不支持该语言</translation>
     </message>
     <message>
-        <location filename="../src/ui/translationerrortext.cpp" line="33"/>
+        <location filename="../src/ui/translationerrortext.cpp" line="36"/>
         <source>The translation service returned an unexpected response</source>
         <translation>翻译服务返回意外响应</translation>
     </message>
     <message>
-        <location filename="../src/ui/translationerrortext.cpp" line="36"/>
+        <location filename="../src/ui/translationerrortext.cpp" line="39"/>
         <source>Translation cancelled</source>
         <translation>翻译取消</translation>
     </message>
     <message>
-        <location filename="../src/ui/translationerrortext.cpp" line="38"/>
+        <location filename="../src/ui/translationerrortext.cpp" line="41"/>
         <source>Nothing to translate</source>
         <translation>没什么可翻译的</translation>
+    </message>
+</context>
+<context>
+    <name>TranslationManager</name>
+    <message>
+        <location filename="../src/core/translationmanager.cpp" line="203"/>
+        <source>Enable free web services in Settings → Services.</source>
+        <translation>请在“设置 → 服务”中启用免费网页服务。</translation>
     </message>
 </context>
 <context>
@@ -1512,7 +1540,7 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="41"/>
+        <location filename="../src/main.cpp" line="44"/>
         <source>Fast desktop translator.</source>
         <translation>快速桌面翻译器。</translation>
     </message>

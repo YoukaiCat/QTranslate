@@ -116,8 +116,11 @@ remains unofficial.
 ## 8. How to integrate
 
 1. DeepL web — the `free-web` mode inside `DeepLService` (the internal `DeepLWebService`) and a
-   warning in settings; there is no separate service. For the other risky endpoints, a common "Allow
-   unofficial free services" toggle can be added.
+   warning in settings; there is no separate service. The common "Allow free web services" toggle
+   (`translation/allowFreeServices`, off by default) is implemented infrastructure: every service
+   that overrides `requiresOptIn()` is hidden from the pickers and refused by `TranslationManager`
+   with `ServiceUnavailable` until the user enables it. The DeepL `free-web` mode stays outside the
+   gate as an explicit mode with its own warning.
 2. For each service — its own `TranslationService` and parser; no keys are needed.
 3. Per-host rate limiting: a mutex + pause (DeepL 2 s, Yandex 750 ms, Reverso 600 ms, MyMemory 350
    ms); no parallel requests to one host.

@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -170,3 +170,64 @@ the first end-to-end picker check. The queue extraction is the separate sibling
 - No live smoke test or new user access is needed in this task: it adds no endpoint, so every check
   is local. The user has already accepted the stage-level rule that free services are opt-in and are
   not the only translation method.
+
+## Outcome
+
+Done. The opt-in gate exists as infrastructure, with no free service added and no endpoint enabled.
+`QueuedWebService`, `DeepLWebService`, and `tst_queuedwebservice` are untouched; the DeepL
+`free-web` mode stays outside the gate.
+
+- Settings: `translation/allowFreeServices` (bool, default `false`) in `TranslationSettings`, read
+  and written in the `translation` group of `SettingsStore`. A missing key loads as `false`; no
+  version migration was needed and `normalize()` leaves the value alone. `tst_settings` covers the
+  default, the round trip, and `allowFreeServices=true` in the INI.
+- Gate: `TranslationService::requiresOptIn()` returns `false` by default; Google, DeepL, and the
+  OpenAI-compatible provider do not override it. `TranslationManager` keeps
+  `freeServicesAllowed()`/`setFreeServicesAllowed()` and checks it in `translate()` after the
+  max-length check and before `isConfigured()`: a gated active service is refused with
+  `ServiceUnavailable` and `tr("Enable free web services in Settings → Services.")`, without calling
+  the service and without caching the error. The unconfigured-service `Auth` behaviour is unchanged.
+  The message uses `TranslationManager::tr(...)` because a bare `tr()` in this file is not extracted
+  by `lupdate` (`tr() cannot be called without context`); `DeepLService::tr(...)` already follows the
+  same pattern. `tst_translationmanager` adds `optInServiceIsRefusedWhenDisabled`,
+  `optInServiceWorksWhenEnabled`, and `regularServiceIsNotAffectedByTheGate` on an extended
+  `FakeService`.
+- Controller: `createTranslation()` sets the flag before registering and selecting services and does
+  not activate a configured gated service while the gate is off, leaving Google active and logging a
+  warning. `applySettings()` syncs the flag; turning the gate off while a gated service is active
+  switches to `google` in memory with a warning, then calls `updateServiceSelectors()`. The same
+  guard protects a changed `translation/service` and the picker filter. `translation/service` in the
+  INI is deliberately not rewritten: re-enabling the gate and restarting restores the stored choice;
+  enabling the gate shows the services without a restart but does not immediately activate the
+  stored one. `updateServiceSelectors()` skips gated services while the gate is off for both the main
+  window and the tray.
+- UI: the Services page ends with a "Free web services" group inside the existing `QScrollArea`,
+  with the `allowFreeServices` checkbox and the word-wrapped `freeWebHint` warning; the default is
+  unchecked. `tst_settingsdialog` finds both by object name and covers the default and round trip.
+  `updateDeepLControls()` and the DeepL free-web warning were not touched.
+- Errors and strings: `TranslationError::ServiceUnavailable` was added after `RateLimited` with the
+  blocked/HTML web-endpoint comment; `translationerrortext.cpp` keeps its exhaustive switch and
+  renders "The translation service is unavailable". All 14 `i18n/qtranslate_*.ts` files contain the
+  five new messages (group title, checkbox, hint, error title, manager message) with complete
+  translations and `→` preserved; each file now has 299 messages and `lrelease` reports 299
+  translations.
+- Documentation: `doc/architecture.md` §4.5 (enum, interface, gate paragraph), §4.9 (flag API and
+  the gate check), §4.11 (INI key), §4.13 (the Services group), and §6 (the user-visible error), and
+  `doc/free-endpoints.md` §8 item 1 describe the gate and the error kind. READMEs,
+  `doc/handoff.md`, and §4.7.1 were not changed.
+- Found and fixed in review: running `lupdate` through the CMake `update_translations` target on
+  Linux scanned only the target's platform sources and marked the Windows-only
+  `HotkeyManager` message "The key combination is not supported." as `type="vanished"` in all 14
+  files, which drops it from the compiled `.qm`. The message was restored; `qt_add_translations` now
+  receives `src/platform/hotkeymanager_win.cpp` as an extra `SOURCES` entry on non-Windows, and
+  `tst_translations` fails on any vanished message. A repeated Linux `update_translations` leaves the
+  files unchanged, and `lconvert` finds the hotkey string in the built `.qm`.
+- Verification: Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie:latest` (Qt 6.8.2,
+  GCC 14.2), Debug and Release: zero `warning:` lines with `-Wall -Wextra`; the targeted
+  `tst_translationmanager`, `tst_settings`, `tst_settingsdialog`, and `tst_translations` pass 4/4 in
+  each configuration, and the full suite passes 28/28 in each. The UI was checked offscreen with a
+  temporary harness outside the repository: the checkbox starts unchecked, the hint wraps and sits
+  inside the scrollable page, and saving writes `[translation] allowFreeServices=true`. The Windows
+  build and the 23 Windows tests were not performed: MSVC is unavailable in this environment.
+- Deferred by design: the end-to-end picker check with a real service belongs to `02-mymemory`; the
+  fallback chain is `07-fallback-chain`; the queue extraction is `02-queued-web-service`.

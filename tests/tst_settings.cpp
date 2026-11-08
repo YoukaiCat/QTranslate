@@ -97,6 +97,7 @@ private slots:
         QVERIFY(settings.translation.secondaryLang != settings.translation.primaryLang);
         QCOMPARE(settings.translation.maxLength, 20000);
         QCOMPARE(settings.translation.autoTranslateDelayMs, 700);
+        QVERIFY(!settings.translation.allowFreeServices);
 
         QCOMPARE(settings.google.mode, QStringLiteral("free"));
         QCOMPARE(settings.deepl.mode, QStringLiteral("api"));
@@ -136,6 +137,7 @@ private slots:
         settings.translation.secondaryLang = QStringLiteral("fr");
         settings.translation.maxLength = 5000;
         settings.translation.autoTranslateDelayMs = 0;
+        settings.translation.allowFreeServices = true;
 
         settings.google.mode = QStringLiteral("cloud");
         settings.google.apiKey = QStringLiteral("google-secret");
@@ -188,6 +190,7 @@ private slots:
         QCOMPARE(result.translation.secondaryLang, QStringLiteral("fr"));
         QCOMPARE(result.translation.maxLength, 5000);
         QCOMPARE(result.translation.autoTranslateDelayMs, 0);
+        QVERIFY(result.translation.allowFreeServices);
 
         QCOMPARE(result.google.mode, QStringLiteral("cloud"));
         QCOMPARE(result.google.apiKey, QStringLiteral("google-secret"));
@@ -216,6 +219,7 @@ private slots:
 
         const QByteArray ini = readFile(path);
         QVERIFY(!ini.isEmpty());
+        QVERIFY(ini.contains("allowFreeServices=true"));
         QVERIFY(!ini.contains("google-secret"));
         QVERIFY(!ini.contains("deepl-secret"));
         QVERIFY(!ini.contains("llm-secret"));

@@ -63,6 +63,11 @@ public:
     virtual QStringList sourceLanguages() const = 0; // internal codes, without "auto"
     virtual QStringList targetLanguages() const = 0;
 
+    // The service sends text to an unofficial or free endpoint and must be
+    // explicitly enabled; the manager refuses it while
+    // translation/allowFreeServices is false.
+    virtual bool requiresOptIn() const { return false; }
+
     // Applies API keys and service mode changes without recreating the service.
     virtual void applySettings(const AppSettings &settings) = 0;
 

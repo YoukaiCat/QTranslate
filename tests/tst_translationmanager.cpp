@@ -43,15 +43,18 @@ protected:
 class FakeService : public TranslationService
 {
 public:
-    explicit FakeService(QString id = QStringLiteral("fake"), bool configured = true)
+    explicit FakeService(QString id = QStringLiteral("fake"), bool configured = true,
+                         bool optIn = false)
         : m_id(std::move(id))
         , m_configured(configured)
+        , m_optIn(optIn)
     {
     }
 
     QString id() const override { return m_id; }
     QString displayName() const override { return m_id; }
     bool isConfigured() const override { return m_configured; }
+    bool requiresOptIn() const override { return m_optIn; }
     QStringList sourceLanguages() const override { return {QStringLiteral("en")}; }
     QStringList targetLanguages() const override { return {QStringLiteral("ru")}; }
     void applySettings(const AppSettings &) override {}
@@ -70,6 +73,7 @@ public:
 private:
     QString m_id;
     bool m_configured;
+    bool m_optIn;
 };
 
 TranslationRequest request(const QString &text)
@@ -250,6 +254,73 @@ private slots:
         QCOMPARE(finished.size(), 1);
         QCOMPARE(int(reply->result().error), error);
         QCOMPARE(reply->result().serviceId, QStringLiteral("fake"));
+    }
+
+    void optInServiceIsRefusedWhenDisabled()
+    {
+        TranslationManager manager;
+        QVERIFY(!manager.freeServicesAllowed());
+        auto *service = new FakeService(QStringLiteral("free"), true, true);
+        manager.registerService(service);
+
+        std::unique_ptr<TranslationReply> reply(
+            manager.translate(request(QStringLiteral("Hello")),
+                              TranslationManager::Channel::MainWindow));
+        QVERIFY(service->requests.isEmpty());
+
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(1000));
+        QCOMPARE(reply->result().error, TranslationError::ServiceUnavailable);
+        QCOMPARE(reply->result().serviceId, QStringLiteral("free"));
+        QVERIFY(reply->result().errorMessage.contains(QStringLiteral("Settings")));
+
+        // The refusal is not cached: with the gate on the request goes through.
+        manager.setFreeServicesAllowed(true);
+        std::unique_ptr<TranslationReply> second(
+            manager.translate(request(QStringLiteral("Hello")),
+                              TranslationManager::Channel::MainWindow));
+        QCOMPARE(service->requests.size(), 1);
+        service->replies.first()->complete(QStringLiteral("Привет"));
+        QCOMPARE(second->result().translatedText, QStringLiteral("Привет"));
+    }
+
+    void optInServiceWorksWhenEnabled()
+    {
+        TranslationManager manager;
+        manager.setFreeServicesAllowed(true);
+        auto *service = new FakeService(QStringLiteral("free"), true, true);
+        manager.registerService(service);
+
+        auto first = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")),
+                              TranslationManager::Channel::MainWindow));
+        QCOMPARE(service->requests.size(), 1);
+        service->replies.first()->complete(QStringLiteral("Привет"));
+        QVERIFY(first->result().ok());
+
+        auto second = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")),
+                              TranslationManager::Channel::MainWindow));
+        QSignalSpy finished(second.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(1000));
+        QCOMPARE(second->result().translatedText, QStringLiteral("Привет"));
+        QCOMPARE(service->requests.size(), 1);
+    }
+
+    void regularServiceIsNotAffectedByTheGate()
+    {
+        TranslationManager manager;
+        QVERIFY(!manager.freeServicesAllowed());
+        auto *service = new FakeService;
+        manager.registerService(service);
+
+        auto reply = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")),
+                              TranslationManager::Channel::MainWindow));
+        QCOMPARE(service->requests.size(), 1);
+        service->replies.first()->complete(QStringLiteral("Привет"));
+        QVERIFY(reply->result().ok());
+        QCOMPARE(reply->result().translatedText, QStringLiteral("Привет"));
     }
 
     void maxLengthBoundary()

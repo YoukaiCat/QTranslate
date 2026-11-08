@@ -161,9 +161,18 @@ set(QTRANSLATE_TS_FILES
     i18n/qtranslate_hi.ts
 )
 
+# lupdate only scans the platform sources that belong to the target on the
+# current platform, which would mark the translations of the other platform
+# backends as vanished. Keep the Windows hotkey backend in the Linux lupdate
+# run; on Windows it is already part of the target.
+if(NOT WIN32)
+    set(QTRANSLATE_LUPDATE_EXTRA_SOURCES src/platform/hotkeymanager_win.cpp)
+endif()
+
 qt_add_translations(qtranslate
     TS_FILES ${QTRANSLATE_TS_FILES}
     RESOURCE_PREFIX "/i18n"
+    SOURCES ${QTRANSLATE_LUPDATE_EXTRA_SOURCES}
 )
 
 install(TARGETS qtranslate

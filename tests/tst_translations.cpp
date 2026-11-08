@@ -14,6 +14,7 @@ struct Message
     QString source;
     QString translation;
     bool unfinished = false;
+    bool vanished = false;
 };
 
 QVector<Message> readMessages(const QString &path)
@@ -44,6 +45,8 @@ QVector<Message> readMessages(const QString &path)
             } else if (inMessage && xml.name() == QLatin1String("translation")) {
                 current.unfinished =
                     xml.attributes().value(QLatin1String("type")) == QLatin1String("unfinished");
+                current.vanished =
+                    xml.attributes().value(QLatin1String("type")) == QLatin1String("vanished");
                 current.translation = xml.readElementText();
             }
         } else if (token == QXmlStreamReader::EndElement
@@ -97,6 +100,8 @@ void TestTranslations::allLanguagesAreComplete()
         QVERIFY2(messages.size() >= 250, qPrintable(name));
 
         for (const Message &message : messages) {
+            QVERIFY2(!message.vanished,
+                     qPrintable(name + QStringLiteral(": vanished ") + message.source));
             QVERIFY2(!message.unfinished,
                      qPrintable(name + QStringLiteral(": unfinished ") + message.source));
             QVERIFY2(!message.translation.trimmed().isEmpty(),

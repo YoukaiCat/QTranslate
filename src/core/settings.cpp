@@ -314,6 +314,10 @@ void SettingsStore::load()
         settings.value(QStringLiteral("autoTranslateDelayMs"),
                        loaded.translation.autoTranslateDelayMs)
             .toInt();
+    loaded.translation.allowFreeServices =
+        settings.value(QStringLiteral("allowFreeServices"),
+                       loaded.translation.allowFreeServices)
+            .toBool();
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("google"));
@@ -439,6 +443,8 @@ void SettingsStore::save(const AppSettings &settings)
     out.setValue(QStringLiteral("maxLength"), normalized.translation.maxLength);
     out.setValue(QStringLiteral("autoTranslateDelayMs"),
                  normalized.translation.autoTranslateDelayMs);
+    out.setValue(QStringLiteral("allowFreeServices"),
+                 normalized.translation.allowFreeServices);
     out.endGroup();
 
     out.beginGroup(QStringLiteral("google"));

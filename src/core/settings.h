@@ -33,6 +33,9 @@ struct TranslationSettings
     QString secondaryLang;
     int maxLength = 20000;
     int autoTranslateDelayMs = 700; // 0 = off; used by the auto-translate stage
+    // Gates services whose requiresOptIn() is true: the manager refuses them
+    // while this is false.
+    bool allowFreeServices = false;
 };
 
 struct GoogleSettings

@@ -42,6 +42,7 @@ private slots:
         settings.translation.secondaryLang = QStringLiteral("fr");
         settings.translation.maxLength = 5000;
         settings.translation.autoTranslateDelayMs = 0;
+        settings.translation.allowFreeServices = true;
         settings.popup.autoCloseOnFocusLoss = false;
 
         SettingsDialog dialog(settings, {QStringLiteral("en"), QStringLiteral("ru")},
@@ -72,6 +73,9 @@ private slots:
             dialog.findChild<QSpinBox *>(QStringLiteral("autoTranslateDelay"));
         auto *pauseInFullscreen =
             dialog.findChild<QCheckBox *>(QStringLiteral("pauseInFullscreen"));
+        auto *allowFreeServices =
+            dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
+        auto *freeWebHint = dialog.findChild<QLabel *>(QStringLiteral("freeWebHint"));
 
         QVERIFY(autostart);
         QVERIFY(startMinimized);
@@ -86,6 +90,8 @@ private slots:
         QVERIFY(maxLength);
         QVERIFY(delay);
         QVERIFY(pauseInFullscreen);
+        QVERIFY(allowFreeServices);
+        QVERIFY(freeWebHint);
 
         QVERIFY(autostart->isChecked());
         QVERIFY(!startMinimized->isChecked());
@@ -101,6 +107,9 @@ private slots:
         QCOMPARE(maxLength->value(), 5000);
         QCOMPARE(delay->value(), 0);
         QVERIFY(pauseInFullscreen->isChecked());
+        QVERIFY(allowFreeServices->isChecked());
+        QVERIFY(freeWebHint->wordWrap());
+        QVERIFY(freeWebHint->text().contains(QStringLiteral("third party")));
     }
 
     void returnsEditedValues()
@@ -136,6 +145,7 @@ private slots:
         dialog.findChild<QSpinBox *>(QStringLiteral("maxLength"))->setValue(7000);
         dialog.findChild<QSpinBox *>(QStringLiteral("autoTranslateDelay"))->setValue(1200);
         dialog.findChild<QCheckBox *>(QStringLiteral("pauseInFullscreen"))->setChecked(false);
+        dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"))->setChecked(true);
 
         const AppSettings result = dialog.settings();
         QVERIFY(result.general.autostart);
@@ -152,6 +162,7 @@ private slots:
         QCOMPARE(result.translation.secondaryLang, QStringLiteral("de"));
         QCOMPARE(result.translation.maxLength, 7000);
         QCOMPARE(result.translation.autoTranslateDelayMs, 1200);
+        QVERIFY(result.translation.allowFreeServices);
         QVERIFY(!result.hotkeys.pauseInFullscreen);
         QCOMPARE(result.google.apiKey, QStringLiteral("keep-me"));
         QCOMPARE(result.network.proxyHost, QStringLiteral("proxy.local"));
@@ -325,6 +336,22 @@ private slots:
         QCOMPARE(result.llm.baseUrl, QStringLiteral("http://127.0.0.1:11434/v1"));
         QCOMPARE(result.llm.apiKey, QStringLiteral("new-llm-key"));
         QCOMPARE(result.llm.model, QStringLiteral("local-model"));
+    }
+
+    void freeWebServicesGate()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("freeWebHint"));
+        QVERIFY(checkbox);
+        QVERIFY(hint);
+        QVERIFY(!checkbox->isChecked());
+        QVERIFY(!dialog.settings().translation.allowFreeServices);
+        QVERIFY(hint->wordWrap());
+
+        checkbox->setChecked(true);
+        QVERIFY(dialog.settings().translation.allowFreeServices);
     }
 
     void llmModels()

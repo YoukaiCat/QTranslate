@@ -297,6 +297,20 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     servicesLayout->addWidget(googleGroup);
     servicesLayout->addWidget(deepLGroup);
     servicesLayout->addWidget(llmGroup);
+    auto *freeWebGroup = new QGroupBox(tr("Free web services"), servicesContent);
+    auto *freeWebForm = new QFormLayout(freeWebGroup);
+    m_allowFreeServices = new QCheckBox(tr("Allow free web services"), freeWebGroup);
+    m_allowFreeServices->setObjectName(QStringLiteral("allowFreeServices"));
+    auto *freeWebHint = new QLabel(
+        tr("These services need no API key. Most are unofficial: they may stop working, apply "
+           "rate limits or block requests, and the text is sent to a third party. The Google "
+           "and DeepL APIs remain the recommended choice."),
+        freeWebGroup);
+    freeWebHint->setObjectName(QStringLiteral("freeWebHint"));
+    freeWebHint->setWordWrap(true);
+    freeWebForm->addRow(m_allowFreeServices);
+    freeWebForm->addRow(freeWebHint);
+    servicesLayout->addWidget(freeWebGroup);
     servicesLayout->addStretch();
     servicesScroll->setWidget(servicesContent);
     servicesPageLayout->addWidget(servicesScroll);
@@ -416,6 +430,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
 
     m_maxLength->setValue(settings.translation.maxLength);
     m_autoTranslateDelay->setValue(settings.translation.autoTranslateDelayMs);
+    m_allowFreeServices->setChecked(settings.translation.allowFreeServices);
 
     const int googleMode = m_googleMode->findData(settings.google.mode);
     m_googleMode->setCurrentIndex(googleMode >= 0 ? googleMode : 0);
@@ -469,6 +484,7 @@ AppSettings SettingsDialog::settings() const
     result.translation.secondaryLang = m_secondaryLanguage->currentCode();
     result.translation.maxLength = m_maxLength->value();
     result.translation.autoTranslateDelayMs = m_autoTranslateDelay->value();
+    result.translation.allowFreeServices = m_allowFreeServices->isChecked();
     result.popup.autoCloseOnFocusLoss = m_autoClosePopup->isChecked();
     result.google.mode = m_googleMode->currentData().toString();
     result.google.apiKey = m_googleApiKey->text().trimmed();

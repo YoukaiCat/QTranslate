@@ -221,6 +221,7 @@ void AppController::createTranslation()
     m_translations->setMaxLength(settings.translation.maxLength);
     m_translations->setPrimaryLanguage(settings.translation.primaryLang);
     m_translations->setSecondaryLanguage(settings.translation.secondaryLang);
+    m_translations->setFreeServicesAllowed(settings.translation.allowFreeServices);
 
     m_google = new GoogleTranslateService(m_network);
     m_deepl = new DeepLService(m_network);
@@ -232,11 +233,17 @@ void AppController::createTranslation()
     m_translations->registerService(m_deepl);
     m_translations->registerService(m_llm);
 
-    if (m_translations->service(settings.translation.service))
-        m_translations->setActiveService(settings.translation.service);
-    else if (!settings.translation.service.isEmpty())
+    if (TranslationService *service = m_translations->service(settings.translation.service)) {
+        if (service->requiresOptIn() && !settings.translation.allowFreeServices) {
+            qCWarning(lcApp) << "Configured service needs free web services to be enabled:"
+                             << settings.translation.service;
+        } else {
+            m_translations->setActiveService(settings.translation.service);
+        }
+    } else if (!settings.translation.service.isEmpty()) {
         qCWarning(lcApp) << "Configured service is not available:"
                          << settings.translation.service;
+    }
 }
 
 void AppController::createHotkeys()
@@ -475,7 +482,10 @@ void AppController::updateServiceSelectors()
 
     QList<MainWindow::ServiceEntry> mainWindowServices;
     QList<TrayIcon::ServiceEntry> trayServices;
+    const bool freeServicesAllowed = m_translations->freeServicesAllowed();
     for (const TranslationService *service : m_translations->services()) {
+        if (service->requiresOptIn() && !freeServicesAllowed)
+            continue;
         mainWindowServices.append({service->id(), service->displayName()});
         trayServices.append({service->id(), service->displayName()});
     }
@@ -551,6 +561,18 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_mainWindow->setAutoTranslateDelay(newSettings.translation.autoTranslateDelayMs);
     }
 
+    if (oldSettings.translation.allowFreeServices
+        != newSettings.translation.allowFreeServices) {
+        m_translations->setFreeServicesAllowed(newSettings.translation.allowFreeServices);
+        const TranslationService *active = m_translations->activeService();
+        if (!newSettings.translation.allowFreeServices && active && active->requiresOptIn()) {
+            qCWarning(lcApp) << "Free web services are disabled; switching to google from"
+                             << active->id();
+            m_translations->setActiveService(QStringLiteral("google"));
+        }
+        updateServiceSelectors();
+    }
+
     if (oldSettings.network.timeoutMs != newSettings.network.timeoutMs)
         m_network->setTimeoutMs(newSettings.network.timeoutMs);
 
@@ -578,11 +600,17 @@ void AppController::applySettings(const AppSettings &oldSettings,
     }
 
     if (oldSettings.translation.service != newSettings.translation.service) {
-        if (m_translations->service(newSettings.translation.service))
-            m_translations->setActiveService(newSettings.translation.service);
-        else
+        TranslationService *service =
+            m_translations->service(newSettings.translation.service);
+        if (!service) {
             qCWarning(lcApp) << "Configured service is not available:"
                              << newSettings.translation.service;
+        } else if (service->requiresOptIn() && !newSettings.translation.allowFreeServices) {
+            qCWarning(lcApp) << "Configured service needs free web services to be enabled:"
+                             << newSettings.translation.service;
+        } else {
+            m_translations->setActiveService(newSettings.translation.service);
+        }
     }
 
     if (oldSettings.translation.service != newSettings.translation.service
