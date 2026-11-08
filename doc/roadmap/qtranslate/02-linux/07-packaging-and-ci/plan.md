@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 7db5e60
 depends: [01-linux-build-baseline, 02-global-hotkeys, 03-x11-selection-and-inplace, 04-x11-hotkey-grab-release, 05-xdg-autostart-and-secrets, 06-cli-and-desktop-integration]
 ---
@@ -152,3 +152,60 @@ install layout, the scripts, and CI.
 - **Scope.** This stage is broad. If a child outgrows its plan, stop and report instead of taking a
   shortcut. Publishing (push, tag, release assets) is an external action and needs the user's
   explicit approval; this stage does not push or tag.
+
+## Outcome
+
+Accepted on 2026-11-08 over `7db5e60..HEAD` (children 01-06 plus the acceptance fix `d0f4b37`).
+Every `## Done when` item holds; the integrated review found one real defect, fixed in the
+acceptance commit.
+
+- **Install layout and desktop entry** (`cc5fcac`): `packaging/linux/qtranslate.desktop` passes
+  `desktop-file-validate`; CMake installs it and the 256x256 hicolor icon; the Linux install tree
+  has exactly `bin/qtranslate`, `share/applications/qtranslate.desktop`, and
+  `share/icons/hicolor/256x256/apps/qtranslate.png`, no `bin/qt.conf` or `share/qt6`, and the
+  installed binary keeps `RUNPATH $ORIGIN:$ORIGIN/../lib`.
+- **Portable archive** (`23840c6`): `packaging/linux/package.sh` owns the bundle: Qt 6.8.2
+  libraries, plugins, 13 Qt translations, `qt.conf` with `Prefix = ..`, `patchelf` RPATH, numeric
+  ownership, and `SHA256SUMS-linux.txt`. The image gained `patchelf`, `qt6-wayland`, and
+  `qt6-translations-l10n`.
+- **Debian package** (`fff215b`): `qtranslate_<version>_amd64.deb` from the same install tree, with
+  exactly the three files, no maintainer scripts, and `Depends` taken from `dpkg-shlibdeps`; the
+  trixie `.deb` installs and removes on trixie and a no-libsecret build drops `libsecret-1-0` and
+  `libglib2.0-0t64` from `Depends`.
+- **AppImage** (`4b8ee83`): `qtranslate-<version>-x86_64.AppImage` built by `linuxdeploy` plus an
+  explicit `appimagetool` with the dated `type2-runtime` `20251108`; four pinned downloads with
+  SHA256 and a cache; `--skip-appimage` for offline runs only; the produced AppImage runs without
+  FUSE and the extracted layout has the Qt/ICU libraries, platform plugins, translations, desktop
+  file, and icon.
+- **Native Astra artifacts** (`25c0f49`): an explicit `--target trixie|astra`; the Astra run
+  produces `qtranslate-<version>-linux-x86_64-astra.tar.gz` and
+  `qtranslate_<version>+astra1_amd64.deb` with `Depends` from Astra's `dpkg-shlibdeps`, plus a
+  separate `SHA256SUMS-linux-astra.txt`. The Astra tar.gz and `.deb` run, install, launch under the
+  real `:0` session, write/remove autostart, and use the XDG settings/log paths; the trixie
+  artifacts' exact Astra failures are recorded (`libglib2.0-0t64`, `libxtst6 (>= 2:1.2.5)`,
+  `GLIBC_2.38`, `CXXABI_1.3.15`, `libsystemd` `GLIBC_2.39`).
+- **CI** (`05fe909`): `packaging/linux/trixie-packages.txt` is the single apt list for the
+  Dockerfile and CI; the `Linux x64 (trixie)` job builds, runs `timeout 300 xvfb-run -a ctest`,
+  packages, and uploads `qtranslate-linux-x64`; the `release` job needs both jobs and downloads
+  both artifact sets into `artifacts`. The Windows job, its Qt 6.8.3 setup, the tag/version check,
+  `on:`, and `concurrency:` are unchanged.
+
+Acceptance ran trixie Debug/Release 28/28 with no warnings, Astra Debug/Release 28/28 after
+`fly-set-execid.sh`, a full trixie `package.sh` run (tar.gz, `.deb`, AppImage, three-line
+checksums), an Astra `--target astra` run (tar.gz, `+astra1` `.deb`, two-line checksums), and the
+negative paths. The one defect: the Astra packaging branch required `libglib2.0-0` unconditionally,
+so an Astra build without libsecret failed at the `Depends` gate; `d0f4b37` now gates the positive
+glib/libsecret assertions on `readelf -d` and keeps the negative `t64`/`libxtst6` assertions
+unchanged. The fix was re-verified on trixie, Astra with libsecret, and Astra without libsecret.
+
+Known limitations carried forward: the AppImage `ldd` gate checks `not found` only, not that every
+Qt library resolves inside the AppDir; plugin presence is checked per directory, not per file; the
+printed `docker run` command has no `--user`/`HOME=/tmp`, so a root run can leave root-owned staging
+files; `debian:trixie` and `qtranslate-trixie:latest` are moving tags; the Astra host gate checks
+`ID=astra` only; the artifacts are not byte-reproducible across runs. The READMEs,
+`doc/architecture.md`, and `doc/handoff.md` still describe Windows-only CI, the 20-test Linux state,
+and the old package-list location; that documentation update belongs to `08-verification` and the
+lead. The real GitHub Actions run, tag push, and release publication are **not performed** and need
+the user's explicit approval; the Astra artifacts are local verification artifacts and are not
+published by CI. Windows Debug/Release and the 23 tests are **not performed** (no MSVC), reviewed by
+diff.
