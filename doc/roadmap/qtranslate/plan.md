@@ -24,7 +24,7 @@ The active roadmap is this file. The detailed Russian history of the old flat pl
   archive. Windows Debug/Release builds and the 23 tests are unavailable in the current Linux
   environment; the outcome records them as not performed, not as passed.
 - After any other code changes, the application builds in Debug and Release without `/W4` warnings
-  and all 23 Windows tests pass; on Linux the same holds with `-Wall -Wextra` and 28 tests.
+  and all 24 Windows tests pass; on Linux the same holds with `-Wall -Wextra` and 29 tests.
 
 ## History
 
