@@ -825,11 +825,21 @@ EOF
     grep -qF 'libxtst6' <<<"$deb_depends" \
         || die "Depends lacks libxtst6: $deb_depends"
 
+    # libsecret is an optional build dependency. Detect it once: the
+    # libsecret-1-0 entry and the Astra libglib2.0-0 entry (glib is libsecret's
+    # dependency) must follow the NEEDED library, never a hand-written list.
+    local links_libsecret=0
+    if readelf -d "$deb_root/usr/bin/qtranslate" | grep -qF 'libsecret-1.so.0'; then
+        links_libsecret=1
+    fi
+
     if [[ $target == astra ]]; then
         # Astra 1.8 predates the t64 transition and ships libxtst6 2:1.2.3.
         # The package names must come from dpkg-shlibdeps, never a hand edit.
-        grep -qE 'libglib2.0-0 \(' <<<"$deb_depends" \
-            || die "the Astra Depends lacks libglib2.0-0: $deb_depends"
+        if (( links_libsecret )); then
+            grep -qE 'libglib2.0-0 \(' <<<"$deb_depends" \
+                || die "the Astra Depends lacks libglib2.0-0: $deb_depends"
+        fi
         grep -qF 'libqt6core6t64' <<<"$deb_depends" \
             || die "the Astra Depends lacks libqt6core6t64: $deb_depends"
         if grep -qF 'libglib2.0-0t64' <<<"$deb_depends"; then
@@ -840,9 +850,7 @@ EOF
         fi
     fi
 
-    # libsecret is an optional build dependency: the entry must follow the
-    # NEEDED library, never a hand-written list.
-    if readelf -d "$deb_root/usr/bin/qtranslate" | grep -qF 'libsecret-1.so.0'; then
+    if (( links_libsecret )); then
         grep -qF 'libsecret-1-0' <<<"$deb_depends" \
             || die "the binary links libsecret-1.so.0 but Depends lacks libsecret-1-0"
     elif grep -qF 'libsecret-1-0' <<<"$deb_depends"; then
