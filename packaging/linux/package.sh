@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Build the portable Linux archive with a bundled Qt runtime.
+# Build the Linux release artifacts: the portable archive with a bundled Qt
+# runtime and the Debian 13 package.
 #
 # The archive has one top-level directory named like the artifact and contains
 # the CMake install tree plus the Qt libraries, plugins, and translations that
-# the application loads at runtime. This script owns the Linux bundle layout;
-# CMake only installs the binary, the desktop file, and the icon.
+# the application loads at runtime. The .deb is staged from the same install
+# tree without the bundle. This script owns the Linux bundle layout; CMake only
+# installs the binary, the desktop file, and the icon.
 set -euo pipefail
 umask 022
 
@@ -31,6 +33,12 @@ wayland_bundled=0
 artifact=
 artifact_size=
 artifact_sha=
+deb_root=
+deb_artifact=
+deb_size=
+deb_sha=
+deb_depends=
+deb_installed_size=
 declare -A system_libs=()
 
 die() {
@@ -42,7 +50,8 @@ usage() {
     cat <<'EOF'
 Usage: packaging/linux/package.sh [options]
 
-Build the portable Linux archive qtranslate-<version>-linux-x86_64.tar.gz.
+Build the portable Linux archive qtranslate-<version>-linux-x86_64.tar.gz
+and the Debian package qtranslate_<version>_amd64.deb.
 
 Options:
   --build-dir DIR    CMake Release build directory (default: build/linux-release)
@@ -56,10 +65,12 @@ image built from packaging/linux/trixie.Dockerfile. Other hosts are refused
 with the docker command to use.
 
 Required tools: cmake, qtpaths6, patchelf, tar, sha256sum,
-desktop-file-validate, readelf, ldd, and the usual coreutils/findutils tools.
+desktop-file-validate, readelf, ldd, dpkg-deb, dpkg-shlibdeps, du, and the
+usual coreutils/findutils tools.
 
 Artifacts:
   <output-dir>/qtranslate-<version>-linux-x86_64.tar.gz
+  <output-dir>/qtranslate_<version>_amd64.deb
   <output-dir>/SHA256SUMS-linux.txt
 
 The script owns the staging directory <output-dir>/.qtranslate-staging.
@@ -159,6 +170,10 @@ check_tools() {
         desktop-file-validate:desktop-file-utils \
         readelf:binutils \
         ldd:libc-bin \
+        dpkg-deb:dpkg \
+        dpkg-shlibdeps:dpkg-dev \
+        du:coreutils \
+        chmod:coreutils \
         sed:sed \
         grep:grep \
         tr:coreutils \
@@ -540,16 +555,199 @@ set_rpaths() {
 }
 
 pack_tarball() {
+    local listing top_level
     artifact="$output_dir/qtranslate-$version-linux-x86_64.tar.gz"
     tar -C "$stage" --owner=0 --group=0 --numeric-owner -czf "$artifact" \
         "qtranslate-$version-linux-x86_64"
+
+    # The archive is packed before build_deb, so the .deb staging directories
+    # must never appear at the top level: only the bundle root may be there.
+    listing=$(tar -tzf "$artifact")
+    top_level=$(sed 's|/.*||' <<<"$listing" | sort -u)
+    [[ $top_level == "qtranslate-$version-linux-x86_64" ]] \
+        || die "the archive top-level entries are '$top_level' instead of only qtranslate-$version-linux-x86_64"
+    if grep -qE '^(DEBIAN|deb|dpkg)(/|$)' <<<"$listing"; then
+        die "the archive contains DEBIAN/, deb/, or dpkg/ staging entries"
+    fi
+
     artifact_size=$(stat -c %s "$artifact")
 }
 
+build_deb() {
+    local control_file="$stage/dpkg/debian/control"
+    local binary install_sha staged_sha shlibs_output size_output contents ctrl_entries
+
+    # The package root comes from the bundle-free install tree: the archive copy
+    # carries Qt, plugins, translations, and qt.conf and must not leak here.
+    deb_root="$stage/deb"
+    binary="$deb_root/usr/bin/qtranslate"
+    mkdir -p "$deb_root/usr"
+    cp -a "$install_root/." "$deb_root/usr/"
+
+    [[ -x $binary ]] \
+        || die "the .deb staging is missing an executable usr/bin/qtranslate"
+    [[ -f $deb_root/usr/share/applications/qtranslate.desktop ]] \
+        || die "the .deb staging is missing usr/share/applications/qtranslate.desktop"
+    [[ -f $deb_root/usr/share/icons/hicolor/256x256/apps/qtranslate.png ]] \
+        || die "the .deb staging is missing usr/share/icons/hicolor/256x256/apps/qtranslate.png"
+    [[ $(stat -c %a "$binary") == 755 ]] \
+        || die "usr/bin/qtranslate has mode $(stat -c %a "$binary") instead of 755"
+    [[ $(stat -c %a "$deb_root/usr/share/applications/qtranslate.desktop") == 644 ]] \
+        || die "usr/share/applications/qtranslate.desktop is not mode 644"
+    [[ $(stat -c %a "$deb_root/usr/share/icons/hicolor/256x256/apps/qtranslate.png") == 644 ]] \
+        || die "usr/share/icons/hicolor/256x256/apps/qtranslate.png is not mode 644"
+    if [[ -e $deb_root/usr/bin/qt.conf ]]; then
+        die "the .deb staging contains usr/bin/qt.conf; stage the install tree, not the bundle"
+    fi
+    if [[ -e $deb_root/usr/share/qt6 ]]; then
+        die "the .deb staging contains usr/share/qt6; stage the install tree, not the bundle"
+    fi
+    local dir
+    for dir in lib plugins translations; do
+        if [[ -e $deb_root/usr/$dir ]]; then
+            die "the .deb staging contains usr/$dir; stage the install tree, not the bundle"
+        fi
+    done
+
+    printf 'Debian package files:\n'
+    find "$deb_root/usr" -type f -printf '%m %P\n' | sort -k2 | sed 's/^/  /'
+
+    # DEBIAN/ must exist before dpkg-shlibdeps runs so the tool treats the root
+    # as a package directory; with dpkg 1.22 it then stays quiet.
+    mkdir -p "$deb_root/DEBIAN"
+
+    # dpkg-shlibdeps needs a source stanza in debian/control. It lives in the
+    # staging directory, outside $deb_root, and is never packaged or committed.
+    mkdir -p "$(dirname "$control_file")"
+    cat > "$control_file" <<'EOF'
+Source: qtranslate
+Section: utils
+Priority: optional
+Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>
+
+Package: qtranslate
+Architecture: any
+Description: QTranslate - fast desktop translator
+EOF
+
+    # The staging directory is relative to the repository root, but
+    # dpkg-shlibdeps runs from $stage/dpkg, so resolve the binary first.
+    install_sha=$(sha256sum "$install_root/bin/qtranslate")
+    install_sha=${install_sha%% *}
+    staged_sha=$(sha256sum "$binary")
+    staged_sha=${staged_sha%% *}
+    [[ $install_sha == "$staged_sha" ]] \
+        || die "the .deb staging changed bin/qtranslate; both artifacts must ship the same binary"
+
+    binary=$(realpath "$binary")
+    shlibs_output=$( cd "$stage/dpkg" && dpkg-shlibdeps -O -e"$binary" ) \
+        || die "dpkg-shlibdeps failed; the image may lack a runtime package whose shlibs file is needed"
+    deb_depends=$(printf '%s\n' "$shlibs_output" | sed -n 's/^shlibs:Depends=//p')
+    [[ -n $deb_depends ]] || die "dpkg-shlibdeps did not report shlibs:Depends"
+
+    grep -qF 'libc6 (>= 2.34)' <<<"$deb_depends" \
+        || die "Depends lacks libc6 (>= 2.34): $deb_depends"
+    grep -qF 'libqt6core6t64' <<<"$deb_depends" \
+        || die "Depends lacks libqt6core6t64: $deb_depends"
+    grep -qF 'libqt6dbus6' <<<"$deb_depends" \
+        || die "Depends lacks libqt6dbus6: $deb_depends"
+    grep -qF 'libxtst6' <<<"$deb_depends" \
+        || die "Depends lacks libxtst6: $deb_depends"
+
+    # libsecret is an optional build dependency: the entry must follow the
+    # NEEDED library, never a hand-written list.
+    if readelf -d "$deb_root/usr/bin/qtranslate" | grep -qF 'libsecret-1.so.0'; then
+        grep -qF 'libsecret-1-0' <<<"$deb_depends" \
+            || die "the binary links libsecret-1.so.0 but Depends lacks libsecret-1-0"
+    elif grep -qF 'libsecret-1-0' <<<"$deb_depends"; then
+        die "Depends contains libsecret-1-0 but the binary does not link libsecret-1.so.0"
+    fi
+
+    # Installed-Size is the unpacked size in KiB and excludes DEBIAN/.
+    size_output=$(du -sk "$deb_root/usr")
+    deb_installed_size=${size_output%%[[:space:]]*}
+    [[ $deb_installed_size =~ ^[1-9][0-9]*$ ]] \
+        || die "cannot compute a positive Installed-Size from du -sk: '$size_output'"
+
+    cat > "$deb_root/DEBIAN/control" <<EOF
+Package: qtranslate
+Version: $version
+Architecture: amd64
+Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>
+Installed-Size: $deb_installed_size
+Depends: $deb_depends
+Section: utils
+Priority: optional
+Homepage: https://github.com/youkaicat/QTranslate
+Description: QTranslate - fast desktop translator
+ QTranslate translates text selected in other applications with a global
+ hotkey. It supports Google Translate, DeepL, and OpenAI-compatible
+ providers, and keeps its settings per user.
+EOF
+    chmod 0644 "$deb_root/DEBIAN/control"
+
+    deb_artifact="$output_dir/qtranslate_${version}_amd64.deb"
+    dpkg-deb --build --root-owner-group "$deb_root" "$deb_artifact"
+    deb_size=$(stat -c %s "$deb_artifact")
+
+    staged_sha=$(sha256sum "$deb_root/usr/bin/qtranslate")
+    staged_sha=${staged_sha%% *}
+    [[ $install_sha == "$staged_sha" ]] \
+        || die "dpkg-deb modified usr/bin/qtranslate; the package must keep the Release binary unstripped"
+
+    # Self-check the metadata that users and apt see.
+    [[ $(dpkg-deb --field "$deb_artifact" Package) == qtranslate ]] \
+        || die "the .deb Package field is not qtranslate"
+    [[ $(dpkg-deb --field "$deb_artifact" Version) == "$version" ]] \
+        || die "the .deb Version field does not match $version"
+    [[ $(dpkg-deb --field "$deb_artifact" Architecture) == amd64 ]] \
+        || die "the .deb Architecture field is not amd64"
+    [[ $(dpkg-deb --field "$deb_artifact" Maintainer) \
+        == 'Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>' ]] \
+        || die "the .deb Maintainer field is not the project identity"
+    [[ $(dpkg-deb --field "$deb_artifact" Installed-Size) == "$deb_installed_size" ]] \
+        || die "the .deb Installed-Size field does not match du -sk"
+    [[ $(dpkg-deb --field "$deb_artifact" Depends) == "$deb_depends" ]] \
+        || die "the .deb Depends field does not match dpkg-shlibdeps"
+    [[ $(dpkg-deb --field "$deb_artifact" Section) == utils ]] \
+        || die "the .deb Section field is not utils"
+    [[ $(dpkg-deb --field "$deb_artifact" Priority) == optional ]] \
+        || die "the .deb Priority field is not optional"
+    [[ $(dpkg-deb --field "$deb_artifact" Homepage) == https://github.com/youkaicat/QTranslate ]] \
+        || die "the .deb Homepage field is not the project URL"
+    [[ $(dpkg-deb --field "$deb_artifact" Description | sed -n '1p') \
+        == 'QTranslate - fast desktop translator' ]] \
+        || die "the .deb Description synopsis is not the expected text"
+
+    contents=$(dpkg-deb --contents "$deb_artifact")
+    [[ $(grep -c '^-' <<<"$contents" || true) == 3 ]] \
+        || die "the .deb contains a different number of regular files than 3"
+    grep -q ' \./usr/bin/qtranslate$' <<<"$contents" \
+        || die "the .deb does not contain ./usr/bin/qtranslate"
+    grep -q ' \./usr/share/applications/qtranslate.desktop$' <<<"$contents" \
+        || die "the .deb does not contain ./usr/share/applications/qtranslate.desktop"
+    grep -q ' \./usr/share/icons/hicolor/256x256/apps/qtranslate.png$' <<<"$contents" \
+        || die "the .deb does not contain ./usr/share/icons/hicolor/256x256/apps/qtranslate.png"
+    if grep -qE ' \./(usr/(lib|plugins|translations|share/qt6)(/|$)|usr/bin/qt\.conf$)' <<<"$contents"; then
+        die "the .deb contains bundle entries"
+    fi
+
+    # No postinst/prerm or other maintainer scripts. tar lists the control
+    # archive's root directory entry as ./, so only that entry may accompany
+    # ./control.
+    ctrl_entries=$(dpkg-deb --ctrl-tarfile "$deb_artifact" | tar -t | grep -vx './' || true)
+    [[ $ctrl_entries == ./control ]] \
+        || die "the .deb control archive contains '$ctrl_entries' instead of only ./control"
+}
+
 write_checksums() {
-    ( cd "$output_dir" && sha256sum "qtranslate-$version-linux-x86_64.tar.gz" > SHA256SUMS-linux.txt )
+    ( cd "$output_dir" \
+        && sha256sum "qtranslate-$version-linux-x86_64.tar.gz" "qtranslate_${version}_amd64.deb" \
+            > SHA256SUMS-linux.txt )
     artifact_sha=$(sha256sum "$artifact")
     artifact_sha=${artifact_sha%% *}
+    deb_sha=$(sha256sum "$deb_artifact")
+    deb_sha=${deb_sha%% *}
 }
 
 print_summary() {
@@ -564,6 +762,11 @@ Package summary:
   artifact: $artifact
   size: $artifact_size bytes
   sha256: $artifact_sha
+  deb: $deb_artifact
+  deb size: $deb_size bytes
+  deb sha256: $deb_sha
+  depends: $deb_depends
+  installed size: $deb_installed_size KiB
   libraries bundled: $library_count
   plugins bundled: ${#plugins[@]}
   Qt translations: $translation_count/$translation_total
@@ -595,6 +798,7 @@ main() {
     bundle_translations
     set_rpaths
     pack_tarball
+    build_deb
     write_checksums
     print_summary
 }

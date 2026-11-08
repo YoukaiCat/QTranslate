@@ -9,8 +9,7 @@
 #
 # Stage 07-packaging-and-ci adds the packaging tooling as its tasks need it:
 # desktop-file-utils and patchelf, plus qt6-wayland and qt6-translations-l10n
-# for the portable archive; later ones add dpkg-dev, file, curl, and the
-# AppImage tools.
+# for the portable archive; later ones add file, curl, and the AppImage tools.
 FROM debian:trixie
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -34,6 +33,9 @@ RUN apt-get update \
         # xvfb only Recommends xauth, but xvfb-run requires it.
         xvfb \
         xauth \
+        # dpkg-shlibdeps computes the .deb Depends; build-essential pulls
+        # dpkg-dev in, but the packaging tool must be visible.
+        dpkg-dev \
         # desktop-file-validate is the gate for packaging/linux/qtranslate.desktop.
         desktop-file-utils \
         # patchelf rewrites the RUNPATH of the bundled Qt libraries and plugins.

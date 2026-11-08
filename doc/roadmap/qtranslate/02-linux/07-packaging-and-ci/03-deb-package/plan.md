@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-desktop-entry-and-install, 02-portable-tarball]
 ---
@@ -333,3 +333,133 @@ Contract:
   gate, or install the dependencies first and record the exact command. Do not claim a bare image
   install as passing. The `.deb` is not distribution-independent; it targets trixie's package
   names.
+
+## Outcome
+
+Done on 2026-11-08. `packaging/linux/package.sh` now builds
+`qtranslate_<version>_amd64.deb` in the same run as the portable archive, from the bundle-free
+`cmake --install` tree, and `packaging/linux/trixie.Dockerfile` lists `dpkg-dev` explicitly. Only
+these two files changed for the task; this outcome and the journal are the lead's documentation.
+The trixie image was rebuilt (`qtranslate-trixie:latest`,
+`sha256:60ee8a378b70b49bac54fc3e841e13a7d6a1cc1c58967fd53a1da9523e8fe318`); `dpkg-deb`,
+`dpkg-shlibdeps` and `dpkg-dev` are 1.22.22, `fakeroot` and `lintian` are not installed.
+
+### Artifact and metadata
+
+- `qtranslate-0.11.0-linux-x86_64.tar.gz`: 28 636 818 bytes, SHA256
+  `067e91444dc53b9637bcac4cae7ab167f31ec3f7bc0ee163145bd41986e71e76`.
+- `qtranslate_0.11.0_amd64.deb`: **405 860 bytes**, SHA256
+  **`1dbfb3c55bb357e946286a3b9f2d41763b5c3d5a0a4f69ed04c13faf5ac1b348`**.
+- `Installed-Size: 1392` KiB (`du -sk` of the staged `usr` in this run; the earlier ~1360 estimate
+  varies with block allocation, and the self-check compares the run's value).
+- `Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>` (no backslash),
+  `Homepage: https://github.com/youkaicat/QTranslate`, `Version: 0.11.0`,
+  `Architecture: amd64`, `Section: utils`, `Priority: optional`.
+- Synopsis `QTranslate - fast desktop translator`; extended description:
+  ```
+   QTranslate translates text selected in other applications with a global
+   hotkey. It supports Google Translate, DeepL, and OpenAI-compatible
+   providers, and keeps its settings per user.
+  ```
+- `Depends` is exactly the `dpkg-shlibdeps -O` output with `shlibs:Depends=` removed and nothing
+  appended:
+  `libc6 (>= 2.34), libgcc-s1 (>= 3.0), libglib2.0-0t64 (>= 2.12.0), libqt6core6t64 (>= 6.8.2),
+  libqt6dbus6 (>= 6.8.2), libqt6gui6 (>= 6.1.2), libqt6network6 (>= 6.7.2),
+  libqt6widgets6 (>= 6.3.0), libsecret-1-0 (>= 0.7), libstdc++6 (>= 5), libx11-6,
+  libxtst6 (>= 2:1.2.5)`. `libsecret-1-0` and `libqt6dbus6` appear only because the binary links
+  them; the conditional gate checks `readelf -d` against the `libsecret-1-0` entry.
+
+`dpkg-deb --info qtranslate_0.11.0_amd64.deb`:
+```
+ new Debian package, version 2.0.
+ size 405860 bytes: control archive=660 bytes.
+     752 bytes,    13 lines      control
+ Package: qtranslate
+ Version: 0.11.0
+ Architecture: amd64
+ Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>
+ Installed-Size: 1392
+ Depends: libc6 (>= 2.34), libgcc-s1 (>= 3.0), libglib2.0-0t64 (>= 2.12.0), libqt6core6t64 (>= 6.8.2), libqt6dbus6 (>= 6.8.2), libqt6gui6 (>= 6.1.2), libqt6network6 (>= 6.7.2), libqt6widgets6 (>= 6.3.0), libsecret-1-0 (>= 0.7), libstdc++6 (>= 5), libx11-6, libxtst6 (>= 2:1.2.5)
+ Section: utils
+ Priority: optional
+ Homepage: https://github.com/youkaicat/QTranslate
+ Description: QTranslate - fast desktop translator
+  QTranslate translates text selected in other applications with a global
+  hotkey. It supports Google Translate, DeepL, and OpenAI-compatible
+  providers, and keeps its settings per user.
+```
+
+`dpkg-deb --contents` has only directories and the three regular files, all `root/root`:
+`./usr/bin/qtranslate` (0755, 1 365 328 bytes),
+`./usr/share/applications/qtranslate.desktop` (0644, 338 bytes),
+`./usr/share/icons/hicolor/256x256/apps/qtranslate.png` (0644, 17 013 bytes). The binary has no
+strip: SHA256 `fef3792c0d773403edb526a3ab3f04092b081a7a97a4b840c444a72b60a44973` is identical in
+the install tree, the staged copy, the `.deb` member and `bin/qtranslate` inside the tar.gz.
+
+`dpkg-deb --ctrl-tarfile | tar -t` lists `./` and `./control` only, so there is no `postinst` or
+`prerm`; `./` is dpkg-deb's standard control-archive root entry (verified with a minimal package
+built by the same dpkg 1.22.22), and the script ignores only that entry and requires exactly
+`./control`. No autostart file, system config, menu entry, `usr/bin/qt.conf`, `usr/share/qt6`,
+`usr/lib`, `usr/plugins`, or `usr/translations` is packaged.
+
+`SHA256SUMS-linux.txt` contains both artifact lines and `sha256sum -c` passes; the Windows
+`SHA256SUMS.txt` is not created. The child 02 sentinel file survived the run; the output directory
+holds only the staging directory, both artifacts, the checksum file, and the sentinel. The tar.gz
+has one top-level directory, `qtranslate-0.11.0-linux-x86_64`, and no `DEBIAN`/`deb`/`dpkg`
+entries; the script now asserts both properties in `pack_tarball()`.
+
+### Install and remove on trixie
+
+In a throwaway `qtranslate-trixie` container (not the development host or Astra):
+`dpkg -i /artifacts/qtranslate_0.11.0_amd64.deb` succeeded (`Setting up qtranslate` plus the
+image's `Processing triggers for desktop-file-utils`), `dpkg -L qtranslate` listed
+`/usr/bin/qtranslate`, the desktop file, and the icon, `desktop-file-validate
+/usr/share/applications/qtranslate.desktop` passed, `xvfb-run -a qtranslate --version` printed
+`QTranslate 0.11.0`, and `dpkg -r qtranslate` removed the three files; `dpkg -s qtranslate`
+reports not installed. No `qtranslate` was running.
+
+### No-libsecret build
+
+In a separate throwaway container with `libsecret-1-dev` removed (runtime `libsecret-1-0`
+0.21.7-1 stayed), a clean Release build under `/tmp/trixie-nosecret` has `LIBSECRET_FOUND` empty
+and no `libsecret-1.so.0` in `readelf -d`; the same `package.sh` produced
+`qtranslate_0.11.0_amd64.deb` (404 204 bytes, SHA256
+`159bfc4e99d2a34677fd1489cfebc76bb73b825cb8a57a92f6c1fa4ec7693d20`, `Installed-Size` 1356 KiB)
+whose `Depends` has neither `libsecret-1-0`
+nor `libglib2.0-0t64`; that `.deb` installs and removes on trixie. `-DCMAKE_DISABLE_FIND_PACKAGE_
+PkgConfig=ON` was not used, no `Recommends`/`Suggests` was added, and this build is not shipped.
+The later tar-layout assertion does not depend on libsecret; the reviewer independently
+reproduced the no-libsecret gate on the same code path.
+
+### Astra expectation
+
+The trixie `.deb` does not install on Astra Linux 1.8.7; this is expected and is not a pass.
+`sudo dpkg -i build/artifacts-linux/qtranslate_0.11.0_amd64.deb` unpacks the package and then
+fails to configure:
+```
+qtranslate зависит от libglib2.0-0t64 (>= 2.12.0), однако:
+ Пакет libglib2.0-0t64 не установлен.
+qtranslate зависит от libxtst6 (>= 2:1.2.5), однако:
+ Версия libxtst6:amd64 в системе — 2:1.2.3-1.1+b5.
+dpkg: проблемы зависимостей — оставляем не настроенным
+```
+The host was cleaned with `sudo dpkg --purge qtranslate`; `dpkg -s qtranslate` reports not
+installed and `/usr/bin/qtranslate` is absent. `Depends` was not edited. The Astra installation
+check remains deferred to child 05 with the native Astra package.
+
+### Regression and negative paths
+
+- trixie Debug and Release: `-Wall -Wextra`, no warnings, CTest 28/28 in both.
+- Astra: 28/28 in the existing `build/linux-debug` and `build/linux-release` after
+  `sudo /usr/bin/fly-set-execid.sh`; the task changed no C++ code.
+- Windows Debug/Release and the 23 tests: **not performed** (no MSVC), reviewed by diff.
+- `--help` lists the `.deb` and `dpkg-deb`/`dpkg-shlibdeps`/`du`; a reduced `PATH` names
+  `dpkg-deb (dpkg)` and `dpkg-shlibdeps (dpkg-dev)`; an invalid `--version`, a missing
+  `CMakeCache.txt`, and a Debug cache fail with the existing messages; the Astra host gate still
+  prints the docker command before the tool gate.
+- `git diff --check` is clean; only the two task files changed; no `debian/` tree was created in
+  the repository.
+
+Known environment caveat, unchanged by this task: `ctest` in the `qtranslate-trixie` image was run
+as root because the image has no `/etc/passwd` entry for UID 1000, so `dbus-daemon` fails for
+`tst_hotkeymanager_wayland`; the packaging run itself used the host UID as the plan requires.
