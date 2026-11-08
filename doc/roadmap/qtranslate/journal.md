@@ -2,19 +2,19 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/02-mymemory/03-mymemory-settings-and-docs` — `in-progress`,
-detailed; the coordinator is next. The service is `done` (`f8fb880`); this task adds the MyMemory
-group in Settings, the two new strings in the 14 `.ts`, the architecture/free-endpoints docs, the
-`AGENTS.md` 26/31 counts and the final picker/smoke checks. After it the MyMemory stage is accepted
-over `base: 371ab1e`; then the top-level stage 3 continues with Mozhi. The infrastructure stage is
-`done` (`fee1bcf..fb531fa`). Decisions: one configured fallback step, not a literal multi-step chain;
-Bing and Reverso stay in the stage; DeepL `free-web` stays outside the gate; MyMemory has no `de`
-email, key, URL setting or new INI key. Stage `02-linux` is `done`; the user deferred the 0.12.0
-release on 2026-11-08 (no version bump, tag, push, or release; the CI publication is not performed).
-The working tree is clean after the settings/docs plan commit; branch `main` matches the root
-`branch:` and is ahead of `origin/main`; nothing is pushed. Next: the settings/docs coordinator, then
-the MyMemory stage acceptance. In a new session: `/new`, choose the `lead` agent, and enter
-`@continue`.
+Current node: `03-free-web-endpoints/03-mozhi` — `todo`, not detailed; the planner is next. The
+MyMemory stage is `done` (accepted over `371ab1e..082dac4`; splitter `d3fc444`, service `f8fb880`,
+settings/docs `9cfbdde`, acceptance fix `082dac4` for the `+` query encoding). Linux is 31/31,
+Windows 26 (not run). MyMemory is behind the opt-in gate; Auto-detect remains selectable and returns
+`UnsupportedLanguage` until the user chooses a language (a later shared-UI decision). The
+infrastructure stage is `done` (`fee1bcf..fb531fa`). The top-level stage 3 continues with Mozhi;
+then Yandex, Bing, Reverso, and the fallback chain. Decisions: one configured fallback step, not a
+literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web` stays outside the
+gate. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version
+bump, tag, push, or release; the CI publication is not performed). The working tree is clean after
+the MyMemory-acceptance commit; branch `main` matches the root `branch:` and is ahead of
+`origin/main`; nothing is pushed. Next: the Mozhi planner, then its coordinator. In a new session:
+`/new`, choose the `lead` agent, and enter `@continue`.
 
 ## Journal
 
@@ -95,3 +95,4 @@ the MyMemory stage acceptance. In a new session: `/new`, choose the `lead` agent
 - 2026-11-08 — Planner detailed `02-mymemory-service` (6 steps, `detailed: true`). Decisions: HTTP 403/429 are `RateLimited`, while a body-level `responseStatus: 403` with unknown details is `BadResponse`; `detectedLanguage` is only the optional `responseData.detectedLanguage`; no `de` email, key, URL setting or INI key; chunks stay inside one reply and pace themselves with `rateLimitMs()`; the tests reuse the DeepL `FakeHttpServer` (it already has `elapsedMs`), and the closed-port case checks `Network`; two platform-neutral targets take Linux to 31 and Windows to 26. The planner flagged the body-level 403 classification and the `detectedLanguage` field as assumptions to fix in the parser/fixture if a live smoke disagrees. Status `in-progress`; coordinator next.
 - 2026-11-08 — Task `03-free-web-endpoints/02-mymemory/02-mymemory-service` done as `f8fb880`. Added `MyMemoryParser` (HTML/JSON/status/quota/details classification, optional `detectedLanguage`, fixed messages) and `MyMemoryService` (`QueuedWebService`, `requiresOptIn`, 350 ms, `GET /get` with `q`/`langpair`/`mt=1`, explicit source, 500-byte `splitUtf8` chunks with edge-whitespace restore, sequential pacing, abort/timeout, no text/URL in logs), the `AppController` registration, 11 fixtures, `tst_mymemoryparser` (26 cases) and `tst_mymemoryservice` (local `QTcpServer`, including edge whitespace, failed chunk, abort/timeout), plus the gated real-service case in `tst_translationmanager`. Verification: Astra Qt 6.10.2 and trixie Qt 6.8.2, Debug/Release, 31/31 with no warnings, `tst_mymemoryservice` 10 repeats per configuration. The reviewer added `edgeWhitespaceIsTrimmed`; no rejected remarks. Windows 26 and the live smoke were not performed. Next: detail `03-mymemory-settings-and-docs`.
 - 2026-11-08 — Planner detailed `03-mymemory-settings-and-docs` (6 steps, `detailed: true`) and stopped at its context threshold with the file complete. Decisions: the group is visible but disabled while the gate is off; only two new `tr()` strings; `.ts` go from 299 to 301; `doc/architecture.md` §4.5/§4.7.3/§4.8/§4.9/§8/§4.14, `doc/free-endpoints.md` §6/§8/§9 and `AGENTS.md` 26/31 are updated here; READMEs, `doc/handoff.md`, the root plan and `07-fallback-chain` stay for the final pass; live smoke and Windows 26 are not performed. Status `in-progress`; coordinator next.
+- 2026-11-08 — Stage `03-free-web-endpoints/02-mymemory` accepted and closed `done` over `371ab1e..082dac4`; all three children are done (`d3fc444`, `f8fb880`, `9cfbdde`). The acceptance repeated Astra/trixie Debug/Release 31/31 with no warnings and found one real defect, fixed in `082dac4`: a literal `+` in the query was not encoded and reached MyMemory as a space (`C++`, `1+1`, `+7...`); the query now sends `%2B`, and `tst_mymemoryservice` checks the raw and decoded values. The lead fixed the stale counters and the "MyMemory remains experimental" line in architecture §9.2, the READMEs/root plan counts (26/31), the handoff state, and the stage outcome. Real problem left: Auto-detect remains selectable for MyMemory, which has no auto-detection, so it returns `UnsupportedLanguage` until the user picks a language; fixing the shared language combos is a later decision. A possible HTML-entity decoding of `translatedText` is unconfirmed without a live smoke. Windows 26 and the live smoke were not performed. Next: `03-mozhi` (`todo`, needs planner detail).

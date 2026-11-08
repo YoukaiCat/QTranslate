@@ -1837,7 +1837,7 @@ Limitations of the environment in which the final verification was performed (no
 - The installer is not code-signed: Windows SmartScreen may show a warning. There is no certificate
   in the project; options and requirements are described in [`code-signing.md`](code-signing.md).
   Adding a signature does not change the artifact format.
-- Linux is implemented on `main` for 0.12.0 (29 tests, X11 full, Wayland limited); the 0.11.x
+- Linux is implemented on `main` for 0.12.0 (31 tests, X11 full, Wayland limited); the 0.11.x
   releases remain Windows-only, so the Linux packages appear only with 0.12.0. The trixie artifacts
   do not run on Astra 1.8.7, which needs the separate native build (§4.14). macOS is not planned.
 
@@ -1861,9 +1861,10 @@ Possible development:
    Translations require selective native-speaker review before a public release.
 7. **Code signing** of the installer ([`code-signing.md`](code-signing.md)) and auto-update over
    the installed version.
-8. **Free web endpoints** — DeepL web is already implemented as the `free-web` mode of a single
-   "DeepL" service without a key (§4.7.1); Yandex web, Bing web, Reverso, Mozhi, MyMemory remain
-   experimental. Rate limits and an unofficial-status warning apply to all.
+8. **Free web endpoints** — DeepL web is implemented as the `free-web` mode of a single "DeepL"
+   service without a key (§4.7.1), and MyMemory is implemented as the first opt-in free API
+   (§4.7.3); Yandex web, Bing web, Reverso, and Mozhi remain experimental. Rate limits and an
+   unofficial-status warning apply to all.
    Details and priorities — [`free-endpoints.md`](free-endpoints.md).
 9. **Local offline translation** — Argos models + CTranslate2 without Python: model download by
    button, pivot through English, fallback to the cloud. Details and PoC — [`local-translation.md`](local-translation.md).
@@ -2007,7 +2008,7 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 - Code comments and source files are not touched, except the one approved comment line in
   `src/platform/selectiongrabber_win.cpp` that now points to the archive. Any other documentation
   change that would require a code comment change is deferred to a separate task.
-- The migration is documentation-only except the one approved comment line in `src/platform/selectiongrabber_win.cpp`, which needs no build; any other code or test change requires the relevant Debug and Release checks and all 24 tests.
+- The migration is documentation-only except the one approved comment line in `src/platform/selectiongrabber_win.cpp`, which needs no build; any other code or test change requires the relevant Debug and Release checks and all 26 tests.
 
 ### 11.8. Verification
 

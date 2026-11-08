@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 371ab1e
 depends: [01-free-web-infrastructure]
 ---
@@ -91,3 +91,38 @@ only numbering.
 - Windows Debug/Release and its 26 tests are unavailable on this Linux machine; record them as not
   performed, not as passed. The final documentation is split: the service docs in `03`, the provider
   and fallback docs in `07-fallback-chain`/the lead.
+
+## Outcome
+
+Accepted on 2026-11-08 over `371ab1e..082dac4`. Three children are `done`:
+`01-split-utf8-and-language-codes` (`d3fc444`), `02-mymemory-service` (`f8fb880`), and
+`03-mymemory-settings-and-docs` (`9cfbdde`).
+
+- **Core:** `TextChunker::splitUtf8` limits each part by UTF-8 bytes without splitting a surrogate
+  pair or `\r\n`, and `split()`/`cutLength()` are unchanged; `Languages` has the `mymemory` branch and
+  the `zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`, `nb`→`no`, `fil`→`tl` overrides without a new
+  `LanguageInfo` column.
+- **Service:** `MyMemory` is an opt-in `QueuedWebService` (`requiresOptIn() == true`) with a 350 ms
+  pause, `GET /get` with `q`/`langpair`/`mt=1`, a 500-byte UTF-8 split, explicit source language
+  (`auto` → `UnsupportedLanguage` before any request), classified 403/429/quota/413/414/5xx/HTML/
+  malformed errors with fixed messages, sequential chunks in one reply, abort/timeout, and no text,
+  URL, body, or `errorString()` in the logs. `MyMemoryParser` covers the response fields and leaves
+  `detectedLanguage` optional. `AppController` registers the service after the LLM service; the gate
+  hides it and keeps Google active when the INI names it with the gate off.
+- **UI/docs:** the Services page has the disabled-while-gated `MyMemory` group and hint; all 14 `.ts`
+  have the two new messages (301, no unfinished/vanished); `doc/architecture.md`
+  §3.1/§3.2/§4.5/§4.7.3/§4.8/§4.9/§8/§4.14, `doc/free-endpoints.md` §6/§8/§9 and `AGENTS.md` 26/31
+  are updated.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2) and `qtranslate-trixie` (Qt 6.8.2), Debug and
+  Release, zero warnings, 31/31; `tst_mymemoryservice` 36 cases and 10 repeats; the gate/INI picker
+  behaviour was checked offscreen; `.ts` complete.
+
+The acceptance found one real defect, fixed in `082dac4`: a literal `+` in the query was not encoded,
+so `C++`, `1+1`, or `+7...` reached MyMemory as spaces; the query now sends `%2B`, and
+`tst_mymemoryservice` checks the raw and decoded values.
+
+Real problems left unfixed: Auto-detect remains selectable for MyMemory, which has no auto-detection,
+so a user who leaves it gets `UnsupportedLanguage` until choosing a language (the hint and the error
+explain it; fixing the shared language combos is a later decision). A possible HTML-entity decoding
+of `translatedText` is unconfirmed without a live smoke. Windows Debug/Release and the 26 tests and
+the live MyMemory smoke were not performed (no MSVC; CTest is offline). Next: `03-mozhi`.
