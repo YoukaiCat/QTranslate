@@ -8,7 +8,7 @@
 
 > **Статус:** 0.11.0 выпущен. Доступны установщик для Windows и портативный архив.
 > Что изменилось — в [заметках к релизу 0.11.0](doc/releases/0.11.0.md).
-> Поддержка Linux в разработке.
+> Поддержка Linux реализована в `main`; пакеты Linux выйдут с 0.12.0.
 
 [English](README.md) | **Русский**
 
@@ -58,10 +58,20 @@
   runtime MSVC уже включены.
 Установщик пока не подписан кодом, поэтому Windows SmartScreen может показать предупреждение.
 
+Пакеты Linux собираются для Debian 13 (trixie) и выйдут со следующим релизом (0.12.0):
+`qtranslate-<version>-linux-x86_64.tar.gz`, `qtranslate_<version>_amd64.deb` и
+`qtranslate-<version>-x86_64.AppImage` (если FUSE недоступен, запускайте с
+`--appimage-extract-and-run`). Им нужен glibc 2.38 или новее, на Astra Linux 1.8.7 они не работают.
+Astra Linux поддерживается отдельной нативной сборкой:
+`qtranslate-<version>-linux-x86_64-astra.tar.gz` и `qtranslate_<version>+astra1_amd64.deb`; это
+локальные проверочные артефакты, CI их не публикует. Сборка и упаковка — в разделе
+[«Linux»](#linux-0120).
+
 ## Использование
 
 ```
 qtranslate [--minimized] [--verbose]
+qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--translate-inplace
 ```
 
 - `Ctrl+Q` — перевести выделение во всплывающем окне рядом с курсором.
@@ -73,8 +83,15 @@ qtranslate [--minimized] [--verbose]
 - Пока на переднем плане полноэкранное приложение, глобальные горячие клавиши автоматически
   освобождаются, поэтому игры получают Ctrl+Q/Ctrl+W. Это можно выключить в
   **Настройки → Горячие клавиши**; **Трей → «Приостановить горячие клавиши»** отключает их вручную.
-- `--minimized` запускает программу скрытой в трее; `--verbose` пишет подробный лог в
-  `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
+- `--translate-popup`, `--translate-main` и `--translate-inplace` запускают три сценария в уже
+  работающем экземпляре (или стартуют его). Опции взаимоисключающие; это переносимый способ
+  привязать действие к ярлыку рабочего стола и основной путь для Wayland — см.
+  [«Linux»](#linux-0120).
+- `--minimized` запускает программу скрытой в трее; `--verbose` пишет подробный лог. В Windows это
+  `%LOCALAPPDATA%\qtranslate\qtranslate.log`, в Linux —
+  `$XDG_STATE_HOME/qtranslate/qtranslate.log` (`~/.local/state/...`, если переменная не задана).
+- Настройки: `%APPDATA%\qtranslate\qtranslate.ini` в Windows и
+  `$XDG_CONFIG_HOME/qtranslate/qtranslate.ini` в Linux (`~/.config/...`, если переменная не задана).
 - Портативный режим: положите пустой `qtranslate.ini` рядом с `qtranslate.exe`, и программа будет
   использовать его вместо `%APPDATA%\qtranslate\qtranslate.ini`.
 
@@ -144,27 +161,46 @@ ctest --test-dir build/release --output-on-failure
 `windows-latest` с Qt 6.8.3 LTS. Пуш тега вроде `v0.11.0` публикует GitHub Release с этими
 файлами; версия тега должна совпадать с версией в `CMakeLists.txt`.
 
-### Linux (в разработке)
+### Linux (0.12.0)
 
-Порт под Linux пока не завершён. Дерево собирается, компонуется и проходит 20 из 20 тестов на
-Debian 13 (trixie, Qt 6.8.2) и Astra Linux 1.8.7 (Qt 6.10.2) с `-Wall -Wextra` и без
-предупреждений; платформенные модули пока — заглушки: глобальные горячие клавиши, захват
-выделения, вставка в активное окно и автозагрузка не реализованы. CI пока собирает только
-Windows.
+QTranslate собирается, компонуется и проходит 28 тестов (20 общих и 8 платформенных Linux) в Debug
+и Release с `-Wall -Wextra` и без предупреждений на Debian 13 (trixie, Qt 6.8.2) и Astra Linux
+1.8.7 (Qt 6.10.2). X11 — полная цель: глобальные горячие клавиши, захват выделения, замена на
+месте, автозагрузка, три CLI-команды и работа в трее реализованы. Wayland ограничен: портал
+`GlobalShortcuts`, если он есть в рабочем окружении, ручное копирование, CLI-команды и явные
+предупреждения; синтетического ввода нет. Для значка в трее GNOME нужно расширение AppIndicator.
 
-Чтобы собрать текущее дерево под Linux для разработки (Qt 6.5+; пакеты ниже — для Debian 13 и
-Astra):
+Сборка и тесты на Debian 13 (список пакетов — `packaging/linux/trixie-packages.txt`, его же
+используют Dockerfile и CI):
 
 ```bash
-sudo apt install build-essential cmake ninja-build qt6-base-dev qt6-tools-dev \
-  qt6-tools-dev-tools libx11-dev libxtst-dev libsecret-1-dev xvfb xauth
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-xvfb-run -a ctest --test-dir build --output-on-failure
+sudo apt install build-essential cmake ninja-build git ca-certificates
+grep -vE '^[[:space:]]*(#|$)' packaging/linux/trixie-packages.txt | \
+  xargs sudo apt install -y --no-install-recommends
+cmake -S . -B build/linux-release -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build/linux-release
+xvfb-run -a ctest --test-dir build/linux-release --output-on-failure
 ```
 
-Список пакетов совпадает с `packaging/linux/trixie.Dockerfile`; `xvfb-run` нужен, потому что
-`tst_hotkeysequence` открывает окно, а у обычного `ctest` нет дисплея.
+`xvfb-run` нужен `xauth`, а `tst_hotkeysequence` открывает окно, поэтому у обычного `ctest` нет
+дисплея. Для упаковки нужен хост trixie или контейнер из `packaging/linux/trixie.Dockerfile`:
+
+```bash
+docker build -f packaging/linux/trixie.Dockerfile -t qtranslate-trixie .
+./packaging/linux/package.sh --build-dir build/linux-release --output-dir build/artifacts-linux
+```
+
+Скрипт собирает портативный архив, `.deb`, AppImage и `SHA256SUMS-linux.txt`; `--skip-appimage`
+нужен только для явного офлайн-прогона. На Astra Linux собирайте нативно с Qt 6.10.2 и
+`--target astra` — получатся `-astra.tar.gz`, `+astra1_amd64.deb` и
+`SHA256SUMS-linux-astra.txt`:
+
+```bash
+./packaging/linux/package.sh --target astra --build-dir build/linux-release --output-dir build/artifacts-linux
+```
+
+Пакетам trixie нужен glibc 2.38+, на Astra Linux 1.8.7 они не работают; для этого и существует
+нативная сборка Astra.
 
 #### Astra Linux: глобальные горячие клавиши
 
@@ -201,11 +237,23 @@ getfattr -n security.exec_id /usr/bin/qtranslate   # из пакета attr; о�
   скорость и стоимость зависят от выбранной модели; у бесплатных моделей жёсткие лимиты. Текст
   отправляется выбранному провайдеру.
 - Промежуточный `Ctrl+C` при захвате выделения может попасть в историю буфера обмена Windows
-  (`Win+V`); исходное содержимое буфера восстанавливается.
+  (`Win+V`); исходное содержимое буфера восстанавливается. Это ограничение Windows.
 - Установщик пока не подписан кодом.
 - Интерфейс на хинди переведён, но в Qt 6.12 нет каталога для хинди, поэтому стандартные диалоги
   Qt остаются на английском.
-- Поддержка Linux ещё не готова; см. раздел сборки.
+- В Linux X11 поддерживается полностью. Wayland ограничен: глобальным клавишам нужен портал
+  `GlobalShortcuts`; иначе используйте CLI-команды или ярлык рабочего стола, копируйте выделение
+  вручную и учитывайте, что режим замены на месте кладёт перевод в буфер обмена. Синтетического
+  ввода (`ydotool`/`wtype`) нет.
+- В Wayland замена на месте и определение активного окна не гарантируются; Ctrl+Shift+Q копирует
+  перевод вместо вставки.
+- Для значка в трее GNOME нужно расширение AppIndicator; без трея программа предупреждает и
+  оставляет главное окно.
+- Секреты Linux хранятся в libsecret, если он доступен и связка ключей запущена; иначе — в файле с
+  правами `0600` и предупреждением в настройках.
+- В X11 при восстановлении буфера сохраняется только текст; остальные форматы не восстанавливаются.
+- Пакетам trixie нужен glibc 2.38+, на Astra Linux 1.8.7 они не работают. Для Astra есть нативные
+  `-astra.tar.gz`/`+astra1` пакеты.
 
 Переводимый текст отправляется выбранному провайдеру: Google, DeepL, OpenRouter или другому
 OpenAI-совместимому серверу. Локальный сервер, например Ollama, оставляет текст на вашей машине.

@@ -8,7 +8,7 @@ translation directly in the active input field.
 
 > **Status:** 0.11.0 released. The Windows installer and the portable archive are available.
 > See the [0.11.0 release notes](doc/releases/0.11.0.md) for the changes.
-> Linux support is in development.
+> Linux support is implemented on `main`; the Linux packages ship with 0.12.0.
 
 **English** | [Русский](README.ru.md)
 
@@ -57,10 +57,19 @@ The latest build is on the [Releases](https://github.com/youkaicat/QTranslate/re
   MSVC runtime are included.
 The installer is not code-signed yet, so Windows SmartScreen may show a warning.
 
+The Linux packages are built for Debian 13 (trixie) and are published with the next release (0.12.0):
+`qtranslate-<version>-linux-x86_64.tar.gz`, `qtranslate_<version>_amd64.deb`, and
+`qtranslate-<version>-x86_64.AppImage` (use `--appimage-extract-and-run` when FUSE is unavailable).
+They require glibc 2.38 or newer and do not run on Astra Linux 1.8.7. Astra Linux is supported through
+a separate native build, `qtranslate-<version>-linux-x86_64-astra.tar.gz` and
+`qtranslate_<version>+astra1_amd64.deb`; those are local verification artifacts and are not published
+by CI. See [Linux](#linux-0120) for build and packaging steps.
+
 ## Usage
 
 ```
 qtranslate [--minimized] [--verbose]
+qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--translate-inplace
 ```
 
 - `Ctrl+Q` — translate the selection in a popup next to the cursor.
@@ -72,8 +81,14 @@ qtranslate [--minimized] [--verbose]
 - Global hotkeys are released automatically while a fullscreen application is in the foreground,
   so games receive Ctrl+Q/Ctrl+W. This can be disabled in **Settings → Hotkeys**; **Tray → Pause
   hotkeys** disables them manually.
-- `--minimized` starts hidden in the tray; `--verbose` writes a detailed log to
-  `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
+- `--translate-popup`, `--translate-main`, and `--translate-inplace` run the three scenarios in an
+  already running instance (or start one). They are mutually exclusive and are the portable trigger
+  for Wayland and desktop shortcuts; see [Linux](#linux-0120).
+- `--minimized` starts hidden in the tray; `--verbose` writes a detailed log. On Windows the log is
+  `%LOCALAPPDATA%\qtranslate\qtranslate.log`; on Linux it is
+  `$XDG_STATE_HOME/qtranslate/qtranslate.log` (`~/.local/state/...` when unset).
+- Settings are `%APPDATA%\qtranslate\qtranslate.ini` on Windows and
+  `$XDG_CONFIG_HOME/qtranslate/qtranslate.ini` on Linux (`~/.config/...` when unset).
 - Portable mode: put an empty `qtranslate.ini` next to `qtranslate.exe` and the application will
   use it instead of `%APPDATA%\qtranslate\qtranslate.ini`.
 
@@ -142,26 +157,47 @@ The output goes to `build/artifacts`. The CI workflow
 `windows-latest` with Qt 6.8.3 LTS. Pushing a tag such as `v0.11.0` publishes a GitHub release with
 these artifacts; the tag must match the version in `CMakeLists.txt`.
 
-### Linux (in progress)
+### Linux (0.12.0)
 
-The Linux port is not finished yet. The tree builds, links, and passes 20 of 20 tests on Debian 13
-(trixie, Qt 6.8.2) and Astra Linux 1.8.7 (Qt 6.10.2) with `-Wall -Wextra` and no warnings; the
-platform modules are still stubs: global hotkeys, selection capture, paste into the active window
-and autostart are not implemented. CI currently builds Windows only.
+QTranslate builds, links, and passes 28 tests (20 shared plus 8 Linux platform tests) in Debug and
+Release with `-Wall -Wextra` and no warnings on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7
+(Qt 6.10.2). X11 is the full target: global hotkeys, selection capture, in-place replacement,
+autostart, the three CLI commands, and tray integration are implemented. Wayland is limited: the
+`GlobalShortcuts` portal when the desktop provides it, manual copying, the CLI commands, and explicit
+warnings; there is no synthetic-input fallback. GNOME needs an AppIndicator extension for the tray
+icon.
 
-To build the current Linux tree for development (Qt 6.5+; the packages below are for Debian 13 and
-Astra):
+Build and test on Debian 13 (the package list lives in `packaging/linux/trixie-packages.txt`, which
+the Dockerfile and CI share):
 
 ```bash
-sudo apt install build-essential cmake ninja-build qt6-base-dev qt6-tools-dev \
-  qt6-tools-dev-tools libx11-dev libxtst-dev libsecret-1-dev xvfb xauth
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-xvfb-run -a ctest --test-dir build --output-on-failure
+sudo apt install build-essential cmake ninja-build git ca-certificates
+grep -vE '^[[:space:]]*(#|$)' packaging/linux/trixie-packages.txt | \
+  xargs sudo apt install -y --no-install-recommends
+cmake -S . -B build/linux-release -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build/linux-release
+xvfb-run -a ctest --test-dir build/linux-release --output-on-failure
 ```
 
-The package list matches `packaging/linux/trixie.Dockerfile`; `xvfb-run` is needed because
-`tst_hotkeysequence` opens a window and a bare `ctest` has no display.
+`xvfb-run` needs `xauth`, and `tst_hotkeysequence` opens a window, so a bare `ctest` has no display.
+Packaging needs a trixie host or the container built from `packaging/linux/trixie.Dockerfile`:
+
+```bash
+docker build -f packaging/linux/trixie.Dockerfile -t qtranslate-trixie .
+./packaging/linux/package.sh --build-dir build/linux-release --output-dir build/artifacts-linux
+```
+
+The script builds the portable archive, `.deb`, AppImage, and `SHA256SUMS-linux.txt`; pass
+`--skip-appimage` only for an explicit offline run. On Astra Linux build natively with Qt 6.10.2 and
+use `--target astra`, which produces the `-astra.tar.gz`, the `+astra1_amd64.deb`, and
+`SHA256SUMS-linux-astra.txt`:
+
+```bash
+./packaging/linux/package.sh --target astra --build-dir build/linux-release --output-dir build/artifacts-linux
+```
+
+The trixie packages require glibc 2.38+ and do not run on Astra Linux 1.8.7; the native Astra build
+exists for that reason.
 
 #### Astra Linux: global hotkeys
 
@@ -198,11 +234,23 @@ security policy's approval. To revoke it, run
   speed and cost depend on the chosen model; free models have strict rate limits. The text is sent
   to the selected provider.
 - The intermediate `Ctrl+C` used to grab a selection may appear in the Windows clipboard history
-  (`Win+V`); the original clipboard contents are restored.
+  (`Win+V`); the original clipboard contents are restored. This is Windows-specific.
 - The installer is not code-signed yet.
 - The Hindi interface is translated, but Qt 6.12 has no Hindi catalog, so standard Qt dialogs
   remain English.
-- Linux support is not ready yet; see the build section above.
+- On Linux, X11 is fully supported. Wayland support is limited: global hotkeys require the
+  `GlobalShortcuts` portal; otherwise use the CLI commands or a desktop shortcut, copy the selection
+  manually, and note that in-place mode writes the translation to the clipboard. There is no
+  synthetic-input fallback (`ydotool`/`wtype`).
+- On Wayland, in-place replacement and active-window detection are not guaranteed; Ctrl+Shift+Q
+  copies the translation instead of pasting it.
+- GNOME needs the AppIndicator extension to show the tray icon; without a tray the application warns
+  and keeps the main window.
+- Linux secrets use libsecret when it is available and the keyring is running; otherwise a `0600`
+  file is used with a warning in settings.
+- On X11 the clipboard restore keeps text only; other clipboard formats are not restored.
+- The trixie Linux packages require glibc 2.38+ and do not run on Astra Linux 1.8.7. Astra uses the
+  native `-astra.tar.gz`/`+astra1` packages.
 
 The text being translated is sent to the selected provider: Google, DeepL, OpenRouter or another
 OpenAI-compatible server. A local server such as Ollama keeps the text on your machine. QTranslate

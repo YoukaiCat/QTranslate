@@ -24,13 +24,13 @@ The active roadmap is this file. The detailed Russian history of the old flat pl
   archive. Windows Debug/Release builds and the 23 tests are unavailable in the current Linux
   environment; the outcome records them as not performed, not as passed.
 - After any other code changes, the application builds in Debug and Release without `/W4` warnings
-  and all 23 tests pass.
+  and all 23 Windows tests pass; on Linux the same holds with `-Wall -Wextra` and 28 tests.
 
 ## History
 
 The old flat plan completed stages 1-12 and delivered releases 0.9.0, 0.9.1, 0.10.0, and 0.11.0. It covers the application skeleton, the translation core and Google Translate, global hotkeys and selection capture, the popup and main-window scenarios, settings and autostart, DeepL and Google Cloud, proxies, release polish, in-place replacement, the installer and CI, and localisation into 15 UI languages. After 0.11.0 the project also added fullscreen hotkey pause behaviour and the QTranslate branding.
 
-Old stages 13 (free web endpoints) and 16 (LLM actions) are partially implemented. DeepL free web is a `free-web` mode of the DeepL service; the OpenAI-compatible translation provider, OpenRouter by default, is implemented. Old stage 11 (Linux support) is not started. Old stages 14, 15, and 17 are design-only. The old plan records known manual gaps: tray behaviour, Word/VS Code/Telegram capture, Win+V clipboard history, a real second monitor, autostart after a real reboot, real DeepL/Google Cloud keys, and an external authenticated proxy. These gaps are recorded in `doc/handoff.md` and do not block new work. The detailed rationale and step-by-step history remain in the Russian archive.
+Old stages 13 (free web endpoints) and 16 (LLM actions) are partially implemented. DeepL free web is a `free-web` mode of the DeepL service; the OpenAI-compatible translation provider, OpenRouter by default, is implemented. Old stage 11 (Linux support) is implemented on `main` for 0.12.0: 28 Linux tests, X11 full, Wayland limited, trixie and native Astra packages. Old stages 14, 15, and 17 are design-only. The old plan records known manual gaps: tray behaviour, Word/VS Code/Telegram capture, Win+V clipboard history, a real second monitor, autostart after a real reboot, real DeepL/Google Cloud keys, and an external authenticated proxy. These gaps are recorded in `doc/handoff.md` and do not block new work. The detailed rationale and step-by-step history remain in the Russian archive.
 
 ## Stages
 

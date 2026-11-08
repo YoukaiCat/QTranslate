@@ -35,19 +35,21 @@ implementation: if the code diverges from it, either fix the code or deliberatel
 
 ### 1.3. Technology stack
 
-- C++17, Qt 6.5+ (Windows: Qt 6.12, MSVC 2022 x64; Linux: GCC/Clang — roadmap stage 2 (old stage 11)), CMake ≥ 3.19.
-- Qt modules: `Core`, `Gui`, `Widgets`, `Network`. Tests additionally use `Test`.
-- Platforms: **Windows 10/11 x64 — current**; **Linux x86_64 — planned** (roadmap stage 2 (old stage 11));
-  macOS is not planned. Platform code is isolated (see §3.3 and §4.14) so the port does not touch the core.
+- C++17, Qt 6.5+ (Windows: Qt 6.12, MSVC 2022 x64; Linux: GCC 12.2 on Astra Linux and GCC 14.2 in
+  trixie with Qt 6.10.2/6.8.2; Clang 16 is also clean), CMake ≥ 3.19.
+- Qt modules: `Core`, `Gui`, `Widgets`, `Network`; `DBus` on Linux for the portal and the tray. Tests
+  additionally use `Test`.
+- Platforms: **Windows 10/11 x64** and **Linux x86_64 (0.12.0)**; macOS is not planned. Platform code
+  is isolated (see §3.3 and §4.14) so the port does not touch the core.
 - TLS: on Windows the stock Qt 6 Schannel backend (`qschannelbackend`), OpenSSL is not needed; on Linux
-  the Qt OpenSSL backend will be used.
+  the Qt OpenSSL backend is used.
 - WinAPI (Windows only): `user32` (hotkeys, `SendInput`, clipboard), `crypt32` (DPAPI for secrets).
 
 ### 1.4. Platform matrix
 
-| Component | Windows 10/11 x64 (0.11.0) | Linux x86_64 (planned, roadmap stage 2 (old stage 11)) |
+| Component | Windows 10/11 x64 (0.11.0) | Linux x86_64 (0.12.0) |
 |---|---|---|
-| Build | MSVC 2022, Qt 6.12 | GCC/Clang, Qt 6.5+, CMake |
+| Build | MSVC 2022, Qt 6.12 | GCC/Clang, Qt 6.5+ (trixie 6.8.2, Astra 6.10.2), CMake |
 | UI | Qt Widgets, tray | Qt Widgets, StatusNotifierItem/AppIndicator |
 | Hotkeys | `RegisterHotKey` | X11 `XGrabKey`; Wayland — the `GlobalShortcuts` portal or CLI + desktop shortcuts |
 | Selection capture | `SendInput` Ctrl+C + clipboard | X11 XTest; Wayland — the user copies manually |
@@ -55,7 +57,7 @@ implementation: if the code diverges from it, either fix the code or deliberatel
 | Autostart | `Run` registry key | XDG autostart |
 | Secrets | DPAPI | libsecret; a 0600 fallback file |
 | Settings | `%APPDATA%\qtranslate` | `$XDG_CONFIG_HOME/qtranslate` |
-| Packages | installer + portable zip | `tar.gz`, `.deb`, AppImage |
+| Packages | installer + portable zip | trixie `tar.gz`, `.deb`, AppImage; native Astra `-astra.tar.gz` and `+astra1` `.deb` |
 
 Windows-specific limitations (elevated windows, Win+V, DPI) do not apply on Linux; instead, Wayland
 limitations appear (§4.14).
@@ -124,9 +126,14 @@ qtranslate/
 ├── .github/
 │   └── workflows/build.yml     build, tests, packaging and release
 ├── packaging/
-│   └── windows/
-│       ├── qtranslate.iss      Inno Setup installer
-│       └── package.ps1         dist + zip + setup + SHA256SUMS
+│   ├── windows/
+│   │   ├── qtranslate.iss      Inno Setup installer
+│   │   └── package.ps1         dist + zip + setup + SHA256SUMS
+│   └── linux/
+│       ├── package.sh          tar.gz, .deb, AppImage; --target astra
+│       ├── qtranslate.desktop  freedesktop desktop entry
+│       ├── trixie.Dockerfile   Debian 13 build/packaging image
+│       └── trixie-packages.txt shared apt package list for the image and CI
 ├── doc/
 │   ├── architecture.md
 │   ├── handoff.md
@@ -179,10 +186,12 @@ qtranslate/
 │   │   └── openaichat.h/.cpp         OpenAI-compatible Chat Completions transport
 │   ├── app/
 │   │   ├── appcontroller.h/.cpp
+│   │   ├── commandline.h/.cpp        CLI parsing and command enum
 │   │   ├── logging.h/.cpp            qtranslate.app logging category
 │   │   └── singleinstance.h/.cpp
 │   ├── core/                   ← static library qtranslate_core (no Widgets or WinAPI)
 │   │   ├── appinfo.h/.cpp            application name and version
+│   │   ├── apppaths.h                XDG config/state paths on Linux, QStandardPaths on Windows
 │   │   ├── translationtypes.h        TranslationRequest/Result/Error
 │   │   ├── translationservice.h/.cpp service interface + TranslationReply
 │   │   ├── translationmanager.h/.cpp service registry, cache, language logic, cancellation
@@ -204,20 +213,23 @@ qtranslate/
 │   │   └── openaicompatibleservice.h/.cpp  OpenAI-compatible provider
 │   ├── platform/
 │   │   ├── hotkeymanager.h           platform-independent interface
-│   │   ├── hotkeymanager_win.cpp
-│   │   ├── hotkeymanager_stub.cpp    stub for non-Windows builds
+│   │   ├── hotkeymanager_win.cpp     RegisterHotKey
+│   │   ├── hotkeymanager_linux.cpp   XGrabKey and the GlobalShortcuts portal
+│   │   ├── sessiontype.h             X11 vs Wayland session detection
+│   │   ├── portalshortcut.h          shared (sa{sv}) D-Bus type
 │   │   ├── selectiongrabber.h
-│   │   ├── selectiongrabber_win.cpp
-│   │   ├── selectiongrabber_stub.cpp stub for non-Windows builds
+│   │   ├── selectiongrabber_win.cpp  SendInput Ctrl+C
+│   │   ├── selectiongrabber_linux.cpp XTest/clipboard; Wayland clipboard read
 │   │   ├── autostart.h
-│   │   ├── autostart_win.cpp
-│   │   ├── autostart_stub.cpp        stub for non-Windows builds
+│   │   ├── autostart_win.cpp         HKCU Run
+│   │   ├── autostart_linux.cpp       XDG Desktop Entry
 │   │   ├── secretprotector.h
 │   │   ├── secretprotector_win.cpp   DPAPI
-│   │   ├── secretprotector_stub.cpp  stub for non-Windows builds
+│   │   ├── secretprotector_linux.cpp libsecret or a 0600 fallback file
 │   │   ├── windowactivation.h        right to bring a window to the foreground
 │   │   ├── windowactivation_win.cpp  AllowSetForegroundWindow
-│   │   └── windowactivation_stub.cpp stub for non-Windows builds
+│   │   ├── windowactivation_linux.cpp _NET_ACTIVE_WINDOW/XGetInputFocus
+│   │   └── *_stub.cpp                stubs for platforms without a backend
 │   └── ui/
 │       ├── trayicon.h/.cpp
 │       ├── mainwindow.h/.cpp
@@ -230,6 +242,8 @@ qtranslate/
     ├── CMakeLists.txt
     ├── fixtures/                     saved Google/DeepL responses (google/, deepl/)
     ├── tst_appinfo.cpp
+    ├── tst_autostart.cpp               Windows and Linux variants
+    ├── tst_cli.cpp                     Linux: parser and two-process forwarding
     ├── tst_deeplparser.cpp
     ├── tst_deeplservice.cpp
     ├── tst_deeplwebparser.cpp
@@ -237,6 +251,9 @@ qtranslate/
     ├── tst_googleparser.cpp
     ├── tst_googletranslateservice.cpp  service against a local HTTP server
     ├── tst_hotkeymanager.cpp           Windows-only
+    ├── tst_hotkeymanager_x11.cpp       Linux X11 backend
+    ├── tst_hotkeymanager_wayland.cpp   Linux portal backend against a mock DBus
+    ├── tst_hotkey_selection_x11.cpp    Linux real manager + grabber
     ├── tst_hotkeysequence.cpp
     ├── tst_languages.cpp
     ├── tst_networkmanager.cpp
@@ -244,14 +261,15 @@ qtranslate/
     ├── tst_openaicompatibleservice.cpp
     ├── tst_popupplacement.cpp
     ├── tst_popupwindow.cpp
-    ├── tst_secretprotector.cpp         Windows-only
+    ├── tst_secretprotector.cpp         Windows and Linux variants
+    ├── tst_selectiongrabber_linux.cpp  Linux selection capture
     ├── tst_settings.cpp
     ├── tst_settingsdialog.cpp
     ├── tst_textchunker.cpp
     ├── tst_translationmanager.cpp
     ├── tst_translations.cpp            shipped .ts files: completeness and placeholders
     ├── tst_uilanguages.cpp             UI language table
-    └── tst_autostart.cpp               Windows-only
+    └── tst_windowactivation_linux.cpp  Linux window helpers
 ```
 
 ### 3.2. Mapping to the current `CMakeLists.txt`
@@ -261,25 +279,26 @@ targets. Currently:
 
 | Target | What is included now (0.11.0) |
 |---|---|
-| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `openaicompatibleservice` |
-| `qtranslate` | `main.cpp`, `app/*` (including the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*`, `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows), `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_openaichat`, `tst_openaicompatibleservice`; each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `openaicompatibleservice` |
+| `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`; 23 tests on Windows and 28 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
 - `qtranslate_core` — a `STATIC` library from `ai/`, `core/`, `net/`, `services/`; depends on `Qt::Core`,
   `Qt::Gui` (because of `QKeySequence` in `hotkeysequence`) and `Qt::Network`, but not on `Qt::Widgets`
   and does not use WinAPI. Both the application and the tests link against it.
-- `qtranslate` — the executable (`WIN32`): `app/`, `platform/`, `ui/`, resources; links against
-  `qtranslate_core`, `Qt::Widgets`, `user32`, `crypt32`.
-- Platform files are included under `if(WIN32)`; for other platforms each module has a stub so the
-  targets build. Headers in `platform/` do not contain `<windows.h>` — WinAPI is visible only in
-  `*_win.cpp`.
+- `qtranslate` — the executable (`WIN32` on Windows): `app/`, `platform/`, `ui/`, resources; links
+  against `qtranslate_core` and `Qt::Widgets`, plus `user32`/`crypt32` on Windows and `Qt6::DBus` on
+  Linux.
+- Platform files are selected per platform: `*_win.cpp` on Windows, `*_linux.cpp` on Linux, and a
+  stub only for platforms without a backend. Headers in `platform/` do not contain `<windows.h>` —
+  WinAPI is visible only in `*_win.cpp`.
 - UI translation: `qt_add_translations(qtranslate TS_FILES <all i18n/qtranslate_*.ts>)`, the `.qm`
   files are embedded in resources.
 - `enable_testing()` + `add_subdirectory(tests)`, each test is a separate `qt_add_executable` and
   `add_test`.
-- Deployment uses `qt_generate_deploy_app_script` (windeployqt). The distribution includes the
+- Deployment uses `qt_generate_deploy_app_script` (windeployqt) on Windows only. The distribution includes the
   `tls/qschannelbackend.dll` plugin and the MSVC CRT (`vcruntime140*.dll`, `msvcp140*.dll`,
   `concrt140.dll`): `windeployqt` does not find the runtime without `VCINSTALLDIR`, so CMake copies it
   itself. This is needed to run on Windows without the Visual C++ Redistributable installed.
@@ -290,6 +309,10 @@ targets. Currently:
   `opengl32sw.dll` (~20 MB), which Qt Widgets does not use. Qt translations are needed for standard
   dialogs and menus; Qt 6.12 has no file for Hindi, so those remain English. The qtranslate UI
   translation is embedded in the exe.
+- On Linux the Windows deploy block is skipped with `if(WIN32)`; CMake installs `bin/qtranslate`,
+  `share/applications/qtranslate.desktop`, and `share/icons/hicolor/256x256/apps/qtranslate.png`.
+  `packaging/linux/package.sh` owns the bundle: Qt libraries, plugins, Qt translations, `qt.conf`,
+  and RPATH. The install tree keeps `RUNPATH $ORIGIN:$ORIGIN/../lib`.
 
 ### 3.4. Packaging, CI and release
 
@@ -301,6 +324,18 @@ The project version is defined once — `project(qtranslate VERSION 0.11.0)`; `A
 `plugins/`, `translations/` directory with Qt, plugins, and the MSVC CRT. `package.ps1` checks the
 required files and packs the contents of `dist` into `qtranslate-<version>-win64.zip`; the archive
 contains the same `bin/`, `plugins/`, `translations/`, and is started via `bin\qtranslate.exe`.
+
+**Linux packages.** `packaging/linux/package.sh` builds from a trixie Release tree or the
+`qtranslate-trixie` image: `qtranslate-<version>-linux-x86_64.tar.gz` (bundled Qt 6.8.2, plugins,
+Qt translations, `qt.conf`, `patchelf` RPATH), `qtranslate_<version>_amd64.deb` (three installed
+files, no maintainer scripts, `Depends` from `dpkg-shlibdeps`), and
+`qtranslate-<version>-x86_64.AppImage` (pinned `linuxdeploy`, `appimagetool`, and runtime), plus
+`SHA256SUMS-linux.txt`. `--skip-appimage` is for explicit offline runs only; CI always builds the
+AppImage. On Astra Linux `--target astra` produces
+`qtranslate-<version>-linux-x86_64-astra.tar.gz` and `qtranslate_<version>+astra1_amd64.deb` with
+Astra's Qt 6.10.2 and Astra `Depends`, plus `SHA256SUMS-linux-astra.txt`; these are local
+verification artifacts and are not CI-published. Trixie artifacts require glibc 2.38+ and are never
+claimed to run on Astra.
 
 **Installer.** `packaging/windows/qtranslate.iss` (Inno Setup 6.3+ / 7) installs the application
 **for the current user**: `PrivilegesRequired=lowest`, the
@@ -326,19 +361,26 @@ Qt DLLs, `qwindows.dll`, `qschannelbackend.dll`, and the CRT, builds the zip, th
 uses the full path. `SHA256SUMS.txt` remains a release asset but is not listed in the README and the
 Downloads section.
 
-**CI.** `.github/workflows/build.yml` on `windows-latest`:
-1. `install-qt-action` installs Qt 6.8.3 LTS MSVC 2022 x64 (aqtinstall does not yet support the Qt 6.12
-   repository layout; local development uses 6.12, the project requires 6.5+);
-2. `ilammy/msvc-dev-cmd` sets up MSVC, CMake (Ninja) builds Release;
-3. `ctest` runs all tests with `QT_QPA_PLATFORM=offscreen`;
-4. Chocolatey installs Ninja and Inno Setup, `package.ps1` builds the artifacts;
-5. `upload-artifact` stores `build/artifacts/*`.
+**CI.** `.github/workflows/build.yml` has two build jobs:
+1. Windows (`windows-latest`): `install-qt-action` installs Qt 6.8.3 LTS MSVC 2022 x64 (aqtinstall
+   does not yet support the Qt 6.12 repository layout; local development uses 6.12, the project
+   requires 6.5+); `ilammy/msvc-dev-cmd` sets up MSVC; CMake (Ninja) builds Release; `ctest` runs
+   with `QT_QPA_PLATFORM=offscreen`; Chocolatey installs Ninja and Inno Setup; `package.ps1` builds
+   the artifacts; `upload-artifact` stores `build/artifacts/*` as `qtranslate-windows-x64`.
+2. Linux (`Linux x64 (trixie)` on `ubuntu-latest`, `container: debian:trixie`): `git` and
+   `ca-certificates` are installed before checkout, then the shared list from
+   `packaging/linux/trixie-packages.txt`; CMake Release with `-DCMAKE_PREFIX_PATH=/usr`; build;
+   `timeout 300 xvfb-run -a ctest --test-dir build/ci --output-on-failure`; `package.sh` without
+   `--skip-appimage`; `upload-artifact` stores `build/artifacts-linux/*` as
+   `qtranslate-linux-x64`.
 
-The workflow runs on push to `main`, on pull requests, and manually. On a `v*` tag a separate job with
-`contents: write` downloads the artifacts and creates/updates the GitHub Release, attaching the
-installer, the zip, and `SHA256SUMS.txt`; the notes come from `doc/releases/<version>.md`. The checksum
-file remains an asset but is not advertised in the README/Downloads. A repeated run overwrites the
-release files (`gh release upload --clobber`).
+The workflow runs on push to `main`, on pull requests, and manually. On a `v*` tag the release job
+with `contents: write` needs both build jobs, downloads both artifact sets into `artifacts`, and
+creates/updates the GitHub Release with the installer, the zip, `SHA256SUMS.txt`, the Linux tar.gz,
+the `.deb`, the AppImage, and `SHA256SUMS-linux.txt`; the notes come from `doc/releases/<version>.md`.
+The checksum files remain assets but are not advertised in the README/Downloads. A repeated run
+overwrites the release files (`gh release upload --clobber`). The real GitHub run and a tag
+publication require the user's explicit approval and are not part of local verification.
 
 **Signing.** There is no code signing yet: the project has no certificate, and SmartScreen may show a
 warning. Adding signing does not change the artifact format or the CI steps (it needs a secret with
@@ -1234,52 +1276,59 @@ buttons and menus for Hindi remain English.
 ### 4.14. Portability and the Linux support plan
 
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
-`*_win.cpp`; for other platforms there is `*_stub.cpp`. `qtranslate_core`, `net/`, `services/`, and
-the UI do not use WinAPI. Thanks to this, the Linux tree configures, builds, and links: 20 of 20
-tests pass under `xvfb-run` on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7 (Qt 6.10.2), and
-the GCC/Clang build is clean with `-Wall -Wextra`. The project minimum stays Qt 6.5+. Linux platform
-actions are still stubs; they arrive in roadmap stage 2 (old stage 11) tasks 02-04, and the table
-below is the target.
+`*_win.cpp`; the Linux backends are `*_linux.cpp`, and `*_stub.cpp` remains only for platforms
+without a backend. `qtranslate_core`, `net/`, `services/`, and the UI do not use WinAPI. The Linux
+tree configures, builds, and links: 28 tests (20 shared plus 8 Linux platform tests) pass under
+`xvfb-run` on Debian 13 (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2;
+Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
+X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
 
-| Module | Windows (current) | Linux X11 (plan) | Linux Wayland (plan) |
+| Module | Windows (current) | Linux X11 (0.12.0) | Linux Wayland (0.12.0, limited) |
 |---|---|---|---|
 | Hotkeys | `RegisterHotKey` | `XGrabKey` via xcb/Xlib | the `org.freedesktop.portal.GlobalShortcuts` portal; if unavailable — CLI commands bound in the DE |
 | Selection capture | `SendInput` Ctrl+C | XTest + `QClipboard` | synthetic input is unavailable; the user copies manually |
 | Translation insertion | `SendInput` Ctrl+V | XTest Ctrl+V | not reliably available; the translation is put on the clipboard with a message (no synthetic input) |
 | Active window | `GetForegroundWindow` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus` | no reliable API; "in-field" mode is not guaranteed |
-| Autostart | `Run` registry | `~/.config/autostart/qtranslate.desktop` | same |
+| Autostart | `Run` registry | `$XDG_CONFIG_HOME/autostart/qtranslate.desktop` | same |
 | Secrets | DPAPI | libsecret | libsecret; fallback — a 0600 file + warning |
 | Tray | `QSystemTrayIcon`/WinAPI | StatusNotifierItem | StatusNotifierItem; GNOME needs the AppIndicator extension |
 | Settings | `%APPDATA%\qtranslate` | `$XDG_CONFIG_HOME/qtranslate` | same |
 | Logs | `%LOCALAPPDATA%\qtranslate` | `$XDG_STATE_HOME/qtranslate` | same |
 
-**CLI commands.** So that hotkeys work in any environment (and on Wayland, where the portal
-may be absent), the application will get the commands `--translate-popup`, `--translate-main`, and
-`--translate-inplace`. They can be assigned to shortcuts in GNOME/KDE/Xfce settings; for the
-X11 implementation they are not needed, but remain a convenient fallback and are used by tests.
+**CLI commands.** `--translate-popup`, `--translate-main`, and `--translate-inplace` are parsed by
+`src/app/commandline.*` and forwarded over the `SingleInstance` socket to a running instance (or
+start one). They are mutually exclusive, combine with `--minimized`/`--verbose`, and are the
+portable trigger for desktop shortcuts and Wayland; on X11 they remain a convenient fallback and
+are covered by `tst_cli`.
 
-**Tray.** Qt uses StatusNotifierItem/DBus. In GNOME, application icons are not shown by default —
-the AppIndicator extension will be required; if the tray is unavailable, the application should
-show the main window and warn rather than exit silently.
+**Tray.** Qt uses StatusNotifierItem/DBus. In GNOME, application icons are not shown by default, so
+the AppIndicator extension is required; if the tray is unavailable, the application shows the main
+window and warns instead of exiting silently. The `--translate-main` path avoids the no-tray
+warning.
 
-**Secrets.** The preferred option is libsecret (`secret_password_store_sync`), which
-uses the system keyring. If the library is not present at build time, secrets are written to the INI with 0600
-permissions, and a warning is shown in settings. Silently storing passwords in plain text
-is unacceptable.
+**Secrets.** libsecret (`secret_password_store_sync`) is used when it is found at build time and
+`org.freedesktop.secrets` is available; tokens are `l:<uuid>`. Otherwise secrets are written to a
+`0600` file under `$XDG_CONFIG_HOME/qtranslate/secrets` with a `0700` directory (`f:<uuid>`), and a
+warning is shown in settings. A capability drop during save shows a message box; an unchanged `l:`
+token is reused through a transient keyring outage, and `f:` tokens migrate to libsecret on the next
+save. Silently storing passwords in plain text is not acceptable.
 
-**Build and packages.** CMake already supports `install` and `qt_generate_deploy_app_script`; for Linux
-`.desktop` files, hicolor icons, `share/applications`, and `RPATH`/`$ORIGIN` for AppImage are added.
-Planned artifacts: `qtranslate-<version>-linux-x86_64.tar.gz` (portable, with Qt),
-`.deb` (Qt dependencies from the distribution), and AppImage. CI — `ubuntu-24.04`, Qt 6.5+, tests in
-`xvfb-run`; the Windows platform tests (`tst_hotkeymanager`, `tst_autostart`,
-`tst_secretprotector`) are replaced by Linux analogues, the other 20 tests are shared.
+**Build and packages.** CMake installs `bin/qtranslate`, the freedesktop desktop file, and the
+256x256 hicolor icon; `packaging/linux/package.sh` owns the bundle and builds the trixie
+`tar.gz`/`.deb`/AppImage and `SHA256SUMS-linux.txt` in the `debian:trixie` container (KDE, GNOME, and
+the shell read the `.desktop` file; `Icon=qtranslate` matches the installed icon). `--target astra`
+builds the native Astra `-astra.tar.gz` and `+astra1` `.deb` with Astra's Qt 6.10.2; those are local
+verification artifacts, not CI-published. CI publishes only trixie artifacts. The Windows platform
+tests (`tst_hotkeymanager`, Windows variants of `tst_autostart`/`tst_secretprotector`) have Linux
+analogues; the other 20 tests are shared.
 
 **Wayland limitations.** Global shortcuts and synthetic input are not base capabilities of
-Wayland. The `GlobalShortcuts` portal is not supported by all desktops and versions; insertion
-into the active field and Ctrl+Shift+Q on Wayland cannot be guaranteed without external tools
-or the RemoteDesktop portal. Therefore, in the first phase of Linux support, X11 is considered a full
-target, and Wayland — a limited one: Ctrl+Q with manual copying, CLI commands, and explicit
-warnings in the interface. macOS is not planned.
+Wayland. The `GlobalShortcuts` portal is not supported by all desktops and versions; insertion into
+the active field and Ctrl+Shift+Q on Wayland cannot be guaranteed without external tools or the
+RemoteDesktop portal. Therefore X11 is the full target, and Wayland is limited: the portal when
+available, Ctrl+Q with manual copying, the CLI commands, in-place feedback that writes the
+translation to the clipboard, and explicit warnings in the interface. No `ydotool`/`wtype` or other
+synthetic-input backend is used. macOS is not planned.
 
 ### 4.15. Spelling, grammar, and punctuation checking (plan)
 
@@ -1465,11 +1514,12 @@ C++ exceptions are not used for flow control: errors are passed in `TranslationR
   (`TranslationManager`), `.service.google`, `.service.deepl`, `.settings`, `.autostart`, `.secret`.
   Only warnings are output by default; detailed logging is enabled by the
   `QT_LOGGING_RULES` environment variable or the `--verbose` flag (writing to
-  `%LOCALAPPDATA%\qtranslate\qtranslate.log`, rotation at 5 MB to `.1`). The message handler
-  writes the time, level, category, and text; the directory is created at startup.
+  `%LOCALAPPDATA%\qtranslate\qtranslate.log` on Windows or
+  `$XDG_STATE_HOME/qtranslate/qtranslate.log` on Linux, rotation at 5 MB to `.1`). The message
+  handler writes the time, level, category, and text; the directory is created at startup.
 - **Texts being translated, keys, and passwords are never written to the log** — only lengths, response codes, time.
 - All requests use HTTPS only; TLS errors are not ignored.
-- Secrets in the INI are encrypted with DPAPI (§4.11).
+- Secrets in the INI use DPAPI on Windows and libsecret or a `0600` fallback on Linux (§4.11).
 - In the help and when a service is selected for the first time, state that the text is sent to a third-party service
   (Google/DeepL).
 
@@ -1498,10 +1548,16 @@ are linked into separate test targets):
 | `tst_textchunker` | Splitting by paragraphs/sentences, words longer than the limit, surrogate pairs are not split |
 | `tst_hotkeysequence` | `QKeySequence` ↔ `(MOD, VK)`, unsupported keys |
 | `tst_hotkeymanager` | `RegisterHotKey`: shortcut conflicts, `setSuspended`, delayed registration (Windows; built together with `platform/hotkeymanager_win.cpp`) |
+| `tst_hotkeymanager_x11` | X11 `XGrabKey`: registration, Lock/NumLock variants, auto-repeat, suspend/resume, Wayland refusal (16 cases) |
+| `tst_hotkeymanager_wayland` | `GlobalShortcuts` portal against a mock DBus: session, batched bind, asynchronous failures, `Activated`/`Deactivated`, suspend, close (20 cases) |
+| `tst_hotkey_selection_x11` | Real X11 manager + grabber + focused editor: release-order cases and the >300 ms hold (7 cases) |
+| `tst_selectiongrabber_linux` | X11 selection capture, clipboard restore, Wayland clipboard read, timeouts (12 cases) |
+| `tst_windowactivation_linux` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus`, `_NET_WM_STATE_FULLSCREEN`, `_NET_WM_PID`, XTest paste, Wayland 0/false (13 cases) |
+| `tst_cli` | CLI parser, mutual exclusion, two-process forwarding, legacy wire (20 cases, Linux) |
 | `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption |
 | `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request (offscreen) |
-| `tst_secretprotector` | DPAPI: round-trip, empty and corrupted data |
-| `tst_autostart` | Autostart command format |
+| `tst_secretprotector` | Windows: DPAPI round-trip, empty and corrupted data. Linux: libsecret token round-trip, `0600` fallback, capability probe, migration (7+1 in trixie, 8/8 on Astra) |
+| `tst_autostart` | Windows: `Run` command format. Linux: desktop entry quoting, `--minimized`, repair, removal (6 cases) |
 | `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language — on a fake service |
 | `tst_uilanguages` | Supported UI languages, normalization of `system`/regional tags, `.qm` resources |
 | `tst_translations` | Completeness of all `.ts` files, preservation of `%1`/`%2`, emoji and edge whitespace |
@@ -1510,11 +1566,20 @@ Services are tested by substituting the network: a fake `TranslationService` for
 local HTTP server (`QTcpServer`) with predefined responses to check error codes,
 timeouts, and proxies.
 
-Manual checklist before release: selection capture in Notepad, a browser, Word, VS Code, Telegram;
-a window in an administrator process (expected not to work); the clipboard after translation matches the
-source; Ctrl+Q at screen edges and on two monitors with different scaling; Ctrl+Shift+Q in an input field
-(selection replacement, clipboard restoration, protection when the window changes); operation through HTTP and
-SOCKS5 proxies with authentication; autostart after a reboot.
+Windows manual checklist before release: selection capture in Notepad, a browser, Word, VS Code,
+Telegram; a window in an administrator process (expected not to work); the clipboard after
+translation matches the source; Ctrl+Q at screen edges and on two monitors with different scaling;
+Ctrl+Shift+Q in an input field (selection replacement, clipboard restoration, protection when the
+window changes); operation through HTTP and SOCKS5 proxies with authentication; autostart after a
+reboot.
+
+Linux manual checklist before release: on a real X11 session, Ctrl+Q/Ctrl+Shift+Q/Ctrl+W, the tray
+menu, settings persistence, autostart create/remove, the three CLI commands with and without a
+running instance, single-instance forwarding, and clipboard restoration; under a headless Weston,
+the missing-portal warning, no X11 connection and no synthetic input; on a portal-capable desktop,
+the `GlobalShortcuts` happy path (otherwise not performed). The Astra `.deb` install/remove and the
+trusted-client step are checked on Astra; the trixie artifacts are checked on trixie and their
+failure on Astra is recorded, never claimed as working.
 
 ### 8.1. Final verification results (old plan stage 8)
 
@@ -1635,9 +1700,9 @@ Local verification (Windows 11, Qt 6.12.0 MSVC 2022 x64):
 | Translation with replacement of the selection | A separate Ctrl+Shift+Q action; does not change Ctrl+Q. Insert only if the original window is still active; otherwise the translation is copied to the clipboard and a notification is shown (§5.4) |
 | Installer | Inno Setup 6.3+/7, **per-user** installation without UAC to `%LOCALAPPDATA%\Programs\qtranslate`; Start menu (on), desktop (off), and autostart (on) tasks; autostart is synchronized with the application setting; settings are preserved on uninstall (§3.4) |
 | Portable build | Remains the second release artifact: a ZIP with `bin/`, `plugins/`, `translations/`; needed by users without installation rights (§3.4) |
-| CI and releases | GitHub Actions on `windows-latest`; push/PR build and test, the `v*` tag publishes the installer, ZIP, and `SHA256SUMS.txt`; the tag version is checked against CMake (§3.4) |
+| CI and releases | GitHub Actions with a Windows job on `windows-latest` and a Linux job in `debian:trixie`; push/PR build and test, the `v*` tag publishes the installer, ZIP, `SHA256SUMS.txt`, the Linux tar.gz/`.deb`/AppImage, and `SHA256SUMS-linux.txt`; the tag version is checked against CMake in the Windows job (§3.4) |
 | Checksums | `SHA256SUMS.txt` remains a separate release asset but is not listed in README/Downloads; if needed, the user can find the file |
-| Linux | Roadmap stage 2 (old stage 11) after moving to a Linux machine: X11 is a full target, Wayland is a portal/CLI fallback with explicit limitations; macOS is not planned (§4.14) |
+| Linux | Linux x86_64 is supported from 0.12.0: X11 is a full target, Wayland is a portal/CLI fallback with explicit limitations; trixie artifacts are CI-built and Astra needs a native build; macOS is not planned (§4.14) |
 | Win+V history entry during capture | The intermediate Ctrl+C may leave an entry; exclusion formats protect only clipboard restoration. A full workaround is a UI Automation strategy (§4.4, §9.2), accepted as future development |
 
 ### 9.2. Limitations and possible development
@@ -1654,8 +1719,9 @@ Limitations of the environment in which the final verification was performed (no
 - The installer is not code-signed: Windows SmartScreen may show a warning. There is no certificate
   in the project; options and requirements are described in [`code-signing.md`](code-signing.md).
   Adding a signature does not change the artifact format.
-- There is no Linux build in 0.11.0: platform modules are stubs, a full port is roadmap stage 2 (old stage 11)
-  (§4.14). macOS is not planned.
+- Linux is implemented on `main` for 0.12.0 (28 tests, X11 full, Wayland limited); the 0.11.x
+  releases remain Windows-only, so the Linux packages appear only with 0.12.0. The trixie artifacts
+  do not run on Astra 1.8.7, which needs the separate native build (§4.14). macOS is not planned.
 
 Possible development:
 
@@ -1668,8 +1734,9 @@ Possible development:
 3. Additional official services (Microsoft Translator, Amazon Translate, Yandex,
    PROMT, LibreTranslate) — a new `TranslationService` class.
 4. Text-to-speech (`QTextToSpeech`), translation history.
-5. **Linux** — roadmap stage 2 (old stage 11): X11 implementations of `platform/*`, Wayland via the `GlobalShortcuts` portal and
-   a CLI fallback, `.deb`/AppImage packages (§4.14).
+5. **Linux** — implemented for 0.12.0: X11 `platform/*`, Wayland via the `GlobalShortcuts` portal
+   and a CLI fallback, `.deb`/AppImage/Astra packages (§4.14); remaining work is the real
+   portal-capable Wayland check and a broader desktop matrix.
 6. **Localization into major world languages** — old plan stage 12 is done: Spanish, German, French,
    Portuguese (Brazil), Italian, Polish, Ukrainian, Turkish, Chinese
    (Simplified), Japanese, Korean, Arabic, Hindi; RTL and translation checks in CI (§4.13).

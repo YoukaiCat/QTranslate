@@ -2,8 +2,10 @@
 
 ## Project
 
-- qtranslate is a Windows tray translator: C++17, Qt 6 Widgets, CMake/Ninja, MSVC. The Linux port is
-  planned; `src/platform/*_stub.cpp` are stubs, so do not claim Linux hotkeys/capture/autostart work.
+- qtranslate is a tray translator for Windows and Linux: C++17, Qt 6 Widgets, CMake/Ninja, MSVC on
+  Windows and GCC/Clang on Linux. X11 is the full Linux target; Wayland is limited
+  (`GlobalShortcuts` portal where available, CLI commands, manual copying, warnings).
+  `src/platform/*_stub.cpp` remain only for platforms without a backend.
 - `qtranslate_core` (`src/core`, `src/net`, `src/services`, `src/ai`) has no Qt Widgets or WinAPI and
   is shared by the app and tests. `qtranslate` adds `src/app`, `src/ui` and `src/platform`.
 - `AppController` is the only class that wires modules together. Keep network/translation logic in
@@ -23,14 +25,21 @@
   worktree or a moved checkout; use manual CMake there or update the paths explicitly.
 - Manual configure:
   `cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:/Qt/6.12.0/msvc2022_64`
+- Linux: `cmake -S . -B build/linux-release -G Ninja -DCMAKE_BUILD_TYPE=Release`, then
+  `cmake --build build/linux-release` and
+  `xvfb-run -a ctest --test-dir build/linux-release --output-on-failure` (`xauth` is required).
+  Packaging uses `packaging/linux/package.sh` on Debian 13 or in `qtranslate-trixie`;
+  `--target astra` builds the native Astra artifacts on Astra Linux.
 - Run one test: `ctest --test-dir build/cli-Release -R tst_settings --output-on-failure`.
   Run everything: `ctest --test-dir build/cli-Release --output-on-failure`.
 - CI sets `QT_QPA_PLATFORM=offscreen`; use it for headless GUI tests. `tst_popupwindow` and
   `tst_settingsdialog` also set offscreen themselves.
-- Both Debug and Release must build without MSVC `/W4` warnings, and all 23 tests must pass.
-  The project requires Qt 6.5+; local development uses Qt 6.12.
+- Debug and Release must build without warnings (`/W4` on Windows, `-Wall -Wextra` on Linux); all
+  23 Windows tests and all 28 Linux tests must pass. The project requires Qt 6.5+; local development
+  uses Qt 6.12 on Windows and Qt 6.10.2 (Astra) or Qt 6.8.2 (trixie) on Linux.
 - Tests use local `QTcpServer` and fixtures; no real Google/DeepL keys or internet are required.
-  `tst_hotkeymanager`, `tst_autostart` and `tst_secretprotector` are Windows-only.
+  `tst_hotkeymanager` is Windows-only; `tst_autostart` and `tst_secretprotector` have Windows and
+  Linux variants. The X11, Wayland, selection, window-activation, and CLI tests are Linux-only.
 
 ## Git and release approval
 
@@ -51,15 +60,17 @@
 - Version source of truth: `project(qtranslate VERSION x.y.z)` in `CMakeLists.txt`. Mirror it in
   `resources/qtranslate.rc` (`FileVersion`/`ProductVersion`). Release tag must be `vX.Y.Z`; CI
   rejects a tag that does not match the CMake version.
-- Release flow (only after explicit user approval): test Debug and Release, run
-  `packaging/windows/package.ps1 -BuildDir build/cli-Release`, commit locally, push the release
-  commit and new annotated tag `vX.Y.Z`, then let CI publish the installer, portable ZIP and
-  `SHA256SUMS.txt`.
+- Release flow (only after explicit user approval): test Debug and Release on Windows and Linux, run
+  `packaging/windows/package.ps1 -BuildDir build/cli-Release` and
+  `packaging/linux/package.sh --build-dir build/ci --output-dir build/artifacts-linux`, commit
+  locally, push the release commit and new annotated tag `vX.Y.Z`, then let CI publish the installer,
+  portable ZIP, `SHA256SUMS.txt`, the Linux tar.gz/`.deb`/AppImage, and `SHA256SUMS-linux.txt`.
 - Do **not** list `SHA256SUMS.txt` or any checksum file in README Download sections or release
   notes Downloads. Keep `SHA256SUMS.txt` as an unlisted release asset for users who need hashes.
 - Never move or rewrite an existing release tag; ship fixes as a new patch tag.
 - `doc/releases/<version>.md` supplies GitHub release notes. Keep release artifacts CI-built:
-  local packaging uses Qt 6.12, CI uses Qt 6.8.3 LTS.
+  Windows local packaging uses Qt 6.12, CI uses Qt 6.8.3 LTS; Linux artifacts are built in the
+  `debian:trixie` container, so their glibc baseline is trixie (2.38+), not Astra 1.8.7.
 - Documentation for a release or a behavior change goes to the active roadmap
   `doc/roadmap/qtranslate/plan.md`; the archived `doc/roadmap/qtranslate/legacy-plan.md` is
   historical and is not edited.
@@ -67,6 +78,11 @@
   are in `doc/code-signing.md`; do not claim releases are signed until CI verifies the signature.
 - CI uses Qt 6.8.3 LTS because aqtinstall 3.3.0 cannot install Qt 6.12. Do not switch CI to 6.12
   without checking aqt support.
+- CI has a Windows job and a Linux job in `debian:trixie` (root container, the shared
+  `packaging/linux/trixie-packages.txt`, `timeout 300 xvfb-run -a ctest`, `package.sh` without
+  `--skip-appimage`, artifact `qtranslate-linux-x64`). The `release` job needs both jobs and
+  publishes both artifact sets; `SHA256SUMS-linux.txt` must stay distinct from the Windows
+  `SHA256SUMS.txt`.
 - `package.ps1` cleans `build/dist`, validates Qt/MSVC CRT/plugin files, then writes the ZIP,
   installer and `SHA256SUMS.txt`. Inno Setup 6.3+/7 is required.
 
@@ -92,10 +108,13 @@
 
 - Google's free endpoint must stay HTTP/1.1 (`Http2AllowedAttribute = false`); HTTP/2 caused
   systematic `429` responses. Do not remove this.
-- Settings default to `%APPDATA%\qtranslate\qtranslate.ini`; a `qtranslate.ini` next to the exe
-  switches to portable mode. API keys and proxy passwords use DPAPI on Windows.
+- Settings default to `%APPDATA%\qtranslate\qtranslate.ini` on Windows and
+  `$XDG_CONFIG_HOME/qtranslate/qtranslate.ini` on Linux; a `qtranslate.ini` next to the exe switches
+  to portable mode. API keys and proxy passwords use DPAPI on Windows, and libsecret or a `0600`
+  fallback file with a warning on Linux.
 - Logs must never contain translated text, API keys or passwords. `--verbose` writes to
-  `%LOCALAPPDATA%\qtranslate\qtranslate.log`.
+  `%LOCALAPPDATA%\qtranslate\qtranslate.log` on Windows and
+  `$XDG_STATE_HOME/qtranslate/qtranslate.log` on Linux.
 - `AppController::start()` calls `Autostart::sync(settings.general.autostart)`; keep installer-written
   settings consistent with it.
 - Deployment intentionally excludes `vc_redist.x64.exe`, D3D/DXC compilers and `opengl32sw.dll`

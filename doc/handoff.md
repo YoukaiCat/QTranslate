@@ -1,6 +1,6 @@
 # Handoff: work state
 
-Date: 2026-11-07. Repository: `C:\projects\qtranslate`, branch `main`.
+Date: 2026-11-08. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
 
 The active roadmap is [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md); the old plan is
 archived at [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); the active
@@ -33,106 +33,45 @@ documentation is English. The migration to the tree roadmap and the English base
 - The working tree must be clean after completion; to verify the fix, `build\dist\bin\qtranslate.exe`
   was started with `--verbose`.
 
-## Linux baseline (2026-11-06, updated 2026-11-07)
+## Linux support (2026-11-08)
 
-- The Linux tree builds, links, and passes 28 of 28 tests in Debug and Release on Debian 13
-  (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2; Clang 16.0.6), with
-  `-Wall -Wextra` and no warnings. `qtranslate --version` works. Windows builds and the 23 tests
-  were not performed here.
-- `packaging/linux/trixie.Dockerfile` reproduces the container; it includes `xauth` because
-  `xvfb-run` needs it. Task 07 must keep the package list and add the packaging tools.
-- Packaging measurement (task 07 planning): trixie Qt 6.8.2 `libQt6Gui`/`libQt6Network` require
-  `GLIBC_2.38`, while Astra 1.8.7 has glibc 2.36; `dpkg-shlibdeps` produces `libglib2.0-0t64` and
-  `libxtst6 (>= 2:1.2.5)`, while Astra has `libglib2.0-0` 2.74.6 and `libxtst6` 2:1.2.3. The trixie
-  `.deb`, tar.gz and AppImage therefore cannot serve Astra; only a native Astra build works. Task 07
-  is a stage with six children: desktop/install, tar.gz, `.deb`, AppImage, native Astra artifacts,
-  and CI. Only trixie artifacts are CI-published; the Astra artifacts are local verification
-  artifacts, because release artifacts stay CI-built. Qt's Linux deploy script copies no Qt
-  libraries and writes a trixie `qt.conf`, so it is guarded with `if(WIN32)` and `package.sh` owns
-  the layout.
-- Per-user paths, autostart and secrets are implemented (task 05, `aed4028`). `src/core/apppaths.h`
-  reads `XDG_CONFIG_HOME`/`XDG_STATE_HOME` directly (empty and relative values ignored) and appends
-  lowercase `qtranslate`; settings are `<config>/qtranslate/qtranslate.ini` and the log
-  `<state>/qtranslate/qtranslate.log`, while a portable `qtranslate.ini` next to the executable
-  still wins. Autostart writes `$XDG_CONFIG_HOME/autostart/qtranslate.desktop` with Desktop Entry
-  quoting, `--minimized`, repair and removal; the writer is native Qt, no GLib/GIO or KDE/KF6
-  dependency is added, and libsecret stays the only optional transitive GLib dependency (user
-  decision). Secrets use libsecret when `libsecret-1` is found at
-  build time and `org.freedesktop.secrets` is available (`l:<uuid>`), otherwise a `0600` file under
-  `<config>/qtranslate/secrets` with a `0700` directory (`f:<uuid>`) and a visible warning in the
-  settings dialog; a capability drop during save shows a message box.
-  `SecretProtector::canReuse()` keeps an unchanged `l:` token through a transient keyring outage,
-  migrates `f:` to libsecret and re-protects missing or corrupt tokens. Task 07 must add
-  `libsecret-1-0` as a runtime dependency when the package is built with libsecret; a build without
-  it remains supported.
-- Known task 05 issues not fixed in this task: an undecodable or unknown token is dropped from the
-  INI on the next save (a no-libsecret build or a transient keyring failure at load); the fallback
-  hint does not highlight an already stored `f:` token while the keyring is available (it migrates
-  on the next save); test entries accumulate in the Astra keyring (no delete API); a path containing
-  `\` or `%` can break the autostart `Exec=` parser (the plan-prescribed escaping was kept). Also:
-  the fallback file stays under XDG config in portable mode, old keyring/file entries remain after
-  an overwrite or migration, and the D-Bus probe can be a false negative when the service is
-  installed but not running or activatable.
-- The Linux install now guards the Windows deploy block with `if(WIN32)`: the generic deploy tool
-  copies no Qt libraries and writes a trixie-specific `bin/qt.conf`, so the packaging script owns
-  the bundle. One `xvfb-run -a` run hung before the command started in the container; CI should
-  wrap tests in `timeout`.
-- Desktop entry and install layout (task 07.01, `cc5fcac`): `packaging/linux/qtranslate.desktop`
-  passes `desktop-file-validate`; CMake installs it to `share/applications` and
-  `resources/icons/app.png` as `share/icons/hicolor/256x256/apps/qtranslate.png`;
-  `QGuiApplication::setDesktopFileName("qtranslate")` fixes the Wayland app id; the Linux install
-  tree has only `bin/qtranslate`, the desktop file and the icon, and keeps
-  `RUNPATH $ORIGIN:$ORIGIN/../lib`.
-- Portable archive (task 07.02, `23840c6`): `packaging/linux/package.sh` builds
-  `qtranslate-<version>-linux-x86_64.tar.gz` with bundled Qt 6.8.2, 17 plugins, 13 Qt
-  translations, a script-written `qt.conf`, `patchelf` RPATH (`$ORIGIN` on libraries,
-  `$ORIGIN/../../lib` on plugins) and `SHA256SUMS-linux.txt`. The trixie image adds `patchelf`,
-  `qt6-wayland` and `qt6-translations-l10n`. Known issues: `ctest` as uid 1000 in the image fails
-  `tst_hotkeymanager_wayland` because `/etc/passwd` has no entry for the uid (CI runs as root), and
-  plugin presence is checked per directory, not per file. The READMEs still say 20/20 tests
-  (task 08).
-- Astra Linux Parsec denies passive `XGrabKey` for untrusted binaries. The user approved the `KBD_R`
-  trusted-client exception: `/etc/X11/trusted.d/qtranslate` lists
-  `build/linux-{debug,release}/qtranslate`, `build/linux-{debug,release}/tests/tst_hotkeymanager_x11`
-  and `build/linux-{debug,release}/tests/tst_hotkey_selection_x11`, and
-  `sudo /usr/bin/fly-set-execid.sh` sets `security.exec_id`. With the attribute set, Debug and
-  Release pass 28/28, the X11 hotkey test passes 16/16 on Astra, and the real `:0` session registers
-  and activates the hotkeys. The attribute is lost on rebuild; re-run the script after building.
-- Linux hotkeys: X11 `XGrabKey` and the Wayland `GlobalShortcuts` portal are implemented behind the
-  unchanged `HotkeyManager` API. The portal creates one session, batches `BindShortcuts`, reports
-  asynchronous bind failures through `registrationFailed`, keeps suspend logical, and returns an empty
-  `hotkey()` after the desktop assigns triggers. `Qt6::DBus` is Linux-only in `qtranslate` and the
-  tests; `libqt6dbus6` is the runtime dependency for packaging and `dbus`/`dbus-daemon` the test
-  dependency. Linux has 28 tests; `tst_hotkeymanager_x11` is 16/16 and `tst_hotkeymanager_wayland`
-  20/20 in trixie and on Astra (after `fly-set-execid.sh`), `tst_autostart` is 6/6, and `tst_cli`
-  is 20/20; `tst_secretprotector` is 7 passed + 1 skipped in trixie (no session keyring, recorded
-  as not performed) and 8/8 on Astra with the real libsecret round-trip. Known gaps: the tray
-  tooltip can show the configured sequence before an asynchronous bind completes or after a desktop
-  reassignment (task 05/06, still open) and two latent signal-reentrancy edges with no current
-  caller.
-- X11 selection capture and the window helpers are implemented; Wayland reads the manually copied
-  clipboard and never synthesizes input. `tst_selectiongrabber_linux` (12) and
-  `tst_windowactivation_linux` (13) were added, and the manual `:0` check passed with `kate`
-  (Ctrl+Q popup, Ctrl+Shift+Q replace, Ctrl+W main window, clipboard restore). The release-order
-  defect was fixed in task 04 (`5b9f9fa`): the grabber waits for the activating key before Ctrl+C, so
-  releasing Ctrl/Shift first, releasing Q first and holding the combination all work; the new
-  `tst_hotkey_selection_x11` is 7/7 and is listed in `trusted.d`. The original clipboard's non-text
-  formats are not restored by the manual check.
-- CLI and desktop behaviour (task 06, `760ae0b`): `--translate-popup`, `--translate-main`,
-  `--translate-inplace` are parsed by `src/app/commandline.*` and forwarded over the
-  `SingleInstance` socket (`activate`/`noop` byte-exact); they combine with `--minimized` and
-  `--verbose`, positional arguments are ignored, and unknown options exit 1. A command start does
-  not show the main window before the grab; with a tray it stays in the tray, and without a tray
-  the popup, main window, or in-place feedback appears as the scenario allows. One
-  `Limited Wayland support` warning is shown per start and per-hotkey tray messages are suppressed
-  on Wayland; a normal start without a tray shows one `System tray unavailable` warning, and
-  in-place messages use a non-modal message box. `tst_cli` covers the parser, two-process
-  forwarding and the legacy wire (20/20). The `.desktop` file, hicolor icons and
-  `share/applications` are task 07.
-- Roadmap stage 2 continues with packaging: task 07 is a stage with six children (desktop/install,
-  tar.gz, `.deb`, AppImage, native Astra artifacts, CI); children 01-02 are done and child 03 is
-  detailed and ready for the coordinator (it has not started). Task 08 is the final Linux gate. The
-  READMEs and `architecture.md` still need the Linux install and limitation updates at task 08.
+- Stage `02-linux` is implemented and at acceptance. All eight children are `done`; `08-verification`
+  is `done` (`b488e03`). The final gate ran Astra Debug/Release 28/28 and trixie Debug/Release 28/28
+  with no warnings; the X11 matrix on the real `:0` session passed (Ctrl+Q/Ctrl+Shift+Q/Ctrl+W,
+  tray, settings, autostart, CLI with and without an instance, single-instance forwarding, clipboard
+  restore). The real GitHub run, tag, and release publication are not performed.
+- X11 is the full target: `XGrabKey` hotkeys (with the Astra trusted-client step), XTest selection
+  capture and paste, `_NET_ACTIVE_WINDOW`, XDG autostart, and per-user paths. Wayland is limited:
+  the `GlobalShortcuts` portal where available, CLI commands, manual copying, clipboard-based
+  in-place feedback, and explicit warnings; no `ydotool`/`wtype`. A real portal-capable desktop was
+  not available; the portal is covered by a mock DBus (20/20) and Weston headless confirms the
+  fallback.
+- Tests: 28 on Linux (20 shared plus `tst_hotkeymanager_x11` 16/16,
+  `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
+  `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
+  `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 20/20). Windows keeps 23 tests and
+  was not run here (no MSVC).
+- Packaging: `packaging/linux/package.sh` builds the trixie `tar.gz`, `.deb`, AppImage, and
+  `SHA256SUMS-linux.txt` in `qtranslate-trixie`; the `.deb` uses `dpkg-shlibdeps` (including
+  `libsecret-1-0`/`libqt6dbus6` only when linked). `--target astra` builds
+  `qtranslate-<version>-linux-x86_64-astra.tar.gz`, `qtranslate_<version>+astra1_amd64.deb`, and
+  `SHA256SUMS-linux-astra.txt`. Trixie artifacts require glibc 2.38+ and do not run on Astra 1.8.7;
+  they are never claimed there. Astra artifacts are local verification artifacts, not CI-published.
+  Accepted hashes are in the `07-packaging-and-ci` and `08-verification` outcomes.
+- CI: the `Linux x64 (trixie)` job runs in `debian:trixie` (shared `trixie-packages.txt`, Release,
+  `timeout 300 xvfb-run -a ctest`, `package.sh`, `qtranslate-linux-x64`); the `release` job needs
+  both build jobs and publishes both artifact sets. The actual GitHub run and tag need approval.
+- Paths, autostart, and secrets: `src/core/apppaths.h` uses `XDG_CONFIG_HOME`/`XDG_STATE_HOME`
+  (settings `<config>/qtranslate/qtranslate.ini`, log `<state>/qtranslate/qtranslate.log`); autostart
+  writes `$XDG_CONFIG_HOME/autostart/qtranslate.desktop`; secrets use libsecret (`l:<uuid>`) or a
+  `0600` file with a warning (`f:<uuid>`).
+- Known gaps: the AppImage `ldd` gate checks `not found` only; plugin presence is per directory;
+  the printed `docker run` command lacks `--user`/`HOME=/tmp`; `debian:trixie` and
+  `qtranslate-trixie` are moving tags; the Astra host gate checks `ID=astra` only; artifacts are not
+  byte-reproducible. Wayland clipboard/in-place and the real portal remain unverified on a real
+  compositor. Windows and the real GitHub run are not performed.
+- Release 0.12.0 is next after the stage acceptance and requires the user's explicit approval; only
+  then should the README download links and release notes be finalised.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
