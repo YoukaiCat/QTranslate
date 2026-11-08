@@ -1,7 +1,8 @@
 ---
 kind: task
-status: todo
-depends: [01-desktop-entry-and-install, 02-portable-tarball]
+status: done
+detailed: true
+depends: [01-desktop-entry-and-install, 02-portable-tarball, 03-deb-package]
 ---
 
 # AppImage
@@ -12,29 +13,60 @@ Extend `packaging/linux/package.sh` to build `qtranslate-<version>-x86_64.AppIma
 Qt, using the freedesktop AppImage tooling. The AppImage is best-effort but is built and uploaded by
 CI; it is not silently dropped when the network or the tools are unavailable.
 
+Measured facts for the pins and the tool behaviour (checked on 2026-11-08):
+
+- Release tags and assets: `linuxdeploy` `1-alpha-20251107-1`, `linuxdeploy-plugin-qt`
+  `1-alpha-20250213-1`, `appimagetool` `1.9.1`, and `type2-runtime` `20251108`. The `appimagetool`
+  `1.9.1` asset self-reports `continuous build (git version 8c8c91f), build 296`, but the download
+  URL is the `1.9.1` tag; do not switch to the `continuous` URL. `type2-runtime` has a dated
+  release `20251108`; use it, not the `continuous` tag.
+- `appimagetool` 1.9.1 bundles `usr/bin/mksquashfs` (and `desktop-file-validate`, `zsyncmake`) in
+  its own AppImage, so `squashfs-tools` is not needed. `libfuse2` is not needed either:
+  `--appimage-extract-and-run` / `APPIMAGE_EXTRACT_AND_RUN=1` is the supported path.
+- `linuxdeploy` 1-alpha-20251107-1 creates `AppRun` as a symlink to `usr/bin/<executable>`, sets the
+  binary's RPATH to `$ORIGIN/../lib`, and **strips** the AppDir copy of the executable. The AppImage
+  binary therefore differs from the tar.gz/.deb binary; do not compare their SHA256 values.
+- `linuxdeploy-plugin-qt` discovers Qt through `qmake6`; the trixie image has
+  `/usr/bin/qmake6` (Qt 6.8.2) and no `qmake`, so set `QMAKE=/usr/bin/qmake6`. Its platform-plugin
+  switch is `EXTRA_PLATFORM_PLUGINS`; `EXTRA_QT_PLUGINS` is only a deprecated alias for
+  `EXTRA_QT_MODULES` and is not a platform-plugin switch. When a `libqwayland*` platform plugin is
+  requested, the plugin also deploys the `wayland-shell-integration` and
+  `wayland-decoration-client` families, but not `wayland-graphics-integration-client`.
+- The trixie image has `qmake6`, `xvfb-run`, `xauth`, and `desktop-file-validate`; it has no
+  `curl`, `wget`, `file`, `mksquashfs`, or `xdotool`. `file` and `curl` are added in step 1;
+  `xdotool` is installed only in the throwaway container used for the GUI smoke test.
+
 Contract:
 
-- Download `linuxdeploy-x86_64.AppImage`, `linuxdeploy-plugin-qt-x86_64.AppImage`, and
-  `appimagetool-x86_64.AppImage` into a tools directory under `build/` (for example
-  `build/linux-tools/<pinned-version>/`). Pin the exact release tag/URL and a SHA256 for each tool
-  in the script; verify the checksum after download and fail on a mismatch. Do not use
-  `continuous` builds or an unverified download. If the tools are already present and their
-  checksums match, reuse them.
+- Download `linuxdeploy-x86_64.AppImage`, `linuxdeploy-plugin-qt-x86_64.AppImage`,
+  `appimagetool-x86_64.AppImage`, and the pinned `runtime-x86_64` into a tools directory under
+  `build/` (for example `build/linux-tools/appimage/`). Pin the exact release tag/URL and a SHA256
+  for each download in the script; verify the checksum after download and fail on a mismatch. Do not
+  use `continuous` builds or an unverified download. If the tools are already present and their
+  checksums match, reuse them; a cached checksum mismatch is a hard failure. All four downloads use
+  a versioned release tag; a changed asset fails the build rather than being used silently.
 - Run the tools with `--appimage-extract-and-run` (they are AppImages themselves and must not
-  require FUSE). Export `ARCH=x86_64`; `linuxdeploy-plugin-qt` needs `qmake6`
-  (`QMAKE=/usr/bin/qmake6` if it does not find it) and the Qt 6.8.2 installation used for the
-  build.
+  require FUSE). Export `ARCH=x86_64` and `APPIMAGE_EXTRACT_AND_RUN=1`; the environment variable is
+  required because `linuxdeploy` starts the Qt plugin AppImage as a child process.
+  `linuxdeploy-plugin-qt` needs `qmake6` (`QMAKE=/usr/bin/qmake6` if it does not find it) and the
+  Qt 6.8.2 installation used for the build.
 - Build an `AppDir` from the same install staging: `usr/bin/qtranslate`,
   `usr/share/applications/qtranslate.desktop`, and the 256x256 icon. Use
   `linuxdeploy --appdir <AppDir> --desktop-file <installed desktop file> --icon-file <installed
-  icon> --plugin qt --output appimage` (or run `appimagetool` explicitly after the plugin) so the
-  AppDir root contains a `qtranslate.desktop` and `qtranslate.png` whose names match `Icon=` and
-  `Exec=qtranslate`. Set `EXTRA_QT_PLUGINS` to include the Wayland platform and shell-integration
-  plugins when `qt6-wayland` is present in the image; otherwise record that the AppImage starts
-  under X11/XWayland only.
+  icon> --plugin qt`, then run `appimagetool --runtime-file <pinned runtime> --no-appstream <AppDir>
+  <artifact>` explicitly. Do not use `linuxdeploy --output appimage`: the explicit `appimagetool`
+  call is what lets the script pass the pinned runtime and the exact artifact name. The AppDir root
+  must contain a `qtranslate.desktop` and `qtranslate.png` whose names match `Icon=` and
+  `Exec=qtranslate`.
+- Set `EXTRA_PLATFORM_PLUGINS` to include `libqoffscreen.so;libqminimal.so` for the headless checks
+  and, when `qt6-wayland` is present, `libqwayland-egl.so;libqwayland-generic.so`; the plugin then
+  deploys the Wayland shell-integration and decoration families. If `qt6-wayland` is absent, record
+  that the AppImage starts under X11/XWayland only. Do not use the deprecated `EXTRA_QT_PLUGINS`.
 - Do not copy the tar.gz `bin/qt.conf` into the AppDir; `linuxdeploy-plugin-qt` writes the AppDir's
-  own Qt configuration and libraries. Do not hand-copy plugins into the AppDir after the plugin
-  ran, unless the plugin misses one and the reason is recorded.
+  own Qt configuration (`# generated by linuxdeploy-plugin-qt`, `Prefix = ../`, `Plugins =
+  plugins`, `Imports = qml`, `Qml2Imports = qml`). Do not overwrite it with the portable archive's
+  `Prefix = ..`/`Translations = translations` file. Do not hand-copy plugins into the AppDir after
+  the plugin ran, unless the plugin misses one and the reason is recorded.
 - Name the artifact `qtranslate-<version>-x86_64.AppImage`; add its line to
   `SHA256SUMS-linux.txt` next to the tar.gz and `.deb`. Add a `--skip-appimage` option for an
   explicit local offline run; the default builds it, and CI must not pass `--skip-appimage`. If the
@@ -44,48 +76,478 @@ Contract:
   to run on Astra 1.8.7 (glibc 2.36). Record that in the outcome; the Astra artifacts are child 05.
 - `packaging/linux/trixie.Dockerfile`: add `file` and `curl` (or use the image's `wget`), and
   `squashfs-tools` only if `appimagetool` does not bundle `mksquashfs`. Do not add `libfuse2`; the
-  `--appimage-extract-and-run` path is the supported one.
+  `--appimage-extract-and-run` path is the supported one. Measured: `appimagetool` 1.9.1 bundles
+  `mksquashfs`, so do not add `squashfs-tools`.
+
+## Steps
+
+1. Add `file` and `curl` to the trixie packaging image; keep FUSE and squashfs-tools out.
+   - `packaging/linux/trixie.Dockerfile`: add `curl` and `file` to the `apt-get install` list with
+     short comments (`curl` downloads the pinned AppImage tools; `file` identifies the produced
+     AppImage in the verification). Update the header comment, which currently says a later child
+     adds `file`, `curl`, and the AppImage tools: the AppImage tools are downloaded by
+     `package.sh`, not installed in the image.
+   - Measured in `qtranslate-trixie:latest` (child 03 image, Qt 6.8.2) before the change: `curl`,
+     `wget`, `file`, `mksquashfs`, and `xdotool` are absent; `qmake6` (`/usr/bin/qmake6`, Qt
+     6.8.2), `xvfb-run`, `xauth`, and `desktop-file-validate` are present; `qmake` is absent.
+   - Measured on the `appimagetool-x86_64.AppImage` 1.9.1 asset: `squashfs-root/usr/bin/mksquashfs`
+     exists. Do not add `squashfs-tools`; do not add `libfuse2`.
+   - Rebuild with `docker build -f packaging/linux/trixie.Dockerfile -t qtranslate-trixie .` and
+     confirm `curl --version`, `file --version`, `qmake6 -query QT_VERSION` prints `6.8.2`, and the
+     image still builds and tests the project (step 9).
+   - Child 06 creates `packaging/linux/trixie-packages.txt`; it already lists `file curl`, so keep
+     both entries when the inline list is replaced.
+
+2. Extend the script's contract, globals, and gates.
+   - Header comment and `usage()`: the script also builds the AppImage; list
+     `qtranslate-<version>-x86_64.AppImage`, `--skip-appimage`, the tools directory
+     `build/linux-tools/appimage/`, and `curl` as a required tool unless `--skip-appimage` is used.
+     Keep the trixie-only host rule and the existing artifacts.
+   - Add globals `appimage_enabled=1`, `appimage_artifact=`, `appimage_size=`, `appimage_sha=`, and
+     `appimage_tools_dir=build/linux-tools/appimage`.
+   - `parse_args`: accept `--skip-appimage` with no value and set `appimage_enabled=0`; keep
+     `--help`, `--build-dir`, `--output-dir`, `--version` unchanged; an unknown argument is still a
+     usage error.
+   - `check_tools`: add `curl:curl` to the literal list only when `appimage_enabled`; keep the
+     single error that names every missing tool. Do not require `file` in the script; it is a
+     verification tool.
+   - `check_host`: when `--skip-appimage` was passed, include it in the printed `docker run` command
+     next to the existing `--build-dir`/`--output-dir`/`--version` values.
+   - `main`: when `appimage_enabled`, call `download_appimage_tools` after `check_qt` and before
+     `prepare_stage` (fail fast before building), and call `build_appimage` after `build_deb` and
+     before `write_checksums`; with `--skip-appimage`, call neither.
+   - Do not add an Astra mode or a `--target` option; child 05 owns the native Astra artifacts.
+
+3. Pin and download the AppImage tools with SHA256 and a cache.
+   - Add `download_tool NAME URL SHA256 MODE` under `appimage_tools_dir`:
+     - If the file exists, compute its SHA256; a match reuses it; a mismatch dies with the path, the
+       expected and actual SHA256, and an instruction to remove the cached file. Do not silently
+       re-download a mismatched cache.
+     - If absent, `mkdir -p` the tools directory, download with
+       `curl --fail --location --retry 3 --connect-timeout 20 --silent --show-error --output
+       "$path.part" "$url"`, verify the SHA256 of the `.part` file, `chmod "$MODE"` it, and `mv` it
+       into place. A download failure or checksum mismatch dies with the tool name, URL, and
+       expected SHA256; no fallback to a system copy or to `continuous`.
+     - The tools directory is under `build/`; a valid cache is reused without network; a pin change
+       requires removing the cached file (the error says so).
+   - Literal pins (checked 2026-11-08; sizes are for the outcome, the SHA256 is the gate):
+     - `linuxdeploy-x86_64.AppImage`:
+       `https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage`,
+       SHA256 `c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d`, 19 421 688
+       bytes, mode `0755`.
+     - `linuxdeploy-plugin-qt-x86_64.AppImage`:
+       `https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-x86_64.AppImage`,
+       SHA256 `15106be885c1c48a021198e7e1e9a48ce9d02a86dd0a1848f00bdbf3c1c92724`, 12 317 424
+       bytes, mode `0755`. The GitHub release asset has no published digest; the SHA256 was
+       computed from the downloaded asset with `sha256sum` on 2026-11-08; re-verify it in the
+       implementation.
+     - `appimagetool-x86_64.AppImage`:
+       `https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage`,
+       SHA256 `ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0`, 15 092 216
+       bytes, mode `0755` (matches the GitHub asset digest).
+     - `runtime-x86_64`:
+       `https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64`,
+       SHA256 `2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d`, 944 632
+       bytes, mode `0644` (matches the GitHub asset digest). It is a data file, but it is pinned
+       by a dated release and its exact bytes.
+   - Do not use the `continuous` URL for any of the four downloads; the `appimagetool` 1.9.1
+     binary self-reports `continuous build`, but its URL is the `1.9.1` tag.
+   - Print the tool names and pinned versions in the summary; do not print the URLs in the summary.
+
+4. Build the AppDir and run `linuxdeploy` with the Qt plugin.
+   - `appdir="$stage/AppDir"`; `cp -a "$install_root/." "$appdir/"`. Assert
+     `usr/bin/qtranslate`, `usr/share/applications/qtranslate.desktop`, and
+     `usr/share/icons/hicolor/256x256/apps/qtranslate.png`; assert no `usr/bin/qt.conf`,
+     `usr/share/qt6`, `usr/lib`, `usr/plugins`, or `usr/translations` (the install tree is
+     bundle-free).
+   - Export `ARCH=x86_64`, `APPIMAGE_EXTRACT_AND_RUN=1`, and `QMAKE=/usr/bin/qmake6`; prepend
+     `$appimage_tools_dir` to `PATH` so `linuxdeploy` discovers the Qt plugin AppImage. The
+     environment variable is required because `linuxdeploy` starts the plugin AppImage as a child
+     process.
+   - Set `platform_plugins="libqoffscreen.so;libqminimal.so"`; when
+     `"$qt_plugins/platforms/libqwayland-generic.so"` exists, append
+     `";libqwayland-egl.so;libqwayland-generic.so"`. Export `EXTRA_PLATFORM_PLUGINS` with that
+     list. Do not use `EXTRA_QT_PLUGINS` (deprecated alias for `EXTRA_QT_MODULES`); do not set
+     `EXTRA_QT_MODULES`.
+   - Run `linuxdeploy-x86_64.AppImage --appimage-extract-and-run --appdir "$appdir" --desktop-file
+     "$install_root/share/applications/qtranslate.desktop" --icon-file
+     "$install_root/share/icons/hicolor/256x256/apps/qtranslate.png" --plugin qt`. Do not pass
+     `--output appimage`; `appimagetool` is run explicitly in step 5 with the pinned runtime.
+   - Expected result: `AppRun -> usr/bin/qtranslate`, root `qtranslate.desktop` and
+     `qtranslate.png` symlinks, `usr/lib` with Qt/ICU/private libraries, `usr/plugins/platforms`
+     with qxcb, offscreen, minimal, and (when present) Wayland, `usr/plugins/tls`,
+     `usr/plugins/imageformats`, `usr/plugins/platforminputcontexts`, the Wayland
+     shell-integration/decoration families, `usr/translations`, and `usr/bin/qt.conf` generated by
+     `linuxdeploy-plugin-qt`. `linuxdeploy` strips the AppDir binary and sets `$ORIGIN/../lib`;
+     this is expected and the AppImage binary must not be compared with the tar.gz/.deb binary.
+   - Do not copy the tar.gz `bin/qt.conf`; do not hand-copy plugins after the plugin. If the Wayland
+     platform plugin fails on a missing `wayland-graphics-integration-client` plugin, add the two
+     plugins explicitly with `linuxdeploy --library
+     "$qt_plugins/wayland-graphics-integration-client/libqt-plugin-wayland-egl.so"` and
+     `.../libshm-emulation-server.so`, record the reason, and do not blanket-copy the family.
+
+5. Run `appimagetool` with the pinned runtime.
+   - `appimage_artifact="$output_dir/qtranslate-$version-x86_64.AppImage"`; `rm -f` it before the
+     run so a stale file cannot be mistaken for this build.
+   - `ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 "$appimage_tools_dir/appimagetool-x86_64.AppImage"
+     --appimage-extract-and-run --runtime-file "$appimage_tools_dir/runtime-x86_64"
+     --no-appstream "$appdir" "$appimage_artifact"`.
+   - `--no-appstream` is required because the project has no AppStream metadata; do not add an
+     AppStream file in this task. `ARCH=x86_64` is required; appimagetool refuses to guess the
+     architecture of the AppDir.
+   - Record `appimage_size` with `stat -c %s` and `appimage_sha` with `sha256sum`; require the file
+     to be executable. `file` must report an ELF 64-bit LSB pie executable for x86-64.
+   - Measured: `appimagetool` 1.9.1 with `--runtime-file` and `ARCH=x86_64` produces an AppImage
+     that runs with `--appimage-extract-and-run`; it uses its bundled `mksquashfs`, so no system
+     `mksquashfs` is needed.
+
+6. Extend `write_checksums` and `print_summary`.
+   - `write_checksums`: build an array with `qtranslate-$version-linux-x86_64.tar.gz`,
+     `qtranslate_${version}_amd64.deb`, and, when `appimage_enabled`,
+     `qtranslate-$version-x86_64.AppImage`; run `( cd "$output_dir" && sha256sum "${files[@]}" >
+     SHA256SUMS-linux.txt )`; set `appimage_sha` as well as the existing artifact checksums.
+   - With `--skip-appimage`, write only the tar.gz and `.deb` lines. If a
+     `qtranslate-<version>-x86_64.AppImage` already exists in the output directory, print one
+     warning that it is not part of this run and is not listed in the checksum file; do not delete
+     it.
+   - `print_summary`: add the AppImage path, size, and SHA256, or `appimage: skipped
+     (--skip-appimage)`; print the pinned tool versions; keep the existing tar.gz/.deb fields.
+   - The tar.gz and `.deb` functions are unchanged; the AppImage build reads `install_root` and must
+     not modify `install_root` or `bundle_root`.
+
+7. Verify the positive path on trixie.
+   - Rebuild the image (step 1); run as the host UID with `docker run --rm --user
+     "$(id -u):$(id -g)" -e HOME=/tmp -e LANG=C.UTF-8 -v "$PWD:/src" -w /src qtranslate-trixie
+     bash -lc '...'` around a Release configure in `build/trixie-release`, the build, and
+     `./packaging/linux/package.sh --build-dir build/trixie-release --output-dir
+     build/artifacts-linux`.
+   - Record the AppImage path, size, and SHA256; `sha256sum -c SHA256SUMS-linux.txt` passes from the
+     output directory; the child 02 sentinel survives; the output directory holds only the staging
+     directory, tar.gz, `.deb`, AppImage, checksum file, and sentinel.
+   - `--version`: with `LD_LIBRARY_PATH` unset, a temporary `HOME`, `XDG_CONFIG_HOME`,
+     `XDG_STATE_HOME`, and a `0700` `XDG_RUNTIME_DIR`, and `QT_QPA_PLATFORM=offscreen`,
+     `./qtranslate-<version>-x86_64.AppImage --appimage-extract-and-run --version` prints
+     `QTranslate <version>` and exits 0; no FUSE is used.
+   - `--appimage-extract` in a temporary directory: check `AppRun`, `qtranslate.desktop`,
+     `qtranslate.png`, `usr/bin/qtranslate`, `usr/bin/qt.conf` (contains
+     `# generated by linuxdeploy-plugin-qt`, not the tar.gz layout), `usr/lib/libQt6Core.so.6`,
+     `usr/plugins/platforms/libqxcb.so`, `libqoffscreen.so`, `libqminimal.so`, optionally
+     `libqwayland-generic.so`/`libqwayland-egl.so`, `usr/plugins/tls/`, `usr/plugins/imageformats/`,
+     and `usr/translations/qt_de.qm`. `desktop-file-validate` passes on the extracted desktop file;
+     it contains `Exec=qtranslate` and `Icon=qtranslate`.
+   - `ldd` on `usr/bin/qtranslate`, `usr/lib/libQt6Gui.so.6`,
+     `usr/plugins/platforms/libqxcb.so`, and (when present) `libqwayland-generic.so` resolves Qt and
+     ICU inside the AppDir, not under `/usr/lib`. Record the system libraries that remain outside
+     the AppDir, including `libsecret-1.so.0`, `libglib-2.0.so.0`, `libssl3`/`libcrypto3`, and the
+     X11/Wayland desktop stack; do not claim the AppImage is self-contained beyond its glibc
+     baseline.
+   - `QT_DEBUG_PLUGINS=1` with `QT_QPA_PLATFORM=offscreen` shows
+     `<extract>/usr/plugins/platforms/libqoffscreen.so`; with `QT_QPA_PLATFORM=wayland` it loads
+     `libqwayland-generic.so` and fails only on the missing compositor (`Failed to create
+     wl_display`), with no `cannot open shared object file`; record the exact lines. If a Wayland
+     shared library is missing, use the explicit `linuxdeploy --library` fallback from step 4 and
+     record why.
+   - Translation path: write `<config>/qtranslate/qtranslate.ini` with `[app]`,
+     `startMinimized=true`, `uiLanguage=de`; run the extracted AppImage with `--verbose`; require
+     `<state>/qtranslate/qtranslate.log` to contain `Loaded Qt translation "qt_de.qm" from
+     "<extract>/usr/translations"`.
+   - GUI: in a throwaway `qtranslate-trixie` container with `xdotool` installed (install it only in
+     that container, not in the packaging image or the CI package list), run under
+     `xvfb-run -a` with temporary `HOME`/XDG directories. Start the AppImage with
+     `--translate-main` (it avoids the no-tray warning) or close every visible app window with
+     `xdotool`; wait for the main window, close it with `xdotool windowclose`, and require exit
+     code 0. If `xdotool` cannot be installed, record the GUI check as not performed and keep
+     `--version` and `--appimage-extract` as the gate; never claim a clean GUI exit without
+     evidence.
+   - Do not run the trixie AppImage on Astra. Record the glibc baseline fact: the bundled trixie Qt
+     6.8.2 requires `GLIBC_2.38`, Astra 1.8.7 has 2.36; the native Astra artifacts are child 05.
+
+8. Verify the offline, negative, and failure paths.
+   - `--help` exits 0 and lists `--skip-appimage`. A `--skip-appimage` run produces the tar.gz and
+     `.deb` only; `SHA256SUMS-linux.txt` has two lines; no tool download happens; a pre-existing
+     AppImage in the output directory is warned about, not deleted.
+   - Remove `build/linux-tools/appimage`, then run the default script in
+     `docker run --rm --network none ...` with a configured build directory; require a clear
+     `package.sh: error:` naming the tool, URL, and expected SHA256, and no AppImage.
+   - Corrupt a cached tool (`printf x >> build/linux-tools/appimage/<tool>`), run with
+     `--network none`; require the hard cache-mismatch error with the path, expected and actual
+     SHA256, and no silent re-download.
+   - A reduced `PATH` without `curl` names `curl (curl)` when the AppImage is enabled; with
+     `--skip-appimage`, the missing `curl` is not an error (provide the rest of the tools).
+   - The Astra host gate still prints the `docker run` command before the tool gate; with
+     `--skip-appimage`, the printed command contains it; no file is created.
+   - `git diff --check` is clean; only `packaging/linux/package.sh` and
+     `packaging/linux/trixie.Dockerfile` changed; no documentation or map file is edited.
+
+9. Regression and records.
+   - Trixie Debug and Release: configure/build with `-Wall -Wextra`, no warnings, and
+     `timeout 300 xvfb-run -a ctest --test-dir <build> --output-on-failure` 28/28 in both (the
+     counts are unchanged from child 03; the AppImage change is packaging-only).
+   - Astra: 28/28 in the existing build trees; run `sudo /usr/bin/fly-set-execid.sh` only if
+     something was rebuilt; the AppImage is not run there.
+   - Windows: no MSVC; review the diff and record the 23 tests as not performed.
+   - `git status`/`git diff --name-only`: only the two files; `build/` stays untracked; do not
+     commit (the lead commits).
+   - Report for the lead: the tool pins, sizes, and the computed plugin-qt SHA256; the dated
+     runtime pin; the AppImage size and SHA256; the extracted layout; the `ldd`/system-library list;
+     the plugin and translation log lines; the GUI check; the `--skip-appimage` and failure
+     evidence; the Astra glibc not-applicable; the Windows not-performed; the `linuxdeploy` strip,
+     `EXTRA_PLATFORM_PLUGINS`, and `wayland-graphics-integration-client` facts; the exact file list.
 
 ## Done when
 
-- A trixie run produces `qtranslate-<version>-x86_64.AppImage`; `--skip-appimage` is documented and
-  the default run without it fails clearly when the tool download or checksum fails.
-- The tool versions, URLs, and SHA256 values are pinned in the script (or a small
-  `packaging/linux/appimage-tools.txt` next to it); no `continuous` URL is used. Re-running the
-  script with the tools already cached does not download again.
-- `./qtranslate-<version>-x86_64.AppImage --appimage-extract-and-run --version` prints
-  `QTranslate <version>` on trixie without FUSE; a GUI start under `xvfb-run -a` with a temporary
-  `HOME` reaches the main window or the no-tray path and exits cleanly.
-- `--appimage-extract` shows `usr/bin/qtranslate`, the bundled Qt libraries, the platform plugins
-  (`qxcb` and optionally Wayland), `qtranslate.desktop`, and `qtranslate.png`; `ldd` on the
-  extracted binary resolves Qt to the AppDir, not to `/usr/lib`; the `.desktop` in the AppDir has
-  `Exec=qtranslate`/`Icon=qtranslate`.
-- `SHA256SUMS-linux.txt` contains the AppImage line and `sha256sum -c` passes; the archive/deb
-  lines from earlier children remain.
-- Debian 13 still builds and tests 28/28; Astra is not used for the AppImage run and is recorded as
-  not applicable (glibc baseline); Windows is recorded as not performed; no documentation edited.
+- A trixie run produces `qtranslate-<version>-x86_64.AppImage`; `--skip-appimage` is documented in
+  `--help` and produces only the tar.gz, the `.deb`, and a two-line `SHA256SUMS-linux.txt`. The
+  default run without `--skip-appimage` fails with a `package.sh: error:` naming the tool, URL, and
+  expected SHA256 when the download fails and no cached tool exists; a cached checksum mismatch is
+  also a hard failure, not a silent re-download.
+- The tool versions, URLs, and SHA256 values are pinned in `package.sh`: `linuxdeploy`
+  `1-alpha-20251107-1`, `linuxdeploy-plugin-qt` `1-alpha-20250213-1`, `appimagetool` `1.9.1`, and
+  the type2 `runtime-x86_64` `20251108`; no `continuous` URL is used for any of the four downloads,
+  and a changed asset fails the build. Re-running with valid cached tools does not download.
+- `QT_QPA_PLATFORM=offscreen ./qtranslate-<version>-x86_64.AppImage --appimage-extract-and-run
+  --version` prints `QTranslate <version>` on trixie without FUSE; a GUI start under `xvfb-run -a`
+  with a temporary `HOME`/XDG directories reaches the main window and exits 0 after the window is
+  closed.
+- `--appimage-extract` shows `AppRun`, `qtranslate.desktop`, `qtranslate.png`, `usr/bin/qtranslate`,
+  `usr/bin/qt.conf` generated by `linuxdeploy-plugin-qt`, the bundled Qt libraries,
+  `usr/plugins/platforms/libqxcb.so`, `libqoffscreen.so`, `libqminimal.so` (and the Wayland plugins
+  when `qt6-wayland` is present), `usr/plugins/tls`, `usr/plugins/imageformats`,
+  `usr/translations/qt_de.qm`, and the desktop file has `Exec=qtranslate`/`Icon=qtranslate`. `ldd`
+  resolves Qt and ICU inside the AppDir; the AppImage's `uiLanguage=de` run logs
+  `Loaded Qt translation "qt_de.qm" from <extract>/usr/translations`; `QT_DEBUG_PLUGINS=1` shows
+  the offscreen plugin and loads the Wayland plugin without a missing shared object.
+- `SHA256SUMS-linux.txt` contains the AppImage line together with the tar.gz and `.deb` lines, and
+  `sha256sum -c` passes; the tar.gz still has the child 02 layout and the `.deb` still has the child
+  03 metadata; `--skip-appimage` leaves both lines intact and does not claim an AppImage.
+- Debian 13 (trixie) still builds Debug and Release with no warnings and CTest 28/28; Astra is not
+  used for the AppImage run and is recorded as not applicable because the bundled trixie Qt 6.8.2
+  needs `GLIBC_2.38` while Astra has 2.36; Windows Debug/Release and the 23 tests are recorded as
+  not performed; no documentation is edited; only `packaging/linux/package.sh` and
+  `packaging/linux/trixie.Dockerfile` change.
 
 ## Risks
 
-- `linuxdeploy` excludes some libraries by default and may leave a needed ICU/pcre2/glib library out
-  of the AppDir. Check `ldd` on the extracted binary and on `usr/lib/libQt6Gui.so.6`; if a library
-  is missing, add it explicitly with `--library` or an exclusion override and record why.
-- `linuxdeploy-plugin-qt` needs a working `qmake6`/Qt installation and may pick the host's Qt if
-  `QMAKE` is wrong. Use the same Qt 6.8.2 as the build; check the bundled `libQt6Core` version in
-  the AppDir.
 - The AppImage tooling is downloaded, not packaged. Pin versions and SHA256; a network-less local
   run can use `--skip-appimage`, but CI must fail rather than omit the artifact. A checksum
-  mismatch is a hard failure.
-- FUSE is unavailable in containers; always use `--appimage-extract-and-run` for the tools and for
-  the produced AppImage test. Do not add `libfuse2` as a build dependency just to run the tools.
-- `appimagetool` may need `mksquashfs`; if the bundled one is absent, install `squashfs-tools` in
-  the image. Do not rely on the host's `mksquashfs` outside the container.
+  mismatch is a hard failure. Do not switch to `continuous` for any download, and do not trust a
+  cached file without verifying its SHA256.
+- The type2 runtime has a dated `20251108` release; use it instead of the `continuous` tag. It is
+  pinned by exact URL and SHA256, and a changed asset fails the build rather than being used
+  silently. Do not fall back to the obsolete AppImageKit 13 runtime (upstream marks it obsolete).
+- The `appimagetool` `1.9.1` asset self-reports `continuous build (git version 8c8c91f), build
+  296`. The download URL is the `1.9.1` tag and its SHA256 is pinned; do not replace it with the
+  `continuous` URL just because of that string.
+- `linuxdeploy` strips the AppDir executable and sets its RPATH to `$ORIGIN/../lib`. Do not compare
+  the AppImage binary's SHA256 with the tar.gz/.deb binary; the `--version` and GUI checks are the
+  gate for the AppImage.
+- `linuxdeploy` is an AppImage and starts `linuxdeploy-plugin-qt` as a child AppImage. Export
+  `APPIMAGE_EXTRACT_AND_RUN=1` in addition to passing `--appimage-extract-and-run` to the direct
+  calls; otherwise the plugin subprocess needs FUSE, which the image does not have. Do not add
+  `libfuse2`.
+- `linuxdeploy-plugin-qt` uses `EXTRA_PLATFORM_PLUGINS`, not `EXTRA_QT_PLUGINS`; the latter is a
+  deprecated alias for `EXTRA_QT_MODULES`. Use `QMAKE=/usr/bin/qmake6`, because the image has no
+  `qmake` and the plugin's search order otherwise checks `qmake-qt5` and `qmake` first.
+- `linuxdeploy-plugin-qt` does not deploy the `wayland-graphics-integration-client` family. If the
+  Wayland platform plugin fails on a missing shared object, add
+  `libqt-plugin-wayland-egl.so`/`libshm-emulation-server.so` with `linuxdeploy --library` and
+  record why; do not blanket-copy the family or overwrite the plugin's `qt.conf`.
+- `linuxdeploy` excludes some libraries by default and may leave a needed ICU/pcre2/glib library out
+  of the AppDir. Check `ldd` on the extracted binary, `usr/lib/libQt6Gui.so.6`, the platform
+  plugins, and (when present) `libqwayland-generic.so`; if a library is missing, add it explicitly
+  with `--library` or an exclusion override and record why.
+- `appimagetool` 1.9.1 bundles `mksquashfs`; `squashfs-tools` is not needed. Do not add it or rely
+  on the host's `mksquashfs`. `--no-appstream` is used because the AppDir has no AppStream
+  metadata; do not add AppStream data in this task.
 - The AppDir's `qt.conf`/plugin layout belongs to `linuxdeploy-plugin-qt`; do not overwrite it with
-  the portable archive's `qt.conf`. The two layouts are different and both must work.
+  the portable archive's `Prefix = ..`/`Translations = translations` file. The two layouts are
+  different and both must work. The AppImage's translations live in `usr/translations` and are
+  loaded through `../translations` from `usr/bin`; the `uiLanguage=de` log line is the proof.
 - `libsecret`/glib may or may not be bundled by `linuxdeploy`; record which ones are inside the
   AppDir and which are expected on the target. Do not claim the AppImage is fully self-contained
-  beyond its glibc baseline.
+  beyond its glibc baseline; `libssl3`/`libcrypto3` and `ca-certificates` are runtime-opened by the
+  TLS backend, and the X11/Wayland stack comes from the target.
+- FUSE is unavailable in containers; always use `--appimage-extract-and-run` for the tools and for
+  the produced AppImage test. Do not add `libfuse2` as a build dependency just to run the tools.
 - The AppImage is trixie-built and requires glibc 2.41; it does not run on Astra. Do not use the
   AppImage as the Astra fallback; child 05 builds the Astra artifacts natively.
-- The artifact name must not collide with the Windows artifacts or the tar.gz/deb names; the
-  release job downloads all artifact sets into one directory.
+- `xdotool` is not in the packaging image and is not a runtime dependency. Install it only in the
+  throwaway container used for the GUI smoke test, or record the GUI check as not performed; do not
+  add it to `packaging/linux/trixie-packages.txt` for CI.
+- `--skip-appimage` must not leave a stale AppImage line in `SHA256SUMS-linux.txt`. `write_checksums`
+  includes the AppImage only when it was built; a pre-existing AppImage in the output directory is
+  warned about, not deleted, because the output directory belongs to the user.
+- The tool cache under `build/` is untracked but can be stale after a pin change. The cache
+  mismatch error names the file and the expected/actual SHA256; remove the file and rerun. Do not
+  add the tools to the repository.
+- The artifact name must not collide with the Windows artifacts or the tar.gz/.deb names; the
+  release job downloads all artifact sets into one directory. `qtranslate-<version>-x86_64.AppImage`
+  is distinct from `qtranslate-<version>-linux-x86_64.tar.gz` and
+  `qtranslate_<version>_amd64.deb`.
+- `--skip-appimage` is for explicit local offline runs only. CI must call the script without it; a
+  missing AppImage is a failed artifact, not a warning. The same applies to a tool download or
+  checksum failure.
+- The AppImage's `--version` needs a working platform plugin because `QApplication` is constructed
+  before the command line is parsed. The AppDir includes offscreen/minimal through
+  `EXTRA_PLATFORM_PLUGINS`; if the plugin does not deploy one, run the check under `xvfb-run -a`
+  and record the difference. Do not add `-platform` arguments to the application.
+- Windows cannot be built here; the script and Dockerfile are Linux-only, but review the diff and
+  record the Windows 23 tests as not performed.
+- The trixie image is not a clean system: it has the full Qt and an `ld.so.cache`, so a missing
+  RUNPATH or a wrong `qt.conf` can still start the application there. The gates are the resolved
+  `ldd` paths, `QT_DEBUG_PLUGINS=1`, the translation log line, and the GUI smoke test; a real clean
+  trixie machine is not available and the AppImage is not claimed to be distribution-independent
+  beyond its glibc baseline.
+
+## Outcome
+
+`packaging/linux/package.sh` now builds `qtranslate-<version>-x86_64.AppImage` from the same
+bundle-free `cmake --install` tree as the portable archive and the `.deb`, and
+`packaging/linux/trixie.Dockerfile` carries `curl` and `file`. The trixie image was rebuilt
+(`qtranslate-trixie:latest`, `0f72bb49a508`): `curl` 8.14.1 and `file` 5.46 are present, `qmake6`
+reports 6.8.2, and FUSE/`squashfs-tools`/`xdotool` still are not.
+
+### Pins and downloads
+
+Four versioned downloads are pinned in `download_tool` and verified by SHA256; a valid cache is
+reused without network, a cache or asset mismatch is a hard failure naming the path, the expected
+and the actual SHA256, and a changed asset fails the build. No `continuous` URL is used and there is
+no fallback to a system copy or an unverified download. The plugin-qt asset has no upstream digest;
+its SHA256 was computed from the downloaded asset and re-verified independently.
+
+| Tool | Release | Bytes | SHA256 |
+| --- | --- | ---: | --- |
+| `linuxdeploy-x86_64.AppImage` | `1-alpha-20251107-1` | 19 421 688 | `c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d` |
+| `linuxdeploy-plugin-qt-x86_64.AppImage` | `1-alpha-20250213-1` | 12 317 424 | `15106be885c1c48a021198e7e1e9a48ce9d02a86dd0a1848f00bdbf3c1c92724` |
+| `appimagetool-x86_64.AppImage` | `1.9.1` | 15 092 216 | `ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0` |
+| `runtime-x86_64` | `20251108` | 944 632 | `2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d` |
+
+The tools self-report `linuxdeploy` `1-alpha` (git `cc7b864`, build 331), plugin-qt `1-alpha` (git
+`ce5291e`, build 211) and `appimagetool` `continuous build (git version 8c8c91f), build 296`; the
+last string is the known 1.9.1 asset text, not a `continuous` download.
+
+### Artifacts
+
+Final run: `./packaging/linux/package.sh --build-dir build/trixie-release --output-dir
+build/artifacts-linux` with the tools cached and the container network off.
+
+- `qtranslate-0.11.0-linux-x86_64.tar.gz`, 28 636 427 bytes, SHA256 `bad8a16f112d...`; still one
+  top-level directory, the child 02 `bin/qt.conf`, and no `DEBIAN`/`deb`/`dpkg` entries.
+- `qtranslate_0.11.0_amd64.deb`, 406 188 bytes, SHA256 `677be95a5725...`; still the three regular
+  files, only `./control` in the control archive, and the same control fields as child 03.
+- `qtranslate-0.11.0-x86_64.AppImage`, 39 270 904 bytes, SHA256
+  `e46dd917b5c8cedbd6f3520774ba3b90b2ce7eb6df52e880186f120416511e45`; `file` reports `ELF 64-bit
+  LSB pie executable, x86-64, version 1 (SYSV), static-pie linked, stripped`.
+- `SHA256SUMS-linux.txt` has three lines and `sha256sum -c` passes; the child 02 sentinel survives;
+  the output directory holds only the staging directory, the three artifacts, the checksum file,
+  and the sentinel.
+- The tar.gz/.deb byte values differ from child 03 because the binary was rebuilt, not because the
+  functions changed. The AppImage is not byte-reproducible: two runs had the same size and
+  different SHA256 values.
+
+### AppDir and AppImage layout
+
+`linuxdeploy --appdir <AppDir> --desktop-file <installed desktop> --icon-file <installed icon>
+--plugin qt` builds the AppDir, then the script calls `appimagetool --runtime-file <pinned runtime>
+--no-appstream <AppDir> <artifact>` explicitly. The root holds `AppRun`, `AppRun.wrapped ->
+usr/bin/qtranslate`, `.DirIcon`, `apprun-hooks/linuxdeploy-plugin-qt-hook.sh`, `qtranslate.desktop`,
+`qtranslate.png`, and `usr/`. `usr/bin` holds `qtranslate` (1 365 328 bytes) and the plugin-generated
+`qt.conf` (`# generated by linuxdeploy-plugin-qt`, `Prefix = ../`, `Plugins = plugins`, `Imports =
+qml`, `Qml2Imports = qml`); the portable archive keeps its own `Prefix = ..`/`Translations =
+translations` file. `usr/lib` has 92 libraries; `usr/plugins` has 21 plugins (imageformats
+gif/ico/jpeg, platforminputcontexts compose/ibus, platforms minimal/offscreen/wayland-egl/
+wayland-generic/xcb, tls certonly/openssl, wayland-decoration-client adwaita/bradient,
+wayland-shell-integration fullscreen-shell-v1/ivi-shell/qt-shell/wl-shell-plugin/xdg-shell,
+xcbglintegrations egl/glx); `usr/translations` has 56 `.qm` files including `qt_de.qm`,
+`qtbase_de.qm`, and `qtmultimedia_de.qm`. `desktop-file-validate` passes on the extracted desktop
+file; it has `Exec=qtranslate` and `Icon=qtranslate`.
+
+### Measured deviations from the plan
+
+- The install tree has `bin/` and `share/` at its root, so the AppDir receives it under `usr/`; the
+  plan's literal `cp -a "$install_root/." "$appdir/"` would not have produced `usr/bin/qtranslate`.
+- `linuxdeploy-plugin-qt` `1-alpha-20250213-1` does not deploy the `wayland-shell-integration` and
+  `wayland-decoration-client` families, and it deploys only `qtbase_*.qm`, not the `qt_*.qm`
+  meta-catalogs. A clean run with `EXTRA_PLATFORM_PLUGINS` produced only imageformats,
+  platforminputcontexts, platforms, tls, and xcbglintegrations; without xdg-shell a Wayland start
+  fails with `No shell integration named "xdg-shell" found`. The script therefore copies both
+  families after the plugin (RUNPATH `$ORIGIN/../../lib:$ORIGIN`, plus `libQt6WlShellIntegration`
+  and `libQt6Svg`) and the 13 `qt_*.qm`/`qtmultimedia_*.qm` catalogs, as the plan's exception for a
+  missed plugin with a recorded reason allows.
+- `linuxdeploy` did not strip `usr/bin/qtranslate` here: it keeps the install tree's BuildID and
+  only the RUNPATH changes to `$ORIGIN/../lib`. The binary is still not comparable with the
+  tar.gz/.deb one.
+- `AppRun` is a wrapper script, not a symlink; the symlink is `AppRun.wrapped`.
+- `libwayland-client.so.0` stays outside the AppDir (linuxdeploy's blacklist); the X11/Wayland
+  desktop stack otherwise comes from the target.
+
+### Runtime checks
+
+- `QT_QPA_PLATFORM=offscreen ./qtranslate-0.11.0-x86_64.AppImage --appimage-extract-and-run
+  --version` prints `QTranslate 0.11.0` and exits 0 with `LD_LIBRARY_PATH` unset and no FUSE.
+- `ldd` resolves Qt, ICU, `libsecret-1.so.0`, `libglib-2.0.so.0`, `libssl.so.3`/`libcrypto.so.3`,
+  the xcb helpers, `libwayland-cursor.so.0`, and `libwayland-egl.so.1` inside the AppDir for
+  `usr/bin/qtranslate`, `usr/lib/libQt6Gui.so.6`, `libqxcb.so`, `libqwayland-generic.so`, and the
+  added Wayland plugins. Outside remain glibc, `libstdc++`, `libgcc_s`, `libX11.so.6`,
+  `libxcb.so.1`, `libwayland-client.so.0`, EGL/GLX/OpenGL, fontconfig/freetype/harfbuzz,
+  `libSM`/`libICE`/`libuuid`, and `libffi`; there is no `not found`. The AppImage is not
+  self-contained beyond its glibc baseline: `libssl3`/`libcrypto3` turned out to be bundled, and
+  `ca-certificates` stays a target dependency.
+- `QT_DEBUG_PLUGINS=1` with `QT_QPA_PLATFORM=offscreen` loads
+  `<extract>/usr/plugins/platforms/libqoffscreen.so`; with `QT_QPA_PLATFORM=wayland` it loads
+  `libqwayland-generic.so` and stops at `Failed to create wl_display (No such file or directory)`,
+  with no `cannot open shared object file`.
+- With `uiLanguage=de` and `--verbose` the log contains `Loaded Qt translation "qt_de.qm" from
+  "<extract>/usr/translations"`.
+- The GUI smoke test ran in a throwaway `qtranslate-trixie` container with `xdotool`, `openbox`, and
+  `wmctrl` installed only there: under `xvfb-run -a` the `--translate-main` start reached the
+  `QTranslate` window and exited 0 after `wmctrl -i -c` delivered `WM_DELETE_WINDOW`. Plain
+  `xdotool windowclose` destroys the X window without a Qt close, so the application stayed alive;
+  it logged `System tray is not available; closing the window quits`.
+
+### Offline and failure paths
+
+- `--help` exits 0 and lists `--skip-appimage`; the header, usage, and summary name the AppImage, the
+  tools directory, and `curl`, which is required only when the AppImage is enabled.
+- `--skip-appimage` builds the tar.gz and `.deb` only, writes two checksum lines, needs neither
+  `curl` nor the tools directory, and leaves a foreign AppImage in the output directory in place
+  with one warning.
+- Without a cached tool and with `--network none` the script fails with `package.sh: error: cannot
+  download AppImage tool 'linuxdeploy-x86_64.AppImage' from <url> (expected SHA256
+  c20cd71e...); put the pinned release into 'build/linux-tools/appimage' or pass --skip-appimage for
+  an offline run`, and no AppImage is created. A corrupted cached tool fails with the path, the
+  expected and actual SHA256, and `remove the cached file and rerun`; it is never silently
+  re-downloaded.
+- A reduced `PATH` without `curl` names `curl (curl)` when the AppImage is enabled and passes the
+  tool gate with `--skip-appimage`. The Astra host gate prints the `docker run` command with
+  `--skip-appimage` and creates no file.
+
+### Regression
+
+- trixie Debug and Release: `cmake --build --clean-first` with `-Wall -Wextra`, no warnings, CTest
+  28/28 in both; the reviewer re-ran both suites 28/28.
+- Astra 1.8.7: 28/28 in the existing `build/linux-debug` and `build/linux-release`; no rebuild, so
+  `fly-set-execid.sh` was not needed, and the AppImage was not run there.
+- Windows/MSVC: Debug/Release and the 23 tests are **not performed**; the change is Linux-only and
+  was reviewed by diff.
+
+### Astra not applicable
+
+The AppImage is built on trixie and inherits its glibc 2.41 baseline. The bundled Qt 6.8.2 libraries
+require `GLIBC_2.38` (measured on `libicui18n`/`libicuuc`, `liblber`/`libldap`, `libxkbcommon`, and
+others) and `libsystemd.so.0` requires `GLIBC_2.39`, while Astra 1.8.7 has glibc 2.36. The trixie
+AppImage therefore does not run on Astra and is not used as the Astra fallback; the native Astra
+artifacts stay in child 05.
+
+### Known limitation
+
+The AppImage `ldd` gate inside `package.sh` only rejects `not found` entries; it does not assert that
+Qt and ICU resolve inside the AppDir. On the trixie image the system Qt can mask a missing bundled
+library, so the manual `ldd` checks above, `QT_DEBUG_PLUGINS=1`, and the `--version` gate remain the
+proof. The portable archive already has the strict in-bundle check; extending it to the AppDir is
+left for a later task.
+
+### Files
+
+Changed: `packaging/linux/package.sh` and `packaging/linux/trixie.Dockerfile` only. No design
+document is edited; `build/` and the tool cache stay untracked.

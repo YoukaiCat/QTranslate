@@ -9,7 +9,8 @@
 #
 # Stage 07-packaging-and-ci adds the packaging tooling as its tasks need it:
 # desktop-file-utils and patchelf, plus qt6-wayland and qt6-translations-l10n
-# for the portable archive; later ones add file, curl, and the AppImage tools.
+# for the portable archive; this task adds file and curl. The AppImage tools
+# themselves are downloaded by package.sh, not installed in the image.
 FROM debian:trixie
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -21,6 +22,10 @@ RUN apt-get update \
         ninja-build \
         git \
         ca-certificates \
+        # curl downloads the pinned AppImage tools in package.sh.
+        curl \
+        # file identifies the produced AppImage in the release verification.
+        file \
         qt6-base-dev \
         qt6-tools-dev \
         qt6-tools-dev-tools \
