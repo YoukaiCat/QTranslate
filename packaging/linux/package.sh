@@ -1110,8 +1110,9 @@ write_checksums() {
         files+=("qtranslate-$version-x86_64.AppImage")
     elif [[ $target == trixie && -e $output_dir/qtranslate-$version-x86_64.AppImage ]]; then
         # The output directory belongs to the user: keep a foreign AppImage,
-        # but do not let it look like part of this run. In Astra mode the trixie
-        # AppImage is legitimate and is listed in SHA256SUMS-linux.txt.
+        # but do not let it look like part of this run. Astra mode does not
+        # build an AppImage at all, so SHA256SUMS-linux-astra.txt never lists
+        # one.
         printf 'warning: %s exists but was not built in this run (--skip-appimage); it is not listed in %s\n' \
             "$output_dir/qtranslate-$version-x86_64.AppImage" "$checksums_file" >&2
     fi

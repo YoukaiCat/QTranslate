@@ -556,6 +556,67 @@ private slots:
         QCOMPARE(loaded.current().google.apiKey, QStringLiteral("retry-me"));
     }
 
+    void failedSecretLoadKeepsStoredToken()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        {
+            SettingsStore store(path, fakeCodec());
+            AppSettings settings = store.current();
+            settings.google.apiKey = QStringLiteral("google-secret");
+            store.save(settings);
+        }
+
+        QString token;
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            token = raw.value(QStringLiteral("google/apiKey")).toString();
+        }
+        QVERIFY(!token.isEmpty());
+
+        // The keyring is unavailable: the token cannot be decrypted, so the
+        // secret loads empty while the file still holds a usable token.
+        const SecretCodec lockedCodec{
+            [](const QString &plainText) {
+                return QByteArrayLiteral("P:") + plainText.toUtf8().toBase64();
+            },
+            [](const QByteArray &) { return QString(); },
+            [](const QByteArray &protectedData) {
+                return protectedData.startsWith(QByteArrayLiteral("P:"));
+            },
+        };
+        {
+            SettingsStore store(path, lockedCodec);
+            store.load();
+            QVERIFY(store.current().google.apiKey.isEmpty());
+
+            // Saving on exit must not delete the token that failed to load.
+            store.save(store.current());
+        }
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            QCOMPARE(raw.value(QStringLiteral("google/apiKey")).toString(), token);
+        }
+
+        // Once the keyring works again the secret is back, and an explicit
+        // removal still deletes it.
+        {
+            SettingsStore store(path, fakeCodec());
+            store.load();
+            QCOMPARE(store.current().google.apiKey, QStringLiteral("google-secret"));
+
+            AppSettings settings = store.current();
+            settings.google.apiKey.clear();
+            store.save(settings);
+        }
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            QVERIFY(!raw.contains(QStringLiteral("google/apiKey")));
+        }
+    }
+
     void futureVersionUsesDefaults()
     {
         QTemporaryDir dir;

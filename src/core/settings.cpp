@@ -76,6 +76,17 @@ void writeSecret(QSettings &settings, const QString &key, const QString &value,
                  const QString &oldValue, const SecretCodec &codec)
 {
     if (value.isEmpty()) {
+        // A secret that failed to load (for example, the keyring was
+        // unavailable) is empty in memory while the file still holds a token
+        // the backend can use. Do not delete that token on an automatic save
+        // at exit, or the secret would be lost even after the keyring
+        // recovers. An explicit removal follows a successful load, so oldValue
+        // is non-empty then.
+        const QString storedText = settings.value(key).toString();
+        if (!storedText.isEmpty() && oldValue.isEmpty() && codec.canReuse
+            && codec.canReuse(QByteArray::fromBase64(storedText.toLatin1()))) {
+            return;
+        }
         settings.remove(key);
         return;
     }
