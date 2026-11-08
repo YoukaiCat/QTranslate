@@ -19,7 +19,13 @@ unset LD_LIBRARY_PATH
 
 build_dir=build/linux-release
 output_dir=build/artifacts-linux
+target=trixie
 version=
+deb_version=
+bundle_name=
+tarball_name=
+checksums_file=SHA256SUMS-linux.txt
+host_label='Debian 13 (trixie)'
 stage=
 install_root=
 bundle_root=
@@ -63,35 +69,47 @@ Usage: packaging/linux/package.sh [options]
 
 Build the portable Linux archive qtranslate-<version>-linux-x86_64.tar.gz,
 the Debian package qtranslate_<version>_amd64.deb, and the AppImage
-qtranslate-<version>-x86_64.AppImage.
+qtranslate-<version>-x86_64.AppImage for the trixie target. The astra target
+builds Astra Linux 1.8.7 artifacts with distinct names and no AppImage.
 
 Options:
   --build-dir DIR    CMake Release build directory (default: build/linux-release)
   --output-dir DIR   artifact directory (default: build/artifacts-linux)
+  --target TARGET    packaging target: trixie (default) or astra; the astra
+                     target requires an Astra Linux 1.8.7 host, skips the
+                     AppImage, and appends +astra1 to the Debian version
   --version X.Y.Z    version used in the artifact name (default: project
                      version from CMakeLists.txt)
   --skip-appimage    do not build the AppImage; use this only for an explicit
                      local offline run, CI must build the AppImage
   --help             print this help and exit
 
-The script must run on Debian 13 (trixie), or inside the qtranslate-trixie
-image built from packaging/linux/trixie.Dockerfile. Other hosts are refused
-with the docker command to use.
+The trixie target must run on Debian 13 (trixie), or inside the
+qtranslate-trixie image built from packaging/linux/trixie.Dockerfile. Other
+hosts are refused with the docker command to use and, on Astra, the --target
+astra hint. The astra target must run on Astra Linux 1.8.7 itself.
 
 Required tools: cmake, qtpaths6, patchelf, tar, sha256sum,
 desktop-file-validate, readelf, ldd, dpkg-deb, dpkg-shlibdeps, du, and the
 usual coreutils/findutils tools. curl is required unless --skip-appimage is
-used.
+used; the astra target never builds the AppImage.
 
-Artifacts:
+Artifacts (trixie):
   <output-dir>/qtranslate-<version>-linux-x86_64.tar.gz
   <output-dir>/qtranslate_<version>_amd64.deb
   <output-dir>/qtranslate-<version>-x86_64.AppImage
   <output-dir>/SHA256SUMS-linux.txt
 
-The AppImage tools (linuxdeploy, linuxdeploy-plugin-qt, appimagetool, and the
-type2 runtime) are downloaded into build/linux-tools/appimage and verified
-against pinned SHA256 values. The script owns the staging directory
+Artifacts (astra):
+  <output-dir>/qtranslate-<version>-linux-x86_64-astra.tar.gz
+  <output-dir>/qtranslate_<version>+astra1_amd64.deb
+  <output-dir>/SHA256SUMS-linux-astra.txt
+
+The astra names and the SHA256SUMS-linux-astra.txt file are distinct from the
+trixie ones, so both sets can live in the same output directory. The AppImage
+tools (linuxdeploy, linuxdeploy-plugin-qt, appimagetool, and the type2
+runtime) are downloaded into build/linux-tools/appimage and verified against
+pinned SHA256 values. The script owns the staging directory
 <output-dir>/.qtranslate-staging.
 EOF
 }
@@ -121,6 +139,15 @@ parse_args() {
                 output_dir=$2
                 shift 2
                 ;;
+            --target)
+                [[ $# -ge 2 && -n ${2-} ]] \
+                    || usage_error "option --target requires a non-empty value"
+                case $2 in
+                    trixie|astra) target=$2 ;;
+                    *) usage_error "invalid target '$2': expected trixie or astra" ;;
+                esac
+                shift 2
+                ;;
             --version)
                 [[ $# -ge 2 && -n ${2-} ]] \
                     || usage_error "option --version requires a non-empty value"
@@ -138,6 +165,13 @@ parse_args() {
                 ;;
         esac
     done
+
+    # The Astra target never builds the AppImage. Applying this after the loop
+    # keeps --target and --skip-appimage order-independent; --skip-appimage is
+    # still accepted in Astra mode as a redundant option.
+    if [[ $target == astra ]]; then
+        appimage_enabled=0
+    fi
 }
 
 check_repo_root() {
@@ -161,6 +195,19 @@ check_host() {
     version_id=$(sed -n 's/^VERSION_ID=//p' "$os_release" | tr -d '"')
     codename=$(sed -n 's/^VERSION_CODENAME=//p' "$os_release" | tr -d '"')
 
+    if [[ $target == astra ]]; then
+        if [[ $os_id == astra ]]; then
+            # Astra reports VERSION_ID=1.8_x86-64, not 1.8.7, so the target
+            # keys on the distribution ID only.
+            host_label='Astra Linux (astra target)'
+            return 0
+        fi
+        printf 'package.sh: error: the astra target must be built on Astra Linux, not on ID=%s VERSION_ID=%s VERSION_CODENAME=%s\n' \
+            "${os_id:-unknown}" "${version_id:-unknown}" "${codename:-unknown}" >&2
+        printf 'The native Astra artifacts need Astra Linux 1.8.7 (Qt 6.10, ICU 72, libglib2.0-0); they cannot be built in the debian:trixie image.\n' >&2
+        exit 1
+    fi
+
     if [[ $os_id == debian ]]; then
         if [[ $codename == trixie || $version_id == 13 ]]; then
             supported=1
@@ -179,8 +226,13 @@ check_host() {
         fi
         printf '  docker run --rm -v "$PWD:/src" -w /src qtranslate-trixie ./packaging/linux/package.sh --build-dir %q --output-dir %q%s%s\n' \
             "$build_dir" "$output_dir" "$version_arg" "$skip_arg" >&2
+        if [[ $os_id == astra ]]; then
+            printf 'For the native Astra artifacts run this script on Astra Linux 1.8.7 with --target astra --build-dir %q --output-dir %q%s\n' \
+                "$build_dir" "$output_dir" "$version_arg" >&2
+        fi
         exit 1
     fi
+    host_label='Debian 13 (trixie)'
 }
 
 check_tools() {
@@ -245,6 +297,19 @@ resolve_version() {
         [[ -n $version ]] \
             || die "cannot read the project version from CMakeLists.txt; pass --version X.Y.Z"
     fi
+
+    # The Debian revision marker belongs to the .deb only: the application
+    # version and AppInfo::version() stay X.Y.Z.
+    if [[ $target == astra ]]; then
+        deb_version="$version+astra1"
+        bundle_name="qtranslate-$version-linux-x86_64-astra"
+        checksums_file=SHA256SUMS-linux-astra.txt
+    else
+        deb_version=$version
+        bundle_name="qtranslate-$version-linux-x86_64"
+        checksums_file=SHA256SUMS-linux.txt
+    fi
+    tarball_name="$bundle_name.tar.gz"
 }
 
 check_arch() {
@@ -411,7 +476,7 @@ install_tree() {
 
     # The install tree stays bundle-free for the .deb stage; the portable root
     # is a separate copy that receives the Qt runtime below.
-    bundle_root="$stage/qtranslate-$version-linux-x86_64"
+    bundle_root="$stage/$bundle_name"
     cp -a "$install_root/." "$bundle_root/"
 }
 
@@ -444,8 +509,16 @@ copy_lib() {
 }
 
 bundle_libraries() {
-    local soname file ldd_output
+    local soname file ldd_output icu_major
     mkdir -p "$bundle_root/lib"
+
+    # The ICU major version follows the Qt build: trixie bundles ICU 76 and
+    # Astra ships ICU 72. Derive it from libQt6Core's NEEDED entry instead of
+    # hardcoding one target's soname.
+    icu_major=$(LC_ALL=C readelf -d "$qt_libs/libQt6Core.so.6" 2>/dev/null \
+        | sed -n 's/.*libicui18n\.so\.\([0-9][0-9]*\).*/\1/p' | head -n1 || true)
+    [[ -n $icu_major ]] \
+        || die "cannot read the ICU major version from $qt_libs/libQt6Core.so.6"
 
     for soname in \
         libQt6Core.so.6 \
@@ -454,9 +527,9 @@ bundle_libraries() {
         libQt6Network.so.6 \
         libQt6DBus.so.6 \
         libQt6XcbQpa.so.6 \
-        libicui18n.so.76 \
-        libicuuc.so.76 \
-        libicudata.so.76 \
+        "libicui18n.so.$icu_major" \
+        "libicuuc.so.$icu_major" \
+        "libicudata.so.$icu_major" \
         libdouble-conversion.so.3 \
         libb2.so.1 \
         libpcre2-16.so.0 \
@@ -493,8 +566,9 @@ bundle_libraries() {
 
 bundle_plugins() {
     local platforms="$bundle_root/plugins/platforms"
+    local imageformats="$bundle_root/plugins/imageformats"
     local plugin family
-    mkdir -p "$platforms"
+    mkdir -p "$platforms" "$imageformats"
 
     for plugin in libqxcb.so libqoffscreen.so libqminimal.so; do
         [[ -f "$qt_plugins/platforms/$plugin" ]] \
@@ -502,12 +576,19 @@ bundle_plugins() {
         cp -a "$qt_plugins/platforms/$plugin" "$platforms/"
     done
 
-    for family in tls imageformats; do
-        [[ -d "$qt_plugins/$family" ]] \
-            || die "missing Qt plugin directory $qt_plugins/$family"
-        mkdir -p "$bundle_root/plugins/$family"
-        cp -a "$qt_plugins/$family/." "$bundle_root/plugins/$family/"
+    # The application only loads JPEG, GIF, and ICO images. Copy that measured
+    # set explicitly: Qt 6.10 ships more image format plugins whose libraries
+    # (libQt6Pdf, libQt6Svg) are not bundled, and check_ldd rejects them.
+    for plugin in libqgif.so libqico.so libqjpeg.so; do
+        [[ -f "$qt_plugins/imageformats/$plugin" ]] \
+            || die "missing Qt image format plugin $plugin in $qt_plugins/imageformats"
+        cp -a "$qt_plugins/imageformats/$plugin" "$imageformats/"
     done
+
+    [[ -d "$qt_plugins/tls" ]] \
+        || die "missing Qt plugin directory $qt_plugins/tls"
+    mkdir -p "$bundle_root/plugins/tls"
+    cp -a "$qt_plugins/tls/." "$bundle_root/plugins/tls/"
 
     if (( wayland_bundled )); then
         for plugin in libqwayland-generic.so libqwayland-egl.so; do
@@ -646,16 +727,16 @@ set_rpaths() {
 
 pack_tarball() {
     local listing top_level
-    artifact="$output_dir/qtranslate-$version-linux-x86_64.tar.gz"
+    artifact="$output_dir/$tarball_name"
     tar -C "$stage" --owner=0 --group=0 --numeric-owner -czf "$artifact" \
-        "qtranslate-$version-linux-x86_64"
+        "$bundle_name"
 
     # The archive is packed before build_deb, so the .deb staging directories
     # must never appear at the top level: only the bundle root may be there.
     listing=$(tar -tzf "$artifact")
     top_level=$(sed 's|/.*||' <<<"$listing" | sort -u)
-    [[ $top_level == "qtranslate-$version-linux-x86_64" ]] \
-        || die "the archive top-level entries are '$top_level' instead of only qtranslate-$version-linux-x86_64"
+    [[ $top_level == "$bundle_name" ]] \
+        || die "the archive top-level entries are '$top_level' instead of only $bundle_name"
     if grep -qE '^(DEBIAN|deb|dpkg)(/|$)' <<<"$listing"; then
         die "the archive contains DEBIAN/, deb/, or dpkg/ staging entries"
     fi
@@ -744,6 +825,21 @@ EOF
     grep -qF 'libxtst6' <<<"$deb_depends" \
         || die "Depends lacks libxtst6: $deb_depends"
 
+    if [[ $target == astra ]]; then
+        # Astra 1.8 predates the t64 transition and ships libxtst6 2:1.2.3.
+        # The package names must come from dpkg-shlibdeps, never a hand edit.
+        grep -qE 'libglib2.0-0 \(' <<<"$deb_depends" \
+            || die "the Astra Depends lacks libglib2.0-0: $deb_depends"
+        grep -qF 'libqt6core6t64' <<<"$deb_depends" \
+            || die "the Astra Depends lacks libqt6core6t64: $deb_depends"
+        if grep -qF 'libglib2.0-0t64' <<<"$deb_depends"; then
+            die "the Astra Depends contains libglib2.0-0t64: $deb_depends"
+        fi
+        if grep -qE 'libxtst6 \(>=' <<<"$deb_depends"; then
+            die "the Astra Depends constrains libxtst6: $deb_depends"
+        fi
+    fi
+
     # libsecret is an optional build dependency: the entry must follow the
     # NEEDED library, never a hand-written list.
     if readelf -d "$deb_root/usr/bin/qtranslate" | grep -qF 'libsecret-1.so.0'; then
@@ -761,7 +857,7 @@ EOF
 
     cat > "$deb_root/DEBIAN/control" <<EOF
 Package: qtranslate
-Version: $version
+Version: $deb_version
 Architecture: amd64
 Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>
 Installed-Size: $deb_installed_size
@@ -776,7 +872,7 @@ Description: QTranslate - fast desktop translator
 EOF
     chmod 0644 "$deb_root/DEBIAN/control"
 
-    deb_artifact="$output_dir/qtranslate_${version}_amd64.deb"
+    deb_artifact="$output_dir/qtranslate_${deb_version}_amd64.deb"
     dpkg-deb --build --root-owner-group "$deb_root" "$deb_artifact"
     deb_size=$(stat -c %s "$deb_artifact")
 
@@ -788,8 +884,8 @@ EOF
     # Self-check the metadata that users and apt see.
     [[ $(dpkg-deb --field "$deb_artifact" Package) == qtranslate ]] \
         || die "the .deb Package field is not qtranslate"
-    [[ $(dpkg-deb --field "$deb_artifact" Version) == "$version" ]] \
-        || die "the .deb Version field does not match $version"
+    [[ $(dpkg-deb --field "$deb_artifact" Version) == "$deb_version" ]] \
+        || die "the .deb Version field does not match $deb_version"
     [[ $(dpkg-deb --field "$deb_artifact" Architecture) == amd64 ]] \
         || die "the .deb Architecture field is not amd64"
     [[ $(dpkg-deb --field "$deb_artifact" Maintainer) \
@@ -999,18 +1095,19 @@ build_appimage() {
 
 write_checksums() {
     local files=(
-        "qtranslate-$version-linux-x86_64.tar.gz"
-        "qtranslate_${version}_amd64.deb"
+        "$tarball_name"
+        "qtranslate_${deb_version}_amd64.deb"
     )
     if (( appimage_enabled )); then
         files+=("qtranslate-$version-x86_64.AppImage")
-    elif [[ -e $output_dir/qtranslate-$version-x86_64.AppImage ]]; then
+    elif [[ $target == trixie && -e $output_dir/qtranslate-$version-x86_64.AppImage ]]; then
         # The output directory belongs to the user: keep a foreign AppImage,
-        # but do not let it look like part of this run.
-        printf 'warning: %s exists but was not built in this run (--skip-appimage); it is not listed in SHA256SUMS-linux.txt\n' \
-            "$output_dir/qtranslate-$version-x86_64.AppImage" >&2
+        # but do not let it look like part of this run. In Astra mode the trixie
+        # AppImage is legitimate and is listed in SHA256SUMS-linux.txt.
+        printf 'warning: %s exists but was not built in this run (--skip-appimage); it is not listed in %s\n' \
+            "$output_dir/qtranslate-$version-x86_64.AppImage" "$checksums_file" >&2
     fi
-    ( cd "$output_dir" && sha256sum "${files[@]}" > SHA256SUMS-linux.txt )
+    ( cd "$output_dir" && sha256sum "${files[@]}" > "$checksums_file" )
     artifact_sha=$(sha256sum "$artifact")
     artifact_sha=${artifact_sha%% *}
     deb_sha=$(sha256sum "$deb_artifact")
@@ -1031,6 +1128,8 @@ print_summary() {
     if (( appimage_enabled )); then
         appimage_summary=$(printf '  appimage: %s\n  appimage size: %s bytes\n  appimage sha256: %s\n  appimage tools: linuxdeploy 1-alpha-20251107-1, linuxdeploy-plugin-qt 1-alpha-20250213-1, appimagetool 1.9.1, type2-runtime 20251108' \
             "$appimage_artifact" "$appimage_size" "$appimage_sha")
+    elif [[ $target == astra ]]; then
+        appimage_summary='  appimage: skipped (Astra target)'
     else
         appimage_summary='  appimage: skipped (--skip-appimage)'
     fi
@@ -1050,7 +1149,7 @@ $appimage_summary
   plugins bundled: ${#plugins[@]}
   Qt translations: $translation_count/$translation_total
   Wayland bundle: $wayland_text
-  host check: Debian 13 (trixie)
+  host check: $host_label
   tool check: passed
   Qt check: $qt_libs (matches the build cache)
   build type: Release
