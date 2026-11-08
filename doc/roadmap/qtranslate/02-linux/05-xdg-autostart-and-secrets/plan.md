@@ -424,8 +424,10 @@ secrets through libsecret with a visible 0600-file fallback. Linux has 27 tests,
   API); the D-Bus probe can be a false negative when the service is installed but not running or
   activatable; the settings hint is based on `isAvailable()`, so a stored `f:` token is not
   highlighted when the keyring is otherwise available (it migrates on the next save); a token that
-  cannot be decoded (a no-libsecret build or a transient keyring failure at load) is removed from
-  the INI on the next save; a literal backslash is written as `\\` and the GNOME parser (GLib's
+  cannot be decoded was removed from the INI on the next save, which the stage acceptance fixed for
+  a transient keyring failure in `da3fefc` (`failedSecretLoadKeepsStoredToken`), while a
+  no-libsecret build still drops an `l:` token by design; a literal backslash is written as `\\` and
+  the GNOME parser (GLib's
   `GDesktopAppInfo`) does not load `%%` in
   `Exec`, so an install path containing `\` or `%` can fail to autostart; Astra keyring test entries
   remain; the live `:0` X11 tests occasionally flake under an active desktop (they were stable

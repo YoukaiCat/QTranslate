@@ -277,7 +277,7 @@ qtranslate/
 The §3.1 tree shows the repository's current layout, and the table below maps it to the current
 targets. Currently:
 
-| Target | What is included now (0.11.0) |
+| Target | What is included now (0.12.0) |
 |---|---|
 | `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `openaicompatibleservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |

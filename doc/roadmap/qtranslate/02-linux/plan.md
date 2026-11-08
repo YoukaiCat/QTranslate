@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: blocked
 base: 584e722
 ---
 
@@ -29,3 +29,11 @@ None technically; follows stage 1 in the old order. The primary distro is Debian
 ## Risks and what is needed from the user
 
 Wayland does not guarantee global shortcuts or synthetic input; X11 is the reliable target and Wayland relies on the `GlobalShortcuts` portal where available, manual copying, and CLI commands. No `ydotool`/`wtype` or other synthetic input is added under Wayland. The user must provide the Debian 13 (trixie) container/CI access and is checking the `.deb`, portable archive, and launch on Astra Linux. If the environment is unavailable, the lead may mark the stage blocked and ask whether to start an independent stage earlier.
+
+## Open question
+
+The acceptance passed on 2026-11-08 with the fix `da3fefc`: Astra and trixie Debug/Release are 28/28
+with no warnings, the integrated diff and the documentation were reviewed, and the only `## Done
+when` item left is the CI publication of the artifacts on a tag. That is the 0.12.0 release and
+needs the user's approval (version bump, release notes, push `main`, tag). The stage is `blocked`
+until that decision.

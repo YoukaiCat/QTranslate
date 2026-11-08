@@ -180,11 +180,23 @@ xvfb-run -a ctest --test-dir build/linux-release --output-on-failure
 ```
 
 `xvfb-run` needs `xauth`, and `tst_hotkeysequence` opens a window, so a bare `ctest` has no display.
-Packaging needs a trixie host or the container built from `packaging/linux/trixie.Dockerfile`:
+Packaging needs Debian 13 (trixie). On a trixie host, run the script after the build above:
+
+```bash
+./packaging/linux/package.sh --build-dir build/linux-release --output-dir build/artifacts-linux
+```
+
+On another host, build and package inside the container built from
+`packaging/linux/trixie.Dockerfile`; the build must use the container's Qt in a separate build
+directory:
 
 ```bash
 docker build -f packaging/linux/trixie.Dockerfile -t qtranslate-trixie .
-./packaging/linux/package.sh --build-dir build/linux-release --output-dir build/artifacts-linux
+docker run --rm -v "$PWD:/src" -w /src -e HOME=/tmp \
+  --user "$(id -u):$(id -g)" qtranslate-trixie bash -c '
+  cmake -S . -B build/linux-trixie -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr &&
+  cmake --build build/linux-trixie &&
+  ./packaging/linux/package.sh --build-dir build/linux-trixie --output-dir build/artifacts-linux'
 ```
 
 The script builds the portable archive, `.deb`, AppImage, and `SHA256SUMS-linux.txt`; pass
@@ -248,7 +260,6 @@ security policy's approval. To revoke it, run
   and keeps the main window.
 - Linux secrets use libsecret when it is available and the keyring is running; otherwise a `0600`
   file is used with a warning in settings.
-- On X11 the clipboard restore keeps text only; other clipboard formats are not restored.
 - The trixie Linux packages require glibc 2.38+ and do not run on Astra Linux 1.8.7. Astra uses the
   native `-astra.tar.gz`/`+astra1` packages.
 

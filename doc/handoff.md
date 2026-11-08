@@ -35,11 +35,14 @@ documentation is English. The migration to the tree roadmap and the English base
 
 ## Linux support (2026-11-08)
 
-- Stage `02-linux` is implemented and at acceptance. All eight children are `done`; `08-verification`
-  is `done` (`b488e03`). The final gate ran Astra Debug/Release 28/28 and trixie Debug/Release 28/28
-  with no warnings; the X11 matrix on the real `:0` session passed (Ctrl+Q/Ctrl+Shift+Q/Ctrl+W,
-  tray, settings, autostart, CLI with and without an instance, single-instance forwarding, clipboard
-  restore). The real GitHub run, tag, and release publication are not performed.
+- Stage `02-linux` passed acceptance on 2026-11-08 over `584e722..da3fefc`. All eight children are
+  `done`; `08-verification` is `done` (`b488e03`). The acceptance review found one real defect, fixed
+  in `da3fefc`: an automatic save at exit deleted an unreadable secret token from the INI when the
+  keyring was unavailable during load. The final gate ran Astra Debug/Release 28/28 and trixie
+  Debug/Release 28/28 with no warnings; the X11 matrix on the real `:0` session passed
+  (Ctrl+Q/Ctrl+Shift+Q/Ctrl+W, tray, settings, autostart, CLI with and without an instance,
+  single-instance forwarding, clipboard restore). The stage criterion "published by CI on a tag" is
+  the 0.12.0 release step and is not performed; it needs the user's approval.
 - X11 is the full target: `XGrabKey` hotkeys (with the Astra trusted-client step), XTest selection
   capture and paste, `_NET_ACTIVE_WINDOW`, XDG autostart, and per-user paths. Wayland is limited:
   the `GlobalShortcuts` portal where available, CLI commands, manual copying, clipboard-based
@@ -70,8 +73,16 @@ documentation is English. The migration to the tree roadmap and the English base
   `qtranslate-trixie` are moving tags; the Astra host gate checks `ID=astra` only; artifacts are not
   byte-reproducible. Wayland clipboard/in-place and the real portal remain unverified on a real
   compositor. Windows and the real GitHub run are not performed.
-- Release 0.12.0 is next after the stage acceptance and requires the user's explicit approval; only
-  then should the README download links and release notes be finalised.
+- Secrets still leave old data behind: when a secret is overwritten or migrated, the old fallback
+  file and old keyring entry are never deleted (there is no `SecretProtector::forget` API), so an
+  obsolete `0600` file with the plaintext can stay in `~/.config/qtranslate/secrets/`; a build
+  without libsecret still drops an `l:` token from the INI by design. The tray tooltip can show the
+  configured sequence before an asynchronous portal bind completes or after a desktop reassignment.
+  The `secretprotector.h` comment "keeps `l:` tokens unconditionally" is inaccurate for a
+  no-libsecret build.
+- Release 0.12.0 is next and requires the user's explicit approval; only then should the version
+  bump, the README download links, and `doc/releases/0.12.0.md` be finalised. When 0.12.0 is
+  published, the old 0.11.1 GitHub release is deleted (user decision).
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 

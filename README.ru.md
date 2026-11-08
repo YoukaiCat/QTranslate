@@ -183,11 +183,22 @@ xvfb-run -a ctest --test-dir build/linux-release --output-on-failure
 ```
 
 `xvfb-run` нужен `xauth`, а `tst_hotkeysequence` открывает окно, поэтому у обычного `ctest` нет
-дисплея. Для упаковки нужен хост trixie или контейнер из `packaging/linux/trixie.Dockerfile`:
+дисплея. Для упаковки нужен Debian 13 (trixie). На хосте trixie запустите скрипт после сборки выше:
+
+```bash
+./packaging/linux/package.sh --build-dir build/linux-release --output-dir build/artifacts-linux
+```
+
+На другом хосте собирайте и упаковывайте в контейнере из `packaging/linux/trixie.Dockerfile`;
+сборка должна использовать Qt из контейнера в отдельном каталоге:
 
 ```bash
 docker build -f packaging/linux/trixie.Dockerfile -t qtranslate-trixie .
-./packaging/linux/package.sh --build-dir build/linux-release --output-dir build/artifacts-linux
+docker run --rm -v "$PWD:/src" -w /src -e HOME=/tmp \
+  --user "$(id -u):$(id -g)" qtranslate-trixie bash -c '
+  cmake -S . -B build/linux-trixie -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr &&
+  cmake --build build/linux-trixie &&
+  ./packaging/linux/package.sh --build-dir build/linux-trixie --output-dir build/artifacts-linux'
 ```
 
 Скрипт собирает портативный архив, `.deb`, AppImage и `SHA256SUMS-linux.txt`; `--skip-appimage`
@@ -251,7 +262,6 @@ getfattr -n security.exec_id /usr/bin/qtranslate   # из пакета attr; о�
   оставляет главное окно.
 - Секреты Linux хранятся в libsecret, если он доступен и связка ключей запущена; иначе — в файле с
   правами `0600` и предупреждением в настройках.
-- В X11 при восстановлении буфера сохраняется только текст; остальные форматы не восстанавливаются.
 - Пакетам trixie нужен glibc 2.38+, на Astra Linux 1.8.7 они не работают. Для Astra есть нативные
   `-astra.tar.gz`/`+astra1` пакеты.
 
