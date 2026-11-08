@@ -1,0 +1,9 @@
+{
+  "responseData": {
+    "translatedText": "SECRET",
+    "match": 1
+  },
+  "quotaFinished": false,
+  "responseDetails": "SOMETHING WENT WRONG",
+  "responseStatus": 500
+}

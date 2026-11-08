@@ -1,0 +1,9 @@
+{
+  "responseData": {
+    "translatedText": "SECRET",
+    "match": 1
+  },
+  "quotaFinished": false,
+  "responseDetails": "INVALID LANGUAGE PAIR SPECIFIED. EXAMPLE: LANGPAIR=EN|IT USING 2 LETTER ISO OR RFC3066 LIKE ZH-CN",
+  "responseStatus": 403
+}

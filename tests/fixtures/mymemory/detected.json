@@ -1,0 +1,10 @@
+{
+  "responseData": {
+    "translatedText": "Hello",
+    "detectedLanguage": "en",
+    "match": 0.95
+  },
+  "quotaFinished": false,
+  "responseDetails": "",
+  "responseStatus": 200
+}

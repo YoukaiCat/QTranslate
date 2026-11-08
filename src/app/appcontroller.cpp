@@ -20,6 +20,7 @@
 #endif
 #include "services/deeplservice.h"
 #include "services/googletranslateservice.h"
+#include "services/mymemoryservice.h"
 #include "services/openaicompatibleservice.h"
 #include "ui/appicon.h"
 #include "ui/mainwindow.h"
@@ -226,12 +227,15 @@ void AppController::createTranslation()
     m_google = new GoogleTranslateService(m_network);
     m_deepl = new DeepLService(m_network);
     m_llm = new OpenAiCompatibleService(m_network);
+    m_mymemory = new MyMemoryService(m_network);
     m_google->applySettings(settings);
     m_deepl->applySettings(settings);
     m_llm->applySettings(settings);
+    m_mymemory->applySettings(settings);
     m_translations->registerService(m_google);
     m_translations->registerService(m_deepl);
     m_translations->registerService(m_llm);
+    m_translations->registerService(m_mymemory);
 
     if (TranslationService *service = m_translations->service(settings.translation.service)) {
         if (service->requiresOptIn() && !settings.translation.allowFreeServices) {
@@ -592,6 +596,8 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_deepl->applySettings(newSettings);
     if (m_llm)
         m_llm->applySettings(newSettings);
+    if (m_mymemory)
+        m_mymemory->applySettings(newSettings);
 
     if (oldSettings.llm.model != newSettings.llm.model
         || oldSettings.llm.baseUrl != newSettings.llm.baseUrl) {

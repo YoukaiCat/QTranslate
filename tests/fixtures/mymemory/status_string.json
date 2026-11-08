@@ -1,0 +1,9 @@
+{
+  "responseData": {
+    "translatedText": "Hallo Welt!",
+    "match": 1
+  },
+  "quotaFinished": false,
+  "responseDetails": "",
+  "responseStatus": "200"
+}

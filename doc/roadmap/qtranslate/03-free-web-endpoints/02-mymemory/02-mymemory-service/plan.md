@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-split-utf8-and-language-codes]
 ---
@@ -291,3 +291,74 @@ the outcome. `AGENTS.md` and the docs are updated in `03-mymemory-settings-and-d
   `03-mymemory-settings-and-docs`.
 - `03-mymemory-settings-and-docs` owns the settings group, translations and docs; do not add a
   temporary settings field or documentation here.
+
+## Outcome
+
+Done on 2026-11-08. The `mymemory` parser and service are registered in the app and covered by
+fixtures and two platform-neutral tests; Google, DeepL (including `free-web`), the LLM service and
+the shared `QueuedWebService`/`TextChunker`/`Languages` code are unchanged. No settings group,
+translation, `.ts`, `doc/`, README or `AGENTS.md` change is part of this task.
+
+- **Parser:** `src/services/mymemoryparser.h/.cpp`. `parseResponse()` returns `ServiceUnavailable`
+  for an HTML body, `BadResponse` for malformed JSON, a non-object root, an invalid
+  `responseStatus` type, an empty `translatedText` or a non-200 status with unknown details;
+  `responseStatus` may be a number or a numeric string and missing means 200; `quotaFinished`
+  accepts a bool or a case-insensitive `"true"`/`"false"` string. `responseDetails` is classified
+  case-insensitively before the generic status check (query length → `TooLong`, invalid
+  language/pair/distinct languages → `UnsupportedLanguage`, quota/free translations/daily limit →
+  `QuotaExceeded`, too many requests/rate limit → `RateLimited`). The optional
+  `responseData.detectedLanguage` goes through `Languages::fromServiceCode("mymemory", ...)`.
+  `errorForHttpStatus()` maps 403/429 → `RateLimited`, 413/414 → `TooLong`, 5xx → `Network`, other
+  non-2xx → `BadResponse`. Every message is a fixed English literal; `responseDetails`, the body,
+  the text and URLs are never echoed.
+- **Service:** `src/services/mymemoryservice.h/.cpp`. Id `mymemory`, display name `MyMemory`,
+  `isConfigured()` and `requiresOptIn()` true, languages from `Languages::supported()`, a no-op
+  `applySettings(const AppSettings &)` with an unnamed parameter, a 350 ms default pause set in the
+  constructor, and `setEndpoint()`/`defaultEndpoint()` for
+  `https://api.mymemory.translated.net/get`. `translate()` rejects `auto` first and empty or
+  whitespace-only text as `EmptyText`, maps both codes with `Languages::toServiceCode`, returns
+  `UnsupportedLanguage` for an empty code, splits with `TextChunker::splitUtf8(..., 500)` and
+  keeps every part's edge whitespace out of the request while restoring it in the result;
+  whitespace-only parts are never sent. `Reply` sends one `GET /get` per chunk (`q`,
+  `langpair=<src>|<dst>`, `mt=1`, `Accept: application/json`, no `Authorization`), calls
+  `noteRequestSent()` before every request, holds the queue slot until the last chunk and paces
+  chunks with `rateLimitMs()`. A failed chunk fails the whole reply without a partial result;
+  `abortImpl()` stops the active request; a timeout is `Timeout` with "MyMemory did not respond
+  within %1 s" and a cancellation is `Cancelled`; network errors use
+  `NetworkManager::describeNetworkError(request, false)`. `QNetworkReply::errorString()` is not used
+  and the `lcMyMemory` logs contain only the part count, language codes, HTTP status, elapsed time
+  and fixed messages.
+- **Tests:** `tests/fixtures/mymemory/` holds the 11 planned fixtures, including a
+  `status_403_details.json` with `translatedText: "SECRET"` and an `html.html` with `blocked` to
+  prove neither is echoed. `tst_mymemoryparser` covers the normal/detected/string-status/quota/
+  details/HTML/malformed/missing-text cases and the `errorForHttpStatus` rows (26 passing cases).
+  `tst_mymemoryservice` uses a local `QTcpServer` and covers the properties, the fresh 350 ms pause,
+  the `GET /get` fields, percent-encoding, language mapping, `auto`/unknown-language rejection
+  without a request, `EmptyText`, byte chunks, chunk pacing and queue serialization, aborting a
+  queued and an active reply, HTTP 403/429/503/414/400, an HTML body, `quotaFinished`, a
+  rate-limit body, a timeout, a refused connection and message hygiene; the accepted review finding
+  added `edgeWhitespaceIsTrimmed`, which sends `" \tHello\r\n "`, answers with a fixed `"X"` and
+  checks the trimmed `q` and the restored `" \tX\r\n "`. No real network is used.
+- **App and build:** `AppController` constructs `MyMemoryService` in `createTranslation()`, applies
+  its no-op settings and registers it after the LLM service; `applySettings()` forwards to it. No
+  `AppSettings` field or INI key is added. `tst_translationmanager` gains
+  `gatedRealServiceIsRefused`, which proves the real service is refused with `ServiceUnavailable`
+  and `serviceId == "mymemory"` while the gate is off. Both source pairs are in `qtranslate_core`
+  and both tests are in `tests/CMakeLists.txt` after `tst_languages`; they are platform-neutral, so
+  the counts are 31 Linux and 26 Windows.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie:latest`
+  (Qt 6.8.2, GCC 14.2), Debug and Release: zero `warning:` lines with `-Wall -Wextra`, the eight
+  targeted tests 8/8, `ctest -N` 31, the full suite 31/31 in every configuration, and
+  `tst_mymemoryservice` 10 repeats per configuration without a timing flake. The reviewer repeated
+  the Release/Debug build and the full Release suite (31/31) and 5 repeats per configuration after
+  the fix. The trixie runs used the existing `build/trixie-*` directories from the host uid; no
+  root-owned files were left in the repository.
+- **Review:** one accepted coverage finding, fixed by the new `edgeWhitespaceIsTrimmed` test; no code
+  change was needed for it. No blockers and no other findings; no real problem was deferred.
+- **Not performed and deferred by design:** Windows/MSVC Debug and Release and its 26 tests (no
+  MSVC; both new tests are platform-neutral) and a live smoke against the real endpoint (CTest never
+  contacts it). The settings group, the 14 `.ts` files, `doc/architecture.md`,
+  `doc/free-endpoints.md`, the `AGENTS.md` counts, both READMEs, `doc/handoff.md`, the root plan and
+  the final manual check belong to `03-mymemory-settings-and-docs`/the lead.
+- **Noted in passing:** one trixie Release full-suite run produced an unrelated `tst_cli`
+  (`forwarding`) flake; the next run was 31/31 and `tst_cli` alone passed 5/5.

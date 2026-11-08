@@ -1,5 +1,7 @@
 #include "core/translationmanager.h"
 #include "core/translationservice.h"
+#include "net/networkmanager.h"
+#include "services/mymemoryservice.h"
 
 #include <QPointer>
 #include <QSignalSpy>
@@ -305,6 +307,26 @@ private slots:
         QVERIFY(finished.wait(1000));
         QCOMPARE(second->result().translatedText, QStringLiteral("Привет"));
         QCOMPARE(service->requests.size(), 1);
+    }
+
+    void gatedRealServiceIsRefused()
+    {
+        NetworkManager network;
+        TranslationManager manager;
+        QVERIFY(!manager.freeServicesAllowed());
+        auto *service = new MyMemoryService(&network);
+        manager.registerService(service);
+        manager.setActiveService(QStringLiteral("mymemory"));
+
+        std::unique_ptr<TranslationReply> reply(
+            manager.translate(request(QStringLiteral("Hello")),
+                              TranslationManager::Channel::MainWindow));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(1000));
+        QCOMPARE(reply->result().error, TranslationError::ServiceUnavailable);
+        QCOMPARE(reply->result().serviceId, QStringLiteral("mymemory"));
+        QVERIFY(reply->result().errorMessage.contains(QStringLiteral("Settings")));
+        QVERIFY(reply->result().translatedText.isEmpty());
     }
 
     void regularServiceIsNotAffectedByTheGate()
