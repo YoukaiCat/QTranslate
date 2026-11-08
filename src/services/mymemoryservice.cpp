@@ -153,6 +153,11 @@ void MyMemoryService::Reply::send()
     query.addQueryItem(QStringLiteral("langpair"), m_source + QLatin1Char('|') + m_target);
     query.addQueryItem(QStringLiteral("mt"), QStringLiteral("1"));
     url.setQuery(query);
+    // Form-decoding servers read a literal '+' in the query as a space, so the
+    // text must carry it as %2B.
+    QString encodedQuery = url.query(QUrl::FullyEncoded);
+    encodedQuery.replace(QLatin1Char('+'), QStringLiteral("%2B"));
+    url.setQuery(encodedQuery, QUrl::StrictMode);
 
     QNetworkRequest request = m_network->makeRequest(url);
     request.setRawHeader("Accept", "application/json");

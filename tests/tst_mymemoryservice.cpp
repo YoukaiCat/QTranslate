@@ -246,7 +246,7 @@ private slots:
         m_server->handler = [](const FakeHttpServer::Request &request) {
             return FakeHttpServer::Response{200, echoResponse(request.url), true};
         };
-        const QString text = QStringLiteral("Hello мир 😀");
+        const QString text = QStringLiteral("Hello + мир 😀");
         std::unique_ptr<TranslationReply> reply(
             m_service->translate({text, QStringLiteral("en"), QStringLiteral("ru")}));
         QSignalSpy finished(reply.get(), &TranslationReply::finished);
@@ -257,7 +257,10 @@ private slots:
         QCOMPARE(queryValue(url, QStringLiteral("q")), text);
         const QString raw = url.query(QUrl::FullyEncoded);
         QVERIFY2(!raw.contains(QLatin1Char(' ')), qPrintable(raw));
+        // A literal '+' would reach a form-decoding server as a space.
+        QVERIFY2(!raw.contains(QLatin1Char('+')), qPrintable(raw));
         QVERIFY2(raw.contains(QStringLiteral("%20")), qPrintable(raw));
+        QVERIFY2(raw.contains(QStringLiteral("%2B")), qPrintable(raw));
         QVERIFY2(raw.contains(QStringLiteral("%D0")), qPrintable(raw)); // Cyrillic
         QVERIFY2(raw.contains(QStringLiteral("%F0%9F")), qPrintable(raw)); // emoji
     }
