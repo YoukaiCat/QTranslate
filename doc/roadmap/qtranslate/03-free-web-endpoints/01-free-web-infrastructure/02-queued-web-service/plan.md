@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -229,3 +229,77 @@ implemented infrastructure. No README or `doc/handoff.md` change.
   not depend on a real network, `QNetworkAccessManager`, or a display.
 - No live smoke test is needed: the task adds no endpoint and the tests use a fake service. The
   DeepL live endpoint remains a manual smoke, not a CTest.
+
+## Outcome
+
+Done. `QueuedWebService` holds the serialized per-host queue in `qtranslate_core`, and
+`DeepLWebService` uses it with no behaviour change; no service is added, no endpoint is enabled, and
+the opt-in gate is untouched.
+
+- Base: `src/services/queuedwebservice.h/.cpp`, `QueuedWebService : public TranslationService`,
+  nested `Reply : public TranslationReply` with `using TranslationReply::TranslationReply;` and a
+  pure `virtual void start()`, public `setRateLimitMs()`/`rateLimitMs()`/`noteRequestSent()`,
+  protected `enqueue()`, private `schedule()`/`startNext()`, `m_queue`/`m_active`/`m_lastRequest`/
+  `m_timer`/`m_rateLimitMs = 2000`. `enqueue()`, `schedule()`, `startNext()`, and
+  `noteRequestSent()` were moved verbatim from the old `DeepLWebService` body (the diff confirms the
+  same statements and order), including the `m_active == reply` checks, the skip of `!first ||
+  first->isFinished()`, and the `finished`/`destroyed` connections. The single-shot timer is created
+  in the base constructor as a child of the service, so no callback can run after destruction. The
+  header keeps only `core/translationservice.h`, `<QElapsedTimer>`, `<QList>`, `<QPointer>` and a
+  `class QTimer;` forward declaration; the base knows no endpoint, retry delay, code conversion,
+  settings, gate, or UI.
+- DeepL: `DeepLWebService` derives from `QueuedWebService`, its `Reply` from `QueuedWebService::Reply`
+  with `start() override`; the duplicate members, the private queue methods, and the duplicated
+  `setRateLimitMs()` are gone. `QueuedWebService(parent)` replaces `TranslationService(parent)`.
+  `Reply::send()` still calls `noteRequestSent()` immediately before `nam()->post()` and the `429`
+  path re-enters `send()` after `m_retryDelayMs`, so the pause covers the retry. The endpoint,
+  `m_retryDelayMs = 3000`, `toWebCode()`, the 5000-character chunking, and the parser are unchanged
+  and do not appear in the diff. `<QList>`/`<QPointer>` are now included explicitly in the `.cpp`
+  because the header no longer provides them transitively. `DeepLService::setWebRateLimitMs()` and
+  `tst_deeplservice.cpp:194` compile unchanged against the inherited setter.
+- Test: `tests/tst_queuedwebservice.cpp`, `QTEST_GUILESS_MAIN`, registered with
+  `qtranslate_add_test(tst_queuedwebservice)` between `tst_popupwindow` and `tst_settings`; the
+  target is platform-neutral (no Widgets, no `QT_QPA_PLATFORM`, no `if(WIN32)`). The fake service
+  and reply cover `startsRepliesOneAtATime`, `rateLimitDelaysTheNextReply`,
+  `abortedQueuedReplyIsSkipped`, `deletingTheActiveReplyStartsTheNext`, and
+  `noteRequestSentRestartsThePause` (a two-chunk reply). Every wait is
+  `QTRY_VERIFY_WITH_TIMEOUT(..., 5000)`; timing assertions are lower bounds with a 10% tolerance
+  (`>= 90` for a 100 ms pause) and no upper bounds; replies are owned by
+  `std::unique_ptr<TranslationReply>` and the service is reset in `cleanup()`. There is no network,
+  no `QTcpServer`, and no display. The test includes `core/settings.h` on top of the plan's include
+  list so the fake `applySettings(const AppSettings &)` override sees the complete type; the include
+  is not strictly required for an empty override, but it is the only deviation from the plan's
+  include list and it does not affect behaviour.
+- `CMakeLists.txt`: `queuedwebservice.cpp/.h` added to `qtranslate_core` after
+  `openaicompatibleservice`, keeping the services block in order.
+- Documentation: `doc/architecture.md` §3.1 (service file and test), §3.2 (`queuedwebservice` in
+  `qtranslate_core`, `tst_queuedwebservice` in the test list, "24 tests on Windows and 29 on Linux"),
+  §4.5 ("The shared request queue" paragraph after the opt-in gate), §4.7.1 (shared queue, unchanged
+  2 s pause, 429 retry still 3 s, test list); `doc/free-endpoints.md` §8 item 3 marks per-host rate
+  limiting as implemented infrastructure with the service-specific pauses. The review found two
+  stale current-state counts in the same document (§4.14 and the portability notes said 28 Linux
+  tests) and a missing row in the §8 test table; they were corrected to 29 tests (21 shared plus 8
+  Linux platform tests) and the `tst_queuedwebservice` row was added. `AGENTS.md` was corrected from
+  "23 Windows tests and all 28 Linux tests" to 24/29, because it is the build-and-test rule read in
+  every session. The READMEs, `doc/handoff.md`, the `.ts` files, `tst_translations`, and the root
+  roadmap were left untouched as the task required; their 23/28 counts are now stale and belong to
+  the next documentation or release pass.
+- Verification: Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie:latest` (Qt 6.8.2,
+  GCC 14.2), Debug and Release: zero `warning:` lines with `-Wall -Wextra`; `tst_queuedwebservice`,
+  `tst_deeplwebservice`, and `tst_deeplservice` pass 3/3 in each configuration, and the full suite
+  passes 29/29 in each. `tst_deeplwebservice` passes without any change to its expectations,
+  including `serializesRequestsWithRateLimit`, `retriesOnceAfterTooManyRequests`,
+  `givesUpAfterTwoTooManyRequests`, `forbiddenIsTreatedAsRateLimited`, and `timeout`. The new test
+  was also run 15 times in a row without a failure. A Clang 16 Debug build (optional, not a gate) is
+  warning-free and passes the targeted tests. Windows/MSVC is unavailable here: the Windows
+  Debug/Release build and its tests were not performed, and the new platform-neutral target would
+  make a Windows run 24 tests, not 23. No live DeepL smoke was run: the endpoint and protocol did
+  not change.
+- Review: no blocker was found. Besides the stale counts, the reviewer noted that `core/settings.h`
+  in the new test is not strictly required for an empty `applySettings()` override; it was kept as
+  harmless, and `doc/free-endpoints.md:46` still saying "Inside `DeepLWebService`" is accurate
+  through inheritance, so it was not reworded.
+- Deferred by design: no service uses the base yet. MyMemory, Mozhi, Yandex, Bing, and Reverso set
+  their own pause (`setRateLimitMs()` in the constructor: MyMemory 350 ms, Yandex 750 ms, Reverso
+  600 ms) and a forgotten call silently leaves the 2000 ms default; `07-fallback-chain` builds on
+  these services.

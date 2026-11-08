@@ -210,6 +210,7 @@ qtranslate/
 │   │   ├── deeplparser.h/.cpp
 │   │   ├── deeplwebservice.h/.cpp    unofficial free web endpoint
 │   │   ├── deeplwebparser.h/.cpp     pure parsing for the web endpoint
+│   │   ├── queuedwebservice.h/.cpp   serialized per-host request queue
 │   │   └── openaicompatibleservice.h/.cpp  OpenAI-compatible provider
 │   ├── platform/
 │   │   ├── hotkeymanager.h           platform-independent interface
@@ -261,6 +262,7 @@ qtranslate/
     ├── tst_openaicompatibleservice.cpp
     ├── tst_popupplacement.cpp
     ├── tst_popupwindow.cpp
+    ├── tst_queuedwebservice.cpp        serialized request queue with a fake service
     ├── tst_secretprotector.cpp         Windows and Linux variants
     ├── tst_selectiongrabber_linux.cpp  Linux selection capture
     ├── tst_settings.cpp
@@ -279,9 +281,9 @@ targets. Currently:
 
 | Target | What is included now (0.12.0) |
 |---|---|
-| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `openaicompatibleservice` |
+| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `openaicompatibleservice`, `queuedwebservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`; 23 tests on Windows and 28 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_queuedwebservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`; 24 tests on Windows and 29 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
@@ -669,6 +671,18 @@ service is active, it switches the active service to Google in memory and logs t
 restores the user's choice. `ServiceUnavailable` is also the error kind for a blocked or HTML
 response from a free web endpoint; the official API paths do not use it.
 
+The shared request queue. `QueuedWebService` (in `qtranslate_core`) serializes the replies of a
+service that talks to one host: one instance per host, at most one active reply, and the next reply
+starts no sooner than `rateLimitMs()` after the last network request. A reply reports every request
+with `noteRequestSent()` right before handing it to `QNetworkAccessManager`, so the pause covers the
+initial request, retries, and later chunks alike. A reply keeps its queue slot until it finishes; a
+multi-chunk protocol therefore sends its chunks sequentially inside one slot and paces them with
+`rateLimitMs()` instead of enqueuing every chunk as a separate reply. A reply that is finished while
+queued is skipped, and a reply deleted while active is dropped through `QPointer`/`destroyed`. The
+default pause is 2000 ms (the moved DeepL value); a service overrides it in its constructor, and
+`setRateLimitMs(0)` disables the pause for tests only. The base knows no endpoints, service
+settings, the opt-in gate, or UI; `DeepLWebService` is its first user.
+
 Each service receives a `NetworkManager` pointer (the shared `QNetworkAccessManager` and
 `makeRequest()` with a timeout and `User-Agent`) and does not create its own manager — this way the
 proxy is configured in one place.
@@ -814,13 +828,15 @@ Content-Type: application/json
   official API, and parsing reuses `DeepLParser`.
 - The chunk limit is 5000 characters. Chunks go in one request as a `text` array; edge spaces are not
   sent and are restored when concatenating.
-- Requests to the host are serialized inside the service and go no more often than once every 2 s,
-  including requests from the main window, the popup, and selection replacement. On `429` — a 3 s
-  pause and one retry. `403` is treated as a block/limit (`RateLimited`), `413` → `TooLong`,
+- Requests to the host are serialized by the shared `QueuedWebService` queue with the unchanged 2 s
+  pause, so they go no more often than once every 2 s, including requests from the main window, the
+  popup, and selection replacement. On `429` — a 3 s pause and one retry; the retry reports its
+  request to the queue as well. `403` is treated as a block/limit (`RateLimited`), `413` → `TooLong`,
   `5xx` → `Network`.
 - `isConfigured() == true`; no key or cookies are used. The text and response body are not written to
   the log.
-- Tests — `tst_deeplwebparser`, `tst_deeplwebservice`, and the `free-web` mode in `tst_deeplservice`;
+- Tests — `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_queuedwebservice` (the shared queue with
+  a fake service), and the `free-web` mode in `tst_deeplservice`;
   live requests are only run as a manual smoke because the endpoint is unstable and rate-limited.
   Switching the mode in the UI: `deeplMode` in `SettingsDialog`, the API key field is disabled in
   `free-web`.
@@ -1306,7 +1322,7 @@ buttons and menus for Hindi remain English.
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
 `*_win.cpp`; the Linux backends are `*_linux.cpp`, and `*_stub.cpp` remains only for platforms
 without a backend. `qtranslate_core`, `net/`, `services/`, and the UI do not use WinAPI. The Linux
-tree configures, builds, and links: 28 tests (20 shared plus 8 Linux platform tests) pass under
+tree configures, builds, and links: 29 tests (21 shared plus 8 Linux platform tests) pass under
 `xvfb-run` on Debian 13 (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2;
 Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
 X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
@@ -1569,6 +1585,7 @@ are linked into separate test targets):
 | `tst_deeplservice` | DeepL against a local HTTP server: Authorization, `text` array, English variants, Developer/Growth hosts, errors, timeout, key check |
 | `tst_deeplwebparser` | Parsing the DeepL web endpoint response, error codes `403/429/413/5xx`, rate limit detection in the body |
 | `tst_deeplwebservice` | DeepL free web against a local HTTP server: `Authorization: None`, language codes, 5000 characters, retry on `429`, serialization and a 2 s pause, errors, timeout |
+| `tst_queuedwebservice` | The shared per-host queue on a fake service: one reply at a time, the rate pause, aborting a queued reply, deleting the active reply, `noteRequestSent()` restarting the pause, a multi-chunk reply holding its slot |
 | `tst_openaichat` | Chat Completions request serialization (model, messages, temperature, `max_tokens`, stream), response parsing, error and finish-reason mapping, model list, endpoint building |
 | `tst_openaicompatibleservice` | The OpenAI-compatible service against a local HTTP server: configuration errors, chat request, source language, plain-text and fenced-JSON responses, whitespace, HTTP errors, timeout, cancellation, OpenRouter key rules, model loading and edited base URL |
 | `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, `closest` when the service changes, unknown codes |
@@ -1749,7 +1766,7 @@ Limitations of the environment in which the final verification was performed (no
 - The installer is not code-signed: Windows SmartScreen may show a warning. There is no certificate
   in the project; options and requirements are described in [`code-signing.md`](code-signing.md).
   Adding a signature does not change the artifact format.
-- Linux is implemented on `main` for 0.12.0 (28 tests, X11 full, Wayland limited); the 0.11.x
+- Linux is implemented on `main` for 0.12.0 (29 tests, X11 full, Wayland limited); the 0.11.x
   releases remain Windows-only, so the Linux packages appear only with 0.12.0. The trixie artifacts
   do not run on Astra 1.8.7, which needs the separate native build (§4.14). macOS is not planned.
 

@@ -10,6 +10,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QList>
 #include <QLoggingCategory>
 #include <QMetaObject>
 #include <QNetworkAccessManager>
@@ -54,7 +55,7 @@ QList<WebPart> splitParts(const QString &text)
 
 } // namespace
 
-class DeepLWebService::Reply : public TranslationReply
+class DeepLWebService::Reply : public QueuedWebService::Reply
 {
 public:
     Reply(NetworkManager *network, QUrl url, QString serviceId, QList<WebPart> parts,
@@ -74,7 +75,7 @@ public:
 
     // Starts on the next event loop iteration: finished() must not be emitted
     // from inside translate().
-    void start()
+    void start() override
     {
         m_elapsed.start();
         QMetaObject::invokeMethod(this, [this] { send(); }, Qt::QueuedConnection);
@@ -259,14 +260,11 @@ DeepLWebService::DeepLWebService(NetworkManager *network, QObject *parent)
 }
 
 DeepLWebService::DeepLWebService(NetworkManager *network, QString serviceId, QObject *parent)
-    : TranslationService(parent)
+    : QueuedWebService(parent)
     , m_network(network)
     , m_serviceId(std::move(serviceId))
     , m_endpoint(defaultEndpoint())
 {
-    m_timer = new QTimer(this);
-    m_timer->setSingleShot(true);
-    connect(m_timer, &QTimer::timeout, this, &DeepLWebService::schedule);
 }
 
 QString DeepLWebService::id() const
@@ -339,11 +337,6 @@ void DeepLWebService::setEndpoint(const QUrl &url)
     m_endpoint = url;
 }
 
-void DeepLWebService::setRateLimitMs(int ms)
-{
-    m_rateLimitMs = qMax(0, ms);
-}
-
 void DeepLWebService::setRetryDelayMs(int ms)
 {
     m_retryDelayMs = qMax(0, ms);
@@ -370,64 +363,4 @@ QString DeepLWebService::toWebCode(const QString &deeplCode)
         result += QLatin1Char('-') + region;
     }
     return result;
-}
-
-void DeepLWebService::enqueue(Reply *reply)
-{
-    m_queue.append(reply);
-    schedule();
-}
-
-void DeepLWebService::schedule()
-{
-    if (m_active || m_queue.isEmpty())
-        return;
-
-    while (!m_queue.isEmpty()) {
-        const QPointer<Reply> first = m_queue.first();
-        if (!first || first->isFinished()) {
-            m_queue.removeFirst();
-            continue;
-        }
-        break;
-    }
-    if (m_queue.isEmpty())
-        return;
-
-    if (m_lastRequest.isValid()) {
-        const qint64 remaining = qint64(m_rateLimitMs) - m_lastRequest.elapsed();
-        if (remaining > 0) {
-            m_timer->start(int(remaining));
-            return;
-        }
-    }
-    startNext();
-}
-
-void DeepLWebService::startNext()
-{
-    while (!m_queue.isEmpty()) {
-        Reply *reply = m_queue.takeFirst();
-        if (!reply || reply->isFinished())
-            continue;
-
-        m_active = reply;
-        connect(reply, &TranslationReply::finished, this, [this, reply] {
-            if (m_active == reply)
-                m_active = nullptr;
-            schedule();
-        });
-        connect(reply, &QObject::destroyed, this, [this, reply] {
-            if (m_active == reply)
-                m_active = nullptr;
-            schedule();
-        });
-        reply->start();
-        return;
-    }
-}
-
-void DeepLWebService::noteRequestSent()
-{
-    m_lastRequest.restart();
 }

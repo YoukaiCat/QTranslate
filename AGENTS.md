@@ -36,7 +36,7 @@
   `tst_popupwindow` and `tst_settingsdialog` also set offscreen themselves. The Linux CI job runs
   GUI tests under `xvfb-run`.
 - Debug and Release must build without warnings (`/W4` on Windows, `-Wall -Wextra` on Linux); all
-  23 Windows tests and all 28 Linux tests must pass. The project requires Qt 6.5+; local development
+  24 Windows tests and all 29 Linux tests must pass. The project requires Qt 6.5+; local development
   uses Qt 6.12 on Windows and Qt 6.10.2 (Astra) or Qt 6.8.2 (trixie) on Linux.
 - Tests use local `QTcpServer` and fixtures; no real Google/DeepL keys or internet are required.
   `tst_hotkeymanager` is Windows-only; `tst_autostart` and `tst_secretprotector` have Windows and

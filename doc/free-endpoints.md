@@ -122,8 +122,9 @@ remains unofficial.
    with `ServiceUnavailable` until the user enables it. The DeepL `free-web` mode stays outside the
    gate as an explicit mode with its own warning.
 2. For each service — its own `TranslationService` and parser; no keys are needed.
-3. Per-host rate limiting: a mutex + pause (DeepL 2 s, Yandex 750 ms, Reverso 600 ms, MyMemory 350
-   ms); no parallel requests to one host.
+3. Per-host rate limiting: implemented infrastructure in `QueuedWebService` — replies of one host
+   are serialized and paused by the service-specific value (DeepL 2 s, Yandex 750 ms, Reverso
+   600 ms, MyMemory 350 ms); no parallel requests to one host.
 4. Text splitting: DeepL 5000 characters, MyMemory 500 bytes, the rest — according to the service
    limits.
 5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,

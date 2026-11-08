@@ -1,19 +1,15 @@
 #pragma once
 
-#include "core/translationservice.h"
+#include "services/queuedwebservice.h"
 
-#include <QElapsedTimer>
-#include <QList>
-#include <QPointer>
 #include <QUrl>
 
 class NetworkManager;
-class QTimer;
 
 // Unofficial free DeepL web endpoint (see doc/free-endpoints.md, §1).
 // It needs no API key and is available as a normal service, like the free
 // Google endpoint. The UI marks it as an unofficial endpoint.
-class DeepLWebService : public TranslationService
+class DeepLWebService : public QueuedWebService
 {
     Q_OBJECT
 
@@ -31,8 +27,7 @@ public:
 
     // Replaces the endpoint. For tests only.
     void setEndpoint(const QUrl &url);
-    // Rate limiting and retry delay. For tests only.
-    void setRateLimitMs(int ms);
+    // Retry delay. For tests only.
     void setRetryDelayMs(int ms);
 
     static QUrl defaultEndpoint();
@@ -43,19 +38,9 @@ public:
 private:
     class Reply;
 
-    void enqueue(Reply *reply);
-    void schedule();
-    void startNext();
-    void noteRequestSent();
-
     NetworkManager *m_network = nullptr;
     QString m_serviceId = QStringLiteral("deepl-web");
     QString m_englishVariant = QStringLiteral("EN-US");
     QUrl m_endpoint;
-    int m_rateLimitMs = 2000;
     int m_retryDelayMs = 3000;
-    QList<QPointer<Reply>> m_queue;
-    QPointer<Reply> m_active;
-    QElapsedTimer m_lastRequest;
-    QTimer *m_timer = nullptr;
 };

@@ -56,6 +56,7 @@ qt_add_library(qtranslate_core STATIC
     src/services/googleparser.cpp           src/services/googleparser.h
     src/services/googletranslateservice.cpp src/services/googletranslateservice.h
     src/services/openaicompatibleservice.cpp src/services/openaicompatibleservice.h
+    src/services/queuedwebservice.cpp       src/services/queuedwebservice.h
 )
 
 target_include_directories(qtranslate_core PUBLIC src)
