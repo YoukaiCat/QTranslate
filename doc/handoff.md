@@ -83,7 +83,8 @@ documentation is English. The migration to the tree roadmap and the English base
   no-libsecret build.
 - Release 0.12.0 is deferred by user decision on 2026-11-08. When it happens, the version bump, the
   README download links, and `doc/releases/0.12.0.md` are needed; the old 0.11.1 GitHub release is
-  deleted then (user decision). The next roadmap node is stage 3 `03-free-web-endpoints`.
+  deleted then (user decision). The roadmap is in stage 3: the opt-in gate and the shared queue are
+  done, and the next task is `02-mymemory`.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
@@ -147,7 +148,7 @@ documentation is English. The migration to the tree roadmap and the English base
 
 - UI: English (source), Russian + Spanish, German, French, Portuguese (Brazil), Italian, Polish,
   Ukrainian, Turkish, Chinese (Simplified), Japanese, Korean, Arabic, Hindi — 15 languages in total.
-- All `.ts` files are in `i18n/`, 253 messages each, included in `QTRANSLATE_TS_FILES` in
+- All `.ts` files are in `i18n/`, 299 messages each, included in `QTRANSLATE_TS_FILES` in
   `CMakeLists.txt`; `.qm` files are embedded into `:/i18n`.
 - `src/core/uilanguages.*`: codes, native names, resources; `normalize()` understands `system`,
   regional tags, `pt-PT` → `pt-BR`, `zh-CN`/`zh-Hans` → `zh-Hans`, `zh-Hant` → English;
@@ -156,7 +157,7 @@ documentation is English. The migration to the tree roadmap and the English base
   `QTranslator`, enables RTL for Arabic and sends `LanguageChange` without a restart.
 - `LanguageComboBox` was switched to `AdjustToContents`, otherwise the German
   "Automatische Erkennung" was cut off.
-- Added `tst_translations` (completeness of all `.ts`, `%1`/`%2`, emoji `⧉ ⇄ ✓ →`, leading and
+- Added `tst_translations` (completeness of all `.ts`, `%1`/`%2`, emoji `📋 ↗ ✓ →`, leading and
   trailing spaces) and `tst_uilanguages` (code normalization and resources).
 - Debug and Release: 19/19 tests at the time of localization; after DeepL free web — 21/21. A launch
   with `uiLanguage=es`, `de`, `ar` was verified: translations load, the Arabic UI is mirrored, long
@@ -337,9 +338,10 @@ Releases are tag-driven. When 0.12.0 is published, delete the old 0.11.1 GitHub 
 
 ## Next release
 
-**0.12.0 after the Linux stage**, from `main`, with the version and scope agreed again. It follows
-the same release flow: version bump, `doc/releases/0.12.0.md`, README links, local checks where
-possible, tag CI as the build gate, and an explicit user approval before the push. The 0.11.1
+**0.12.0 is deferred by user decision on 2026-11-08**; the Linux stage is done and stage 3 is in
+progress. When it is approved, it comes from `main` with the version and scope agreed again. It
+follows the same release flow: version bump, `doc/releases/0.12.0.md`, README links, local checks
+where possible, tag CI as the build gate, and an explicit user approval before the push. The 0.11.1
 branch is deleted; do not recreate it. When 0.12.0 is published, delete the old 0.11.1 GitHub
 release.
 

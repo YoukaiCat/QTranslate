@@ -282,8 +282,8 @@ the opt-in gate is untouched.
   Linux platform tests) and the `tst_queuedwebservice` row was added. `AGENTS.md` was corrected from
   "23 Windows tests and all 28 Linux tests" to 24/29, because it is the build-and-test rule read in
   every session. The READMEs, `doc/handoff.md`, the `.ts` files, `tst_translations`, and the root
-  roadmap were left untouched as the task required; their 23/28 counts are now stale and belong to
-  the next documentation or release pass.
+  roadmap were left untouched as the task required; their 23/28 counts were updated to 24/29 in
+  `fb531fa` by the lead.
 - Verification: Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie:latest` (Qt 6.8.2,
   GCC 14.2), Debug and Release: zero `warning:` lines with `-Wall -Wextra`; `tst_queuedwebservice`,
   `tst_deeplwebservice`, and `tst_deeplservice` pass 3/3 in each configuration, and the full suite

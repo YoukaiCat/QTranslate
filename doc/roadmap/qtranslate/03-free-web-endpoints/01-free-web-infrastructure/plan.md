@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: fee1bcf
 ---
 
@@ -55,3 +55,34 @@ the DeepL queue refactor must stay behaviour-preserving and is gated by `tst_dee
 `tr()` strings must be complete in the 14 `.ts` files, including `→`. No live smoke or new user
 access is needed because no endpoint is added. The user has already accepted the stage-level rule that
 free services are opt-in and are not the only translation method.
+
+## Outcome
+
+Accepted on 2026-11-08 over `fee1bcf..fb531fa`. Both children are `done`: `01-opt-in-gate`
+(`8ea3d0a`) and `02-queued-web-service` (`e13c294`), with the journal and count updates in
+`01e8b72`/`fb531fa`.
+
+- **Gate:** `translation/allowFreeServices` defaults to `false`; `TranslationService::requiresOptIn()`
+  and the central `TranslationManager` refusal with `ServiceUnavailable` and "Enable free web
+  services in Settings → Services." work without calling the service; the Services tab has the
+  checkbox and warning; `AppController` filters the pickers and switches to Google in memory when the
+  active service becomes gated, keeping the INI value; five strings are complete in all 14 `.ts`.
+  The `lupdate`-vanished Windows-only hotkey message was fixed with `hotkeymanager_win.cpp` as an
+  extra `qt_add_translations` source and a `tst_translations` guard.
+- **Queue:** `QueuedWebService` in `qtranslate_core` holds the serialized per-host queue and the
+  2000 ms default pause; the moved body matches the old DeepL code after the class rename;
+  `DeepLWebService` derives from it and keeps its endpoint, retry delay, `toWebCode()`, chunking, and
+  parser; `tst_deeplwebservice` and `tst_deeplservice` are unchanged and green; the new
+  platform-neutral `tst_queuedwebservice` covers ordering, the pause, aborting a queued reply,
+  deleting the active reply, and the multi-chunk slot/pacing contract.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2/GCC 12.2) and `qtranslate-trixie` (Qt 6.8.2/GCC
+  14.2), Debug and Release, zero warnings, 29/29; the new queue test ran 40 times without a flake;
+  Clang 16 Debug is clean; `update_translations` finds 299 messages, 0 new, 0 vanished.
+- **Docs:** `doc/architecture.md` §3.1/§3.2/§4.5/§4.7.1/§4.14/§8, `doc/free-endpoints.md` §8,
+  `AGENTS.md`, both READMEs, `doc/handoff.md`, and the root plan use the 24/29 counts and describe
+  the gate and the shared queue.
+
+No service is added and no endpoint is enabled; Google, DeepL (including `free-web`), and the LLM
+service behave as before. Windows Debug/Release and its 24 tests were not performed (no MSVC); a real
+display/150% UI check was not repeated (the dialog test is offscreen). No real code problems were
+deferred. The next node is `02-mymemory`.

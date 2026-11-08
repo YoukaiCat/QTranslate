@@ -1936,7 +1936,7 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 - Code comments and source files are not touched, except the one approved comment line in
   `src/platform/selectiongrabber_win.cpp` that now points to the archive. Any other documentation
   change that would require a code comment change is deferred to a separate task.
-- The migration is documentation-only except the one approved comment line in `src/platform/selectiongrabber_win.cpp`, which needs no build; any other code or test change requires the relevant Debug and Release checks and all 23 tests.
+- The migration is documentation-only except the one approved comment line in `src/platform/selectiongrabber_win.cpp`, which needs no build; any other code or test change requires the relevant Debug and Release checks and all 24 tests.
 
 ### 11.8. Verification
 
