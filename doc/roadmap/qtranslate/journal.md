@@ -2,19 +2,20 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/01-free-web-infrastructure/01-opt-in-gate` — `in-progress`; the
-coordinator is next. Stage 3 was split by the planner into seven top-level children: the
-infrastructure stage (opt-in gate and queued web service), MyMemory, Mozhi, Yandex web, Bing web,
-Reverso, and the fallback chain; the gate task is detailed. Decisions: one configured fallback step
-(`translation/fallbackService`), not a literal multi-step chain; Bing and Reverso stay in the stage;
-DeepL `free-web` stays outside the gate. Stage `02-linux` is `done` (accepted over
+Current node: `03-free-web-endpoints/01-free-web-infrastructure/02-queued-web-service` — `todo`, not
+detailed; the planner is next. The opt-in gate is `done` (`8ea3d0a`): Linux 28/28, and the
+`lupdate`-vanished Windows-only hotkey message was fixed with a `tst_translations` guard. The queue
+task is a behaviour-preserving extraction of the DeepL free-web queue; the new `tst_queuedwebservice`
+takes Linux to 29. Stage 3 has seven top-level children: the infrastructure stage (gate + queue),
+MyMemory, Mozhi, Yandex web, Bing web, Reverso, and the fallback chain. Decisions: one configured
+fallback step (`translation/fallbackService`), not a literal multi-step chain; Bing and Reverso stay
+in the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is `done` (accepted over
 `584e722..da3fefc`; acceptance fix `da3fefc`, documentation `bc86eff`, outcome `fee1bcf`). The user
 deferred the 0.12.0 release on 2026-11-08: no version bump, tag, push, or release, and the CI
-publication is recorded as not performed. The working tree is clean after the roadmap commit; branch
-`main` matches the root `branch:` and is ahead of `origin/main`; nothing is pushed. Not performed in
-stage 2: Windows, a real portal-capable Wayland desktop, live Wayland clipboard/in-place, the trixie
-keyring case, and the real GitHub run/tag/release. Next: the gate coordinator, then the queue task,
-then MyMemory. In a new session: `/new`, choose the `lead` agent, and enter `@continue`.
+publication is recorded as not performed. The working tree is clean after the gate commit; branch
+`main` matches the root `branch:` and is ahead of `origin/main`; nothing is pushed. Next: the queue
+planner, then its coordinator, then MyMemory. In a new session: `/new`, choose the `lead` agent, and
+enter `@continue`.
 
 ## Journal
 
@@ -86,3 +87,4 @@ then MyMemory. In a new session: `/new`, choose the `lead` agent, and enter `@co
 - 2026-11-08 — Stage `02-linux` acceptance over `584e722..d31aba1`, extended by the acceptance fix `da3fefc`. The coordinator found one real defect: an automatic save at exit removed an unreadable secret token from the INI when the keyring was unavailable at load (`writeSecret` treated the empty in-memory value as a user deletion); fixed in `da3fefc` with the regression test `failedSecretLoadKeepsStoredToken`, and the `write_checksums` comment was corrected. Verification after the fix: Astra Debug/Release 28/28 and trixie Debug/Release 28/28, no warnings, Clang 16 clean; the accepted artifacts' `sha256sum -c` is 3/3 and 2/2; the X11 `:0` matrix was not repeated because no X11 code changed after `b488e03`. The lead corrected the four documentation errors found by acceptance (the READMEs' X11 clipboard-restore bullet and the container packaging command, the `architecture.md` 0.12.0 table header, and the `AGENTS.md` CI offscreen wording), updated `doc/handoff.md`, and noted in the task 05 outcome that the token-deletion limitation was fixed. The only open stage criterion is the real CI publication on a tag; the stage is `blocked` on the user's 0.12.0 release decision. Real problems left unfixed: old fallback secret files and keyring entries are never deleted (no `SecretProtector::forget`), a no-libsecret build still drops an `l:` token by design, the packaging gates remain partial, Windows and a real Wayland portal are not performed. No push.
 - 2026-11-08 — User decision after the stage acceptance: defer the 0.12.0 release and continue with the roadmap. Stage `02-linux` is closed `done` with the CI publication on a tag recorded as not performed (not passed); no version bump, tag, push, or release was made, and the old 0.11.1 release stays. Rejected: releasing now (the user wants stage 3 first), preparing the release locally (no immediate value), and leaving the stage blocked (it would stall the roadmap on an external publication step). Next node: stage `03-free-web-endpoints` (`todo`, no children; the planner splits it).
 - 2026-11-08 — Planner split `03-free-web-endpoints` into seven top-level children: the infrastructure stage (opt-in gate and queued web service), MyMemory, Mozhi, Yandex web, Bing web, Reverso, and the fallback chain. The first version put the gate and the queue in one task; the lead sent it back because they are independently acceptable and exceed the task size, so the infrastructure became a stage with two tasks. Decisions: one configured fallback step (`translation/fallbackService`) instead of a literal multi-step chain (future extension); Bing and Reverso stay in the stage (the Done-when asks for clear errors, not guaranteed success); DeepL `free-web` stays outside the gate. The planner stopped at the context threshold after writing the files; the work is complete. `01-opt-in-gate` is `in-progress`; coordinator next.
+- 2026-11-08 — Task `03-free-web-endpoints/01-free-web-infrastructure/01-opt-in-gate` done as `8ea3d0a`. Added `translation/allowFreeServices` (default false), `TranslationService::requiresOptIn()`, the central `TranslationManager` refusal with `ServiceUnavailable` and "Enable free web services in Settings → Services.", the Services-tab checkbox and warning, and the `AppController` picker filtering with the in-memory switch to Google (the INI keeps the configured service). DeepL `free-web` and the LLM service stay outside the gate. Five new strings are complete in all 14 `.ts`. The coordinator accepted one real review remark: a Linux `lupdate` run marked the Windows-only `HotkeyManager` message as vanished in all 14 `.ts`, so `qt_add_translations` now receives `src/platform/hotkeymanager_win.cpp` as an extra source on non-Windows and `tst_translations` fails on any vanished message; `lconvert` finds the string in the built `.qm` again. Verification: Astra Qt 6.10.2 and trixie Qt 6.8.2, Debug/Release, 28/28 with no warnings; the UI default/round trip passed offscreen. Windows and the 23 tests were not performed. No real problems deferred. The queue extraction is the next child; no push.
