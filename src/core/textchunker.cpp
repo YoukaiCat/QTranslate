@@ -67,6 +67,31 @@ qsizetype cutLength(const QString &text, qsizetype from, qsizetype maxLength)
     return n;
 }
 
+// UTF-16 units of the code point at `pos`: two for a valid surrogate pair.
+qsizetype codePointLength(const QString &text, qsizetype pos)
+{
+    return text.at(pos).isHighSurrogate() && pos + 1 < text.size()
+                   && text.at(pos + 1).isLowSurrogate()
+               ? 2
+               : 1;
+}
+
+// UTF-8 size of the code point at `pos`: 1 for ASCII, 2 for U+0080..U+07FF,
+// 3 for U+0800..U+FFFF and 4 for a surrogate pair. A lone surrogate is
+// invalid; 3 bytes is a conservative upper bound for it, and the defensive
+// loop in splitUtf8 checks the real encoded size.
+qsizetype codePointSize(const QString &text, qsizetype pos)
+{
+    const QChar c = text.at(pos);
+    if (c.isHighSurrogate() && pos + 1 < text.size() && text.at(pos + 1).isLowSurrogate())
+        return 4;
+    if (c.unicode() < 0x80)
+        return 1;
+    if (c.isSurrogate())
+        return 3;
+    return c.unicode() < 0x800 ? 2 : 3;
+}
+
 } // namespace
 
 namespace TextChunker {
@@ -86,6 +111,87 @@ QStringList split(const QString &text, int maxLength)
         from += length;
     }
     parts << text.mid(from);
+    return parts;
+}
+
+QStringList splitUtf8(const QString &text, int maxBytes)
+{
+    QStringList parts;
+    if (text.isEmpty())
+        return parts;
+
+    // One code point must fit into a part.
+    const qsizetype limit = qMax(maxBytes, 4);
+    const qsizetype half = limit / 2;
+    qsizetype from = 0;
+    while (from < text.size()) {
+        // The longest prefix of the rest that fits into the byte limit, and
+        // the natural boundaries seen in the second half of the window.
+        qsizetype end = from;
+        qsizetype bytes = 0;
+        qsizetype blankLine = 0;
+        qsizetype lineBreak = 0;
+        qsizetype sentenceEnd = 0;
+        qsizetype whitespace = 0;
+        while (end < text.size()) {
+            const qsizetype size = codePointSize(text, end);
+            if (bytes + size > limit)
+                break;
+            bytes += size;
+            end += codePointLength(text, end);
+
+            // Natural boundaries only count in the second half, so that parts
+            // do not get needlessly short.
+            if (bytes <= half)
+                continue;
+            const qsizetype n = end - from;
+            const QChar last = text.at(end - 1);
+            if (last == u'\n') {
+                lineBreak = end;
+                if ((n >= 2 && text.at(end - 2) == u'\n')
+                    || (n >= 3 && text.at(end - 2) == u'\r' && text.at(end - 3) == u'\n')) {
+                    blankLine = end;
+                }
+            } else if (isFullWidthSentenceEnd(last)) {
+                sentenceEnd = end;
+            } else if (last.isSpace()
+                       && !(last == u'\r' && end < text.size() && text.at(end) == u'\n')) {
+                whitespace = end;
+                if (n >= 2 && isSentenceEnd(text.at(end - 2)))
+                    sentenceEnd = end;
+            }
+        }
+
+        // The strongest boundary wins; otherwise cut at the last code point
+        // that fits. A rest that fits at all is one part.
+        qsizetype cut = end;
+        if (end < text.size()) {
+            if (whitespace)
+                cut = whitespace;
+            if (sentenceEnd)
+                cut = sentenceEnd;
+            if (lineBreak)
+                cut = lineBreak;
+            if (blankLine)
+                cut = blankLine;
+        }
+
+        qsizetype length = cut - from;
+        // Never cut between "\r" and "\n".
+        if (length > 1 && cut < text.size() && text.at(cut - 1) == u'\r'
+            && text.at(cut) == u'\n') {
+            --length;
+        }
+
+        // The sizes above must fit already; this only guards against a lone
+        // surrogate, whose UTF-8 size differs from the estimate.
+        const qsizetype minLength = codePointLength(text, from);
+        while (length > minLength && text.mid(from, length).toUtf8().size() > limit)
+            --length;
+
+        parts << text.mid(from, length);
+        from += length;
+    }
     return parts;
 }
 

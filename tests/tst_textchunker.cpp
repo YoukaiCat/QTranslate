@@ -17,6 +17,24 @@ void verifyInvariants(const QString &text, const QStringList &parts, int maxLeng
     }
 }
 
+// The same for a UTF-8 byte limit: no part is longer than `maxBytes` bytes and
+// no "\r\n" is split either.
+void verifyUtf8Invariants(const QString &text, const QStringList &parts, int maxBytes)
+{
+    QCOMPARE(parts.join(QString()), text);
+    for (const QString &part : parts) {
+        QVERIFY(!part.isEmpty());
+        QVERIFY2(part.toUtf8().size() <= maxBytes,
+                 qPrintable(QString::number(part.toUtf8().size())));
+        QVERIFY2(!part.front().isLowSurrogate(), "surrogate pair split");
+        QVERIFY2(!part.back().isHighSurrogate(), "surrogate pair split");
+    }
+    for (qsizetype i = 0; i + 1 < parts.size(); ++i) {
+        QVERIFY2(!(parts.at(i).back() == u'\r' && parts.at(i + 1).front() == u'\n'),
+                 "CRLF split");
+    }
+}
+
 } // namespace
 
 class TestTextChunker : public QObject
@@ -159,6 +177,134 @@ private slots:
         // Natural boundaries keep parts reasonably long.
         for (qsizetype i = 0; i + 1 < parts.size(); ++i)
             QVERIFY(parts.at(i).size() > 2500);
+    }
+
+    void utf8EmptyText()
+    {
+        QVERIFY(TextChunker::splitUtf8(QString(), 10).isEmpty());
+    }
+
+    void utf8ShortTextIsOnePart()
+    {
+        const QString text = QStringLiteral("Hello, world.\n\nSecond paragraph.");
+        QCOMPARE(TextChunker::splitUtf8(text, 5000), QStringList{text});
+        QCOMPARE(TextChunker::splitUtf8(text, int(text.toUtf8().size())), QStringList{text});
+    }
+
+    void utf8CutsAfterSentence()
+    {
+        // ASCII: a byte and a UTF-16 code unit are the same.
+        const QString text = QStringLiteral("One two three four. Five six seven eight nine ten.");
+        const QStringList parts = TextChunker::splitUtf8(text, 30);
+        verifyUtf8Invariants(text, parts, 30);
+        QCOMPARE(parts.first(), QStringLiteral("One two three four. "));
+    }
+
+    void utf8CutsAfterSentenceInCyrillic()
+    {
+        // Two bytes per character: 48 bytes are 24 characters.
+        const QString text = QStringLiteral("Это первое предложение. Это второе предложение.");
+        QCOMPARE(TextChunker::splitUtf8(text, int(text.toUtf8().size())), QStringList{text});
+        const QStringList parts = TextChunker::splitUtf8(text, 48);
+        verifyUtf8Invariants(text, parts, 48);
+        QCOMPARE(parts, (QStringList{QStringLiteral("Это первое предложение. "),
+                                     QStringLiteral("Это второе предложение.")}));
+    }
+
+    void utf8CutsAfterFullWidthSentenceEnd()
+    {
+        // Three bytes per character: 36 bytes are 12 characters.
+        const QString text = QStringLiteral("今天天气很好。明天会下雨吗？周末会很暖和");
+        const QStringList parts = TextChunker::splitUtf8(text, 36);
+        verifyUtf8Invariants(text, parts, 36);
+        QCOMPARE(parts, (QStringList{QStringLiteral("今天天气很好。"),
+                                     QStringLiteral("明天会下雨吗？"),
+                                     QStringLiteral("周末会很暖和")}));
+    }
+
+    void utf8SurrogatePairsAreNotSplit()
+    {
+        // U+1F600 takes 4 UTF-8 bytes and two UTF-16 code units.
+        QString text;
+        for (int i = 0; i < 20; ++i)
+            text += QStringLiteral("😀");
+        for (int maxBytes : {1, 4, 5, 6, 7}) {
+            const QStringList parts = TextChunker::splitUtf8(text, maxBytes);
+            verifyUtf8Invariants(text, parts, qMax(maxBytes, 4));
+            QCOMPARE(parts.size(), 20); // one code point per part
+        }
+        // Two 4-byte code points fit into 9 bytes.
+        const QStringList pairs = TextChunker::splitUtf8(text, 9);
+        verifyUtf8Invariants(text, pairs, 9);
+        QCOMPARE(pairs.size(), 10);
+        QCOMPARE(pairs.first(), QStringLiteral("😀😀"));
+    }
+
+    void utf8CrLfIsNotSplit()
+    {
+        // The limit would cut exactly between "\r" and "\n".
+        const QString text = QStringLiteral("abcdefghi\r\njklmnopqr");
+        const QStringList parts = TextChunker::splitUtf8(text, 10);
+        verifyUtf8Invariants(text, parts, 10);
+        QCOMPARE(parts.first(), QStringLiteral("abcdefghi"));
+        QVERIFY(parts.at(1).startsWith(QStringLiteral("\r\n")));
+    }
+
+    void utf8CutsAfterLineBreakWithCrLf()
+    {
+        const QString text = QStringLiteral("aaaa bbbb\r\ncccc dddd");
+        const QStringList parts = TextChunker::splitUtf8(text, 12);
+        verifyUtf8Invariants(text, parts, 12);
+        QCOMPARE(parts, (QStringList{QStringLiteral("aaaa bbbb\r\n"),
+                                     QStringLiteral("cccc dddd")}));
+    }
+
+    void utf8WordLongerThanLimit()
+    {
+        // No boundary in the second half: a hard cut at a code-point boundary.
+        const QString text = QString(10, u'ж') + QStringLiteral(" end");
+        const QStringList parts = TextChunker::splitUtf8(text, 8);
+        verifyUtf8Invariants(text, parts, 8);
+        QCOMPARE(parts.first(), QString(4, u'ж'));
+        QCOMPARE(parts.at(1), QString(4, u'ж'));
+    }
+
+    void utf8TinyLimit()
+    {
+        // A limit below 4 bytes is raised to one 4-byte code point.
+        const QString text = QStringLiteral("abc 😀 def");
+        const QStringList parts = TextChunker::splitUtf8(text, 1);
+        verifyUtf8Invariants(text, parts, 4);
+        QCOMPARE(parts, (QStringList{QStringLiteral("abc "), QStringLiteral("😀"),
+                                     QStringLiteral(" def")}));
+    }
+
+    void utf8LargeTextInvariants()
+    {
+        // Mixed text with paragraphs, sentences, Cyrillic, CJK and emoji.
+        const QStringList pieces = {
+            QStringLiteral("The cat sits on the mat. "),
+            QStringLiteral("Кот сидит на коврике. "),
+            QStringLiteral("今日は晴れです。"),
+            QStringLiteral("😀🙂 "),
+            QStringLiteral("Is it late? Yes!\r\n"),
+            QStringLiteral("\r\n"),
+        };
+        QRandomGenerator random(42);
+        QString text;
+        int textBytes = 0;
+        while (textBytes < 30000) {
+            const QString piece = pieces.at(random.bounded(int(pieces.size())));
+            text += piece;
+            textBytes += int(piece.toUtf8().size());
+        }
+
+        const QStringList parts = TextChunker::splitUtf8(text, 500);
+        verifyUtf8Invariants(text, parts, 500);
+        // Natural boundaries keep parts reasonably long.
+        for (qsizetype i = 0; i + 1 < parts.size(); ++i)
+            QVERIFY2(parts.at(i).toUtf8().size() > 250,
+                     qPrintable(QString::number(parts.at(i).toUtf8().size())));
     }
 };
 

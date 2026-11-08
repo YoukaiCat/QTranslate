@@ -154,6 +154,22 @@ constexpr QLatin1String kGoogle("google");
 constexpr QLatin1String kDeepL("deepl");
 constexpr QLatin1String kDeepLWeb("deepl-web");
 constexpr QLatin1String kLlm("llm");
+constexpr QLatin1String kMyMemory("mymemory");
+
+// MyMemory takes ISO 639-1/RFC 3066 codes and follows the Google catalogue,
+// but a few of its codes differ from the internal ones.
+struct CodeOverride
+{
+    const char *code;        // internal code
+    const char *serviceCode; // MyMemory code
+};
+
+constexpr CodeOverride kMyMemoryOverrides[] = {
+    {"zh-Hans", "zh-CN"},
+    {"zh-Hant", "zh-TW"},
+    {"nb", "no"},
+    {"fil", "tl"},
+};
 
 const LanguageInfo *findInfo(const QString &code)
 {
@@ -162,6 +178,17 @@ const LanguageInfo *findInfo(const QString &code)
             return &info;
     }
     return nullptr;
+}
+
+const char *mymemoryCodeOf(const LanguageInfo &info)
+{
+    if (!info.google)
+        return nullptr; // the catalogue follows Google's
+    for (const CodeOverride &codeOverride : kMyMemoryOverrides) {
+        if (QLatin1String(info.code) == QLatin1String(codeOverride.code))
+            return codeOverride.serviceCode;
+    }
+    return info.code;
 }
 
 const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
@@ -174,6 +201,8 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
     // LLMs accept the internal codes; the catalogue is the same as Google's.
     if (serviceId == kLlm)
         return info.google ? info.code : nullptr;
+    if (serviceId == kMyMemory)
+        return mymemoryCodeOf(info);
     return nullptr;
 }
 
