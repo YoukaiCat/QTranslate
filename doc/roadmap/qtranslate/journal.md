@@ -2,20 +2,20 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/01-free-web-infrastructure/02-queued-web-service` — `todo`, not
-detailed; the planner is next. The opt-in gate is `done` (`8ea3d0a`): Linux 28/28, and the
-`lupdate`-vanished Windows-only hotkey message was fixed with a `tst_translations` guard. The queue
-task is a behaviour-preserving extraction of the DeepL free-web queue; the new `tst_queuedwebservice`
-takes Linux to 29. Stage 3 has seven top-level children: the infrastructure stage (gate + queue),
-MyMemory, Mozhi, Yandex web, Bing web, Reverso, and the fallback chain. Decisions: one configured
-fallback step (`translation/fallbackService`), not a literal multi-step chain; Bing and Reverso stay
-in the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is `done` (accepted over
+Current node: `03-free-web-endpoints/01-free-web-infrastructure/02-queued-web-service` —
+`in-progress`, detailed; the coordinator is next. The plan extracts `QueuedWebService` from the
+accepted DeepL queue with a 2000 ms default, adds `tst_queuedwebservice`, and takes Linux to 29; the
+new test is platform-neutral, so a future Windows run would have 24. The opt-in gate is `done`
+(`8ea3d0a`). Stage 3 has seven top-level children: the infrastructure stage (gate + queue), MyMemory,
+Mozhi, Yandex web, Bing web, Reverso, and the fallback chain. Decisions: one configured fallback step
+(`translation/fallbackService`), not a literal multi-step chain; Bing and Reverso stay in the stage;
+DeepL `free-web` stays outside the gate. Stage `02-linux` is `done` (accepted over
 `584e722..da3fefc`; acceptance fix `da3fefc`, documentation `bc86eff`, outcome `fee1bcf`). The user
 deferred the 0.12.0 release on 2026-11-08: no version bump, tag, push, or release, and the CI
-publication is recorded as not performed. The working tree is clean after the gate commit; branch
-`main` matches the root `branch:` and is ahead of `origin/main`; nothing is pushed. Next: the queue
-planner, then its coordinator, then MyMemory. In a new session: `/new`, choose the `lead` agent, and
-enter `@continue`.
+publication is recorded as not performed. The working tree is clean after the queue-plan commit;
+branch `main` matches the root `branch:` and is ahead of `origin/main`; nothing is pushed. Next: the
+queue coordinator, then MyMemory. In a new session: `/new`, choose the `lead` agent, and enter
+`@continue`.
 
 ## Journal
 
@@ -88,3 +88,4 @@ enter `@continue`.
 - 2026-11-08 — User decision after the stage acceptance: defer the 0.12.0 release and continue with the roadmap. Stage `02-linux` is closed `done` with the CI publication on a tag recorded as not performed (not passed); no version bump, tag, push, or release was made, and the old 0.11.1 release stays. Rejected: releasing now (the user wants stage 3 first), preparing the release locally (no immediate value), and leaving the stage blocked (it would stall the roadmap on an external publication step). Next node: stage `03-free-web-endpoints` (`todo`, no children; the planner splits it).
 - 2026-11-08 — Planner split `03-free-web-endpoints` into seven top-level children: the infrastructure stage (opt-in gate and queued web service), MyMemory, Mozhi, Yandex web, Bing web, Reverso, and the fallback chain. The first version put the gate and the queue in one task; the lead sent it back because they are independently acceptable and exceed the task size, so the infrastructure became a stage with two tasks. Decisions: one configured fallback step (`translation/fallbackService`) instead of a literal multi-step chain (future extension); Bing and Reverso stay in the stage (the Done-when asks for clear errors, not guaranteed success); DeepL `free-web` stays outside the gate. The planner stopped at the context threshold after writing the files; the work is complete. `01-opt-in-gate` is `in-progress`; coordinator next.
 - 2026-11-08 — Task `03-free-web-endpoints/01-free-web-infrastructure/01-opt-in-gate` done as `8ea3d0a`. Added `translation/allowFreeServices` (default false), `TranslationService::requiresOptIn()`, the central `TranslationManager` refusal with `ServiceUnavailable` and "Enable free web services in Settings → Services.", the Services-tab checkbox and warning, and the `AppController` picker filtering with the in-memory switch to Google (the INI keeps the configured service). DeepL `free-web` and the LLM service stay outside the gate. Five new strings are complete in all 14 `.ts`. The coordinator accepted one real review remark: a Linux `lupdate` run marked the Windows-only `HotkeyManager` message as vanished in all 14 `.ts`, so `qt_add_translations` now receives `src/platform/hotkeymanager_win.cpp` as an extra source on non-Windows and `tst_translations` fails on any vanished message; `lconvert` finds the string in the built `.qm` again. Verification: Astra Qt 6.10.2 and trixie Qt 6.8.2, Debug/Release, 28/28 with no warnings; the UI default/round trip passed offscreen. Windows and the 23 tests were not performed. No real problems deferred. The queue extraction is the next child; no push.
+- 2026-11-08 — Planner detailed `02-queued-web-service` (6 steps, `detailed: true`). Decisions: the base default pause is the moved 2000 ms, so a forgotten constructor line in DeepL cannot silently disable the accepted pause; each later service must set its own (MyMemory 350, Yandex 750, Reverso 600). The new `tst_queuedwebservice` is platform-neutral and added unconditionally, so a Windows run would have 24 tests and Linux 29; the lead accepts 24/29, and the root plan and `AGENTS.md` counts need the update after this task. The five timing tests use "at least" assertions with a ~10% tolerance and no upper bounds; the refactor keeps the endpoint, retry delay, code conversion, and parser in `DeepLWebService`. The planner questioned the Windows count and the 2000 ms default; the lead accepted both with the reasons above. Status `in-progress`; coordinator next.

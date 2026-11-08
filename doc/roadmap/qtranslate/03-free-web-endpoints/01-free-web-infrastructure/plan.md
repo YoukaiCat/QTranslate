@@ -38,7 +38,8 @@ DeepL `free-web` mode stays outside the gate.
 - No service is added and no endpoint is enabled; Google, DeepL (including `free-web`), and the LLM
   service behave as before except for the new gate infrastructure.
 - Debug and Release build without warnings on Linux; the full suite passes; the Windows build and
-  the 23 Windows tests are recorded as not performed.
+  its tests (23 existing plus the new platform-neutral `tst_queuedwebservice`, i.e. 24) are recorded
+  as not performed.
 
 ## Depends on
 
