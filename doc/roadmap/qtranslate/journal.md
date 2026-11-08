@@ -2,20 +2,19 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/02-mymemory/01-split-utf8-and-language-codes` — `in-progress`,
-detailed; the coordinator is next. MyMemory became a stage with three tasks: the byte splitter and
-language codes (current), the parser/service, and the settings/docs task; the second and third are
-not detailed yet. The infrastructure stage is `done` (accepted over `fee1bcf..fb531fa`; gate
-`8ea3d0a`, queue `e13c294`). Linux is 29 tests, Windows 24 (not run); MyMemory adds two
-platform-neutral tests, so the target is 31/26. Decisions: one configured fallback step
-(`translation/fallbackService`), not a literal multi-step chain; Bing and Reverso stay in the stage;
-DeepL `free-web` stays outside the gate; MyMemory has no `de` email and no new INI key. Stage
-`02-linux` is `done` (accepted over `584e722..da3fefc`). The user deferred the 0.12.0 release on
-2026-11-08: no version bump, tag, push, or release, and the CI publication is recorded as not
-performed. The working tree is clean after the MyMemory split commit; branch `main` matches the root
-`branch:` and is ahead of `origin/main`; nothing is pushed. Next: the splitter/language coordinator,
-then the service, then the settings/docs task. In a new session: `/new`, choose the `lead` agent, and
-enter `@continue`.
+Current node: `03-free-web-endpoints/02-mymemory/02-mymemory-service` — `todo`, not detailed; the
+planner is next. The splitter/language task is `done` (`d3fc444`): `TextChunker::splitUtf8` with 11
+cases and the MyMemory codes are in; `split()`/`cutLength()` are unchanged; Linux is 29/29, Windows
+24 not run. The service task adds the parser, service, registration, fixtures and two platform-neutral
+tests, taking Linux to 31 and Windows to 26. The infrastructure stage is `done` (`fee1bcf..fb531fa`).
+The MyMemory stage is `in-progress`, `base: 371ab1e`; its third child (`03-mymemory-settings-and-docs`)
+follows the service. Decisions: one configured fallback step, not a literal multi-step chain; Bing
+and Reverso stay in the stage; DeepL `free-web` stays outside the gate; MyMemory has no `de` email and
+no new INI key. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no
+version bump, tag, push, or release; the CI publication is not performed). The working tree is clean
+after the splitter commit; branch `main` matches the root `branch:` and is ahead of `origin/main`;
+nothing is pushed. Next: the service planner, then its coordinator, then the settings/docs task. In a
+new session: `/new`, choose the `lead` agent, and enter `@continue`.
 
 ## Journal
 
@@ -92,3 +91,4 @@ enter `@continue`.
 - 2026-11-08 — Task `03-free-web-endpoints/01-free-web-infrastructure/02-queued-web-service` done as `e13c294`. Added `QueuedWebService` (`src/services/queuedwebservice.h/.cpp`) in `qtranslate_core`: nested `Reply : public TranslationReply` with a pure `start()`, public `setRateLimitMs()`/`rateLimitMs()`/`noteRequestSent()`, protected `enqueue()`, a single-shot child timer, and the moved `schedule()`/`startNext()` — the queue body is statement-for-statement the old DeepL code, including the `m_active == reply` guards and the `finished`/`destroyed` cleanup. `DeepLWebService` derives from it, its `Reply` from `QueuedWebService::Reply`; the duplicate members, the private queue methods, and its `setRateLimitMs()` are gone; the endpoint, `m_retryDelayMs`, `toWebCode()`, the 5000-character chunking, and the parser are untouched, and `Reply::send()` still reports the request before `post()` so the 429 retry is covered by the pause. The 2000 ms default is inherited unchanged. New platform-neutral `tst_queuedwebservice` (no Widgets, no network, `QTRY_VERIFY_WITH_TIMEOUT`, lower bounds only) covers ordering, the rate pause, aborting a queued reply, deleting the active reply, and a two-chunk reply that holds its slot and paces itself. Verification: Astra Linux 1.8.7 (Qt 6.10.2/GCC 12.2) and `qtranslate-trixie:latest` (Qt 6.8.2/GCC 14.2), Debug and Release, zero `warning:` with `-Wall -Wextra`; targeted `tst_queuedwebservice`/`tst_deeplwebservice`/`tst_deeplservice` 3/3 and the full suite 29/29 in all four configurations; `tst_deeplwebservice` unchanged and green (serialization, 429 retry, two 429, 403, timeout); the new test also ran 15 times without a flake; Clang 16 Debug (optional) clean. The reviewer found no blocker; besides a harmless extra `core/settings.h` include it noted two stale current-state counts in `doc/architecture.md` (§4.14 and the portability notes still said 28 Linux tests) and a missing `tst_queuedwebservice` row in the §8 table, which the coordinator fixed together with the `AGENTS.md` 24/29 counts. The READMEs, `doc/handoff.md`, and the root plan still say 23/28 and are left for the lead's documentation pass. Windows Debug/Release and its tests were not performed (no MSVC); the new target makes a Windows run 24, not 23. No real problems deferred. Next: `02-mymemory`; no push.
 - 2026-11-08 — Stage `03-free-web-endpoints/01-free-web-infrastructure` accepted and closed `done` over `fee1bcf..fb531fa`; both children are done (`8ea3d0a`, `e13c294`). The acceptance repeated Astra/trixie Debug/Release 29/29 with no warnings, confirmed the queue body matches the old DeepL code after the class rename, the gate is central and the DeepL/LLM paths are unchanged, and the docs/counters are consistent. No code fixes; the lead fixed the stale lead-owned lines (Where we left off, root plan counters, handoff next-node/message-count/symbols/next-release, architecture policy count, queue-outcome phrase) in this commit. The next node is `02-mymemory` (`todo`, needs planner detail).
 - 2026-11-08 — The planner detailed MyMemory as one task (~30 files with fixtures and 14 `.ts`); the lead sent it back because it exceeded the task size and had independently acceptable parts. `02-mymemory` is now a stage (`depends: [01-free-web-infrastructure]`) with `01-split-utf8-and-language-codes` (detailed; `splitUtf8` + `tst_textchunker`, MyMemory codes + `tst_languages`), `02-mymemory-service` (parser, service, registration, fixtures, two new tests; depends on 01), and `03-mymemory-settings-and-docs` (UI group, 14 `.ts`, architecture/free-endpoints/AGENTS, counts; depends on 02). Counts: 29/24 after 01, 31/26 after 02. The first child is `in-progress`; coordinator next.
+- 2026-11-08 — Task `03-free-web-endpoints/02-mymemory/01-split-utf8-and-language-codes` done as `d3fc444`. Added `TextChunker::splitUtf8` (UTF-8 byte limit, boundary preference, no surrogate-pair or `\r\n` split, `maxBytes < 4` clamps to one code point) without changing `split()`/`cutLength()`, and the MyMemory `serviceCodeOf()` branch with `kMyMemoryOverrides` (`zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`, `nb`→`no`, `fil`→`tl`); `tst_textchunker` gained 11 cases and `tst_languages` 11 forward/5 reverse rows plus `roundTrip`/`supportedLists`. Verification: Astra Qt 6.10.2 and trixie Qt 6.8.2, Debug/Release, 29/29 with no warnings; the reviewer fuzzed `splitUtf8` on 300 000 random strings without an invariant violation. One comment about lone surrogates was corrected after measuring Qt 6.8 vs 6.10; no code change. Windows and the 24 tests were not performed; no real problems. Next: detail `02-mymemory-service`.
