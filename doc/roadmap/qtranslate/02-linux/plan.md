@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: blocked
+status: done
 base: 584e722
 ---
 
@@ -30,10 +30,42 @@ None technically; follows stage 1 in the old order. The primary distro is Debian
 
 Wayland does not guarantee global shortcuts or synthetic input; X11 is the reliable target and Wayland relies on the `GlobalShortcuts` portal where available, manual copying, and CLI commands. No `ydotool`/`wtype` or other synthetic input is added under Wayland. The user must provide the Debian 13 (trixie) container/CI access and is checking the `.deb`, portable archive, and launch on Astra Linux. If the environment is unavailable, the lead may mark the stage blocked and ask whether to start an independent stage earlier.
 
-## Open question
+## Outcome
 
-The acceptance passed on 2026-11-08 with the fix `da3fefc`: Astra and trixie Debug/Release are 28/28
-with no warnings, the integrated diff and the documentation were reviewed, and the only `## Done
-when` item left is the CI publication of the artifacts on a tag. That is the 0.12.0 release and
-needs the user's approval (version bump, release notes, push `main`, tag). The stage is `blocked`
-until that decision.
+Accepted on 2026-11-08 over `584e722..da3fefc` (the acceptance fix is `da3fefc`; the documentation
+corrections are `bc86eff`). All eight children are `done`.
+
+- **Build and tests:** Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie` (Qt 6.8.2,
+  GCC 14.2) build Debug and Release with no warnings and pass 28/28; Clang 16 is clean. Per-binary
+  counts are in `08-verification`; `tst_secretprotector` is 7+1 in trixie (no session keyring) and
+  8/8 on Astra.
+- **X11:** the real `:0` matrix passed in `08-verification` (Ctrl+Q popup, Ctrl+Shift+Q in-place,
+  Ctrl+W main window, tray, settings, autostart, CLI with and without an instance, single-instance
+  forwarding, clipboard restore); the X11 code did not change after it. The grab-release fix
+  (`5b9f9fa`) and the Astra trusted-client setup are part of the stage.
+- **Wayland:** the `GlobalShortcuts` portal backend (mock DBus 20/20), the limited fallback with a
+  visible warning, no X11 connection under Weston, and no synthetic input. A real portal-capable
+  desktop and live Wayland clipboard/in-place were not available and are not performed.
+- **Artifacts:** the trixie `tar.gz`, `.deb`, and AppImage and the native Astra `-astra.tar.gz` and
+  `+astra1_amd64.deb` are built by `package.sh`; hashes, install/remove, `ldd`, plugin and Qt
+  translation checks are in `07-packaging-and-ci` and `08-verification`. The CI and release jobs
+  are verified statically; the actual GitHub run, tag, and publication were **not performed**: the
+  user deferred the 0.12.0 release on 2026-11-08, so this `## Done when` item is recorded as not
+  performed, not as passed.
+- **Documentation:** both READMEs, `AGENTS.md`, `doc/architecture.md`, and `doc/handoff.md` describe
+  the Linux install, packages, CLI, XDG paths, tests, and limitations; the acceptance corrected the
+  four factual errors found by the review.
+
+One real defect was found and fixed during acceptance (`da3fefc`): an automatic save at exit deleted
+an unreadable secret token from the INI when the keyring was unavailable at load; the regression
+test `failedSecretLoadKeepsStoredToken` covers it. The `write_checksums` comment was corrected in
+the same commit.
+
+Real problems left unfixed because of their price: old fallback secret files and keyring entries
+are never deleted when a secret is overwritten or migrated (no `SecretProtector::forget`), so an
+obsolete plaintext `0600` file can remain; a build without libsecret drops an `l:` token from the
+INI by design; the AppImage `ldd` gate checks only `not found`, plugin presence is per directory,
+the tags are moving, and artifacts are not byte-reproducible; the tray tooltip can show the
+configured sequence before an asynchronous portal bind; the `secretprotector.h` comment "keeps `l:`
+tokens unconditionally" is inaccurate for a no-libsecret build. Windows Debug/Release and the 23
+Windows tests were not performed (no MSVC), and a real Wayland portal was not available.

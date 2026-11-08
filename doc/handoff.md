@@ -41,8 +41,9 @@ documentation is English. The migration to the tree roadmap and the English base
   keyring was unavailable during load. The final gate ran Astra Debug/Release 28/28 and trixie
   Debug/Release 28/28 with no warnings; the X11 matrix on the real `:0` session passed
   (Ctrl+Q/Ctrl+Shift+Q/Ctrl+W, tray, settings, autostart, CLI with and without an instance,
-  single-instance forwarding, clipboard restore). The stage criterion "published by CI on a tag" is
-  the 0.12.0 release step and is not performed; it needs the user's approval.
+  single-instance forwarding, clipboard restore). The stage criterion "published by CI on a tag" was
+  not performed: the user deferred the 0.12.0 release on 2026-11-08, and the stage was closed with
+  this recorded as not performed.
 - X11 is the full target: `XGrabKey` hotkeys (with the Astra trusted-client step), XTest selection
   capture and paste, `_NET_ACTIVE_WINDOW`, XDG autostart, and per-user paths. Wayland is limited:
   the `GlobalShortcuts` portal where available, CLI commands, manual copying, clipboard-based
@@ -80,9 +81,9 @@ documentation is English. The migration to the tree roadmap and the English base
   configured sequence before an asynchronous portal bind completes or after a desktop reassignment.
   The `secretprotector.h` comment "keeps `l:` tokens unconditionally" is inaccurate for a
   no-libsecret build.
-- Release 0.12.0 is next and requires the user's explicit approval; only then should the version
-  bump, the README download links, and `doc/releases/0.12.0.md` be finalised. When 0.12.0 is
-  published, the old 0.11.1 GitHub release is deleted (user decision).
+- Release 0.12.0 is deferred by user decision on 2026-11-08. When it happens, the version bump, the
+  README download links, and `doc/releases/0.12.0.md` are needed; the old 0.11.1 GitHub release is
+  deleted then (user decision). The next roadmap node is stage 3 `03-free-web-endpoints`.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
