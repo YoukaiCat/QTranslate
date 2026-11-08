@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QGroupBox>
 #include <QKeySequenceEdit>
 #include <QLabel>
 #include <QLineEdit>
@@ -352,6 +353,36 @@ private slots:
 
         checkbox->setChecked(true);
         QVERIFY(dialog.settings().translation.allowFreeServices);
+    }
+
+    void myMemoryGroup()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("de"), QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("mymemoryGroup"));
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("mymemoryHint"));
+        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
+        QVERIFY(group);
+        QVERIFY(hint);
+        QVERIFY(checkbox);
+
+        QCOMPARE(group->title(), QStringLiteral("MyMemory"));
+        QVERIFY(!checkbox->isChecked());
+        QVERIFY(!group->isEnabled());
+        QVERIFY(hint->wordWrap());
+        QVERIFY(hint->text().contains(QStringLiteral("no key")));
+        QVERIFY(hint->text().contains(QStringLiteral("source language")));
+        QVERIFY(hint->text().contains(QStringLiteral("third party")));
+        QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
+        QVERIFY(!dialog.settings().translation.allowFreeServices);
+
+        checkbox->setChecked(true);
+        QVERIFY(group->isEnabled());
+        QVERIFY(dialog.settings().translation.allowFreeServices);
+
+        checkbox->setChecked(false);
+        QVERIFY(!group->isEnabled());
+        QVERIFY(!dialog.settings().translation.allowFreeServices);
     }
 
     void llmModels()

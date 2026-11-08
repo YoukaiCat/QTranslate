@@ -1,7 +1,8 @@
 # Free web translation endpoints
 
-Date: 2026-11-05. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
-mode of the DeepL service; the other endpoints are research**.
+Date: 2026-11-08. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
+mode of the DeepL service, and MyMemory is implemented as a gated no-key service; the other
+endpoints are research**.
 
 This document records the free endpoints without an API key that can be added to qtranslate as
 experimental services. The main source is the open project
@@ -102,6 +103,26 @@ made the only translation method.
 - **Pro:** no key is needed, and it is more predictable than scraping.
 - **Con:** short requests, mixed quality, and many requests for long texts.
 
+**Implementation in qtranslate (2026-11-08).**
+
+- The `mymemory` service: `GET https://api.mymemory.translated.net/get?q=…&langpair=<src>|<dst>&mt=1`
+  with `Accept: application/json`; no key, no URL or email setting, `isConfigured() == true`.
+- Explicit source language only: `auto` finishes with `UnsupportedLanguage` before the request.
+  The codes follow Google's catalogue with `zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`, `nb`→`no`,
+  `fil`→`tl`; the other languages use the internal code.
+- 500 UTF-8 bytes per chunk (`TextChunker::splitUtf8`); a long text is split, the chunks are sent
+  one after another inside one queue slot of `QueuedWebService` with the 350 ms pause, and edge
+  whitespace is restored when the parts are joined.
+- Errors: 403/429 → `RateLimited`, quota details or `quotaFinished` → `QuotaExceeded`, 413/414 or a
+  query-length detail → `TooLong`, 5xx → `Network`, HTML → `ServiceUnavailable`, a malformed or
+  unknown status → `BadResponse`. The messages are fixed literals and never contain the text, the
+  URL or `responseDetails`.
+- Behind the opt-in gate `translation/allowFreeServices` (off by default): the service overrides
+  `requiresOptIn()`, is hidden from the pickers and is refused by `TranslationManager` while the
+  gate is off.
+- Code: `src/services/mymemoryparser.*`, `src/services/mymemoryservice.*`; tests:
+  `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_languages`, `tst_textchunker`.
+
 ## 7. DeepL API: the current free tier
 
 This section used to list `DeepL API Free` with 500,000 characters per month. That is outdated: now
@@ -121,12 +142,13 @@ remains unofficial.
    that overrides `requiresOptIn()` is hidden from the pickers and refused by `TranslationManager`
    with `ServiceUnavailable` until the user enables it. The DeepL `free-web` mode stays outside the
    gate as an explicit mode with its own warning.
-2. For each service — its own `TranslationService` and parser; no keys are needed.
+2. For each service — its own `TranslationService` and parser; no keys are needed. Implemented for
+   MyMemory (`src/services/mymemory*`); it is the first real service behind the gate.
 3. Per-host rate limiting: implemented infrastructure in `QueuedWebService` — replies of one host
-   are serialized and paused by the service-specific value (DeepL 2 s, Yandex 750 ms, Reverso
-   600 ms, MyMemory 350 ms); no parallel requests to one host.
-4. Text splitting: DeepL 5000 characters, MyMemory 500 bytes, the rest — according to the service
-   limits.
+   are serialized and paused by the service-specific value (DeepL 2 s, MyMemory 350 ms; Yandex
+   750 ms and Reverso 600 ms are planned); no parallel requests to one host.
+4. Text splitting: implemented for DeepL (5000 characters) and MyMemory (500 UTF-8 bytes); the
+   rest — according to the service limits.
 5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,
    without a retry storm.
 6. Fallback: the official API → free web → Mozhi/another service; do not show raw HTML.
@@ -137,7 +159,7 @@ remains unofficial.
 ## 9. Priorities
 
 1. **DeepL web** — implemented: high quality but high risk; available as a DeepL mode.
-2. **MyMemory** — the simplest and relatively official free API.
+2. **MyMemory** — implemented: the simplest and relatively official free API.
 3. **Mozhi** — one integration, many engines, self-hosting possible.
 4. **Yandex web** — important for the Russian audience.
 5. **Bing web** — fragile auth and HTML; do it after the rest.

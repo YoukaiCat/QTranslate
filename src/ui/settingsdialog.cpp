@@ -311,6 +311,23 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     freeWebForm->addRow(m_allowFreeServices);
     freeWebForm->addRow(freeWebHint);
     servicesLayout->addWidget(freeWebGroup);
+
+    auto *myMemoryGroup = new QGroupBox(tr("MyMemory"), servicesContent);
+    myMemoryGroup->setObjectName(QStringLiteral("mymemoryGroup"));
+    auto *myMemoryLayout = new QVBoxLayout(myMemoryGroup);
+    auto *myMemoryHint = new QLabel(
+        tr("MyMemory is a free translation API and needs no key. Enable free web services above "
+           "to use it. It cannot detect the source language, and long text is sent in several "
+           "requests. The text is sent to a third party."),
+        myMemoryGroup);
+    myMemoryHint->setObjectName(QStringLiteral("mymemoryHint"));
+    myMemoryHint->setWordWrap(true);
+    myMemoryLayout->addWidget(myMemoryHint);
+    servicesLayout->addWidget(myMemoryGroup);
+    m_mymemoryGroup = myMemoryGroup;
+    connect(m_allowFreeServices, &QCheckBox::toggled, this,
+            &SettingsDialog::updateMyMemoryControls);
+
     servicesLayout->addStretch();
     servicesScroll->setWidget(servicesContent);
     servicesPageLayout->addWidget(servicesScroll);
@@ -465,6 +482,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_proxyTestStatus->clear();
     m_testProxy->setEnabled(true);
     updateProxyControls();
+    updateMyMemoryControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -559,6 +577,11 @@ void SettingsDialog::updateDeepLControls()
     m_checkDeepLKey->setEnabled(!freeWeb);
     m_deepLKeyStatus->setEnabled(!freeWeb);
     m_deepLWebHint->setVisible(freeWeb);
+}
+
+void SettingsDialog::updateMyMemoryControls()
+{
+    m_mymemoryGroup->setEnabled(m_allowFreeServices->isChecked());
 }
 
 void SettingsDialog::updateProxyControls()

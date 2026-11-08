@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [02-mymemory-service]
 ---
@@ -178,3 +178,52 @@ Record Windows Debug/Release and its 26 tests as not performed (no MSVC).
 - The optional live smoke may fail because of quota or network; record it as not performed rather
   than claiming success. Windows Debug/Release and its 26 tests are unavailable on this Linux
   machine; record them as not performed, not as passed.
+
+## Outcome
+
+Done on 2026-11-09. The Services page shows the gate-aware `MyMemory` group, the 14 `.ts` files
+carry the two new strings, and the architecture, free-endpoints and `AGENTS.md` documents are in
+line with the service. No service, parser, `AppSettings` or INI behaviour changed.
+
+- **Settings group:** `src/ui/settingsdialog.h/.cpp` has `m_mymemoryGroup`, `mymemoryHint` and
+  `updateMyMemoryControls()`. The group is created after `freeWebGroup` (so the gate checkbox is
+  above it), has a word-wrapped hint with the free/no-key warning, the opt-in hint, the explicit
+  source and multi-request notes, and no key, URL, email or `QLineEdit` field. `toggled` follows the
+  gate checkbox, and the call at the end of `loadValues()` starts the default-off dialog with the
+  group disabled. `tests/tst_settingsdialog.cpp::myMemoryGroup` covers the title, hint text and word
+  wrap, the absent `QLineEdit`, the disabled default, both toggle directions and
+  `dialog.settings().translation.allowFreeServices`; no new settings field exists.
+- **Translations:** all 14 `i18n/qtranslate_*.ts` went from 299 to 301 messages. `lupdate` ran from
+  the `update_translations` target (Qt 6.10.2, with `src/platform/hotkeymanager_win.cpp` in the
+  scan), the group title and hint are translated in every file, the Windows-only hotkey message is
+  still present, and `tst_translations` finds no new, unfinished, empty or vanished messages. Service
+  error strings remain English literals and add no `.ts` messages.
+- **Architecture:** `doc/architecture.md` §4.5 has `mymemory` in the `id()` example and names
+  `DeepLWebService` and `MyMemoryService` as the queue users (MyMemory 350 ms). The new §4.7.3
+  documents the endpoint and query, explicit-source-only behaviour, 500-byte `splitUtf8` chunks,
+  sequential chunks inside one queue slot, the response fields, the error table (403/429, quota,
+  413/414, 5xx, HTML, malformed, unknown body status), fixed messages, no `de` email,
+  `requiresOptIn()` and the tests. §4.8 adds the MyMemory code column and states the override table
+  (`zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`, `nb`→`no`, `fil`→`tl`) and the absent `LanguageInfo`
+  field; §4.9 notes the first real opt-in consumer. §8 adds `tst_mymemoryparser` and
+  `tst_mymemoryservice` and updates the `tst_textchunker`, `tst_languages`, `tst_settingsdialog` and
+  `tst_translationmanager` descriptions. §4.14 now says 31 tests (23 shared plus 8 Linux platform),
+  26 Windows and "the other 23 tests"; the historical 0.12.0 and migration sentences are unchanged.
+  For consistency with the already registered service, §3.1 and §3.2 also gained the MyMemory
+  sources, fixtures, tests and the 26/31 counts.
+- **Free endpoints and `AGENTS.md`:** `doc/free-endpoints.md` has the updated status line, the §6
+  "Implementation in qtranslate" note, implemented values in §8 items 2-4 and "implemented" in §9
+  item 2. `AGENTS.md:39` says 26 Windows and 31 Linux tests. `README.md`, `README.ru.md`,
+  `doc/handoff.md`, the root plan and `07-fallback-chain` were not edited; the final
+  provider/fallback documentation and counters stay with them.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie:latest` (Qt 6.8.2,
+  GCC 14.2), Debug and Release: builds without `warning:` under `-Wall -Wextra`; the full suite is
+  31/31 in all four configurations; `tst_settingsdialog` 22 passed, `tst_translations` passed,
+  `tst_translationmanager` 24 passed. The Services group was checked offscreen by the test. The
+  picker filter was checked in `AppController::updateServiceSelectors()` and by
+  `tst_translationmanager::gatedRealServiceIsRefused`; a real offscreen run with
+  `translation/service=mymemory` and the gate off kept Google active and logged
+  `Configured service needs free web services to be enabled: "mymemory"`. The optional live smoke
+  (short en→ru and a long multi-chunk text) and Windows Debug/Release with its 26 tests were not
+  performed (no MSVC; CTest never contacts the real endpoint).
+- **Review:** no findings, no rejected remarks, no deferred real problems.

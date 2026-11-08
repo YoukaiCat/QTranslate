@@ -210,6 +210,8 @@ qtranslate/
 │   │   ├── deeplparser.h/.cpp
 │   │   ├── deeplwebservice.h/.cpp    unofficial free web endpoint
 │   │   ├── deeplwebparser.h/.cpp     pure parsing for the web endpoint
+│   │   ├── mymemoryservice.h/.cpp    free MyMemory API (no key, opt-in)
+│   │   ├── mymemoryparser.h/.cpp     pure parsing for the MyMemory API
 │   │   ├── queuedwebservice.h/.cpp   serialized per-host request queue
 │   │   └── openaicompatibleservice.h/.cpp  OpenAI-compatible provider
 │   ├── platform/
@@ -241,7 +243,7 @@ qtranslate/
 │       └── appicon.h/.cpp
 └── tests/
     ├── CMakeLists.txt
-    ├── fixtures/                     saved Google/DeepL responses (google/, deepl/)
+    ├── fixtures/                     saved Google/DeepL/MyMemory responses (google/, deepl/, mymemory/)
     ├── tst_appinfo.cpp
     ├── tst_autostart.cpp               Windows and Linux variants
     ├── tst_cli.cpp                     Linux: parser and two-process forwarding
@@ -257,6 +259,8 @@ qtranslate/
     ├── tst_hotkey_selection_x11.cpp    Linux real manager + grabber
     ├── tst_hotkeysequence.cpp
     ├── tst_languages.cpp
+    ├── tst_mymemoryparser.cpp
+    ├── tst_mymemoryservice.cpp
     ├── tst_networkmanager.cpp
     ├── tst_openaichat.cpp
     ├── tst_openaicompatibleservice.cpp
@@ -281,9 +285,9 @@ targets. Currently:
 
 | Target | What is included now (0.12.0) |
 |---|---|
-| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `openaicompatibleservice`, `queuedwebservice` |
+| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_queuedwebservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`; 24 tests on Windows and 29 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_queuedwebservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`; 26 tests on Windows and 31 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
@@ -633,7 +637,7 @@ protected:
 class TranslationService : public QObject {
     Q_OBJECT
 public:
-    virtual QString id() const = 0;            // "google", "deepl", "llm"
+    virtual QString id() const = 0;            // "google", "deepl", "llm", "mymemory"
     virtual QString displayName() const = 0;
     virtual bool isConfigured() const = 0;     // DeepL without a key — false
     virtual QString configurationError() const { return {}; } // hint if not configured
@@ -681,7 +685,8 @@ multi-chunk protocol therefore sends its chunks sequentially inside one slot and
 queued is skipped, and a reply deleted while active is dropped through `QPointer`/`destroyed`. The
 default pause is 2000 ms (the moved DeepL value); a service overrides it in its constructor, and
 `setRateLimitMs(0)` disables the pause for tests only. The base knows no endpoints, service
-settings, the opt-in gate, or UI; `DeepLWebService` is its first user.
+settings, the opt-in gate, or UI; `DeepLWebService` and `MyMemoryService` use it, and MyMemory
+sets 350 ms.
 
 Each service receives a `NetworkManager` pointer (the shared `QNetworkAccessManager` and
 `makeRequest()` with a timeout and `User-Agent`) and does not create its own manager — this way the
@@ -879,20 +884,79 @@ X-Title: qtranslate
 - The `src/ai/openaichat.*` transport does not depend on `TranslationService`: future AI actions and
   the dictionary will use it too.
 
+### 4.7.3. `MyMemoryService` — free no-key API
+
+The `mymemory` service uses the public MyMemory API (see [`free-endpoints.md`](free-endpoints.md),
+§6). It needs no key and works out of the box (`isConfigured() == true`); it is the first real
+consumer of the opt-in gate: `requiresOptIn() == true`, so `TranslationManager` refuses it and
+`AppController` hides it from the pickers until `translation/allowFreeServices` is on (§4.5, §4.9).
+There is no `[mymemory]` settings group and no key, URL or email setting.
+
+```
+GET https://api.mymemory.translated.net/get?q=<text>&langpair=<src>|<dst>&mt=1
+Accept: application/json
+```
+
+- The source language is explicit only: with `auto` the reply finishes with `UnsupportedLanguage`
+  before any request; the same happens for a language the catalogue does not support. Once the
+  source is explicit, empty text returns `EmptyText` before the request.
+- The request is a `GET` with the text in the query. The chunk limit is 500 UTF-8 bytes:
+  `TextChunker::splitUtf8` cuts the text so that no chunk exceeds the limit and no multi-byte
+  sequence is split. Edge whitespace is not sent and is restored when the parts are joined; a part
+  that is only whitespace is not sent at all.
+- Every chunk is a separate request, but all chunks of one reply stay inside one queue slot of
+  `QueuedWebService` (§4.5) and are paced sequentially by the service's 350 ms. The pause applies
+  between chunks and between replies from all channels; requests to the host never overlap.
+- Response fields: `responseData.translatedText` (required), `responseStatus` (a number or a numeric
+  string; missing means 200), `responseDetails`, `quotaFinished` (a bool or a `"true"`/`"false"`
+  string) and the optional `responseData.detectedLanguage`. The parser fills `detectedSourceLang`
+  from `detectedLanguage` when present; MyMemory normally reports none because the source is
+  explicit, and the service keeps the first non-empty value across chunks.
+- Errors:
+
+  | Condition | `TranslationError` |
+  |---|---|
+  | HTTP 403 or 429 | `RateLimited` |
+  | `quotaFinished` true, or a quota/daily-limit text in `responseDetails` | `QuotaExceeded` |
+  | HTTP 413 or 414, or a query-length text in `responseDetails` | `TooLong` |
+  | HTTP 5xx | `Network` |
+  | an HTML body | `ServiceUnavailable` |
+  | an invalid-language text in `responseDetails` | `UnsupportedLanguage` |
+  | malformed JSON, no translated text, an unknown `responseStatus`, other 4xx | `BadResponse` |
+  | transfer timeout | `Timeout` |
+
+  The error messages are fixed literals: the URL contains the text and `responseDetails` can repeat
+  it, so neither the details, the body nor the URL is echoed to the user or the log. HTTP statuses
+  are classified by `MyMemoryParser::errorForHttpStatus()`, body statuses by `parseResponse()`.
+- A failed chunk fails the whole reply and stops the remaining chunks. Cancellation aborts the
+  active request and drops the reply from the queue.
+- No `de` email parameter: the anonymous quota is enough for a fallback, and a flow that sends a
+  personal email address to a third party needs a separate user decision. For the same reason the
+  service has no key, URL or email setting.
+- Tests: `tst_mymemoryparser` (saved fixtures) and `tst_mymemoryservice` (a local `QTcpServer`),
+  plus the `mymemory` branch in `tst_languages` and `splitUtf8` in `tst_textchunker`. No test
+  contacts the real endpoint; a live smoke is manual only.
+
 ### 4.8. Languages — `languages`
 
 The program uses its own language codes internally (`en`, `ru`, `de`, `pt-BR`, `zh-Hans`…).
 Services map them to their own codes:
 
-| Internal | Google | DeepL source | DeepL target |
-|---|---|---|---|
-| `en` | `en` | `EN` | `EN-US` (configurable: `EN-GB`) |
-| `pt-BR` | `pt` | `PT` | `PT-BR` |
-| `zh-Hans` | `zh-CN` | `ZH` | `ZH-HANS` |
-| `ru` | `ru` | `RU` | `RU` |
-| `he` | `iw` | `HE` | `HE` |
-| `nb` | `no` | `NB` | `NB` |
-| `fil` | `tl` | — | — |
+| Internal | Google | DeepL source | DeepL target | MyMemory |
+|---|---|---|---|---|
+| `en` | `en` | `EN` | `EN-US` (configurable: `EN-GB`) | `en` |
+| `pt-BR` | `pt` | `PT` | `PT-BR` | `pt-BR` |
+| `zh-Hans` | `zh-CN` | `ZH` | `ZH-HANS` | `zh-CN` |
+| `zh-Hant` | `zh-TW` | `ZH` | `ZH-HANT` | `zh-TW` |
+| `ru` | `ru` | `RU` | `RU` | `ru` |
+| `he` | `iw` | `HE` | `HE` | `he` |
+| `nb` | `no` | `NB` | `NB` | `no` |
+| `fil` | `tl` | — | — | `tl` |
+
+MyMemory follows Google's catalogue and takes the internal ISO 639-1/RFC 3066 code, except for a
+small override table: `zh-Hans` → `zh-CN`, `zh-Hant` → `zh-TW`, `nb` → `no`, `fil` → `tl`; the
+other codes, including `he`, are sent unchanged. The mapping is a branch plus this override table in
+`languages.cpp`; there is no per-service `LanguageInfo` column or field.
 
 The module stores a table `{code, English name, native name, service codes}`
 (about 110 Google languages, of which about 35 are available in DeepL) and provides functions in the
@@ -971,6 +1035,11 @@ Responsibilities:
    `TranslationReply::createFinished`, that is, asynchronously). `AppController` keeps
    `setFreeServicesAllowed()` in sync with `translation/allowFreeServices` and filters gated
    services from the pickers.
+
+MyMemory is the first real service with `requiresOptIn() == true` (§4.7.3); the gate logic above is
+unchanged. `AppController` registers it like the other services, hides it from the pickers while the
+gate is off, and if `translation/service=mymemory` is configured, keeps Google active and logs that
+the configured service needs free web services to be enabled.
 
 ### 4.10. Network and proxy — `NetworkManager`
 
@@ -1322,7 +1391,7 @@ buttons and menus for Hindi remain English.
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
 `*_win.cpp`; the Linux backends are `*_linux.cpp`, and `*_stub.cpp` remains only for platforms
 without a backend. `qtranslate_core`, `net/`, `services/`, and the UI do not use WinAPI. The Linux
-tree configures, builds, and links: 29 tests (21 shared plus 8 Linux platform tests) pass under
+tree configures, builds, and links: 31 tests (23 shared plus 8 Linux platform tests) pass under
 `xvfb-run` on Debian 13 (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2;
 Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
 X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
@@ -1364,7 +1433,7 @@ the shell read the `.desktop` file; `Icon=qtranslate` matches the installed icon
 builds the native Astra `-astra.tar.gz` and `+astra1` `.deb` with Astra's Qt 6.10.2; those are local
 verification artifacts, not CI-published. CI publishes only trixie artifacts. The Windows platform
 tests (`tst_hotkeymanager`, Windows variants of `tst_autostart`/`tst_secretprotector`) have Linux
-analogues; the other 20 tests are shared.
+analogues; the other 23 tests are shared.
 
 **Wayland limitations.** Global shortcuts and synthetic input are not base capabilities of
 Wayland. The `GlobalShortcuts` portal is not supported by all desktops and versions; insertion into
@@ -1585,14 +1654,16 @@ are linked into separate test targets):
 | `tst_deeplservice` | DeepL against a local HTTP server: Authorization, `text` array, English variants, Developer/Growth hosts, errors, timeout, key check |
 | `tst_deeplwebparser` | Parsing the DeepL web endpoint response, error codes `403/429/413/5xx`, rate limit detection in the body |
 | `tst_deeplwebservice` | DeepL free web against a local HTTP server: `Authorization: None`, language codes, 5000 characters, retry on `429`, serialization and a 2 s pause, errors, timeout |
+| `tst_mymemoryparser` | Parsing MyMemory fixtures: `responseData.translatedText`, numeric/string `responseStatus`, optional `detectedLanguage`, quota/HTTP/HTML and malformed bodies; fixed error messages without the response details |
+| `tst_mymemoryservice` | MyMemory against a local HTTP server: the `GET` query and `mt=1`, language codes, rejected `auto`, 500-byte UTF-8 chunks and edge whitespace, 350 ms chunk pacing, serialized requests, cancellation, HTTP/HTML/quota/timeout errors, messages without the text or URL |
 | `tst_queuedwebservice` | The shared per-host queue on a fake service: one reply at a time, the rate pause, aborting a queued reply, deleting the active reply, `noteRequestSent()` restarting the pause, a multi-chunk reply holding its slot |
 | `tst_openaichat` | Chat Completions request serialization (model, messages, temperature, `max_tokens`, stream), response parsing, error and finish-reason mapping, model list, endpoint building |
 | `tst_openaicompatibleservice` | The OpenAI-compatible service against a local HTTP server: configuration errors, chat request, source language, plain-text and fenced-JSON responses, whitespace, HTTP errors, timeout, cancellation, OpenRouter key rules, model loading and edited base URL |
-| `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, `closest` when the service changes, unknown codes |
+| `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, MyMemory codes (`zh-CN`, `zh-TW`, `no`, `tl`), `closest` when the service changes, unknown codes |
 | `tst_networkmanager` | Proxy types, HTTP proxy with authentication and `CONNECT`, SOCKS5 with login/password, `testProxy`, clear errors and no password in the text |
 | `tst_popupplacement` | Positioning of the Ctrl+Q window: reflection at edges, pressing against the screen, a second monitor with negative coordinates |
 | `tst_popupwindow` | Popup states (offscreen): request, result, copying, error/"Retry", language change, pinning, automatic hint closing |
-| `tst_textchunker` | Splitting by paragraphs/sentences, words longer than the limit, surrogate pairs are not split |
+| `tst_textchunker` | Splitting by paragraphs/sentences, words longer than the limit, surrogate pairs are not split; `splitUtf8` splits by UTF-8 bytes without breaking a multi-byte sequence |
 | `tst_hotkeysequence` | `QKeySequence` ↔ `(MOD, VK)`, unsupported keys |
 | `tst_hotkeymanager` | `RegisterHotKey`: shortcut conflicts, `setSuspended`, delayed registration (Windows; built together with `platform/hotkeymanager_win.cpp`) |
 | `tst_hotkeymanager_x11` | X11 `XGrabKey`: registration, Lock/NumLock variants, auto-repeat, suspend/resume, Wayland refusal (16 cases) |
@@ -1602,10 +1673,10 @@ are linked into separate test targets):
 | `tst_windowactivation_linux` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus`, `_NET_WM_STATE_FULLSCREEN`, `_NET_WM_PID`, XTest paste, Wayland 0/false (13 cases) |
 | `tst_cli` | CLI parser, mutual exclusion, two-process forwarding, legacy wire (20 cases, Linux) |
 | `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption |
-| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request (offscreen) |
+| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate (offscreen) |
 | `tst_secretprotector` | Windows: DPAPI round-trip, empty and corrupted data. Linux: libsecret token round-trip, `0600` fallback, capability probe, migration (7+1 in trixie, 8/8 on Astra) |
 | `tst_autostart` | Windows: `Run` command format. Linux: desktop entry quoting, `--minimized`, repair, removal (6 cases) |
-| `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language — on a fake service |
+| `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language — on a fake service; the real MyMemory service refused while the gate is off |
 | `tst_uilanguages` | Supported UI languages, normalization of `system`/regional tags, `.qm` resources |
 | `tst_translations` | Completeness of all `.ts` files, preservation of `%1`/`%2`, emoji and edge whitespace |
 

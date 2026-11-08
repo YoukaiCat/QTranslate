@@ -8,6 +8,7 @@
 class QCheckBox;
 class QCloseEvent;
 class QComboBox;
+class QGroupBox;
 class QLabel;
 class QKeySequenceEdit;
 class QLineEdit;
@@ -67,6 +68,7 @@ private:
     bool anyHotkeyEditFocused() const;
     void updateGoogleControls();
     void updateDeepLControls();
+    void updateMyMemoryControls();
     void updateProxyControls();
 
     AppSettings m_initial;
@@ -109,6 +111,8 @@ private:
     QComboBox *m_llmModel = nullptr;
     QPushButton *m_loadLlmModels = nullptr;
     QLabel *m_llmStatus = nullptr;
+
+    QGroupBox *m_mymemoryGroup = nullptr;
 
     QComboBox *m_proxyMode = nullptr;
     QComboBox *m_proxyType = nullptr;
