@@ -24,6 +24,7 @@
 #include "services/mozhiservice.h"
 #include "services/mymemoryservice.h"
 #include "services/openaicompatibleservice.h"
+#include "services/reversoservice.h"
 #include "services/yandexwebservice.h"
 #include "ui/appicon.h"
 #include "ui/mainwindow.h"
@@ -234,6 +235,7 @@ void AppController::createTranslation()
     m_mozhi = new MozhiService(m_network);
     m_yandexWeb = new YandexWebService(m_network);
     m_bingWeb = new BingWebService(m_network);
+    m_reverso = new ReversoService(m_network);
     m_google->applySettings(settings);
     m_deepl->applySettings(settings);
     m_llm->applySettings(settings);
@@ -241,6 +243,7 @@ void AppController::createTranslation()
     m_mozhi->applySettings(settings);
     m_yandexWeb->applySettings(settings);
     m_bingWeb->applySettings(settings);
+    m_reverso->applySettings(settings);
     m_translations->registerService(m_google);
     m_translations->registerService(m_deepl);
     m_translations->registerService(m_llm);
@@ -248,6 +251,7 @@ void AppController::createTranslation()
     m_translations->registerService(m_mozhi);
     m_translations->registerService(m_yandexWeb);
     m_translations->registerService(m_bingWeb);
+    m_translations->registerService(m_reverso);
 
     if (TranslationService *service = m_translations->service(settings.translation.service)) {
         if (service->requiresOptIn() && !settings.translation.allowFreeServices) {
@@ -616,6 +620,8 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_yandexWeb->applySettings(newSettings);
     if (m_bingWeb)
         m_bingWeb->applySettings(newSettings);
+    if (m_reverso)
+        m_reverso->applySettings(newSettings);
 
     // A cached translation from the old instance or engine must not be
     // reused. The active reply keeps its captured endpoint, so it is not

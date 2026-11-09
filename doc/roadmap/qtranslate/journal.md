@@ -2,13 +2,13 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/06-reverso/01-reverso-parser` — `in-progress`, detailed; the
-coordinator is running (started 2026-11-09 in the resumed session). The Reverso split is committed
-as `e92e4ad`; `06-reverso` is a stage (`in-progress`, `base: d2cdf3c`) with four children: parser
-(detailed), service, settings and docs. Work is on `main` (matches the root `branch:`); the working
-tree was clean before the coordinator and nothing is pushed. Linux is 37/37, Windows 32 (derived,
-not run); the parser adds `tst_reversoparser` (38/33) and the service `tst_reversoservice` (39/34);
-the `.ts` count grows from 311 to 313. Stage `03-free-web-endpoints` is `in-progress`:
+Current node: `03-free-web-endpoints/06-reverso/02-reverso-service` — `in-progress`, detailed; the
+coordinator is running (started 2026-11-09). `01-reverso-parser` is done as `b50945a`; the Reverso
+split is committed as `e92e4ad`; `06-reverso` is a stage (`in-progress`, `base: d2cdf3c`) with four
+children: parser (done), service, settings and docs. Work is on `main` (matches the root `branch:`);
+the working tree has only the lead's journal and the planner's plan.md, nothing is pushed. Linux is
+38/38, Windows 33 (derived, not run); the service adds `tst_reversoservice` (39/34); the `.ts` count
+grows from 311 to 313. Stage `03-free-web-endpoints` is `in-progress`:
 `01-free-web-infrastructure`, `02-mymemory`, `03-mozhi`, `04-yandex-web` and `05-bing-web` are
 `done`; `06-reverso` is in progress and `07-fallback-chain` is `todo`. Real deferred problem: an
 active reply can store a result fetched from the old instance/engine after `clearCache()`
@@ -19,8 +19,8 @@ decision (Reverso has the same issue: it rejects `auto` with a clear message); Y
 step, not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web` stays
 outside the gate; the Bing POST is urlencoded, not multipart; Reverso has six languages and no
 `auto`. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version
-bump, tag, push, or release). Next: finish the parser task, then detail and run `02-reverso-service`
-(planner), then `03-reverso-settings`, `04-reverso-docs` and the Reverso stage acceptance.
+bump, tag, push, or release). Next: detail `02-reverso-service` (planner), then run it, then
+`03-reverso-settings`, `04-reverso-docs` and the Reverso stage acceptance.
 
 ## Journal
 
@@ -125,3 +125,5 @@ bump, tag, push, or release). Next: finish the parser task, then detail and run 
 - 2026-11-09 — Stage `03-free-web-endpoints/05-bing-web` accepted and closed `done` over `53b43a5..169dff6`; all four children are done (`444764a`, `ef510a0`, `fb04851`, `639f234`; lead pass `7cc5244`). The acceptance repeated Astra/trixie Debug/Release 37/37 with no warnings; `tst_bingwebparser` 55/55, `tst_bingwebservice` 74/74 (two acceptance tests added), `tst_settingsdialog` 26/26, `tst_translations` 4/4; it checked the gate/INI, cookie isolation, 401-refresh, urlencoded POST, 1000 ms/5000 UTF-16, the language mapping and the docs/README counts. Three accepted fixes in `169dff6`: the §4.7.6 error table now maps body `statusCode` 403/413/429/5xx correctly, `free-endpoints.md` matches it, and the all-whitespace chunk and control-character MUID cases are covered. Known gaps: the `m_service` guard has no destruction test, the count-mismatch branch has no wire test, the `roundTrip()` exception skips `pt-PT`/`zh-Hant` (explicit rows cover them), and the 1000 ms/5000 UTF-16 values remain assumptions. No real problems were left unfixed because of cost. The READMEs were corrected to call MyMemory a free API and only Mozhi/Yandex/Bing unofficial. Next: `06-reverso`; no push.
 - 2026-11-09 — Planner split `06-reverso` into a stage with four children: `01-reverso-parser` (detailed), `02-reverso-service`, `03-reverso-settings` and `04-reverso-docs`. The node was too large for one task (parser and language branch, service and registration, settings and 14 `.ts`, docs; four independent acceptances), the same split as Bing. Decisions: six languages only (`en`, `fr`, `de`, `es`, `it`, `ru`), no `auto`; the internal codes equal Reverso's, the six languages form the full 36-direction cross product and `direction` is `<source>-<target>`; the JSON `deviceId`/`appId` are strings `"0"`; the upstream `error` flag is handled together with `success == false`; a browser Chrome UA is set on Reverso requests only; 600 ms and 5000 UTF-16 are named assumptions; `auto` returns `UnsupportedLanguage` with a message to choose an explicit source; the short validated provider `message` may reach `errorMessage` but is never logged; fixtures plus a local `QTcpServer`; counts 37/32 now, 38/33 after the parser and 39/34 after the service; `.ts` 311 → 313. The protocol was checked against `doc/free-endpoints.md` §4 and the upstream `ahatem/QTranslate` plugin, not a live request. No user question; the READMEs, `doc/handoff.md`, the root plan and `07-fallback-chain` stay lead-owned. The parser is `in-progress`; coordinator next. No push.
 - 2026-11-09 — Context stop at ~380k right after the Reverso split commit `e92e4ad`; the `01-reverso-parser` coordinator was not started. The stage `06-reverso` and the parser are `in-progress`, the parser plan is detailed and committed, and the working tree is clean. In a new session: `/new`, choose `lead`, `@continue`, then start the coordinator for `01-reverso-parser`. No push.
+- 2026-11-09 — Planner detailed `02-reverso-service` (9 steps, `detailed: true`). The task already carried a long implementation description in `## Task`; it was moved into steps, not duplicated. Decisions: `ReversoService` derives from `QueuedWebService` with a constructor `setRateLimitMs(600)`; the JSON body has seven string fields (`deviceId`/`appId` = `"0"`); `browserUserAgent()` is a separate Reverso constant; no cookies and no `Cookie` header; `applySettings()` is empty; `setEndpoint()` is the only test seam and the inherited `setRateLimitMs()` the only timing seam; `auto` returns the exact `Reverso needs an explicit source language; choose one instead of Auto-detect`; a failed chunk fails the whole reply; `fail()` logs the error kind, never `errorMessage`. The count-mismatch branch stays defensive and unreachable from the wire (recorded in risks); the test file is the context risk. Counts: Linux 39, Windows 34. Status `in-progress`; coordinator next; no push.
+- 2026-11-09 — Task `03-free-web-endpoints/06-reverso/01-reverso-parser` done as `b50945a`. Added the `reverso` language branch (only `en`, `fr`, `de`, `es`, `it`, `ru`; `auto` and other codes empty) and the pure `ReversoParser` in `src/services/reversoparser.{h,cpp}`, 29 fixtures under `tests/fixtures/reverso/`, `tst_reversoparser` (40 cases) and the `tst_languages` rows (200); the target is registered platform-neutrally after `tst_queuedwebservice`. Verification: Linux Debug/Release 38/38 with no warnings; Windows 33 was not performed (no MSVC). The reviewer found no blockers or remarks. Found while working and deferred to `04-reverso-docs`: `doc/free-endpoints.md` §4 omits the flat upstream `error` flag that the parser handles, and `AGENTS.md` still says 32/37 tests. No live smoke. Next: detail `02-reverso-service`; no push.

@@ -27,6 +27,7 @@ class GoogleTranslateService;
 class MyMemoryService;
 class MozhiService;
 class OpenAiCompatibleService;
+class ReversoService;
 class QTranslator;
 class YandexWebService;
 struct AppSettings;
@@ -106,6 +107,7 @@ private:
     MozhiService *m_mozhi = nullptr;
     YandexWebService *m_yandexWeb = nullptr;
     BingWebService *m_bingWeb = nullptr;
+    ReversoService *m_reverso = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for
     QPointer<TranslationReply> m_popupReply;      // the request the popup waits for
     QPointer<TranslationReply> m_inPlaceReply;    // the request for replacing a selection

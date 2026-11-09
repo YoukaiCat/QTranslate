@@ -64,6 +64,7 @@ qt_add_library(qtranslate_core STATIC
     src/services/openaicompatibleservice.cpp src/services/openaicompatibleservice.h
     src/services/queuedwebservice.cpp       src/services/queuedwebservice.h
     src/services/reversoparser.cpp          src/services/reversoparser.h
+    src/services/reversoservice.cpp         src/services/reversoservice.h
     src/services/yandexwebparser.cpp        src/services/yandexwebparser.h
     src/services/yandexwebservice.cpp       src/services/yandexwebservice.h
 )

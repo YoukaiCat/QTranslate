@@ -50,6 +50,7 @@ target_link_libraries(tst_popupwindow PRIVATE Qt::Widgets)
 set_tests_properties(tst_popupwindow PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 qtranslate_add_test(tst_queuedwebservice)
 qtranslate_add_test(tst_reversoparser)
+qtranslate_add_test(tst_reversoservice)
 qtranslate_add_test(tst_settings)
 qtranslate_add_test(tst_settingsdialog
     ${PROJECT_SOURCE_DIR}/src/ui/languagecombobox.cpp
