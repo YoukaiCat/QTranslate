@@ -696,147 +696,147 @@
     <name>MainWindow</name>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="52"/>
-        <location filename="../src/ui/mainwindow.cpp" line="305"/>
+        <location filename="../src/ui/mainwindow.cpp" line="308"/>
         <source>Source language</source>
         <translation>Ausgangssprache</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="57"/>
-        <location filename="../src/ui/mainwindow.cpp" line="307"/>
+        <location filename="../src/ui/mainwindow.cpp" line="310"/>
         <source>Swap languages</source>
         <translation>Sprachen tauschen</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="61"/>
-        <location filename="../src/ui/mainwindow.cpp" line="309"/>
+        <location filename="../src/ui/mainwindow.cpp" line="312"/>
         <source>Target language</source>
         <translation>Zielsprache</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="65"/>
-        <location filename="../src/ui/mainwindow.cpp" line="312"/>
+        <location filename="../src/ui/mainwindow.cpp" line="315"/>
         <source>Translation service</source>
         <translation>Übersetzungsdienst</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="73"/>
-        <location filename="../src/ui/mainwindow.cpp" line="311"/>
+        <location filename="../src/ui/mainwindow.cpp" line="314"/>
         <source>Service:</source>
         <translation>Service:</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="83"/>
-        <location filename="../src/ui/mainwindow.cpp" line="313"/>
+        <location filename="../src/ui/mainwindow.cpp" line="316"/>
         <source>Source text</source>
         <translation>Quelltext</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="84"/>
-        <location filename="../src/ui/mainwindow.cpp" line="314"/>
+        <location filename="../src/ui/mainwindow.cpp" line="317"/>
         <source>Enter text to translate</source>
         <translation>Geben Sie den zu übersetzenden Text ein</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="87"/>
         <location filename="../src/ui/mainwindow.cpp" line="89"/>
-        <location filename="../src/ui/mainwindow.cpp" line="315"/>
-        <location filename="../src/ui/mainwindow.cpp" line="316"/>
+        <location filename="../src/ui/mainwindow.cpp" line="318"/>
+        <location filename="../src/ui/mainwindow.cpp" line="319"/>
         <source>Translation</source>
         <translation>Übersetzung</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="107"/>
-        <location filename="../src/ui/mainwindow.cpp" line="319"/>
+        <location filename="../src/ui/mainwindow.cpp" line="322"/>
         <source>Check</source>
         <translation>Prüfen</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="109"/>
-        <location filename="../src/ui/mainwindow.cpp" line="320"/>
+        <location filename="../src/ui/mainwindow.cpp" line="323"/>
         <source>Check the source text</source>
         <translation>Quelltext prüfen</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="111"/>
-        <location filename="../src/ui/mainwindow.cpp" line="317"/>
+        <location filename="../src/ui/mainwindow.cpp" line="320"/>
         <source>Translate</source>
         <translation>Übersetzen</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="113"/>
-        <location filename="../src/ui/mainwindow.cpp" line="318"/>
+        <location filename="../src/ui/mainwindow.cpp" line="321"/>
         <source>Ctrl+Enter</source>
         <translation>Ctrl+Enter</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="114"/>
-        <location filename="../src/ui/mainwindow.cpp" line="321"/>
+        <location filename="../src/ui/mainwindow.cpp" line="324"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="116"/>
-        <location filename="../src/ui/mainwindow.cpp" line="322"/>
+        <location filename="../src/ui/mainwindow.cpp" line="325"/>
         <source>Copy the translation to the clipboard</source>
         <translation>Übersetzung in die Zwischenablage kopieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="256"/>
+        <location filename="../src/ui/mainwindow.cpp" line="259"/>
         <source>Translating…</source>
         <translation>Wird übersetzt…</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="275"/>
+        <location filename="../src/ui/mainwindow.cpp" line="278"/>
         <source>Detected language: %1</source>
         <translation>Erkannte Sprache: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="388"/>
+        <location filename="../src/ui/mainwindow.cpp" line="396"/>
         <source>Nothing to check</source>
         <translation>Nichts zu prüfen</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="524"/>
+        <location filename="../src/ui/mainwindow.cpp" line="536"/>
         <source>Corrections applied</source>
         <translation>Korrekturen angewendet</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="531"/>
+        <location filename="../src/ui/mainwindow.cpp" line="543"/>
         <source>Preview of corrections</source>
         <translation>Vorschau der Korrekturen</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="534"/>
+        <location filename="../src/ui/mainwindow.cpp" line="546"/>
         <source>Corrected text:</source>
         <translation>Korrigierter Text:</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="559"/>
+        <location filename="../src/ui/mainwindow.cpp" line="571"/>
         <source>Check before translation</source>
         <translation>Vor der Übersetzung prüfen</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="562"/>
+        <location filename="../src/ui/mainwindow.cpp" line="574"/>
         <source>%1 issues found in the source text.</source>
         <translation>%1 Probleme im Quelltext gefunden.</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="565"/>
+        <location filename="../src/ui/mainwindow.cpp" line="577"/>
         <source>Apply corrections and translate</source>
         <translation>Korrekturen anwenden und übersetzen</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="568"/>
+        <location filename="../src/ui/mainwindow.cpp" line="580"/>
         <source>Translate anyway</source>
         <translation>Trotzdem übersetzen</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="639"/>
+        <location filename="../src/ui/mainwindow.cpp" line="651"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>Korrigierter Text in die Zwischenablage kopiert</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="669"/>
+        <location filename="../src/ui/mainwindow.cpp" line="681"/>
         <source>Translation copied to the clipboard</source>
         <translation>Übersetzung in die Zwischenablage kopiert</translation>
     </message>
@@ -1121,49 +1121,80 @@
 <context>
     <name>ProofreadingPanel</name>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="117"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="126"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="184"/>
         <source>Rule: %1</source>
         <translation>Regel: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="161"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="170"/>
         <source>Issues</source>
         <translation>Probleme</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="162"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="171"/>
         <source>Replace</source>
         <translation>Ersetzen</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="163"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="172"/>
         <source>Ignore</source>
         <translation>Ignorieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="164"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="173"/>
         <source>Replace all</source>
         <translation>Alle ersetzen</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="165"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="173"/>
+        <source>Replace selection</source>
+        <translation>Auswahl ersetzen</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="174"/>
         <source>Copy corrected text</source>
         <translation>Korrigierten Text kopieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="179"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="199"/>
         <source>Checking…</source>
         <translation>Prüfung…</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="183"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="203"/>
         <source>No issues found.</source>
         <translation>Keine Probleme gefunden.</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="202"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="223"/>
         <source>No suggestions</source>
         <translation>Keine Vorschläge</translation>
+    </message>
+</context>
+<context>
+    <name>ProofreadingPopupWindow</name>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="178"/>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="179"/>
+        <source>Check the selection</source>
+        <translation>Auswahl prüfen</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="180"/>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="181"/>
+        <source>Corrected text:</source>
+        <translation>Korrigierter Text:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="182"/>
+        <source>The selection is replaced only after you confirm. Undo depends on the other application and may not work.</source>
+        <translation>Die Auswahl wird erst nach der Bestätigung ersetzt. Rückgängig hängt von der anderen Anwendung ab und funktioniert möglicherweise nicht.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="184"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
     </message>
 </context>
 <context>

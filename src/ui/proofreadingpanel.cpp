@@ -66,6 +66,8 @@ void ProofreadingPanel::buildUi()
     connect(m_replacements, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             [this](int) { updateActions(); });
     connect(m_replaceButton, &QPushButton::clicked, this, [this] {
+        if (m_externalMode)
+            return;
         const int row = m_list->currentRow();
         const int index = m_replacements->currentIndex();
         const ProofreadingIssue *issue = issueAt(row);
@@ -79,6 +81,13 @@ void ProofreadingPanel::buildUi()
     connect(m_copyButton, &QPushButton::clicked, this,
             &ProofreadingPanel::copyCorrectedRequested);
 
+    retranslateUi();
+    updateActions();
+}
+
+void ProofreadingPanel::setExternalMode(bool external)
+{
+    m_externalMode = external;
     retranslateUi();
     updateActions();
 }
@@ -161,7 +170,7 @@ void ProofreadingPanel::retranslateUi()
     m_title->setText(tr("Issues"));
     m_replaceButton->setText(tr("Replace"));
     m_ignoreButton->setText(tr("Ignore"));
-    m_replaceAllButton->setText(tr("Replace all"));
+    m_replaceAllButton->setText(m_externalMode ? tr("Replace selection") : tr("Replace all"));
     m_copyButton->setText(tr("Copy corrected text"));
     setState(m_state);
 
@@ -234,10 +243,19 @@ void ProofreadingPanel::updateActions()
     m_ignoreButton->setEnabled(issue != nullptr);
     m_replaceAllButton->setEnabled(hasIssues());
     m_copyButton->setEnabled(hasIssues());
+
+    // A synthetic paste replaces the whole selection at once, so the per-issue
+    // actions and the suggestion combo have no meaning in the external window.
+    m_replaceButton->setVisible(!m_externalMode);
+    m_ignoreButton->setVisible(!m_externalMode);
+    m_replacements->setVisible(!m_externalMode);
 }
 
 void ProofreadingPanel::ignoreCurrentIssue()
 {
+    if (m_externalMode)
+        return;
+
     const int row = m_list->currentRow();
     if (row < 0 || row >= m_issues.size())
         return;

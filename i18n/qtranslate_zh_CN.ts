@@ -696,147 +696,147 @@
     <name>MainWindow</name>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="52"/>
-        <location filename="../src/ui/mainwindow.cpp" line="305"/>
+        <location filename="../src/ui/mainwindow.cpp" line="308"/>
         <source>Source language</source>
         <translation>源语言</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="57"/>
-        <location filename="../src/ui/mainwindow.cpp" line="307"/>
+        <location filename="../src/ui/mainwindow.cpp" line="310"/>
         <source>Swap languages</source>
         <translation>交换语言</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="61"/>
-        <location filename="../src/ui/mainwindow.cpp" line="309"/>
+        <location filename="../src/ui/mainwindow.cpp" line="312"/>
         <source>Target language</source>
         <translation>目标语言</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="65"/>
-        <location filename="../src/ui/mainwindow.cpp" line="312"/>
+        <location filename="../src/ui/mainwindow.cpp" line="315"/>
         <source>Translation service</source>
         <translation>翻译服务</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="73"/>
-        <location filename="../src/ui/mainwindow.cpp" line="311"/>
+        <location filename="../src/ui/mainwindow.cpp" line="314"/>
         <source>Service:</source>
         <translation>服务：</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="83"/>
-        <location filename="../src/ui/mainwindow.cpp" line="313"/>
+        <location filename="../src/ui/mainwindow.cpp" line="316"/>
         <source>Source text</source>
         <translation>源文本</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="84"/>
-        <location filename="../src/ui/mainwindow.cpp" line="314"/>
+        <location filename="../src/ui/mainwindow.cpp" line="317"/>
         <source>Enter text to translate</source>
         <translation>输入要翻译的文字</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="87"/>
         <location filename="../src/ui/mainwindow.cpp" line="89"/>
-        <location filename="../src/ui/mainwindow.cpp" line="315"/>
-        <location filename="../src/ui/mainwindow.cpp" line="316"/>
+        <location filename="../src/ui/mainwindow.cpp" line="318"/>
+        <location filename="../src/ui/mainwindow.cpp" line="319"/>
         <source>Translation</source>
         <translation>翻译</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="107"/>
-        <location filename="../src/ui/mainwindow.cpp" line="319"/>
+        <location filename="../src/ui/mainwindow.cpp" line="322"/>
         <source>Check</source>
         <translation>检查</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="109"/>
-        <location filename="../src/ui/mainwindow.cpp" line="320"/>
+        <location filename="../src/ui/mainwindow.cpp" line="323"/>
         <source>Check the source text</source>
         <translation>检查源文本</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="111"/>
-        <location filename="../src/ui/mainwindow.cpp" line="317"/>
+        <location filename="../src/ui/mainwindow.cpp" line="320"/>
         <source>Translate</source>
         <translation>翻译</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="113"/>
-        <location filename="../src/ui/mainwindow.cpp" line="318"/>
+        <location filename="../src/ui/mainwindow.cpp" line="321"/>
         <source>Ctrl+Enter</source>
         <translation>Ctrl+Enter</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="114"/>
-        <location filename="../src/ui/mainwindow.cpp" line="321"/>
+        <location filename="../src/ui/mainwindow.cpp" line="324"/>
         <source>Copy</source>
         <translation>复制</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="116"/>
-        <location filename="../src/ui/mainwindow.cpp" line="322"/>
+        <location filename="../src/ui/mainwindow.cpp" line="325"/>
         <source>Copy the translation to the clipboard</source>
         <translation>将译文复制到剪贴板</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="256"/>
+        <location filename="../src/ui/mainwindow.cpp" line="259"/>
         <source>Translating…</source>
         <translation>正在翻译…</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="275"/>
+        <location filename="../src/ui/mainwindow.cpp" line="278"/>
         <source>Detected language: %1</source>
         <translation>检测到的语言：%1</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="388"/>
+        <location filename="../src/ui/mainwindow.cpp" line="396"/>
         <source>Nothing to check</source>
         <translation>没有可检查的内容</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="524"/>
+        <location filename="../src/ui/mainwindow.cpp" line="536"/>
         <source>Corrections applied</source>
         <translation>已应用更正</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="531"/>
+        <location filename="../src/ui/mainwindow.cpp" line="543"/>
         <source>Preview of corrections</source>
         <translation>更正预览</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="534"/>
+        <location filename="../src/ui/mainwindow.cpp" line="546"/>
         <source>Corrected text:</source>
         <translation>更正后的文本：</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="559"/>
+        <location filename="../src/ui/mainwindow.cpp" line="571"/>
         <source>Check before translation</source>
         <translation>翻译前检查</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="562"/>
+        <location filename="../src/ui/mainwindow.cpp" line="574"/>
         <source>%1 issues found in the source text.</source>
         <translation>在源文本中发现 %1 个问题。</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="565"/>
+        <location filename="../src/ui/mainwindow.cpp" line="577"/>
         <source>Apply corrections and translate</source>
         <translation>应用更正并翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="568"/>
+        <location filename="../src/ui/mainwindow.cpp" line="580"/>
         <source>Translate anyway</source>
         <translation>仍然翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="639"/>
+        <location filename="../src/ui/mainwindow.cpp" line="651"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>更正后的文本已复制到剪贴板</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="669"/>
+        <location filename="../src/ui/mainwindow.cpp" line="681"/>
         <source>Translation copied to the clipboard</source>
         <translation>译文已复制到剪贴板</translation>
     </message>
@@ -1121,49 +1121,80 @@
 <context>
     <name>ProofreadingPanel</name>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="117"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="126"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="184"/>
         <source>Rule: %1</source>
         <translation>规则：%1</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="161"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="170"/>
         <source>Issues</source>
         <translation>问题</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="162"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="171"/>
         <source>Replace</source>
         <translation>替换</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="163"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="172"/>
         <source>Ignore</source>
         <translation>忽略</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="164"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="173"/>
         <source>Replace all</source>
         <translation>全部替换</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="165"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="173"/>
+        <source>Replace selection</source>
+        <translation>替换所选内容</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="174"/>
         <source>Copy corrected text</source>
         <translation>复制更正后的文本</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="179"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="199"/>
         <source>Checking…</source>
         <translation>检查…</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="183"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="203"/>
         <source>No issues found.</source>
         <translation>未发现问题。</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="202"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="223"/>
         <source>No suggestions</source>
         <translation>没有建议</translation>
+    </message>
+</context>
+<context>
+    <name>ProofreadingPopupWindow</name>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="178"/>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="179"/>
+        <source>Check the selection</source>
+        <translation>检查所选内容</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="180"/>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="181"/>
+        <source>Corrected text:</source>
+        <translation>更正后的文本：</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="182"/>
+        <source>The selection is replaced only after you confirm. Undo depends on the other application and may not work.</source>
+        <translation>所选内容仅在确认后才会替换。撤销取决于其他应用程序，可能无法使用。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="184"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
     </message>
 </context>
 <context>

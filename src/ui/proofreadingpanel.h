@@ -10,16 +10,24 @@ class QLabel;
 class QListWidget;
 class QPushButton;
 
-// Issue list of the main-window checking mode (see doc/proofreading.md, §6).
-// It never edits a document and holds no manager, service or settings: the
-// owner applies the edits, feeds results back through showResult() and
-// repaints the highlights from issues().
+// Issue list of the checking modes (see doc/proofreading.md, §6). It never
+// edits a document and holds no manager, service or settings: the owner
+// applies the edits, feeds results back through showResult() and repaints the
+// highlights from issues(). The external mode of the selection popup hides the
+// per-issue actions and the suggestion combo, because a synthetic paste can
+// only replace the whole selection: "Replace selection" and
+// "Copy corrected text" remain.
 class ProofreadingPanel : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit ProofreadingPanel(QWidget *parent = nullptr);
+
+    // Switches between the main-window and the external-selection surface.
+    // Applies the labels and the visibility itself: the popup calls it after
+    // the constructor has built the widgets.
+    void setExternalMode(bool external);
 
     void showChecking();                               // clears the list, shows "Checking…"
     void showResult(const ProofreadingResult &result); // issues, "No issues found." or the error
@@ -61,4 +69,5 @@ private:
     QVector<ProofreadingIssue> m_issues;
     ProofreadingResult m_errorResult; // the last failed result, for retranslation
     State m_state = State::Empty;
+    bool m_externalMode = false;
 };

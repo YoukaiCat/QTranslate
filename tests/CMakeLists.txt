@@ -65,6 +65,16 @@ qtranslate_add_test(tst_proofreadingpanel
 )
 target_link_libraries(tst_proofreadingpanel PRIVATE Qt::Widgets)
 set_tests_properties(tst_proofreadingpanel PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+qtranslate_add_test(tst_proofreadingpopup
+    ${PROJECT_SOURCE_DIR}/src/ui/proofreadingpopupwindow.cpp
+    ${PROJECT_SOURCE_DIR}/src/ui/proofreadingpopupwindow.h
+    ${PROJECT_SOURCE_DIR}/src/ui/proofreadingpanel.cpp
+    ${PROJECT_SOURCE_DIR}/src/ui/proofreadingpanel.h
+    ${PROJECT_SOURCE_DIR}/src/ui/proofreadingerrortext.cpp
+    ${PROJECT_SOURCE_DIR}/src/ui/proofreadingerrortext.h
+)
+target_link_libraries(tst_proofreadingpopup PRIVATE Qt::Widgets)
+set_tests_properties(tst_proofreadingpopup PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 qtranslate_add_test(tst_queuedwebservice)
 qtranslate_add_test(tst_reversoparser)
 qtranslate_add_test(tst_reversoservice)

@@ -696,147 +696,147 @@
     <name>MainWindow</name>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="52"/>
-        <location filename="../src/ui/mainwindow.cpp" line="305"/>
+        <location filename="../src/ui/mainwindow.cpp" line="308"/>
         <source>Source language</source>
         <translation>ソース言語</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="57"/>
-        <location filename="../src/ui/mainwindow.cpp" line="307"/>
+        <location filename="../src/ui/mainwindow.cpp" line="310"/>
         <source>Swap languages</source>
         <translation>言語を入れ替える</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="61"/>
-        <location filename="../src/ui/mainwindow.cpp" line="309"/>
+        <location filename="../src/ui/mainwindow.cpp" line="312"/>
         <source>Target language</source>
         <translation>翻訳先の言語</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="65"/>
-        <location filename="../src/ui/mainwindow.cpp" line="312"/>
+        <location filename="../src/ui/mainwindow.cpp" line="315"/>
         <source>Translation service</source>
         <translation>翻訳サービス</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="73"/>
-        <location filename="../src/ui/mainwindow.cpp" line="311"/>
+        <location filename="../src/ui/mainwindow.cpp" line="314"/>
         <source>Service:</source>
         <translation>サービス：</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="83"/>
-        <location filename="../src/ui/mainwindow.cpp" line="313"/>
+        <location filename="../src/ui/mainwindow.cpp" line="316"/>
         <source>Source text</source>
         <translation>ソーステキスト</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="84"/>
-        <location filename="../src/ui/mainwindow.cpp" line="314"/>
+        <location filename="../src/ui/mainwindow.cpp" line="317"/>
         <source>Enter text to translate</source>
         <translation>翻訳するテキストを入力してください</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="87"/>
         <location filename="../src/ui/mainwindow.cpp" line="89"/>
-        <location filename="../src/ui/mainwindow.cpp" line="315"/>
-        <location filename="../src/ui/mainwindow.cpp" line="316"/>
+        <location filename="../src/ui/mainwindow.cpp" line="318"/>
+        <location filename="../src/ui/mainwindow.cpp" line="319"/>
         <source>Translation</source>
         <translation>翻訳</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="107"/>
-        <location filename="../src/ui/mainwindow.cpp" line="319"/>
+        <location filename="../src/ui/mainwindow.cpp" line="322"/>
         <source>Check</source>
         <translation>チェック</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="109"/>
-        <location filename="../src/ui/mainwindow.cpp" line="320"/>
+        <location filename="../src/ui/mainwindow.cpp" line="323"/>
         <source>Check the source text</source>
         <translation>ソーステキストをチェック</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="111"/>
-        <location filename="../src/ui/mainwindow.cpp" line="317"/>
+        <location filename="../src/ui/mainwindow.cpp" line="320"/>
         <source>Translate</source>
         <translation>翻訳する</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="113"/>
-        <location filename="../src/ui/mainwindow.cpp" line="318"/>
+        <location filename="../src/ui/mainwindow.cpp" line="321"/>
         <source>Ctrl+Enter</source>
         <translation>Ctrl+Enter</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="114"/>
-        <location filename="../src/ui/mainwindow.cpp" line="321"/>
+        <location filename="../src/ui/mainwindow.cpp" line="324"/>
         <source>Copy</source>
         <translation>コピー</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="116"/>
-        <location filename="../src/ui/mainwindow.cpp" line="322"/>
+        <location filename="../src/ui/mainwindow.cpp" line="325"/>
         <source>Copy the translation to the clipboard</source>
         <translation>翻訳をクリップボードにコピー</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="256"/>
+        <location filename="../src/ui/mainwindow.cpp" line="259"/>
         <source>Translating…</source>
         <translation>翻訳中…</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="275"/>
+        <location filename="../src/ui/mainwindow.cpp" line="278"/>
         <source>Detected language: %1</source>
         <translation>検出された言語：%1</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="388"/>
+        <location filename="../src/ui/mainwindow.cpp" line="396"/>
         <source>Nothing to check</source>
         <translation>チェックするテキストがありません</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="524"/>
+        <location filename="../src/ui/mainwindow.cpp" line="536"/>
         <source>Corrections applied</source>
         <translation>修正を適用しました</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="531"/>
+        <location filename="../src/ui/mainwindow.cpp" line="543"/>
         <source>Preview of corrections</source>
         <translation>修正内容のプレビュー</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="534"/>
+        <location filename="../src/ui/mainwindow.cpp" line="546"/>
         <source>Corrected text:</source>
         <translation>修正後のテキスト:</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="559"/>
+        <location filename="../src/ui/mainwindow.cpp" line="571"/>
         <source>Check before translation</source>
         <translation>翻訳前にチェック</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="562"/>
+        <location filename="../src/ui/mainwindow.cpp" line="574"/>
         <source>%1 issues found in the source text.</source>
         <translation>ソーステキストに %1 件の問題が見つかりました。</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="565"/>
+        <location filename="../src/ui/mainwindow.cpp" line="577"/>
         <source>Apply corrections and translate</source>
         <translation>修正を適用して翻訳</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="568"/>
+        <location filename="../src/ui/mainwindow.cpp" line="580"/>
         <source>Translate anyway</source>
         <translation>そのまま翻訳</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="639"/>
+        <location filename="../src/ui/mainwindow.cpp" line="651"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>修正後のテキストをクリップボードにコピーしました</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="669"/>
+        <location filename="../src/ui/mainwindow.cpp" line="681"/>
         <source>Translation copied to the clipboard</source>
         <translation>翻訳をクリップボードにコピーしました</translation>
     </message>
@@ -1121,49 +1121,80 @@
 <context>
     <name>ProofreadingPanel</name>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="117"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="126"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="184"/>
         <source>Rule: %1</source>
         <translation>ルール: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="161"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="170"/>
         <source>Issues</source>
         <translation>問題</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="162"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="171"/>
         <source>Replace</source>
         <translation>置換</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="163"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="172"/>
         <source>Ignore</source>
         <translation>無視</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="164"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="173"/>
         <source>Replace all</source>
         <translation>すべて置換</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="165"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="173"/>
+        <source>Replace selection</source>
+        <translation>選択範囲を置換</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="174"/>
         <source>Copy corrected text</source>
         <translation>修正後のテキストをコピー</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="179"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="199"/>
         <source>Checking…</source>
         <translation>チェック中…</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="183"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="203"/>
         <source>No issues found.</source>
         <translation>問題は見つかりませんでした。</translation>
     </message>
     <message>
-        <location filename="../src/ui/proofreadingpanel.cpp" line="202"/>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="223"/>
         <source>No suggestions</source>
         <translation>候補なし</translation>
+    </message>
+</context>
+<context>
+    <name>ProofreadingPopupWindow</name>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="178"/>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="179"/>
+        <source>Check the selection</source>
+        <translation>選択範囲をチェック</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="180"/>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="181"/>
+        <source>Corrected text:</source>
+        <translation>修正後のテキスト:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="182"/>
+        <source>The selection is replaced only after you confirm. Undo depends on the other application and may not work.</source>
+        <translation>選択範囲は確認後にのみ置換されます。元に戻す操作は他のアプリケーションに依存し、機能しない場合があります。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpopupwindow.cpp" line="184"/>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
     </message>
 </context>
 <context>
