@@ -601,6 +601,52 @@ private slots:
         QVERIFY(!dialog.settings().translation.allowFreeServices);
     }
 
+    void reversoGroup()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true);
+        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("reversoGroup"));
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("reversoHint"));
+        auto *bingGroup = dialog.findChild<QGroupBox *>(QStringLiteral("bingGroup"));
+        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
+        QVERIFY(group);
+        QVERIFY(hint);
+        QVERIFY(bingGroup);
+        QVERIFY(checkbox);
+
+        QCOMPARE(group->title(), QStringLiteral("Reverso"));
+        QVERIFY(!checkbox->isChecked());
+        QVERIFY(!group->isHidden());
+        QVERIFY(!group->isEnabled());
+        QVERIFY(hint->wordWrap());
+        QVERIFY(hint->text().contains(QStringLiteral("unofficial")));
+        QVERIFY(hint->text().contains(QStringLiteral("no key")));
+        QVERIFY(hint->text().contains(QStringLiteral("rate")));
+        QVERIFY(hint->text().contains(QStringLiteral("block")));
+        QVERIFY(hint->text().contains(QStringLiteral("free web services")));
+        QVERIFY(hint->text().contains(QStringLiteral("several requests")));
+        QVERIFY(hint->text().contains(QStringLiteral("third party")));
+        QVERIFY(hint->text().contains(QStringLiteral("English")));
+        QVERIFY(hint->text().contains(QStringLiteral("source language")));
+        QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
+        QVERIFY(!dialog.settings().translation.allowFreeServices);
+
+        const QLayout *servicesLayout = group->parentWidget()->layout();
+        QVERIFY(servicesLayout);
+        QVERIFY(servicesLayout->indexOf(bingGroup) >= 0);
+        QVERIFY(servicesLayout->indexOf(bingGroup) < servicesLayout->indexOf(group));
+
+        checkbox->setChecked(true);
+        QVERIFY(group->isEnabled());
+        QVERIFY(dialog.settings().translation.allowFreeServices);
+
+        checkbox->setChecked(false);
+        QVERIFY(!group->isEnabled());
+        QVERIFY(!dialog.settings().translation.allowFreeServices);
+    }
+
     void llmModels()
     {
         AppSettings settings;

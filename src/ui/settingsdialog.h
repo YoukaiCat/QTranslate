@@ -72,6 +72,7 @@ private:
     void updateMozhiControls();
     void updateYandexControls();
     void updateBingControls();
+    void updateReversoControls();
     void updateProxyControls();
 
     AppSettings m_initial;
@@ -127,6 +128,8 @@ private:
     QGroupBox *m_yandexGroup = nullptr;
 
     QGroupBox *m_bingGroup = nullptr;
+
+    QGroupBox *m_reversoGroup = nullptr;
 
     QComboBox *m_proxyMode = nullptr;
     QComboBox *m_proxyType = nullptr;

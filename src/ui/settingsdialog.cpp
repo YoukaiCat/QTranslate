@@ -412,6 +412,22 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     connect(m_allowFreeServices, &QCheckBox::toggled, this,
             &SettingsDialog::updateBingControls);
 
+    m_reversoGroup = new QGroupBox(tr("Reverso"), servicesContent);
+    m_reversoGroup->setObjectName(QStringLiteral("reversoGroup"));
+    auto *reversoLayout = new QVBoxLayout(m_reversoGroup);
+    auto *reversoHint = new QLabel(
+        tr("Reverso is an unofficial endpoint and needs no key. It supports only English, French, "
+           "German, Spanish, Italian and Russian and cannot detect the source language. Enable free "
+           "web services above to use it. It may stop working, apply rate limits or block requests. "
+           "Long text is sent in several requests. The text is sent to a third party."),
+        m_reversoGroup);
+    reversoHint->setObjectName(QStringLiteral("reversoHint"));
+    reversoHint->setWordWrap(true);
+    reversoLayout->addWidget(reversoHint);
+    servicesLayout->addWidget(m_reversoGroup);
+    connect(m_allowFreeServices, &QCheckBox::toggled, this,
+            &SettingsDialog::updateReversoControls);
+
     servicesLayout->addStretch();
     servicesScroll->setWidget(servicesContent);
     servicesPageLayout->addWidget(servicesScroll);
@@ -577,6 +593,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     updateMozhiControls();
     updateYandexControls();
     updateBingControls();
+    updateReversoControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -697,6 +714,11 @@ void SettingsDialog::updateYandexControls()
 void SettingsDialog::updateBingControls()
 {
     m_bingGroup->setEnabled(m_allowFreeServices->isChecked());
+}
+
+void SettingsDialog::updateReversoControls()
+{
+    m_reversoGroup->setEnabled(m_allowFreeServices->isChecked());
 }
 
 void SettingsDialog::updateProxyControls()
