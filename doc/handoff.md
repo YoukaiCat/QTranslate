@@ -94,9 +94,11 @@ documentation is English. The migration to the tree roadmap and the English base
   no-libsecret build.
 - Release 0.12.0 is deferred by user decision on 2026-11-08. When it happens, the version bump, the
   README download links, and `doc/releases/0.12.0.md` are needed; the old 0.11.1 GitHub release is
-  deleted then (user decision). The roadmap is in stage 3: the opt-in gate, the shared queue,
-  MyMemory, Mozhi, Yandex web, Bing web and Reverso are done, and the fallback chain is implemented
-  (manager, settings/UI and docs); the fallback stage acceptance is next.
+  deleted then (user decision). The roadmap is past stage 3: the opt-in gate, the shared queue,
+  MyMemory, Mozhi, Yandex web, Bing web and Reverso are done, the fallback chain is implemented
+  (manager, settings/UI and docs), and stage 3 is accepted `done`. Stage 4
+  (`04-local-offline-translation`) stays `blocked` by the user's 2026-11-05 decision; the next stage
+  is `05-proofreading`.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
