@@ -50,6 +50,7 @@ qt_add_library(qtranslate_core STATIC
     src/core/uilanguages.cpp                src/core/uilanguages.h
     src/net/networkmanager.cpp              src/net/networkmanager.h
     src/services/bingwebparser.cpp          src/services/bingwebparser.h
+    src/services/bingwebservice.cpp         src/services/bingwebservice.h
     src/services/deeplparser.cpp            src/services/deeplparser.h
     src/services/deeplservice.cpp           src/services/deeplservice.h
     src/services/deeplwebparser.cpp         src/services/deeplwebparser.h

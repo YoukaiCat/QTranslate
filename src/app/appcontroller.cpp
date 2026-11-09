@@ -18,6 +18,7 @@
 #ifdef Q_OS_LINUX
 #  include "platform/sessiontype.h"
 #endif
+#include "services/bingwebservice.h"
 #include "services/deeplservice.h"
 #include "services/googletranslateservice.h"
 #include "services/mozhiservice.h"
@@ -232,18 +233,21 @@ void AppController::createTranslation()
     m_mymemory = new MyMemoryService(m_network);
     m_mozhi = new MozhiService(m_network);
     m_yandexWeb = new YandexWebService(m_network);
+    m_bingWeb = new BingWebService(m_network);
     m_google->applySettings(settings);
     m_deepl->applySettings(settings);
     m_llm->applySettings(settings);
     m_mymemory->applySettings(settings);
     m_mozhi->applySettings(settings);
     m_yandexWeb->applySettings(settings);
+    m_bingWeb->applySettings(settings);
     m_translations->registerService(m_google);
     m_translations->registerService(m_deepl);
     m_translations->registerService(m_llm);
     m_translations->registerService(m_mymemory);
     m_translations->registerService(m_mozhi);
     m_translations->registerService(m_yandexWeb);
+    m_translations->registerService(m_bingWeb);
 
     if (TranslationService *service = m_translations->service(settings.translation.service)) {
         if (service->requiresOptIn() && !settings.translation.allowFreeServices) {
@@ -610,6 +614,8 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_mozhi->applySettings(newSettings);
     if (m_yandexWeb)
         m_yandexWeb->applySettings(newSettings);
+    if (m_bingWeb)
+        m_bingWeb->applySettings(newSettings);
 
     // A cached translation from the old instance or engine must not be
     // reused. The active reply keeps its captured endpoint, so it is not

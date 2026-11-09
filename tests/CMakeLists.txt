@@ -23,6 +23,7 @@ endfunction()
 
 qtranslate_add_test(tst_appinfo)
 qtranslate_add_test(tst_bingwebparser)
+qtranslate_add_test(tst_bingwebservice)
 qtranslate_add_test(tst_deeplparser)
 qtranslate_add_test(tst_deeplservice)
 qtranslate_add_test(tst_deeplwebparser)

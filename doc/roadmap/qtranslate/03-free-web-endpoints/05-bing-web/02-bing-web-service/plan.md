@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-bing-web-parser]
 ---
@@ -465,3 +465,68 @@ target immediately after `tst_bingwebparser` in the platform-neutral block of
   manual attributes to make the cookie "visible".
 - Windows Debug/Release and its 32 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+
+## Outcome
+
+Done. `BingWebService` and `tst_bingwebservice` exist, the service is registered in `AppController`
+after Yandex, and no settings group, `.ts`, documentation, README, `doc/handoff.md`, root plan or
+`07-fallback-chain` file was changed; commit and push are the lead's.
+
+- Service: `src/services/bingwebservice.h/.cpp` in `qtranslate_core` right after `bingwebparser.cpp`.
+  `BingWebService` derives from `QueuedWebService`, sets 1000 ms, returns id `bing-web`, display name
+  `Bing`, `isConfigured() == true`, `requiresOptIn() == true`, and takes both language lists from
+  `Languages::supported("bing-web", ...)`. `setEndpoints()` replaces the two URLs independently with a
+  per-URL fallback to `https://www.bing.com/translator` and `https://www.bing.com/ttranslatev3`;
+  `browserUserAgent()` is public for the test and is set on the Bing requests only.
+- Handshake: the token page is fetched with `Accept: text/html`, the browser User-Agent, the manual
+  cookie attributes and `SameOriginRedirectPolicy`, and without a `Cookie` header;
+  `BingWebParser::parseTranslatorPage()` supplies the token, `IG`, `IID`, key and lifetime. The `MUID`
+  comes from `Set-Cookie` via `muidFromSetCookieValues()` first and from `page.muid` second; a missing
+  or control-character MUID fails with `ServiceUnavailable` before the POST. The POST carries
+  `isVertical=1`, `IG`/`IID`, the seven fields in the documented order with UTF-8 percent-encoding on
+  both names and values, `Content-Type: application/x-www-form-urlencoded`,
+  `Accept: application/json`, the browser User-Agent and exactly one `Cookie: MUID=...`;
+  `noteRequestSent()` precedes every `get()`/`post()`.
+- Cache and pacing: the token and its MUID live in one `CachedToken` entry per instance for the page
+  lifetime (3600000 ms default, a reported 0 preserved), and `applySettings()` clears it. Every request
+  of one reply is paced by at least `rateLimitMs()`, including the GET→POST pair and the refresh. Two
+  flags beyond the plan's `m_refreshed` keep the edge cases right: `m_tokenFetched` lets a token from a
+  0 ms page be posted once instead of looping on the GET, and `m_forceTokenFetch` guarantees exactly
+  one token GET on a 401 even when the cache holds a different token. The cache is cleared only when it
+  still holds the token the POST used.
+- Chunks and errors: text is split with `TextChunker::split(text, 5000)`, edge whitespace is stripped
+  and restored, whitespace-only parts are never sent, and all chunks stay in one queued reply. A failed
+  chunk fails the whole reply, and a sent/translation count mismatch is `BadResponse`. A 401 (HTTP or
+  body) refreshes once and retries the same chunk; a second 401 is `RateLimited`; a failed refresh
+  surfaces its error; a 403 is `RateLimited` without a refresh; a 401 on a later chunk after a refresh
+  is not refreshed again. The remaining statuses, HTML/provider/malformed bodies, timeout and network
+  errors follow the documented mapping. A review finding added a `m_service` guard in
+  `Reply::onFinished()`, so a reply fails with `Network` when the service is destroyed during a
+  request. Messages and the `qtranslate.service.bing-web` log never carry the text, page, body, URL,
+  token, key, MUID, cookie or `errorString()`.
+- `AppController`: `BingWebService` is constructed, configured and registered after Yandex, and
+  receives `applySettings(newSettings)` in the settings-update path; no `AppSettings` field, INI key or
+  cache reset was added.
+- Test: `tests/tst_bingwebservice.cpp` extends the Mozhi `FakeHttpServer` with `Set-Cookie` values,
+  builds synthetic token pages and translation bodies, and covers the properties and defaults, the GET
+  and POST headers/query/fields/order/encoding, the MUID precedence and fallback, the mapped language
+  codes and `auto-detect`, unsupported codes and empty text without a request, edge whitespace,
+  5000-unit chunks, pacing and queue serialization, cancel/abort, a failed middle chunk, token reuse,
+  0 ms lifetime, `applySettings()`, the 401 rules with exact GET/POST counts, the error matrix,
+  cross-origin redirects on both requests, cookie isolation (the jar before and after, no MUID in the
+  jar, another request keeps its own cookie) and the `TOPSECRET` message/log hygiene. It is
+  platform-neutral and registered after `tst_bingwebparser`; CTest contacts only the local server.
+- Verification: Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie:latest` (Qt 6.8.2,
+  GCC 14.2), Debug and Release: zero warnings, `ctest -N` 37, `tst_bingwebservice` 72/72, full suite
+  37/37 in every configuration; the Release Bing test passed five repeats without a timing flake. The
+  trixie suite needed an external `/etc/passwd`/`/etc/group` workaround for `dbus-daemon` in
+  `tst_hotkeymanager_wayland` only. A manual live smoke passed: the translator page answered 200 with
+  all markers, and the POST with the form and `Cookie: MUID=...` returned `Hallo Welt` with detected
+  `en`. The smoke did not measure a pause limit, so 1000 ms and 5000 UTF-16 units remain named
+  conservative assumptions. Windows/MSVC is unavailable: the Windows Debug/Release build and its 32
+  tests were **not performed**, not passed.
+- Review: one accepted finding — the `m_service` guard was missing in `Reply::onFinished()` (a null
+  `QPointer` dereference in `finishTokenPage()` if the service was destroyed while the GET was in
+  flight) — fixed by the guard that fails the reply with `Network`. No rejected findings and no real
+  problem was deferred because of cost. The count-mismatch branch in `finishTranslation()` has no wire
+  test, because a successful POST always returns one translation per chunk.

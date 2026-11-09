@@ -21,6 +21,7 @@ class SettingsStore;
 class TranslationManager;
 class TranslationReply;
 class TrayIcon;
+class BingWebService;
 class DeepLService;
 class GoogleTranslateService;
 class MyMemoryService;
@@ -104,6 +105,7 @@ private:
     MyMemoryService *m_mymemory = nullptr;
     MozhiService *m_mozhi = nullptr;
     YandexWebService *m_yandexWeb = nullptr;
+    BingWebService *m_bingWeb = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for
     QPointer<TranslationReply> m_popupReply;      // the request the popup waits for
     QPointer<TranslationReply> m_inPlaceReply;    // the request for replacing a selection
