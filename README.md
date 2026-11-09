@@ -98,9 +98,9 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
   in **Settings → Services → Google Translate**.
 - **DeepL** — official API with a key or the unofficial free web mode without a key. Both modes are
   in **Settings → Services → DeepL**.
-- **Free web services** — MyMemory is a free no-key API; Mozhi, Yandex web and Bing web are
-  unofficial no-key endpoints. All are optional and gated by **Settings → Services → Allow free web
-  services**; the unofficial ones may be rate-limited, change or stop working. Google and DeepL
+- **Free web services** — MyMemory is a free no-key API; Mozhi, Yandex web, Bing web and Reverso
+  are unofficial no-key endpoints. All are optional and gated by **Settings → Services → Allow free
+  web services**; the unofficial ones may be rate-limited, change or stop working. Google and DeepL
   remain the primary providers.
 - **OpenAI-compatible provider** — the default server is [OpenRouter](https://openrouter.ai)
   (`https://openrouter.ai/api/v1`). OpenRouter **requires a key**; it offers free models such as
@@ -163,7 +163,7 @@ these artifacts; the tag must match the version in `CMakeLists.txt`.
 
 ### Linux (0.12.0)
 
-QTranslate builds, links, and passes 37 tests (29 shared plus 8 Linux platform tests) in Debug and
+QTranslate builds, links, and passes 39 tests (31 shared plus 8 Linux platform tests) in Debug and
 Release with `-Wall -Wextra` and no warnings on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7
 (Qt 6.10.2). X11 is the full target: global hotkeys, selection capture, in-place replacement,
 autostart, the three CLI commands, and tray integration are implemented. Wayland is limited: the
@@ -246,9 +246,10 @@ security policy's approval. To revoke it, run
   Cloud/DeepL with an API key.
 - DeepL free web mode is an unofficial endpoint without an API key. It may be rate-limited, change
   or stop working; the official DeepL API is more reliable.
-- Mozhi, Yandex web and Bing web are unofficial endpoints without an API key. They may be
+- Mozhi, Yandex web, Bing web and Reverso are unofficial endpoints without an API key. They may be
   rate-limited, change or stop working; MyMemory is a free no-key API with its own quota and a
-  500-byte request limit. All of them send the text to a third party.
+  500-byte request limit. Reverso supports only English, French, German, Spanish, Italian and
+  Russian and cannot detect the source language. All of them send the text to a third party.
 - OpenRouter and other OpenAI-compatible providers need an API key and an available model. Quality,
   speed and cost depend on the chosen model; free models have strict rate limits. The text is sent
   to the selected provider.

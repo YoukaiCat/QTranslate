@@ -2,13 +2,13 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/06-reverso` — the stage's four children are done; the lead's
-README/handoff/root-plan pass and the stage acceptance are next. `04-reverso-docs` is done (this
-commit); `03-reverso-settings` is done as `124c050`; `02-reverso-service` is done as `04aab67`;
-`01-reverso-parser` is done as `b50945a`. The Reverso split is committed as `e92e4ad`; `06-reverso`
-is a stage (`in-progress`, `base: d2cdf3c`). Work is on `main` (matches the root `branch:`); the
-working tree has only the docs and the map, nothing is pushed. Linux is 39/39, Windows 34 (derived,
-not run); the `.ts` count is 313 in every file. Stage `03-free-web-endpoints` is `in-progress`:
+Current node: `03-free-web-endpoints/06-reverso` — the stage's four children and the lead's README/
+`doc/handoff.md`/root-plan pass are done; the Reverso stage acceptance is next. `04-reverso-docs` was
+committed as `394063b`; `03-reverso-settings` as `124c050`; `02-reverso-service` as `04aab67`;
+`01-reverso-parser` as `b50945a`. The Reverso split is committed as `e92e4ad`; `06-reverso` is a
+stage (`in-progress`, `base: d2cdf3c`). Work is on `main` (matches the root `branch:`); the working
+tree has only this lead pass, nothing is pushed. Linux is 39/39, Windows 34 (derived, not run); the
+`.ts` count is 313 in every file. Stage `03-free-web-endpoints` is `in-progress`:
 `01-free-web-infrastructure`, `02-mymemory`, `03-mozhi`, `04-yandex-web` and `05-bing-web` are
 `done`; `06-reverso` is in progress and `07-fallback-chain` is `todo`. Real deferred problem: an
 active reply can store a result fetched from the old instance/engine after `clearCache()`
@@ -19,8 +19,7 @@ decision (Reverso has the same issue: it rejects `auto` with a clear message); Y
 step, not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web` stays
 outside the gate; the Bing POST is urlencoded, not multipart; Reverso has six languages and no
 `auto`. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version
-bump, tag, push, or release). Next: update the READMEs/`doc/handoff.md`/root plan for Reverso, then
-run the Reverso stage acceptance.
+bump, tag, push, or release). Next: run the Reverso stage acceptance over `d2cdf3c..HEAD`.
 
 ## Journal
 
@@ -131,3 +130,4 @@ run the Reverso stage acceptance.
 - 2026-11-09 — Planner detailed `03-reverso-settings` (6 steps, `detailed: true`). The group stays one `QGroupBox` with `reversoHint` and no input fields; `m_reversoGroup` only for `updateReversoControls()`; the hint is one `tr()` with concatenation to keep the count at 313; `Reverso` stays untranslated in the title and `displayName()`; `Reverso` in `settingsdialog.cpp:349` is the Mozhi engine, not the group; `settings()`/`validate()` unchanged; no `AppSettings`/INI key or cache reset; `tst_settingsdialog` 26 → 27; `.ts` 311 → 313; no new target. Status `in-progress`; coordinator next; no push.
 - 2026-11-09 — Task `03-free-web-endpoints/06-reverso/03-reverso-settings` done as `124c050`. Added the gate-aware `Reverso` group after `Bing` with one word-wrapped `reversoHint` (unofficial/no-key, six languages, no auto-detection, gate, rate limits/blocks, several requests, third party) and no key/URL/input field; `updateReversoControls()` follows `translation/allowFreeServices`, is connected to the toggle and called at the end of `loadValues()`. Added `tst_settingsdialog::reversoGroup` (27 passed, 25 named cases) and two messages in all 14 `.ts` (311 → 313, 0 unfinished/empty/vanished; `Reverso` untranslated, the hint translated; the Mozhi engine entry at `settingsdialog.cpp:349` and `displayName()` untouched; the `<location>` churn is expected). Verification: Linux Debug/Release 39/39 with zero warnings, `ctest -N` 39; Windows 34 and its build were not performed (no MSVC). Review found no blockers or remarks; no real problems. Next: `04-reverso-docs` (lead, documentation-only); no push.
 - 2026-11-09 — Task `03-free-web-endpoints/06-reverso/04-reverso-docs` done by the lead (documentation-only, no coordinator). Updated `doc/architecture.md` §3.1/§3.2/§4.5/§4.7.7/§4.8/§4.9/§4.14/§8/§9.2 (new §4.7.7 describes the fixed JSON `POST`, the seven string fields, the browser UA, the six-language branch and 36-direction cross product, the `auto` rejection, the flat response with the `error` flag, 5000 UTF-16 chunks/600 ms, the gate, the error table and the hygiene; the counts are 34 Windows / 39 Linux), `doc/free-endpoints.md` status/§4/§8/§9 (implemented block, services/pauses/chunks, item 6 implemented) and `AGENTS.md` 34/39 (31 shared, 3 Windows-only, 8 Linux-only). Verification: all relative links resolve, `git diff --check` clean, no Cyrillic added, the only non-map files are the three docs above. Windows 34 and a live smoke were not performed. Next: the lead's README/`doc/handoff.md`/root-plan pass and the Reverso stage acceptance; no push.
+- 2026-11-09 — Lead final pass for Reverso. `README.md`/`README.ru.md` list Reverso as the fourth unofficial no-key endpoint (with the six-language limitation), `doc/handoff.md` marks Reverso implemented and records 34 Windows / 39 Linux with the two new shared tests, and the root plan says 34/39 and lists Reverso. No code, test, UI or `.ts` change. Next: the Reverso stage acceptance over `d2cdf3c..HEAD`; no push.
