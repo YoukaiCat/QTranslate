@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -311,3 +311,70 @@ token into an error message.
   not to this parser task.
 - Windows Debug/Release and its 31 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+
+## Outcome
+
+Done. The pure Bing web layer exists: the `bing-web` language branch, `BingWebParser`, the saved
+fixtures and `tst_bingwebparser`. No service, registration, settings UI, `.ts` file, documentation,
+README, `doc/handoff.md`, root plan or `07-fallback-chain` file was changed; commit and push are the
+lead's.
+
+- Language branch: `src/core/languages.cpp` has `kBingWeb`, the 77-code `kBingWebCodes` whitelist,
+  `kBingWebOverrides` (`pt-BR`→`pt`, `sr`→`sr-Cyrl`), `bingWebCodeOf()` called from
+  `serviceCodeOf()`, and the `{"bing-web", "sr-Latn", "sr"}` synonym. `LanguageInfo` and
+  `kLanguages` are untouched, so `fromServiceCode()` and `supported()` reverse the mapping for free:
+  `pt`→`pt-BR`, `pt-PT`→`pt-PT`, `sr-Cyrl`/`sr-Latn`→`sr`, `nb`→`nb`, `zh-Hans`/`zh-Hant`
+  unchanged, and `ceb`/`kk`/`pa`/`haw` and the rest of the codes outside the catalogue are not
+  declared.
+- Parser: `src/services/bingwebparser.h/.cpp` in `qtranslate_core`, with `TokenPage` and
+  `parseTranslatorPage()`, `muidFromSetCookieValues()`, `isTokenRejection()`, `parseResponse()`,
+  `parseErrorBody()` and `errorForHttpStatus()`. Extraction is tolerant string searching
+  (`IG:"`, the first `data-iid="`, the helper array up to `;`, the optional `"muid"`/`"sid"`/`"tid"`
+  fields); `QJsonDocument` is used only on the helper substring and on responses, and every index is
+  checked, so a truncated page fails with the fixed message instead of reading out of bounds. A
+  numeric helper key goes through `qint64`, so `1750000000123` keeps its digits; the third helper
+  element sets `lifetimeMs`, with a negative or missing value falling back to 3600000. `MUID` is
+  matched by exact cookie name, so `MUIDB` is not accepted; the case-insensitive compare and both
+  `;`-separated and Qt-merged `,`-separated values are handled.
+- Errors: HTML → `ServiceUnavailable`, a 401 provider object (number or string) →
+  `RateLimited` with `the endpoint rejected the token`, 403/429 → `RateLimited`, 413 → `TooLong`,
+  5xx → `Network`, any other status or an `errorMessage` alone → `ServiceUnavailable`, a JSON
+  array/malformed/empty body and an unrecognised plain text → `None`, and `403` is never a token
+  rejection. `errorForHttpStatus()` maps 401/403/429 → `RateLimited`, 413 → `TooLong`, 5xx →
+  `Network`, everything else → `BadResponse`. A provider error object under HTTP 200 is recognised
+  by `parseResponse()` before the success path. Every message is a fixed English literal; the new
+  non-plan literals are `the request is too long for the endpoint` (413), `the endpoint is
+  temporarily unavailable` (5xx) and `the endpoint is blocked or unavailable` (plain-text block,
+  matching `YandexWebParser`).
+- Response: `parseResponse()` uses the first array element with a non-empty `translations` array,
+  joins `translations[].text` in order without inventing a separator, maps
+  `detectedLanguage.language` through `bing-web` (unknown or missing stays empty) and tolerates
+  `to`, `usedLLM` and a second element. A malformed document, a non-array root, an empty array, no
+  translations, a non-object translation and a missing/non-string/empty `text` are `BadResponse`
+  with `no translated text in the response`.
+- Fixtures: `tests/fixtures/bingweb/` has the 40 files listed in the plan. The page is a trimmed
+  synthetic reproduction of the observed marker shape with fake token/MUID/SID/TID values, and
+  `SECRET` sentinels in the body text, the HTML error page, `error_message_only.json`,
+  `error_unknown.json` and `plain.txt` prove the messages do not leak them. No live page, real
+  token or real cookie is committed.
+- Test: `tests/tst_bingwebparser.cpp` covers the full extraction (including the first IID, the
+  numeric and string key, an absent MUID/SID/TID, a custom/negative/absent lifetime), all page
+  failures, the `MUID`/`MUIDB`/merged/case-insensitive/absent cookie cases, the live-shaped
+  response, joined translations, an ignored later element, every detected-language row, all bad
+  responses, `isTokenRejection()` (numeric, string, 403, HTML, malformed, empty), every error body,
+  the plain-text fallback, the HTTP-status table and the message-hygiene helper (non-empty, no
+  `SECRET`, `<`, `{`, `}` or `://`). `tests/tst_languages.cpp` covers the forward, reverse,
+  round-trip and supported-list rows for Bing. The target is registered in the platform-neutral
+  block after `tst_appinfo`, so no platform conditional is added.
+- Verification: Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2), Debug and Release, a forced rebuild of the
+  changed translation units: zero `warning:`/`error:` lines with `-Wall -Wextra`. `tst_bingwebparser`
+  passes 55/55 and `tst_languages` 167/167; the full suite passes 36/36 with
+  `xvfb-run -a ctest --test-dir build/linux-release --output-on-failure`, and `ctest -N` shows 36
+  Linux tests (35 + the new target). Windows/MSVC is unavailable here: the Windows Debug/Release
+  build and its 31 tests (30 + the new target) were **not performed**, not passed.
+- Review: no blocker and no accepted fix. The only note was that the generic `pt-PT`/`zh-Hant`
+  Source exception in `roundTrip()` also skips those two Bing pairs, although Bing maps them
+  distinctly; the explicit forward and reverse rows assert both, and the plan asked to keep the
+  existing exception, so no change was made.
+- Deferred by design: none. The live smoke, `BingWebService`, registration, the settings UI, the
+  translations and the documentation belong to `02`–`04`.

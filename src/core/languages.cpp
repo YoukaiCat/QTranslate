@@ -147,6 +147,7 @@ constexpr Synonym kSynonyms[] = {
     {"google", "fil",   "fil"},
     {"google", "nb",    "nb"},
     {"deepl",  "EN-GB", "en"},      // English variant chosen in the DeepL settings
+    {"bing-web", "sr-Latn", "sr"},  // Bing reports Latin script but only accepts sr-Cyrl
 };
 // clang-format on
 
@@ -157,6 +158,7 @@ constexpr QLatin1String kLlm("llm");
 constexpr QLatin1String kMyMemory("mymemory");
 constexpr QLatin1String kMozhi("mozhi");
 constexpr QLatin1String kYandexWeb("yandex-web");
+constexpr QLatin1String kBingWeb("bing-web");
 
 // MyMemory takes ISO 639-1/RFC 3066 codes and follows the Google catalogue,
 // but a few of its codes differ from the internal ones.
@@ -191,6 +193,24 @@ constexpr CodeOverride kYandexWebOverrides[] = {
     {"zh-Hant", "zh"},
     {"nb", "no"},
     {"pt-BR", "pt"},
+};
+
+// The observed Bing web catalogue (doc/free-endpoints.md, §3). Bing uses "pt"
+// for Brazilian Portuguese and keeps "pt-PT" for Portugal; Serbian is only
+// accepted qualified by script. Norwegian is "nb".
+constexpr const char *kBingWebCodes[] = {
+    "af", "am", "ar", "az", "be", "bg", "bn", "bs", "ca", "cs", "cy", "da",
+    "de", "el", "en", "et", "eu", "fa", "fi", "fil", "fr", "ga", "gu", "ha",
+    "he", "hi", "hmn", "hr", "ht", "hu", "hy", "id", "is", "it", "ja", "jv",
+    "ka", "km", "kn", "ko", "lo", "lt", "lv", "mk", "mn", "mr", "ms", "mt",
+    "my", "nb", "ne", "nl", "pl", "pt", "pt-PT", "ro", "ru", "si", "sk",
+    "sl", "sm", "so", "sq", "sr-Cyrl", "sv", "sw", "ta", "te", "th", "tr",
+    "uk", "ur", "vi", "yo", "zh-Hans", "zh-Hant", "zu",
+};
+
+constexpr CodeOverride kBingWebOverrides[] = {
+    {"pt-BR", "pt"},
+    {"sr", "sr-Cyrl"},
 };
 
 const LanguageInfo *findInfo(const QString &code)
@@ -239,6 +259,24 @@ const char *yandexWebCodeOf(const LanguageInfo &info)
     return nullptr;
 }
 
+// Bing takes the internal ISO 639-1 codes with the exceptions in
+// kBingWebOverrides, and only the codes in its observed catalogue.
+const char *bingWebCodeOf(const LanguageInfo &info)
+{
+    const char *code = info.code;
+    for (const CodeOverride &codeOverride : kBingWebOverrides) {
+        if (QLatin1String(info.code) == QLatin1String(codeOverride.code)) {
+            code = codeOverride.serviceCode;
+            break;
+        }
+    }
+    for (const char *candidate : kBingWebCodes) {
+        if (QLatin1String(candidate) == QLatin1String(code))
+            return candidate;
+    }
+    return nullptr;
+}
+
 const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
                           Languages::Direction d)
 {
@@ -255,6 +293,8 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
         return mozhiCodeOf(info);
     if (serviceId == kYandexWeb)
         return yandexWebCodeOf(info);
+    if (serviceId == kBingWeb)
+        return bingWebCodeOf(info);
     return nullptr;
 }
 

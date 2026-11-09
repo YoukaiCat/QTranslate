@@ -1,0 +1,14 @@
+[
+    {
+        "translations": [
+            {
+                "text": "Hallo Welt",
+                "to": "de"
+            }
+        ],
+        "usedLLM": true,
+        "detectedLanguage": {
+            "language": "en"
+        }
+    }
+]

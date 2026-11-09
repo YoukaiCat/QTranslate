@@ -15,6 +15,7 @@ const QString llm = QStringLiteral("llm");
 const QString mozhi = QStringLiteral("mozhi");
 const QString mymemory = QStringLiteral("mymemory");
 const QString yandexWeb = QStringLiteral("yandex-web");
+const QString bingWeb = QStringLiteral("bing-web");
 } // namespace
 
 class TestLanguages : public QObject
@@ -115,6 +116,26 @@ private slots:
         QTest::newRow("yandex web zu") << yandexWeb << "zu" << Direction::Source << "";
         QTest::newRow("yandex web unknown code") << yandexWeb << "xx" << Direction::Target << "";
         QTest::newRow("yandex web auto") << yandexWeb << "auto" << Direction::Source << "";
+        QTest::newRow("bing web en") << bingWeb << "en" << Direction::Target << "en";
+        QTest::newRow("bing web ru") << bingWeb << "ru" << Direction::Target << "ru";
+        QTest::newRow("bing web de") << bingWeb << "de" << Direction::Source << "de";
+        QTest::newRow("bing web zh-Hans") << bingWeb << "zh-Hans" << Direction::Target
+                                          << "zh-Hans";
+        QTest::newRow("bing web zh-Hant") << bingWeb << "zh-Hant" << Direction::Source
+                                          << "zh-Hant";
+        QTest::newRow("bing web pt-BR") << bingWeb << "pt-BR" << Direction::Target << "pt";
+        QTest::newRow("bing web pt-PT") << bingWeb << "pt-PT" << Direction::Source << "pt-PT";
+        QTest::newRow("bing web nb") << bingWeb << "nb" << Direction::Target << "nb";
+        QTest::newRow("bing web sr") << bingWeb << "sr" << Direction::Source << "sr-Cyrl";
+        QTest::newRow("bing web he") << bingWeb << "he" << Direction::Target << "he";
+        QTest::newRow("bing web fil") << bingWeb << "fil" << Direction::Target << "fil";
+        QTest::newRow("bing web jv") << bingWeb << "jv" << Direction::Source << "jv";
+        QTest::newRow("bing web hmn") << bingWeb << "hmn" << Direction::Target << "hmn";
+        QTest::newRow("bing web ceb") << bingWeb << "ceb" << Direction::Target << "";
+        QTest::newRow("bing web kk") << bingWeb << "kk" << Direction::Source << "";
+        QTest::newRow("bing web pa") << bingWeb << "pa" << Direction::Target << "";
+        QTest::newRow("bing web haw") << bingWeb << "haw" << Direction::Source << "";
+        QTest::newRow("bing web auto") << bingWeb << "auto" << Direction::Source << "";
         QTest::newRow("unknown code") << google << "xx" << Direction::Target << "";
         QTest::newRow("auto is not a language") << google << "auto" << Direction::Source << "";
         QTest::newRow("unknown service") << "yandex" << "en" << Direction::Target << "";
@@ -181,6 +202,18 @@ private slots:
         QTest::newRow("yandex web en") << yandexWeb << "en" << Direction::Target << "en";
         QTest::newRow("yandex web ru") << yandexWeb << "ru" << Direction::Source << "ru";
         QTest::newRow("yandex web unknown") << yandexWeb << "xx" << Direction::Source << "";
+        QTest::newRow("bing web pt") << bingWeb << "pt" << Direction::Source << "pt-BR";
+        QTest::newRow("bing web pt-PT") << bingWeb << "pt-PT" << Direction::Source << "pt-PT";
+        QTest::newRow("bing web nb") << bingWeb << "nb" << Direction::Source << "nb";
+        QTest::newRow("bing web sr-Cyrl") << bingWeb << "sr-Cyrl" << Direction::Source << "sr";
+        QTest::newRow("bing web sr-Latn synonym") << bingWeb << "sr-Latn" << Direction::Source
+                                                  << "sr";
+        QTest::newRow("bing web zh-Hans") << bingWeb << "zh-Hans" << Direction::Source
+                                          << "zh-Hans";
+        QTest::newRow("bing web zh-Hant") << bingWeb << "zh-Hant" << Direction::Target
+                                          << "zh-Hant";
+        QTest::newRow("bing web he") << bingWeb << "he" << Direction::Source << "he";
+        QTest::newRow("bing web unknown") << bingWeb << "xx" << Direction::Source << "";
         QTest::newRow("unknown") << google << "xx-unknown" << Direction::Source << "";
         QTest::newRow("empty") << google << "" << Direction::Source << "";
         QTest::newRow("google code for deepl") << deepl << "iw" << Direction::Source << "";
@@ -199,7 +232,8 @@ private slots:
     {
         // Every supported language maps to a service code and back to itself,
         // except where several internal codes share a service code (DeepL "PT", "ZH").
-        for (const QString &service : {google, deepl, deeplWeb, llm, mozhi, mymemory, yandexWeb}) {
+        for (const QString &service : {google, deepl, deeplWeb, llm, mozhi, mymemory, yandexWeb,
+                                       bingWeb}) {
             for (Direction direction : {Direction::Source, Direction::Target}) {
                 for (const QString &code : Languages::supported(service, direction)) {
                     const QString serviceCode = Languages::toServiceCode(service, code, direction);
@@ -261,6 +295,21 @@ private slots:
         for (const QString &code : {Languages::autoCode(), QStringLiteral("fil"),
                                     QStringLiteral("jv"), QStringLiteral("pt-PT")}) {
             QVERIFY2(!yandexWebSources.contains(code), qPrintable(code));
+        }
+        const QStringList bingWebSources = Languages::supported(bingWeb, Direction::Source);
+        QCOMPARE(Languages::supported(bingWeb, Direction::Target), bingWebSources);
+        QVERIFY(!bingWebSources.isEmpty());
+        for (const QString &code :
+             {QStringLiteral("ru"), QStringLiteral("uk"), QStringLiteral("tr"),
+              QStringLiteral("zh-Hans"), QStringLiteral("zh-Hant"), QStringLiteral("pt-BR"),
+              QStringLiteral("pt-PT"), QStringLiteral("nb"), QStringLiteral("sr"),
+              QStringLiteral("he"), QStringLiteral("fil"), QStringLiteral("jv")}) {
+            QVERIFY2(bingWebSources.contains(code), qPrintable(code));
+        }
+        for (const QString &code :
+             {Languages::autoCode(), QStringLiteral("ceb"), QStringLiteral("kk"),
+              QStringLiteral("pa"), QStringLiteral("haw")}) {
+            QVERIFY2(!bingWebSources.contains(code), qPrintable(code));
         }
         QVERIFY(Languages::supported(QStringLiteral("yandex"), Direction::Target).isEmpty());
     }
