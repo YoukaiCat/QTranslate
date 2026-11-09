@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [02-selection-check-and-replace]
 ---
@@ -68,3 +68,54 @@ decision in the test.
 - Linux Debug and Release build with `-Wall -Wextra` and the suite is 45/45 with zero warnings;
   Windows 39 remains not performed; the Astra trusted-client step is recorded.
 - No text from the editor or from an issue reaches the log.
+
+## Outcome
+
+- Added `tests/tst_proofreading_selection_x11.cpp` and registered the target in the
+  `CMAKE_SYSTEM_NAME STREQUAL "Linux"` block of `tests/CMakeLists.txt` with
+  `QT_QPA_PLATFORM=xcb`, `Qt::Widgets`, `X11::X11`, `X11::Xtst` and the real popup, panel, error
+  text, grabber and window-activation sources. No application source changed: the test found no
+  defect in `SelectionGrabber`, `WindowActivation` or the popup placement and non-activation flags.
+- Cases, all on the real platform code under Xvfb: `replacesFocusedEditorSelection` grabs "teh"
+  from "teh cat" through XTest Ctrl+C, feeds the synthetic issue (0/3 → "the"), clicks
+  `Replace selection` (`replaceRequested()` exactly once), snapshots `correctedText()` before
+  `hide()` as `AppController` does, puts it on the clipboard and calls the real
+  `Platform::sendPasteShortcut()`, then waits for "the cat"; `popupDoesNotTakeFocus` shows the
+  popup and asserts that `QApplication::focusWindow()` and `Platform::foregroundWindow()` still
+  belong to the editor (the premise of the controller guard, not the guard itself);
+  `grabberRestoresClipboard` checks the grabber's own restore of a marker with a non-text MIME
+  type; `noSelectionIsEmpty` checks the empty result without asserting the controller message.
+  The test repeats the controller's order (hide, foreground check, clipboard, paste) in the test
+  body instead of linking `AppController`.
+- Flake risk: the X11 focus and clipboard are set manually because there is no window manager;
+  `EnvironmentGuard` removes `WAYLAND_DISPLAY` and sets `XDG_SESSION_TYPE=x11`, `PressedKeysGuard`
+  releases every key, `cleanup()` restores `PointerRoot`, and all waits are `QTRY_*` with 2–5 s.
+  A missing display, a non-xcb platform or a missing XTEST extension skips through the same
+  `QSKIP` reasons as the existing X11 tests. The XTEST-only grab needs no passive `XGrabKey`.
+- Verification: Linux Debug and Release build with `-Wall -Wextra` and zero warnings; the full
+  `xvfb-run -a ctest` is 45/45 in both configurations (the new test is #42). The new test passed
+  60+ consecutive runs during development and `--repeat until-fail:10` in Debug after the final
+  edit (5 runs in Release), with no flake. `noSelectionIsEmpty` intentionally waits for the
+  grabber's 400 ms clipboard timeout. Nothing logs the editor text or an issue message.
+- Astra trusted-client step: the test ran on Astra 1.8 with Qt 6.10.2 under Xvfb with 6 passed,
+  0 skipped **without** a new `/etc/X11/trusted.d` entry. The XTEST injection used here is
+  permitted for an untrusted client, unlike the passive `XGrabKey` path that required the
+  `KBD_R` entries for `tst_hotkey_selection_x11`; the existing entries were not changed.
+  `fly-set-execid.sh` was therefore not needed for the new binary.
+- Translations: no new strings; the measured total stays **382** `<message>` in each of the 14
+  files and `tst_translations` passes. Windows 39 tests are **not performed** (no MSVC here); the
+  target exists only in the Linux block.
+- Manual gaps, deliberately not automated: the `AppController` window-change fallback, the
+  Wayland copy branch and the post-paste clipboard restore in `pasteText()` (500 ms) are not
+  covered; a real `:0` session was **not** run, so those paths are recorded as not performed,
+  not as passed.
+- Known limitation, inherited from the other X11 tests: the `QSKIP` for a missing `DISPLAY` is
+  unreachable because `QTEST_MAIN` creates the `QApplication` before `initTestCase`; without a
+  display the process aborts instead of skipping. CI runs every X11 test under `xvfb-run`.
+- Review: one minor remark accepted and fixed — the corrected-text snapshot is taken before
+  `hide()`, exactly like `AppController` reads `m_proofreadCorrected`. The unreachable `DISPLAY`
+  skip and a fixed `qWait(200)` in `popupDoesNotTakeFocus` were rejected as inherited behaviour
+  and a non-defect.
+- Found while working, not edited here: `AGENTS.md` still says 34 Windows and 39 Linux tests (now
+  39 and 45), and `doc/proofreading.md` and `doc/handoff.md` still describe the external-selection
+  stage as not implemented. Both were already stale before this task.

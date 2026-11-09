@@ -185,6 +185,26 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set_tests_properties(tst_windowactivation_linux PROPERTIES
         ENVIRONMENT "QT_QPA_PLATFORM=xcb")
 
+    # The external-selection gate: the real popup, the real X11 grab and the
+    # real synthetic paste in one process.
+    qtranslate_add_test(tst_proofreading_selection_x11
+        ${PROJECT_SOURCE_DIR}/src/ui/proofreadingpopupwindow.cpp
+        ${PROJECT_SOURCE_DIR}/src/ui/proofreadingpopupwindow.h
+        ${PROJECT_SOURCE_DIR}/src/ui/proofreadingpanel.cpp
+        ${PROJECT_SOURCE_DIR}/src/ui/proofreadingpanel.h
+        ${PROJECT_SOURCE_DIR}/src/ui/proofreadingerrortext.cpp
+        ${PROJECT_SOURCE_DIR}/src/ui/proofreadingerrortext.h
+        ${PROJECT_SOURCE_DIR}/src/platform/selectiongrabber.h
+        ${PROJECT_SOURCE_DIR}/src/platform/sessiontype.h
+        ${PROJECT_SOURCE_DIR}/src/platform/selectiongrabber_linux.cpp
+        ${PROJECT_SOURCE_DIR}/src/platform/windowactivation.h
+        ${PROJECT_SOURCE_DIR}/src/platform/windowactivation_linux.cpp
+    )
+    target_link_libraries(tst_proofreading_selection_x11 PRIVATE
+        Qt::Widgets X11::X11 X11::Xtst)
+    set_tests_properties(tst_proofreading_selection_x11 PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=xcb")
+
     # The CLI test is guiless: it parses the shared options and drives the
     # real single-instance socket with a child process, so it needs no display.
     qtranslate_add_test(tst_cli
