@@ -2,23 +2,24 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/05-bing-web/02-bing-web-service` — `in-progress`, detailed; the
-coordinator is next. `05-bing-web` is a stage (`in-progress`, `base: 53b43a5`); its first child
-`01-bing-web-parser` is `done` as `444764a` (parser, the `bing-web` language branch, 40 fixtures,
-`tst_bingwebparser` 55/55, `tst_languages` 167/167, full suite 36/36 on Astra Debug/Release with no
-warnings). The working tree is clean; `main` matches the root `branch:` and is ahead of
-`origin/main`; nothing is pushed. Stage `03-free-web-endpoints` is `in-progress`:
-`01-free-web-infrastructure`, `02-mymemory`, `03-mozhi` and `04-yandex-web` are `done`;
-`06-reverso` and `07-fallback-chain` are `todo`. Linux is 36/36, Windows 31 (derived, not run); the
-service adds `tst_bingwebservice`, so Linux becomes 37 and Windows would be 32. Real deferred
-problem: an active reply can store a result fetched from the old instance/engine after
+Current node: `03-free-web-endpoints/05-bing-web/03-bing-web-settings` — `todo`, not detailed; the
+planner is detailing it next. `05-bing-web` is a stage (`in-progress`, `base: 53b43a5`); its first
+two children are `done`: `01-bing-web-parser` as `444764a` and `02-bing-web-service` as `ef510a0`
+(service with the two-step handshake, token+MUID cache, one-time 401 refresh and 72 test cases;
+Astra and trixie Debug/Release 37/37 with no warnings; the live smoke returned `Hallo Welt` with
+detected `en`; Windows 32 was not performed). The working tree is clean; `main` matches the root
+`branch:` and is ahead of `origin/main`; nothing is pushed. Stage `03-free-web-endpoints` is
+`in-progress`: `01-free-web-infrastructure`, `02-mymemory`, `03-mozhi` and `04-yandex-web` are
+`done`; `06-reverso` and `07-fallback-chain` are `todo`. Linux is 37/37, Windows 32 (derived, not
+run); the settings task adds no test target and the `.ts` message count grows from 309 to 311. Real
+deferred problem: an active reply can store a result fetched from the old instance/engine after
 `clearCache()` (cache-generation counter in `TranslationManager` plus a test; also covers
 `google.mode`, `deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a
 later shared-UI decision; Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations.
 Decisions: one configured fallback step, not a literal multi-step chain; Bing and Reverso stay in
 the stage; DeepL `free-web` stays outside the gate; the Bing POST is urlencoded, not multipart.
 Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version bump,
-tag, push, or release). Next: the coordinator for `02-bing-web-service`.
+tag, push, or release). Next: the planner details `03-bing-web-settings`.
 
 ## Journal
 
@@ -115,3 +116,4 @@ tag, push, or release). Next: the coordinator for `02-bing-web-service`.
 - 2026-11-09 — Planner split `05-bing-web` into a stage with four children: `01-bing-web-parser` (detailed), `02-bing-web-service`, `03-bing-web-settings` and `04-bing-web-docs`. The combined node was about 30 files with three independent acceptances, so it did not fit one task; the parser is separate because Bing's page markers are the fragile layer. The parser covers `BingWebParser`, the `bing-web` language branch (the observed whitelist, `pt-BR`→`pt`, `pt-PT`→`pt-PT`, `sr`→`sr-Cyrl`, `nb`→`nb`, `zh-Hans`/`zh-Hant`, and the `sr-Latn`→`sr` synonym), fixtures and `tst_bingwebparser`; `02` adds `BingWebService` with the two-step handshake, token cache, one-time 401 refresh, explicit `MUID` cookie and `tst_bingwebservice`; `03` the gate-aware Bing group and 14 `.ts` (309 → 311); `04` the docs and the `AGENTS.md` counts. Counts: 35/30 now, 36/31 after the parser, 37/32 after the service. Protocol correction from a live check on 2026-11-09: the POST body is `application/x-www-form-urlencoded`, not multipart; urlencoded returned a translation while multipart with the same fields returned `{"statusCode":205,"errorMessage":""}`. `MUID` comes from the GET's `Set-Cookie` (the page `muid` is the fallback), both requests use manual cookie attributes, and the POST sends an explicit `Cookie: MUID=...`; the token is cached for the page lifetime (3600000 ms default) and a 401 (HTTP or body `statusCode`) refreshes exactly once, a second 401 is `RateLimited`, and a 403 is a block with no refresh. `auto` is sent as `auto-detect`; 1000 ms and 5000 UTF-16 are named assumptions. The planner verified the live page markers and response shape; the READMEs, `doc/handoff.md`, the root plan and `07-fallback-chain` stay lead-owned. No user question. The parser is `in-progress`; coordinator next. No push.
 - 2026-11-09 — Task `03-free-web-endpoints/05-bing-web/01-bing-web-parser` done as `444764a`. Added the `bing-web` language branch (`kBingWeb`, the 77-code whitelist, `pt-BR`→`pt`, `sr`→`sr-Cyrl`, the `sr-Latn`→`sr` synonym; no `LanguageInfo` column), `BingWebParser` (tolerant page markers, the first `data-iid`, the numeric helper key through `qint64`, optional `MUID`/`SID`/`TID`, exact `MUID`/`MUIDB` separation, response and error parsing, fixed messages), 40 synthetic fixtures with `SECRET` sentinels, `tst_bingwebparser` (55/55), and the Bing rows in `tst_languages` (167/167). Verification: Astra Linux 1.8.7 Qt 6.10.2, Debug and Release, zero `warning:` lines with `-Wall -Wextra`; the full suite 36/36 (`ctest -N` 36); the Windows build and its 31 tests were not performed (no MSVC). The review found no blocker; the only note was that the generic `pt-PT`/`zh-Hant` Source exception in `roundTrip()` also skips those two Bing pairs, but explicit forward/reverse rows cover them and the plan required keeping the exception. No deferred real problems. Next: detail `02-bing-web-service`; no push.
 - 2026-11-09 — Planner detailed `02-bing-web-service` (9 steps, `detailed: true`). Decisions: it stays one task (7 files, one service and one test target; the ~700–800-line test is the context risk, but a second target would not give a second independent result); `MUID` is cached together with the token because a reused token skips the GET that produced the cookie; the 1000 ms pause also covers GET→POST, not only the chunks; `browserUserAgent()` is public for the test; one `m_refreshed` flag per reply and the same token-page path for the refresh; the manual cookie attributes are verified through the jar before/after, not on the wire; the new fixed literal is `the token page has no session cookie`; `AppController` registers the service after Yandex and forwards `applySettings()`; `FakeHttpServer` from `tst_mozhiwebservice` needs a `Set-Cookie` extension. Counts: Linux 36 → 37, Windows 31 → 32. No user question; no code touched. Coordinator next; no push.
+- 2026-11-09 — Task `03-free-web-endpoints/05-bing-web/02-bing-web-service` done as `ef510a0`. Added `BingWebService` on `QueuedWebService`: the two-step GET/POST handshake, the token and `MUID` in one cache for the page lifetime (3600000 ms default, a reported 0 preserved), 1000 ms pacing on every request including GET→POST and the refresh, the one-time 401 refresh (HTTP or body) with a retry of the same chunk, 403 as `RateLimited` without a refresh, 5000 UTF-16 chunks with edge-whitespace restore, the documented error mapping, abort/cancelled handling, and message/log hygiene; registered in `AppController` after Yandex. Added `tst_bingwebservice` (72 cases) on the extended `FakeHttpServer` with `Set-Cookie`. Verification: Astra and `qtranslate-trixie` Debug/Release, zero warnings, `ctest -N` 37 and 37/37; the live smoke returned `Hallo Welt` with detected `en`; Windows 32 was not performed. Review: one accepted fix — a missing `m_service` guard in `Reply::onFinished()` could null-deref if the service was destroyed during the token GET; the reply now fails with `Network`. Recorded edge notes: with a 0 ms lifetime a multi-chunk text fetches the token before every chunk, and the count-mismatch branch has no wire test because a successful POST returns one translation per chunk. No real problems were deferred. Next: detail `03-bing-web-settings`; no push.
