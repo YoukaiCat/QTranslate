@@ -4,12 +4,69 @@
 #include "core/translationservice.h"
 
 #include <QLoggingCategory>
+#include <QMetaObject>
 
 Q_LOGGING_CATEGORY(lcTranslation, "qtranslate.translation", QtWarningMsg)
 
 namespace {
 
 constexpr int kMaxCacheEntries = 200;
+
+// A failure the fallback policy retries once. EmptyText, TooLong, Cancelled,
+// BadResponse and UnsupportedLanguage are excluded deliberately: a retry would
+// not help or must not happen.
+bool isRetryable(TranslationError error)
+{
+    switch (error) {
+    case TranslationError::Auth:
+    case TranslationError::QuotaExceeded:
+    case TranslationError::RateLimited:
+    case TranslationError::ServiceUnavailable:
+    case TranslationError::Network:
+    case TranslationError::Timeout:
+        return true;
+    case TranslationError::None:
+    case TranslationError::TooLong:
+    case TranslationError::UnsupportedLanguage:
+    case TranslationError::BadResponse:
+    case TranslationError::Cancelled:
+    case TranslationError::EmptyText:
+        break;
+    }
+    return false;
+}
+
+// A fixed name for the log: never the user text, a URL or an error message.
+QString errorName(TranslationError error)
+{
+    switch (error) {
+    case TranslationError::Auth:
+        return QStringLiteral("auth");
+    case TranslationError::QuotaExceeded:
+        return QStringLiteral("quota");
+    case TranslationError::RateLimited:
+        return QStringLiteral("rate-limited");
+    case TranslationError::ServiceUnavailable:
+        return QStringLiteral("unavailable");
+    case TranslationError::Network:
+        return QStringLiteral("network");
+    case TranslationError::Timeout:
+        return QStringLiteral("timeout");
+    case TranslationError::Cancelled:
+        return QStringLiteral("cancelled");
+    case TranslationError::BadResponse:
+        return QStringLiteral("bad-response");
+    case TranslationError::TooLong:
+        return QStringLiteral("too-long");
+    case TranslationError::UnsupportedLanguage:
+        return QStringLiteral("unsupported-language");
+    case TranslationError::EmptyText:
+        return QStringLiteral("empty-text");
+    case TranslationError::None:
+        break;
+    }
+    return QStringLiteral("none");
+}
 
 TranslationReply *finishedWithError(const QString &serviceId, TranslationError error,
                                     const QString &message)
@@ -23,8 +80,9 @@ TranslationReply *finishedWithError(const QString &serviceId, TranslationError e
 
 } // namespace
 
-// Wraps a service reply: smart retry on the secondary language, final-result
-// caching, and cancellation of the underlying request.
+// Wraps a service reply: smart retry on the secondary language, a one-hop
+// fallback on a retryable error, final-result caching, and cancellation of the
+// underlying request.
 class TranslationManager::Reply : public TranslationReply
 {
 public:
@@ -38,6 +96,20 @@ public:
     }
 
     void start() { send(m_request); }
+
+    // For errors detected before any request (an unconfigured service): the
+    // fallback policy still applies, but finished() must not be emitted from
+    // inside translate(), so the first step goes through the event loop.
+    void startWithError(const TranslationResult &result)
+    {
+        QMetaObject::invokeMethod(
+            this,
+            [this, result] {
+                if (!isFinished())
+                    onPrimaryError(result);
+            },
+            Qt::QueuedConnection);
+    }
 
 protected:
     void abortImpl() override
@@ -83,7 +155,7 @@ private:
         }
 
         if (!result.ok()) {
-            finishResult(result);
+            onPrimaryError(result);
             return;
         }
 
@@ -103,6 +175,62 @@ private:
         finishResult(result);
     }
 
+    // The primary failed, an early or a real result. The fallback is resolved
+    // here, at failure time, so a gate or fallback change made while the
+    // primary was in flight is honoured. One hop only: a fallback failure
+    // finishes with the primary error and never starts another request.
+    void onPrimaryError(const TranslationResult &result)
+    {
+        if (!m_fallbackStarted && isRetryable(result.error)) {
+            if (TranslationService *fallback = m_manager->fallbackFor(m_service)) {
+                m_primaryError = result;
+                m_fallbackStarted = true;
+                m_fallback = fallback;
+                qCWarning(lcTranslation)
+                    << "Primary service" << m_service->id()
+                    << QStringLiteral("failed (%1); trying fallback").arg(errorName(result.error))
+                    << fallback->id();
+                m_inner = fallback->translate(m_request);
+                if (!m_inner) {
+                    // A service returning no reply is a defect, not a retryable
+                    // error: report the primary error.
+                    qCWarning(lcTranslation) << "Fallback" << fallback->id()
+                                             << "returned no reply";
+                    finishResult(m_primaryError);
+                    return;
+                }
+                m_inner->setParent(this);
+                connect(m_inner, &TranslationReply::finished, this, &Reply::onFallbackFinished);
+                return;
+            }
+        }
+        finishResult(result);
+    }
+
+    void onFallbackFinished()
+    {
+        TranslationReply *inner = m_inner;
+        m_inner = nullptr;
+        if (!inner || isFinished())
+            return;
+        const TranslationResult result = inner->result();
+        inner->deleteLater();
+
+        // One failure is one fallback request, not two: the fallback never gets
+        // the smart secondary-language retry, so a success is returned as-is
+        // even when detectedSourceLang equals the primary language.
+        if (result.ok()) {
+            // The result keeps the fallback's serviceId; finishResult() stores
+            // it under the primary cache key through m_cacheKey.
+            qCWarning(lcTranslation) << "Fallback" << m_fallback->id() << "succeeded";
+            finishResult(result);
+            return;
+        }
+        qCWarning(lcTranslation) << "Fallback" << m_fallback->id()
+                                 << QStringLiteral("failed (%1)").arg(errorName(result.error));
+        finishResult(m_primaryError);
+    }
+
     void finishResult(const TranslationResult &result)
     {
         if (result.ok())
@@ -115,8 +243,11 @@ private:
     TranslationRequest m_request;
     QString m_cacheKey;
     QPointer<TranslationReply> m_inner;
+    TranslationService *m_fallback = nullptr;
     TranslationResult m_firstResult;
+    TranslationResult m_primaryError;
     bool m_smartRetry = false;
+    bool m_fallbackStarted = false;
 };
 
 TranslationManager::TranslationManager(QObject *parent)
@@ -165,6 +296,38 @@ void TranslationManager::setMaxLength(int length)
     m_maxLength = length > 0 ? length : kDefaultMaxLength;
 }
 
+void TranslationManager::setFreeServicesAllowed(bool allowed)
+{
+    if (m_freeServicesAllowed == allowed)
+        return;
+    m_freeServicesAllowed = allowed;
+    if (!allowed)
+        clearCache();
+}
+
+void TranslationManager::setFallbackService(const QString &id)
+{
+    const QString normalized = id.trimmed().toLower();
+    if (normalized == m_fallbackService)
+        return;
+    m_fallbackService = normalized;
+    clearCache();
+}
+
+TranslationService *TranslationManager::fallbackFor(TranslationService *primary) const
+{
+    if (m_fallbackService.isEmpty() || !m_freeServicesAllowed)
+        return nullptr;
+    TranslationService *fallback = service(m_fallbackService);
+    if (!fallback || fallback == primary)
+        return nullptr;
+    if (primary && fallback->id() == primary->id())
+        return nullptr;
+    if (!fallback->requiresOptIn())
+        return nullptr;
+    return fallback;
+}
+
 void TranslationManager::setPrimaryLanguage(const QString &code)
 {
     if (m_primaryLanguage == code)
@@ -203,10 +366,17 @@ TranslationReply *TranslationManager::translate(const TranslationRequest &reques
             TranslationManager::tr("Enable free web services in Settings → Services."));
     } else if (!m_active->isConfigured()) {
         const QString hint = m_active->configurationError();
-        reply = finishedWithError(
-            serviceId, TranslationError::Auth,
-            hint.isEmpty() ? QStringLiteral("%1 needs an API key").arg(m_active->displayName())
-                           : hint);
+        TranslationResult result;
+        result.serviceId = serviceId;
+        result.error = TranslationError::Auth;
+        result.errorMessage = hint.isEmpty()
+            ? QStringLiteral("%1 needs an API key").arg(m_active->displayName())
+            : hint;
+        auto *managed = new Reply(this, m_active, request, cacheKey(serviceId, request));
+        reply = managed;
+        current(channel) = reply;
+        managed->startWithError(result);
+        return reply;
     } else {
         const QString key = cacheKey(serviceId, request);
         TranslationResult cachedResult;
