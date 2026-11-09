@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 8d0efd7
 depends: [01-free-web-infrastructure, 02-mymemory, 03-mozhi, 04-yandex-web, 05-bing-web, 06-reverso]
 ---
@@ -146,3 +146,66 @@ manager can retry on). All six are `done`. The three children are sequential:
   recorded as not performed, not as passed.
 - The final documentation and test gate belongs here; the lead owns `doc/handoff.md` and the release
   decision. Do not start a release or push.
+
+## Outcome
+
+Accepted. The whole range `8d0efd7..HEAD` was reviewed as one unit against this stage's
+`## Done when`; no code defect was found and no fix commit was made. The three children agree with
+each other and with the final documentation.
+
+- `01-fallback-manager`: `TranslationManager` exposes `fallbackService()`/`setFallbackService()`
+  (trimmed, lowercased, cache cleared on a change) and resolves `fallbackFor()` at failure time. It
+  tries one configured opt-in fallback exactly once on `Auth`, `QuotaExceeded`, `RateLimited`,
+  `ServiceUnavailable`, `Network` and `Timeout`, including the deferred pre-request `Auth` path
+  through `startWithError()`, and never on success, `EmptyText`, `TooLong`, `UnsupportedLanguage`,
+  `Cancelled` or `BadResponse`. The reply's own primary service, an unregistered id and a
+  non-opt-in service are ignored; there is no second hop and the fallback does not get the smart
+  secondary-language retry. A successful fallback keeps its own `serviceId` and is cached under the
+  primary key; a failed fallback logs its error kind and returns the primary error.
+  `setFreeServicesAllowed(false)` and `setFallbackService()` clear the cache. The trigger/non-trigger
+  matrix, the pre-request path, invalid fallbacks, the gate including a gate-off while the primary is
+  in flight, the fallback failure, abort, both cache clears, the no-loop/no-smart-retry rules and the
+  log hygiene are covered by `tst_translationmanager`, which is green.
+- `02-fallback-settings-and-ui`: `translation/fallbackService` is loaded, saved and normalized (empty
+  default; the five opt-in ids; trimmed and lowercased; unknown and non-opt-in ids become empty with
+  a fixed warning that does not echo the typed value); `settingsVersion` stays `1`. The Services page
+  has the gate-aware **Fallback service** group after the free-web group and before MyMemory: `None`
+  plus the registered opt-in services, a hint naming the retryable failures and the third party, and
+  a combo that is disabled while the gate is off but keeps and returns the remembered value.
+  `AppController` passes the registered opt-in list to the dialog and applies the key at startup and
+  on a change. `tst_settings` and `tst_settingsdialog` cover the default, the round trip, the
+  normalization, the contents and order, the disabled state, the remembered value and the
+  unknown-id cleanup. All 14 `.ts` files are at 316 messages with no unfinished, empty or vanished
+  entries; `tst_translations` passes.
+- `03-fallback-docs`: `doc/architecture.md` §4.9/§4.11 describe the implemented API, the trigger and
+  non-trigger lists, the pre-request `Auth` path, the one-hop/no-loop rule, the primary error, the
+  cache, the gate and the log/privacy rule; `doc/free-endpoints.md` §8 item 6 and §9 present the
+  fallback as implemented, not as future work. `AGENTS.md` needed no change (39 Linux / 34 Windows
+  and no new test target stay true); the READMEs, `doc/handoff.md` and the root plan were updated in
+  the lead's final pass and do not contradict the code.
+- Overall: Google/DeepL remain primary; the fallback is opt-in, default `None`, one hop, never a
+  loop and never the only translation method; it is not used while the free-services gate is off; a
+  fallback failure shows the primary error; the text, keys and URLs never appear in a log or a
+  message; changing the fallback or disabling the gate clears the cache.
+- Verification: Linux Debug and Release build without warnings and the full suite passes 39/39 in
+  both configurations (re-run by the coordinator). `git diff --check` is clean and the change set is
+  limited to the stage's code, tests, `.ts` files and the lead-owned map/README/handoff files.
+  Windows Debug/Release and its 34 tests are **not performed** (no MSVC on this Linux machine), not
+  passed. The live smoke was **not performed**: this environment has no interactive GUI and no real
+  provider or free endpoint available; the reason is recorded here and the check was not worked
+  around. No push was made.
+- Parent stage trace: MyMemory and Mozhi work with their per-host rate limits; Yandex web, Bing web
+  and Reverso return clear errors; 429/403 are handled without hangs; Google/DeepL stay primary and
+  the free services are opt-in fallbacks; tests and documentation were updated. These were delivered
+  by the six completed children and their green tests; no live endpoint was contacted in this
+  acceptance run.
+- Real problem left open (not fixed because the price is outside this stage): the cache-generation
+  race in `TranslationManager`. Clearing the cache when the gate or the fallback changes does not
+  stop an already running fallback, so its successful result can be cached after `clearCache()` and
+  served by the next request while the gate is off; the same applies to the language and
+  service-mode setters. It is recorded in `doc/roadmap/qtranslate/journal.md`; a full fix needs a
+  generation counter in `TranslationManager` plus a test, not a local patch. No other real problem
+  was left unfixed.
+- The lead's files (`doc/roadmap/qtranslate/journal.md`, `doc/roadmap/qtranslate/plan.md`) and this
+  stage's `plan.md` were not committed by the coordinator; the stage `status` and this outcome are
+  left in the working tree for the lead's commit.
