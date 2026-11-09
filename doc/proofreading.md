@@ -113,14 +113,17 @@ For text replacement:
 A separate **"Text checking"** tab (do not mix it with "Translation"):
 
 - `proofreading/enabled` — enable the mode;
-- `proofreading/provider` — `languagetool`, `hunspell`, `yandex`, `llm`;
+- `proofreading/provider` — `languagetool` in the first version; `llm` arrives with stage 6;
 - `proofreading/language` — checking language (`auto` or a specific one);
 - `proofreading/endpoint` — URL of your own LanguageTool/LLM;
-- `proofreading/apiKey` — key, if needed (DPAPI);
 - `proofreading/categories` — spelling, grammar, punctuation, style;
 - `proofreading/checkBeforeTranslation` — `false` by default;
 - `proofreading/autoReplace` — `false` by default (do not change text silently);
+- `proofreading/allowOnlineServices` — `false` by default; remote checking is opt-in;
 - `proofreading/hotkey` — a separate shortcut, empty by default.
+
+The first version sends no credentials: the public LanguageTool API and a self-hosted URL work
+without a key, and the premium `username`/`apiKey` mode is deferred to a later task.
 
 The tab must be separate, as requested; the settings must be independent of translation and must not
 affect the selected translation service.
@@ -132,7 +135,7 @@ affect the selected translation service.
 - List: message, rule, replacement options, "Replace", "Ignore" buttons.
 - "Replace all" / "Apply corrections" with a preview.
 - "Copy corrected text".
-- States: checking, no errors, provider unavailable, key required, request limit.
+- States: checking, no errors, provider unavailable, request limit.
 - For an external selection: a separate window/panel, like the popup, with replacement confirmation.
 
 ## 7. Tests
@@ -140,9 +143,9 @@ affect the selected translation service.
 - The LanguageTool parser on fixtures: several errors, replacements, offset/length, UTF-16 and
   surrogate pairs, an empty response, 429/403/5xx;
 - Merging offsets when splitting long text;
-- Hunspell/Nuspell: dictionary, case, punctuation around the word;
-- Yandex Speller: success, empty response, limit;
-- Settings: saving/loading, DPAPI for the key, a separate tab;
+- Hunspell/Nuspell: dictionary, case, punctuation around the word; *(deferred)*
+- Yandex Speller: success, empty response, limit; *(deferred)*
+- Settings: saving/loading, the online gate, a separate tab;
 - UI (offscreen): the list, replacing one/all, undo, request cancellation;
 - Manual smoke: LanguageTool cloud/self-hosted, replacement in Notepad/a browser.
 
@@ -174,7 +177,8 @@ Speller items below are the long-term design and are not part of stage 5 (user d
 - [ ] It is possible to replace one error, all errors, and the text with the corrected one.
 - [ ] Replacement in the main window is undone by undo; for an external application there is
   confirmation.
-- [ ] LanguageTool works through the cloud and a self-hosted URL; keys are stored through DPAPI.
+- [ ] LanguageTool works through the cloud and a self-hosted URL, without credentials in the first
+  version; premium `username`/`apiKey` support is deferred.
 - [ ] Hunspell/Nuspell and Yandex Speller work at least for spelling. *(deferred)*
 - [ ] Network/limit/key errors are shown clearly and the application does not hang.
 - [ ] Tests and documentation are updated.
