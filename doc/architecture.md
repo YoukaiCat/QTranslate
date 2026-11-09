@@ -1063,7 +1063,8 @@ Both names and values are percent-encoded as UTF-8 (`QUrl::toPercentEncoding`), 
   translation; `from` is mapped through `Languages::fromServiceCode()` into `detectedSourceLang`.
   `to`, extra fields and a second element are tolerated and ignored. A missing or unknown `from`
   leaves `detectedSourceLang` empty and is not an error. An empty array, a non-object first element,
-  a JSON object or string, malformed JSON, or a missing/whitespace-only `text` is `BadResponse`.
+  a bare JSON object without a recognised error, a JSON string, malformed JSON, or a
+  missing/whitespace-only `text` is `BadResponse`.
 - Errors: the body is classified before the HTTP status and also for 2xx responses (a 200 with an
   error body is not a success).
 
@@ -1836,7 +1837,7 @@ are linked into separate test targets):
 | `tst_mozhiparser` | Parsing Mozhi fixtures: `translated-text`, `detected`, `source_language`, `target_transliteration`, `auto`, HTML/JSON/plain-text errors, the HTTP status mapping and fixed messages without the body or URL |
 | `tst_mozhiwebservice` | Mozhi against a local HTTP server: the `GET /api/translate` query, an instance path prefix, `engine`/`from`/`to`/`text`, Google-style codes, `auto`, 5000-unit chunks, 500 ms pacing, serialization, cancellation, HTTP/HTML/JSON/timeout errors, a refused cross-origin redirect, `applySettings()` and the non-abort behaviour |
 | `tst_yandexwebparser` | Parsing Yandex fixtures: the array response with `text`/`from`, extra fields and a second element ignored, `from` mapping, empty/non-object/malformed bodies, HTML/captcha, JSON and plain-text rate-limit/block bodies, the status mapping and fixed messages without the text, body or URL |
-| `tst_yandexwebservice` | Yandex web against a local HTTP server: the POST form, content type, all fields, UTF-8 percent-encoding, the browser User-Agent on this request only, mapped target codes, constant `targetLang=auto`, `auto` source, 5000-unit chunks, 750 ms pacing, serialization, cancellation, a refused cross-origin redirect, HTTP/HTML/JSON/rate-limit/timeout errors and messages without the text or URL |
+| `tst_yandexwebservice` | Yandex web against a local HTTP server: the POST form, content type, all fields, UTF-8 percent-encoding, the browser User-Agent on this request only, mapped target codes, constant `targetLang=auto`, `auto` source, 5000-unit chunks, the 750 ms default pause, serialization, cancellation, a refused cross-origin redirect, HTTP/HTML/JSON/rate-limit/timeout errors and messages without the text or URL |
 | `tst_queuedwebservice` | The shared per-host queue on a fake service: one reply at a time, the rate pause, aborting a queued reply, deleting the active reply, `noteRequestSent()` restarting the pause, a multi-chunk reply holding its slot |
 | `tst_openaichat` | Chat Completions request serialization (model, messages, temperature, `max_tokens`, stream), response parsing, error and finish-reason mapping, model list, endpoint building |
 | `tst_openaicompatibleservice` | The OpenAI-compatible service against a local HTTP server: configuration errors, chat request, source language, plain-text and fenced-JSON responses, whitespace, HTTP errors, timeout, cancellation, OpenRouter key rules, model loading and edited base URL |

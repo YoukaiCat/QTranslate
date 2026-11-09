@@ -2,19 +2,20 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/04-yandex-web` — acceptance. All three children are `done`: the
-service (`34dd4a6`), the settings/UI (`a1e0051`), and the docs (this commit, done by the lead as a
-documentation-only task). The Yandex stage acceptance over `base: fdd3bfd..HEAD` is next. Linux is
-35/35, Windows 30 is not run. The Mozhi stage is `done` (`c4d3eed..52e5196`). Real deferred problem:
-an active reply can store a result fetched from the old instance/engine after `clearCache()`
-(cache-generation counter in `TranslationManager` plus a test; also covers `google.mode`,
-`deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a later shared-UI
-decision. Decisions: one configured fallback step, not a literal multi-step chain; Bing and Reverso
-stay in the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is `done`; the user
-deferred the 0.12.0 release on 2026-11-08 (no version bump, tag, push, or release; the CI publication
-is not performed). The working tree is clean after the Yandex-docs commit; branch `main` matches the
-root `branch:` and is ahead of `origin/main`; nothing is pushed. Next: the Yandex stage acceptance,
-then `05-bing-web`. In a new session: `/new`, choose the `lead` agent, and enter `@continue`.
+Current node: `03-free-web-endpoints/05-bing-web` — `todo`, not detailed; the planner is next in a
+new session. The Yandex stage is `done` (accepted over `fdd3bfd..7b2e574`; service `34dd4a6`,
+settings `a1e0051`, docs `7b2e574`). Linux is 35/35, Windows 30 (not run). The top-level stage 3
+continues with Bing, Reverso, and the fallback chain. Real deferred problem: an active reply can
+store a result fetched from the old instance/engine after `clearCache()` (cache-generation counter
+in `TranslationManager` plus a test; also covers `google.mode`, `deepl.mode`,
+`deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a later shared-UI decision.
+Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations. Decisions: one configured
+fallback step, not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web`
+stays outside the gate. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on
+2026-11-08 (no version bump, tag, push, or release; the CI publication is not performed). The
+working tree is clean after the Yandex-acceptance commit; branch `main` matches the root `branch:`
+and is ahead of `origin/main`; nothing is pushed. **Context stop at ~360k.** In a new session:
+`/new`, choose the `lead` agent, and enter `@continue`.
 
 ## Journal
 
@@ -107,3 +108,4 @@ then `05-bing-web`. In a new session: `/new`, choose the `lead` agent, and enter
 - 2026-11-09 — Planner detailed `02-yandex-web-settings` (6 steps, `detailed: true`). Decisions: one `m_yandexGroup` after the whole Mozhi block; one `tr()` hint covering unofficial/no-key, the gate, rate limits/blocks, several requests, and the third party; two new strings (307 → 309); `tst_settingsdialog` grows to 25, using `{de, en, ru}` and `isHidden()/isEnabled()`; no key/URL field, no `AppSettings` field, no new target. The planner confirmed 307 messages in each `.ts`, no `Yandex` message yet (`settingsdialog.cpp:350` is a `QStringLiteral`), and the gate-aware pattern. Status `in-progress`; coordinator next.
 - 2026-11-09 — Task `03-free-web-endpoints/04-yandex-web/02-yandex-web-settings` done as `a1e0051`. Added the `Yandex` group after Mozhi with one `yandexHint` string (unofficial, gate, rate limits/blocks, several requests, third party), gate-aware enabling, no key/URL/`AppSettings` field, `tst_settingsdialog::yandexGroup` (25 passed), and two new messages in all 14 `.ts` (307 → 309). Verification: Astra Debug/Release 35/35, no warnings; a fresh trixie Release also 35/35; no reviewer blockers. Windows 30 was not performed. Next: detail `03-yandex-web-docs`.
 - 2026-11-09 — Task `03-free-web-endpoints/04-yandex-web/03-yandex-web-docs` done by the lead (documentation-only, no coordinator). Updated `doc/architecture.md` §3.1/§3.2/§4.5/new §4.7.5/§4.8/§4.9/§8/§4.14/§9.2, `doc/free-endpoints.md` status/§2/§8/§9, and `AGENTS.md` 30/35; `ctest -N` reports 35, the historical §9.2/§11.9 sentences stay unchanged. No live smoke; Windows 30 is derived, not run. Next: the Yandex stage acceptance over `fdd3bfd..HEAD`.
+- 2026-11-09 — Stage `03-free-web-endpoints/04-yandex-web` accepted and closed `done` over `fdd3bfd..7b2e574`; all three children are done (`34dd4a6`, `a1e0051`, `7b2e574`). The acceptance repeated Astra/trixie Debug/Release 35/35 with no warnings, checked the service/settings/docs integration and the gate/INI path, and found no code defects; no fixes were needed. The lead fixed two documentation wording issues (a bare JSON object in §4.7.5, the 750 ms default in the §8 row) and the stale lead-owned lines (READMEs/root plan 30/35, handoff state and counts, stage outcome). Real deferred problem: the cache-generation race (unchanged). Known limitations: `zh-Hant`→`zh`, `pt-PT` absent, 750 ms/5000 UTF-16 assumptions. Windows 30 and the live smoke were not performed. Context reached the threshold after this node; the next node is `05-bing-web` (`todo`, needs planner detail in a new session). No push.

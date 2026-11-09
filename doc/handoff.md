@@ -50,12 +50,13 @@ documentation is English. The migration to the tree roadmap and the English base
   in-place feedback, and explicit warnings; no `ydotool`/`wtype`. A real portal-capable desktop was
   not available; the portal is covered by a mock DBus (20/20) and Weston headless confirms the
   fallback.
-- Tests: 33 on Linux (25 shared plus `tst_hotkeymanager_x11` 16/16,
+- Tests: 35 on Linux (27 shared plus `tst_hotkeymanager_x11` 16/16,
   `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
   `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
   `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 20/20; `tst_queuedwebservice`,
-  `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_mozhiparser`, and `tst_mozhiwebservice` are the
-  new shared tests). Windows keeps 28 tests and was not run here (no MSVC).
+  `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_mozhiparser`, `tst_mozhiwebservice`,
+  `tst_yandexwebparser`, and `tst_yandexwebservice` are the new shared tests). Windows keeps 30
+  tests and was not run here (no MSVC).
 - Packaging: `packaging/linux/package.sh` builds the trixie `tar.gz`, `.deb`, AppImage, and
   `SHA256SUMS-linux.txt` in `qtranslate-trixie`; the `.deb` uses `dpkg-shlibdeps` (including
   `libsecret-1-0`/`libqt6dbus6` only when linked). `--target astra` builds
@@ -85,7 +86,7 @@ documentation is English. The migration to the tree roadmap and the English base
 - Release 0.12.0 is deferred by user decision on 2026-11-08. When it happens, the version bump, the
   README download links, and `doc/releases/0.12.0.md` are needed; the old 0.11.1 GitHub release is
   deleted then (user decision). The roadmap is in stage 3: the opt-in gate, the shared queue,
-  MyMemory, and Mozhi are done, and the next task is `04-yandex-web`.
+  MyMemory, Mozhi, and Yandex web are done, and the next task is `05-bing-web`.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
@@ -179,9 +180,9 @@ documentation is English. The migration to the tree roadmap and the English base
 
 ## Free web endpoints (roadmap stage 3 (old stage 13), partial)
 
-- [`free-endpoints.md`](free-endpoints.md): DeepL web, MyMemory, and Mozhi are implemented; the
-  opt-in gate (`translation/allowFreeServices`) and the shared `QueuedWebService` queue are
-  implemented infrastructure; Yandex web, Bing web, and Reverso are research and the next roadmap
+- [`free-endpoints.md`](free-endpoints.md): DeepL web, MyMemory, Mozhi, and Yandex web are
+  implemented; the opt-in gate (`translation/allowFreeServices`) and the shared `QueuedWebService`
+  queue are implemented infrastructure; Bing web and Reverso are research and the next roadmap
   tasks. MyMemory cannot auto-detect the source language, so Auto-detect stays a selectable value and
   returns `UnsupportedLanguage` until the user picks a language; the settings hint and the error
   explain it. Fixing the shared language combos is a later decision.

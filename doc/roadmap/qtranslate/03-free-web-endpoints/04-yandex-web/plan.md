@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: fdd3bfd
 depends: [01-free-web-infrastructure]
 ---
@@ -106,3 +106,28 @@ service id and the gate; `03-yandex-web-docs` depends on both for the final beha
   source field or different semantics, record it; do not guess silently.
 - Windows Debug/Release and its 30 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+
+## Outcome
+
+Accepted on 2026-11-09 over `fdd3bfd..7b2e574`. Three children are `done`:
+`01-yandex-web-service` (`34dd4a6`), `02-yandex-web-settings` (`a1e0051`), and
+`03-yandex-web-docs` (`7b2e574`, lead).
+
+- **Service:** `yandex-web` is an opt-in `QueuedWebService` with the fixed `POST` endpoint, the
+  documented form fields, a browser Chrome/YaBrowser UA on this request only, constant
+  `targetLang=auto` (no source field; the target is `statLang`/`locale`), 5000 UTF-16 chunks, a
+  750 ms pause, the 71-code whitelist with `zh-Hans`/`zh-Hant`→`zh`, `nb`→`no`, `pt-BR`→`pt`,
+  `SameOriginRedirectPolicy`, the array response, body-first error classification, and no text,
+  body, URL, or UA in the logs.
+- **Settings/UI:** the gate-aware `Yandex` group with the unofficial/opt-in hint, no key or URL
+  field; two new strings in all 14 `.ts` (309); `tst_settingsdialog` covers the group.
+- **Docs:** architecture §3.1/§3.2/§4.5/§4.7.5/§4.8/§4.9/§8/§4.14/§9.2, `free-endpoints.md`
+  status/§2/§8/§9, `AGENTS.md` 30/35.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2) and `qtranslate-trixie` (Qt 6.8.2), Debug and
+  Release, zero warnings, 35/35; `tst_yandexwebservice` 10 repeats per configuration; the gate/INI
+  path checked offscreen. No code defects; no fixes.
+
+Known limitations: `zh-Hant` is declared but sent as `zh`, so Traditional Chinese is served as
+Simplified; `pt-PT` is not declared and `closest()` maps it to `pt-BR`; 750 ms and 5000 UTF-16 are
+documented assumptions. The cache-generation race remains a deferred shared problem. Windows 30 and
+the live Yandex smoke were not performed (no MSVC; captcha/403 risk). Next: `05-bing-web`.

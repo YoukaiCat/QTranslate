@@ -159,7 +159,7 @@ these artifacts; the tag must match the version in `CMakeLists.txt`.
 
 ### Linux (0.12.0)
 
-QTranslate builds, links, and passes 33 tests (25 shared plus 8 Linux platform tests) in Debug and
+QTranslate builds, links, and passes 35 tests (27 shared plus 8 Linux platform tests) in Debug and
 Release with `-Wall -Wextra` and no warnings on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7
 (Qt 6.10.2). X11 is the full target: global hotkeys, selection capture, in-place replacement,
 autostart, the three CLI commands, and tray integration are implemented. Wayland is limited: the
