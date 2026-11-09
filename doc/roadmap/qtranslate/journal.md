@@ -2,16 +2,17 @@
 
 ## Where we left off
 
-Current node: `05-proofreading` — stage `blocked` on three user questions from the 2026-11-09 split:
-the provider set (all three vs LanguageTool + Yandex Speller vs LanguageTool only), the
-proofreading-scoped online switch (`proofreading/allowOnlineServices`, default off), and whether
-external-selection checking (`07`) stays in the stage. The planner wrote seven children;
-`01-proofreading-core` is detailed and `in-progress`, the rest are `todo`. The `question` tool
-reported the dialog as dismissed, but the user did not close it; the questions are still unanswered.
+Current node: `05-proofreading` — stage `in-progress`, `base: eb91f6b`. The user answered the three
+split questions on 2026-11-09: **LanguageTool only** (Yandex Speller and Hunspell/Nuspell deferred;
+`06-spelling-providers` is `dropped` with its design kept), the proofreading-scoped online gate
+`proofreading/allowOnlineServices` defaulting to `false`, and external-selection checking (`07`)
+stays in the stage. The planner revised the stage and `01-proofreading-core` (detailed,
+`in-progress`); the coordinator for `01` is next. No code has been written for this stage yet.
 
 Release **0.12.0** was published on 2026-11-09 from `main` (`ef9500a`, tag `v0.12.0`); the tag CI
 built and published all Windows and Linux assets, and the checksums match. The old 0.11.1 GitHub
-release is not deleted yet: it needs a final confirmation in this session.
+release stays until the user checks the current code on Windows (decision of 2026-11-09, which
+supersedes the earlier timing).
 
 `03-free-web-endpoints` is `done` (accepted over `fee1bcf..2c2b1b7`, seven children done); stage 4
 `04-local-offline-translation` stays `blocked` by the user's 2026-11-05 decision and is not dropped.
@@ -150,3 +151,4 @@ POST is urlencoded, not multipart; Reverso has six languages and no `auto`. The 
 - 2026-11-09 — Parent stage `03-free-web-endpoints` accepted and closed `done` over `fee1bcf..2c2b1b7`. The acceptance checked all seven children and the five `Done when` criteria: MyMemory/Mozhi rate limits, clear errors for Yandex/Bing/Reverso, 403/429 without hangs, Google/DeepL primary with opt-in free fallbacks, tests and docs. It found and fixed one real defect in `2c2b1b7`: the cache-generation race in `TranslationManager` (an already-running reply could store a result after `clearCache()` and serve it under a new instance/engine/mode); the fix adds a generation counter captured by `Reply` and checked in `finishResult()`, a cache clear for `google.mode`/`deepl.mode`/`deepl.englishVariant` in `AppController::applySettings()`, and `tst_translationmanager::resultArrivingAfterClearIsNotCached()`. Verification: Linux Debug/Release 39/39, `tst_translationmanager` 50/50, no warnings; Windows 34 and a live smoke were not performed. The next stage is `05-proofreading`; stage 4 stays `blocked` by the user's 2026-11-05 decision. No push.
 - 2026-11-09 — Release decision corrected by the user. The 2026-11-08 entry recorded a deferral of 0.12.0, but the user stated in this session that they had asked for the release in the previous session; the `question` dialog for stage 5 was also reported as dismissed by the tool although the user did not close it. The user's instruction stands: publish **0.12.0** from `main`. Scope: everything since `v0.11.0` (Linux support, free web providers, fallback, fullscreen hotkey pause, documentation migration). Prepared: version bump in `CMakeLists.txt`/`resources/qtranslate.rc`, `doc/releases/0.12.0.md`, README download links, handoff and journal updates. Windows Debug/Release and its 34 tests are not performed locally (no MSVC); the tag CI is the build gate. Stage 5 stays `blocked` on the three unanswered questions until the release is out.
 - 2026-11-09 — Release `0.12.0` published from `main` as `ef9500a`, annotated tag `v0.12.0`. Local checks: Linux Debug/Release 39/39 with no warnings under `xvfb-run -a`, `--version` prints `QTranslate 0.12.0`; Windows was not built locally. CI tag run 42668400346 succeeded (Windows and Linux jobs, release job) and the `main` run 42668386239 succeeded. Published assets: setup 11 315 684 B, ZIP 13 958 965 B, Linux tar.gz 28 782 608 B, `.deb` 530 960 B, AppImage 39 410 168 B, plus the unlisted `SHA256SUMS.txt` and `SHA256SUMS-linux.txt`; every asset digest matches its checksum file. Release: https://github.com/YoukaiCat/QTranslate/releases/tag/v0.12.0. The old 0.11.1 release is not deleted yet; it awaits a final user confirmation despite the 2026-11-08 decision, because the action is irreversible. The roadmap stays at `05-proofreading`, blocked on the three split questions.
+- 2026-11-09 — User decisions on stage 5 and 0.11.1, recorded after the release. **Providers: LanguageTool only** in the first version; Yandex Speller and Hunspell/Nuspell are deferred, and `06-spelling-providers` is `dropped` with its design kept (rejected: all three — a native library and dictionaries on both platforms; LanguageTool + Yandex Speller). **Privacy: a separate `proofreading/allowOnlineServices`, default `false`**, governing every remote endpoint including a self-hosted LanguageTool (rejected: reusing `translation/allowFreeServices`, which couples checking to translation; no gate). **External-selection checking stays in the stage** as child `07` (rejected: moving it to a later stage). The stage is `in-progress`, `base: eb91f6b`; the planner revised the stage, `01-proofreading-core` and the affected child texts. `doc/proofreading.md` now records the LanguageTool-only first version and marks the Hunspell/Yandex criteria as deferred. **0.11.1 stays published** until the user checks the current code on Windows; this supersedes the 2026-11-08 timing, not the intent to delete it later. Next: coordinator for `01-proofreading-core`.

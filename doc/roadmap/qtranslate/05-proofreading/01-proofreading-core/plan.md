@@ -38,7 +38,7 @@ and no provider is registered yet, so the transient state is harmless).
    - `struct ProofreadingResult { QVector<ProofreadingIssue> issues; QString correctedText;
      QString serviceId; TranslationError error = TranslationError::None; QString errorMessage;
      bool ok() const { return error == TranslationError::None; } }`. `correctedText` stays empty for
-     a provider that returns issues (LanguageTool, Yandex Speller) and is filled only by a provider
+     a provider that returns issues (LanguageTool) and is filled only by a provider
      that returns ready text (the stage-6 LLM).
    - `struct ProofreadingRequest { QString text; QString language; QStringList categories; }`;
      `language` is an internal code or `Languages::autoCode()` ("auto"), `categories` uses the values
@@ -62,14 +62,15 @@ and no provider is registered yet, so the transient state is harmless).
      `createFinished()` uses `Qt::QueuedConnection` so the caller can connect.
    - `class ProofreadingService : public QObject`:
      ```cpp
-     virtual QString id() const = 0;                    // "languagetool", "yandex", "hunspell", "llm"
+     virtual QString id() const = 0;                    // "languagetool" (stage 6 adds "llm")
      virtual QString displayName() const = 0;
      virtual bool isConfigured() const = 0;
      virtual QString configurationError() const { return {}; }
      virtual QStringList languages() const = 0;         // internal codes, without "auto"
      virtual bool supportsAutoLanguage() const { return false; }
      // Sends the text to a remote service; the manager refuses it while
-     // proofreading/allowOnlineServices is false. A local engine returns true.
+     // proofreading/allowOnlineServices is false. A future local engine would
+     // return true; no provider of this stage does.
      virtual bool isLocal() const { return false; }
      virtual void applySettings(const AppSettings &settings) = 0;
      virtual ProofreadingReply *check(const ProofreadingRequest &request) = 0;
@@ -138,7 +139,7 @@ and no provider is registered yet, so the transient state is harmless).
    - `struct ProofreadingSettings` next to the other groups (`settings.h:44-80`):
      ```cpp
      bool enabled = false;
-     QString provider = QStringLiteral("languagetool"); // languagetool | yandex | hunspell | llm
+     QString provider = QStringLiteral("languagetool"); // the only id of this stage
      QString language = QStringLiteral("auto");
      QString endpoint;                                  // empty: the provider default
      QString apiKey;
@@ -159,9 +160,11 @@ and no provider is registered yet, so the transient state is harmless).
      (`settings.cpp:195-205`, `1575-1584` in `doc/architecture.md`).
    - Pure helpers next to `mozhiEngineIds()` (`settings.h:118`): `QStringList
      proofreadingCategoryIds()` returning `{"spelling", "grammar", "punctuation", "style"}` in that
-     order, and `QStringList proofreadingProviderIds()` returning `{"languagetool", "yandex",
-     "hunspell", "llm"}`. The second one reserves the ids of the later children; the settings, the
-     manager and the tests share both lists instead of copying strings.
+     order, and `QStringList proofreadingProviderIds()` returning `{"languagetool"}`. The provider
+     list holds only ids that a registered service can answer, so the settings store and the UI have
+     no dead values; stage 6 appends `llm` together with its service, and the dropped
+     `06-spelling-providers` would have appended its ids the same way. The settings, the manager and
+     the tests share both lists instead of copying strings.
    - Normalisation in `normalize()` (`settings.cpp:165-205` is the model):
      * `provider`: trimmed and lowercased; when not in `proofreadingProviderIds()`, reset to
        `languagetool` with a fixed warning that does not echo the value;
@@ -197,8 +200,9 @@ and no provider is registered yet, so the transient state is harmless).
    - pre-network checks with zero provider calls: empty and whitespace-only text → `EmptyText`;
      no provider → `ServiceUnavailable`; unconfigured → `Auth` with the provider's
      `configurationError`; a remote provider with the switch off → `ServiceUnavailable` with exactly
-     `Enable online text checking in Settings → Text checking.`, while a local provider answers with
-     the switch off; `auto` on a provider without auto support and an unknown code →
+     `Enable online text checking in Settings → Text checking.`, while a fake service with
+     `isLocal() == true` answers with the switch off (the seam for a future offline engine; no such
+     provider ships here); `auto` on a provider without auto support and an unknown code →
      `UnsupportedLanguage` mentioning the code; every pre-network reply arrives asynchronously
      (`QSignalSpy` count is 0 right after `check()`);
    - result pass-through: `issues`, `correctedText`, `serviceId` and `ok()` arrive unchanged, and the
@@ -267,8 +271,9 @@ and no provider is registered yet, so the transient state is harmless).
   in order (empty or unknown → all). `kCurrentVersion` stays `1`, the group is optional, and no
   translation setting is read or written.
 - `proofreadingCategoryIds()` and `proofreadingProviderIds()` are the single source of the id
-  strings, and `isValidProofreadingEndpoint()`/`normalizedProofreadingEndpoint()` are the single
-  endpoint rule; no `proofreading/hotkey` key is added.
+  strings — the provider list contains only `languagetool` in this stage — and
+  `isValidProofreadingEndpoint()`/`normalizedProofreadingEndpoint()` are the single endpoint rule;
+  no `proofreading/hotkey` key is added.
 - `tst_proofreadingmanager` covers every case in step 6, is platform-neutral and registered in the
   platform-neutral block of `tests/CMakeLists.txt`; `tst_settings` and `tst_textchunker` carry the
   new cases; `ctest -N` shows 40 Linux tests (39 + 1) and would show 35 on Windows (34 + 1).
@@ -288,10 +293,16 @@ and no provider is registered yet, so the transient state is harmless).
   and reuse keeps one error vocabulary, one `ui/translationerrortext` and one set of translations.
   Do not add a parallel enum and do not rename the existing one.
 - **The gate is a new user-visible key.** `proofreading/allowOnlineServices` is not in
-  `doc/proofreading.md` §5; it is the stage's privacy mechanism and is reported to the lead for the
-  user's approval. Do not reuse `translation/allowFreeServices`, because the stage requires checking
-  not to affect translation settings. Local engines must stay usable with the switch off, so
-  `isLocal()` is a service property, not a provider id check in the manager.
+  `doc/proofreading.md` §5; it is the stage's privacy mechanism and was approved by the user on
+  2026-11-09 (default `false`). Do not reuse `translation/allowFreeServices`, because the stage
+  requires checking not to affect translation settings. The `isLocal()` seam keeps a future offline
+  engine usable with the switch off; no such provider ships in this stage, so do not add a provider
+  id that no registered service can answer.
+- **Only LanguageTool ships.** `06-spelling-providers` is `dropped` (user decision of 2026-11-09)
+  and stage 6 adds `llm` together with its service. Keep `proofreadingProviderIds()` at
+  `{"languagetool"}` and let the UI and the manager treat a missing provider as unavailable instead
+  of pre-seeding ids for later stages; a stored value that is not in the list is reset with the fixed
+  warning already specified.
 - **Empty categories mean all.** The alternative (empty = check nothing) would make a hand-edited
   file silently useless. The parser and the UI must both treat an empty list as all four; the
   manager passes the request through unchanged, so the service applies the rule once.

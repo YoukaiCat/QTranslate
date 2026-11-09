@@ -1,10 +1,16 @@
 ---
 kind: stage
-status: todo
-depends: [01-proofreading-core, 03-languagetool-service]
+status: dropped
 ---
 
 # Spelling providers
+
+## Dropped
+
+Dropped on 2026-11-09 by the user's decision: the first version of the checking mode ships
+LanguageTool only, and Yandex Speller and Hunspell/Nuspell are deferred. The directory is kept as
+the design record; nothing below is part of stage 5 or gates it, and no child was started. A later
+stage can revive the node (renumbering is the lead's call) if offline or no-key spelling is wanted.
 
 ## Goal
 

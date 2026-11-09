@@ -1,6 +1,8 @@
 # Spelling, grammar, and punctuation checking
 
-Date: 2026-11-05. Status: **roadmap stage 5 (old stage 15); future task, code not implemented**.
+Date: 2026-11-05. Status: **roadmap stage 5 (old stage 15), in progress; code not implemented yet**. The
+first version ships **LanguageTool only** (user decision of 2026-11-09); Yandex Speller and
+Hunspell/Nuspell are deferred and kept here as the longer-term design.
 
 ## 1. Goal
 
@@ -163,12 +165,16 @@ affect the selected translation service.
 
 ## 10. Done criteria
 
+The first version implements LanguageTool and the online gate; the Hunspell/Nuspell and Yandex
+Speller items below are the long-term design and are not part of stage 5 (user decision of
+2026-11-09). The stage criteria live in [`roadmap/qtranslate/05-proofreading/plan.md`](roadmap/qtranslate/05-proofreading/plan.md).
+
 - [ ] There is a separate "Text checking" tab and independent settings.
 - [ ] Checking finds errors and shows them in a list/with highlighting.
 - [ ] It is possible to replace one error, all errors, and the text with the corrected one.
 - [ ] Replacement in the main window is undone by undo; for an external application there is
   confirmation.
 - [ ] LanguageTool works through the cloud and a self-hosted URL; keys are stored through DPAPI.
-- [ ] Hunspell/Nuspell and Yandex Speller work at least for spelling.
+- [ ] Hunspell/Nuspell and Yandex Speller work at least for spelling. *(deferred)*
 - [ ] Network/limit/key errors are shown clearly and the application does not hang.
 - [ ] Tests and documentation are updated.

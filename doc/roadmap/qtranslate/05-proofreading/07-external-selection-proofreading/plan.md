@@ -44,6 +44,8 @@ Two children, each with its own result:
 - The captured selection is checked, the candidates are shown, and the text is replaced only after
   an explicit confirmation; a different foreground window aborts the paste, the clipboard is restored
   as the other in-place scenarios do, and the window explains that undo depends on the application.
+  While `proofreading/allowOnlineServices` is off, the popup shows the manager's gate message and
+  replaces nothing.
 - Cancel, focus loss and a new request stop the check and the paste cleanly; no text is logged.
 - Tests cover the new hotkey action on each backend, the CLI forwarding, the popup list and
   confirmation, and the X11 replacement; the existing hotkey and selection tests stay green. Debug and
