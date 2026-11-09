@@ -2,12 +2,12 @@
 
 ## Where we left off
 
-Current node: `05-proofreading` — stage `in-progress`, `base: eb91f6b`. The user answered the three
-split questions on 2026-11-09: **LanguageTool only** (Yandex Speller and Hunspell/Nuspell deferred;
-`06-spelling-providers` is `dropped` with its design kept), the proofreading-scoped online gate
+Current node: `05-proofreading` — stage `in-progress`, `base: eb91f6b`; child `01-proofreading-core`
+is `done` (`8faaaf3`, Linux 40/40) and `02-languagetool-parser` is next, not yet detailed. User
+decisions of 2026-11-09: **LanguageTool only** (Yandex Speller and Hunspell/Nuspell deferred;
+`06-spelling-providers` `dropped` with its design kept), a proofreading-scoped online gate
 `proofreading/allowOnlineServices` defaulting to `false`, and external-selection checking (`07`)
-stays in the stage. The planner revised the stage and `01-proofreading-core` (detailed,
-`in-progress`); the coordinator for `01` is next. No code has been written for this stage yet.
+stays in the stage.
 
 Release **0.12.0** was published on 2026-11-09 from `main` (`ef9500a`, tag `v0.12.0`); the tag CI
 built and published all Windows and Linux assets, and the checksums match. The old 0.11.1 GitHub
@@ -18,7 +18,7 @@ supersedes the earlier timing).
 `04-local-offline-translation` stays `blocked` by the user's 2026-11-05 decision and is not dropped.
 The root is `in-progress`; its `Done when` requires every stage to be done or dropped, so stage 4's
 blocked state is a deliberate exception. Work is on `main` (matches the root `branch:`); the working
-tree is clean. Linux is 39/39, Windows 34 (derived locally; the tag CI ran them).
+tree is clean. Linux is 40/40, Windows 35 (34 + the new shared test; derived, not run locally).
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
@@ -152,3 +152,4 @@ POST is urlencoded, not multipart; Reverso has six languages and no `auto`. The 
 - 2026-11-09 — Release decision corrected by the user. The 2026-11-08 entry recorded a deferral of 0.12.0, but the user stated in this session that they had asked for the release in the previous session; the `question` dialog for stage 5 was also reported as dismissed by the tool although the user did not close it. The user's instruction stands: publish **0.12.0** from `main`. Scope: everything since `v0.11.0` (Linux support, free web providers, fallback, fullscreen hotkey pause, documentation migration). Prepared: version bump in `CMakeLists.txt`/`resources/qtranslate.rc`, `doc/releases/0.12.0.md`, README download links, handoff and journal updates. Windows Debug/Release and its 34 tests are not performed locally (no MSVC); the tag CI is the build gate. Stage 5 stays `blocked` on the three unanswered questions until the release is out.
 - 2026-11-09 — Release `0.12.0` published from `main` as `ef9500a`, annotated tag `v0.12.0`. Local checks: Linux Debug/Release 39/39 with no warnings under `xvfb-run -a`, `--version` prints `QTranslate 0.12.0`; Windows was not built locally. CI tag run 42668400346 succeeded (Windows and Linux jobs, release job) and the `main` run 42668386239 succeeded. Published assets: setup 11 315 684 B, ZIP 13 958 965 B, Linux tar.gz 28 782 608 B, `.deb` 530 960 B, AppImage 39 410 168 B, plus the unlisted `SHA256SUMS.txt` and `SHA256SUMS-linux.txt`; every asset digest matches its checksum file. Release: https://github.com/YoukaiCat/QTranslate/releases/tag/v0.12.0. The old 0.11.1 release is not deleted yet; it awaits a final user confirmation despite the 2026-11-08 decision, because the action is irreversible. The roadmap stays at `05-proofreading`, blocked on the three split questions.
 - 2026-11-09 — User decisions on stage 5 and 0.11.1, recorded after the release. **Providers: LanguageTool only** in the first version; Yandex Speller and Hunspell/Nuspell are deferred, and `06-spelling-providers` is `dropped` with its design kept (rejected: all three — a native library and dictionaries on both platforms; LanguageTool + Yandex Speller). **Privacy: a separate `proofreading/allowOnlineServices`, default `false`**, governing every remote endpoint including a self-hosted LanguageTool (rejected: reusing `translation/allowFreeServices`, which couples checking to translation; no gate). **External-selection checking stays in the stage** as child `07` (rejected: moving it to a later stage). The stage is `in-progress`, `base: eb91f6b`; the planner revised the stage, `01-proofreading-core` and the affected child texts. `doc/proofreading.md` now records the LanguageTool-only first version and marks the Hunspell/Yandex criteria as deferred. **0.11.1 stays published** until the user checks the current code on Windows; this supersedes the 2026-11-08 timing, not the intent to delete it later. Next: coordinator for `01-proofreading-core`.
+- 2026-11-09 — Task `05-proofreading/01-proofreading-core` done as `8faaaf3`. Added `proofreadingtypes.h`, `proofreadingservice.{h,cpp}` (reply semantics identical to `TranslationReply`), `proofreadingmanager.{h,cpp}` (channels `MainWindow`/`InPlace`, registry, `onlineServicesAllowed` gate, the pre-network refusals, per-channel `QPointer`, log hygiene), `TextChunker::splitWithOffsets()`, `ProofreadingSettings` with `[proofreading]` (`provider` = `languagetool` only, the four categories, `checkBeforeTranslation`/`autoReplace`/`allowOnlineServices` false, the secret through `readSecret`/`writeSecret`), and `tst_proofreadingmanager` plus new `tst_settings`/`tst_textchunker` cases. New notes for later children: the service applies the "empty categories = all" rule once; stage 6 appends `llm` together with its service; the gate string is `Enable online text checking in Settings → Text checking.`; `doc/architecture.md` §4.11 and `doc/proofreading.md` §5 still need the `proofreading/*` keys, which is lead documentation work. Verification: Linux Debug/Release 40/40 with no warnings under `xvfb-run -a`, `ctest -N` 40; Windows 35 was not performed (no MSVC). The reviewer's only remark was rejected (an unknown provider id is logged like `TranslationManager::setActiveService()`, and the id is internal). No real problems left unfixed. Next: detail `02-languagetool-parser`.
