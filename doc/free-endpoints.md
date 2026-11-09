@@ -1,8 +1,8 @@
 # Free web translation endpoints
 
 Date: 2026-11-09. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
-mode of the DeepL service; MyMemory, Mozhi, and Yandex web are implemented as gated no-key services;
-Bing web and Reverso are research**.
+mode of the DeepL service; MyMemory, Mozhi, Yandex web and Bing web are implemented as gated no-key
+services; Reverso is research**.
 
 This document records the free endpoints without an API key that can be added to qtranslate as
 experimental services. The main source is the open project
@@ -95,12 +95,42 @@ made the only translation method.
 - **Preparation:** `GET https://www.bing.com/translator` and HTML parsing: `IG`, `data-iid`,
   `params_AbusePreventionHelper` (key/token), `MUID`, `SID`, `TID`.
 - **Request:** `POST https://www.bing.com/ttranslatev3?isVertical=1&IG=...&IID=...`
-- **Format:** form-data: `text`, `fromLang`, `to`, `token`, `key`, `isAuthv2=true`,
-  `tryFetchingGenderDebiasedTranslations=true`; cookie `MUID`.
+- **Format:** `application/x-www-form-urlencoded`; fields `text`, `fromLang`, `to`, `token`, `key`,
+  `isAuthv2=true`, `tryFetchingGenderDebiasedTranslations=true`; cookie `MUID`.
 - **Response:** JSON with `detectedLanguage` and a `translations[].text` array.
 - **Limits:** the token lives about an hour; on `401`, refresh the token once and retry, without
   loops. Bing's HTML changes, so the parser is fragile.
 - **Complexity:** higher than the others because of token and cookie extraction.
+
+**Implementation in qtranslate (2026-11-09).**
+
+- The `bing-web` service: opt-in (`requiresOptIn() == true`), no key, behind
+  `translation/allowFreeServices`; fixed endpoints `https://www.bing.com/translator` (GET) and
+  `https://www.bing.com/ttranslatev3` (POST). The page parser extracts `IG`, the first `data-iid`,
+  the `params_AbusePreventionHelper` key/token/lifetime, and the optional `muid`/`sid`/`tid`; it is
+  not an HTML parser and fails with a fixed message when the markers are absent.
+- POST body: `application/x-www-form-urlencoded`, not multipart; the fields in the order above, with
+  every name and value percent-encoded as UTF-8. The 2026-11-09 observation returned a translation
+  for the urlencoded form and `{"statusCode":205,"errorMessage":""}` for multipart with the same
+  fields.
+- `MUID` comes from the GET's `Set-Cookie` first and the page's `muid` second; both requests set
+  `CookieLoadControlAttribute`/`CookieSaveControlAttribute` to `Manual`, and the POST sends exactly
+  one explicit `Cookie: MUID=...`, so the shared cookie jar is neither read nor written.
+- The token and `MUID` are cached together for the page-reported lifetime (3600000 ms default),
+  cleared by `applySettings()`, and never persisted or logged. HTTP 401 or a body `statusCode` 401
+  refreshes once and retries the same chunk; a second 401 is `RateLimited`; a 403 is a block with no
+  refresh.
+- 5000 UTF-16 code units and a 1000 ms pause are conservative named assumptions; chunks are
+  sequential inside one queue slot, edge whitespace is restored, and `SameOriginRedirectPolicy`
+  refuses a cross-origin redirect. A browser User-Agent is set on these requests only; the
+  application UA and `AppInfo::userAgent()` are unchanged.
+- Response `[{"translations":[{"text":...}],"detectedLanguage":{"language":...}}]`: the first element
+  with translations is used, `text` values are joined, and `detectedLanguage` is mapped back. Errors
+  are body-first: 401/403/429 and rate-limit bodies → `RateLimited`, 413 → `TooLong`, 5xx →
+  `Network`, HTML/missing markers/missing MUID/blocked/provider errors → `ServiceUnavailable`,
+  malformed/empty responses → `BadResponse`, timeout/abort → `Timeout`/`Cancelled`.
+- Tests: `tst_bingwebparser`, `tst_bingwebservice`, `tst_languages`, `tst_settingsdialog`; CTest
+  never contacts the real endpoint, and a live smoke is manual only.
 
 ## 4. Reverso
 
@@ -207,14 +237,16 @@ remains unofficial.
    with `ServiceUnavailable` until the user enables it. The DeepL `free-web` mode stays outside the
    gate as an explicit mode with its own warning.
 2. For each service — its own `TranslationService` and parser; no keys are needed. Implemented for
-   MyMemory (`src/services/mymemory*`), Mozhi (`src/services/mozhi*`), and Yandex web
-   (`src/services/yandexweb*`); they are the three real services behind the gate.
+   MyMemory (`src/services/mymemory*`), Mozhi (`src/services/mozhi*`), Yandex web
+   (`src/services/yandexweb*`) and Bing web (`src/services/bingweb*`); they are the four real
+   services behind the gate.
 3. Per-host rate limiting: implemented infrastructure in `QueuedWebService` — replies of one host
    are serialized and paused by the service-specific value (DeepL 2 s, MyMemory 350 ms, Mozhi
-   500 ms, Yandex web 750 ms; Reverso 600 ms is planned); no parallel requests to one host.
+   500 ms, Yandex web 750 ms, Bing web 1000 ms; Reverso 600 ms is planned); no parallel requests to
+   one host.
 4. Text splitting: implemented for DeepL (5000 characters), MyMemory (500 UTF-8 bytes), Mozhi
-   (5000 UTF-16 code units), and Yandex web (5000 UTF-16 code units); the rest — according to the
-   service limits.
+   (5000 UTF-16 code units), Yandex web (5000 UTF-16 code units), and Bing web (5000 UTF-16 code
+   units); the rest — according to the service limits.
 5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,
    without a retry storm.
 6. Fallback: the official API → free web → Mozhi/another service; do not show raw HTML.
@@ -229,7 +261,7 @@ remains unofficial.
 3. **Mozhi** — implemented: one integration, many engines, self-hosting possible.
 4. **Yandex web** — implemented: important for the Russian audience, but an unofficial scraped
    endpoint.
-5. **Bing web** — fragile auth and HTML; do it after the rest.
+5. **Bing web** — implemented: fragile auth and HTML, but the fourth opt-in free service.
 6. **Reverso** — niche, fewer languages.
 
 ## 10. What not to do

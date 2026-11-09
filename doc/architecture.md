@@ -216,6 +216,8 @@ qtranslate/
 │   │   ├── mozhiparser.h/.cpp        pure parsing for the Mozhi API
 │   │   ├── yandexwebservice.h/.cpp   unofficial Yandex web endpoint (no key, opt-in)
 │   │   ├── yandexwebparser.h/.cpp    pure parsing for the Yandex web endpoint
+│   │   ├── bingwebservice.h/.cpp     unofficial Bing web endpoint (no key, opt-in)
+│   │   ├── bingwebparser.h/.cpp      pure parsing for the Bing web endpoint
 │   │   ├── queuedwebservice.h/.cpp   serialized per-host request queue
 │   │   └── openaicompatibleservice.h/.cpp  OpenAI-compatible provider
 │   ├── platform/
@@ -247,9 +249,11 @@ qtranslate/
 │       └── appicon.h/.cpp
 └── tests/
     ├── CMakeLists.txt
-    ├── fixtures/                     saved Google/DeepL/MyMemory/Mozhi/Yandex responses (google/, deepl/, mymemory/, mozhi/, yandexweb/)
+    ├── fixtures/                     saved Google/DeepL/MyMemory/Mozhi/Yandex/Bing responses (google/, deepl/, mymemory/, mozhi/, yandexweb/, bingweb/)
     ├── tst_appinfo.cpp
     ├── tst_autostart.cpp               Windows and Linux variants
+    ├── tst_bingwebparser.cpp
+    ├── tst_bingwebservice.cpp          service against a local HTTP server
     ├── tst_cli.cpp                     Linux: parser and two-process forwarding
     ├── tst_deeplparser.cpp
     ├── tst_deeplservice.cpp
@@ -293,9 +297,9 @@ targets. Currently:
 
 | Target | What is included now (0.12.0) |
 |---|---|
-| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `yandexwebparser`, `yandexwebservice` |
+| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `bingwebparser`, `bingwebservice`, `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `yandexwebparser`, `yandexwebservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_queuedwebservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 30 tests on Windows and 35 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_queuedwebservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 32 tests on Windows and 37 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
@@ -645,7 +649,7 @@ protected:
 class TranslationService : public QObject {
     Q_OBJECT
 public:
-    virtual QString id() const = 0;            // "google", "deepl", "llm", "mymemory", "mozhi", "yandex-web"
+    virtual QString id() const = 0;            // "google", "deepl", "llm", "mymemory", "mozhi", "yandex-web", "bing-web"
     virtual QString displayName() const = 0;
     virtual bool isConfigured() const = 0;     // DeepL without a key — false
     virtual QString configurationError() const { return {}; } // hint if not configured
@@ -693,8 +697,9 @@ multi-chunk protocol therefore sends its chunks sequentially inside one slot and
 queued is skipped, and a reply deleted while active is dropped through `QPointer`/`destroyed`. The
 default pause is 2000 ms (the moved DeepL value); a service overrides it in its constructor, and
 `setRateLimitMs(0)` disables the pause for tests only. The base knows no endpoints, service
-settings, the opt-in gate, or UI; `DeepLWebService`, `MyMemoryService`, `MozhiService` and
-`YandexWebService` use it; MyMemory sets 350 ms, Mozhi 500 ms and Yandex web 750 ms.
+settings, the opt-in gate, or UI; `DeepLWebService`, `MyMemoryService`, `MozhiService`,
+`YandexWebService` and `BingWebService` use it; MyMemory sets 350 ms, Mozhi 500 ms, Yandex web
+750 ms and Bing web 1000 ms.
 
 Each service receives a `NetworkManager` pointer (the shared `QNetworkAccessManager` and
 `makeRequest()` with a timeout and `User-Agent`) and does not create its own manager — this way the
@@ -1086,6 +1091,89 @@ Both names and values are percent-encoded as UTF-8 (`QUrl::toPercentEncoding`), 
   contacts the real endpoint; a live smoke is manual only and is recorded as not performed with the
   reason, never as passed.
 
+### 4.7.6. `BingWebService` — unofficial Bing web endpoint
+
+`BingWebService` implements the unofficial `www.bing.com` translator endpoint. Its id is `bing-web`,
+its display name is `Bing`, it needs no key (`isConfigured() == true`), and it is the fourth real
+opt-in consumer after MyMemory (§4.7.3), Mozhi (§4.7.4) and Yandex (§4.7.5):
+`requiresOptIn() == true`, `TranslationManager` refuses it while `translation/allowFreeServices` is
+false, and `AppController` hides it from the pickers. There is no key or URL field and no `[bing]`
+settings group; `applySettings()` only clears the token cache and no `AppSettings`/INI key is added.
+`AppController` registers it after Yandex.
+
+Handshake:
+
+```
+GET https://www.bing.com/translator
+Accept: text/html
+
+POST https://www.bing.com/ttranslatev3?isVertical=1&IG=<IG>&IID=<IID>
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+Cookie: MUID=<MUID>
+
+text=<text>&fromLang=<source>&to=<target>&token=<token>&key=<key>&isAuthv2=true&tryFetchingGenderDebiasedTranslations=true
+```
+
+- Token page: the parser extracts the first `IG:"..."`, the first `data-iid="..."`,
+  `params_AbusePreventionHelper = [key,"token",lifetimeMs];`, and the optional `"muid"`, `"sid"` and
+  `"tid"` values with tolerant string searches; it is not an HTML parser and never executes
+  JavaScript. The helper key may be a JSON number, so its digits are preserved rather than formatted
+  through a double. A page without the required markers is `ServiceUnavailable` with a fixed message
+  and no POST.
+- Body: `application/x-www-form-urlencoded`, not multipart; the seven fields above in that order, with
+  every name and value percent-encoded as UTF-8. The 2026-11-09 observation returned a translation
+  for the urlencoded form and `{"statusCode":205,"errorMessage":""}` for multipart with the same
+  fields. `SameOriginRedirectPolicy` is set on both requests, so a cross-origin redirect is refused.
+- Browser User-Agent: a fixed desktop Chrome string is set on the Bing requests only, after
+  `NetworkManager::makeRequest()`. `AppInfo::userAgent()` and every other service keep the application
+  User-Agent. This is protocol emulation, not a claim that the application is a browser and not a
+  secret; no captcha solver, headless browser, cookie harvesting or block bypass is used.
+- `MUID`: the value from the GET's `Set-Cookie` is preferred; the page's `muid` is the fallback. Both
+  requests set `CookieLoadControlAttribute` and `CookieSaveControlAttribute` to `Manual`, so the
+  shared `QNetworkAccessManager` cookie jar is never read or written, and the POST sends exactly one
+  explicit `Cookie: MUID=...` header. A missing MUID, or a value containing a control character, is
+  `ServiceUnavailable` before the POST.
+- Cache: the token and its `MUID` are stored together per service instance for the lifetime reported
+  by the page (3600000 ms in the observed page; a missing or invalid value falls back to that
+  constant). The cache is never persisted to the INI or the log, and `applySettings()` clears it.
+- Refresh: HTTP 401 or a JSON body with `statusCode` 401 triggers exactly one token refresh and one
+  retry of the same chunk; a second 401 is `RateLimited` without a third request. A 403 is a block,
+  not a token rejection: `RateLimited`, no refresh. The test asserts the exact GET/POST counts.
+- Chunking and pacing: at most 5000 UTF-16 code units per request via `TextChunker::split`,
+  sequential chunks inside one `QueuedWebService` slot, a 1000 ms pause between every request to the
+  host (including GET→POST and the refresh), edge whitespace removed before the request and restored
+  at the joints, whitespace-only parts not sent, and a failed chunk failing the whole reply without a
+  partial result. Both values are conservative named assumptions, not measured limits.
+- Languages: see §4.8. `auto` is sent as `auto-detect`; an explicit source and the target are mapped
+  to Bing's codes, and an unmapped code finishes with `UnsupportedLanguage` before any request.
+- Response: a JSON array; the first element with a non-empty `translations` array is used,
+  `translations[].text` values are joined in order, and `detectedLanguage.language` is mapped through
+  `Languages::fromServiceCode()` into `detectedSourceLang`. `to`, `usedLLM`, extra fields and a second
+  element are tolerated and ignored. A malformed document, a non-array root, an empty array, no
+  translations, a non-object translation, or a missing/non-string/empty `text` is `BadResponse`.
+- Errors: the body is classified before the HTTP status and also for 2xx responses (a 200 with an
+  error body is not a success).
+
+  | Condition | `TranslationError` |
+  |---|---|
+  | a second 401 (HTTP or body `statusCode`) in the same reply | `RateLimited` |
+  | HTTP 403/429 or a rate-limit body | `RateLimited` |
+  | HTTP 413 | `TooLong` |
+  | HTTP 5xx without a recognised body | `Network` |
+  | an HTML page, a missing token marker, a missing MUID, a blocked body, or a provider error object with a status other than 401/403/429 | `ServiceUnavailable` |
+  | malformed JSON, an empty array, a missing/empty `translations` array or `text`, or an unknown non-2xx status | `BadResponse` |
+  | a network error | `Network` |
+  | timeout / `abort()` | `Timeout` / `Cancelled` |
+
+  Messages are fixed literals and never contain the text, the page, the body, the URL, the token, the
+  key or the cookie; network errors use `NetworkManager::describeNetworkError(request, false)`, never
+  `QNetworkReply::errorString()`.
+- Tests: `tst_bingwebparser` (saved fixtures), `tst_bingwebservice` (a local `QTcpServer`), the
+  `bing-web` rows in `tst_languages`, and the `Bing` group in `tst_settingsdialog`. CTest never
+  contacts the real endpoint; a live smoke is manual only and is recorded as passed or as not
+  performed with the reason (captcha, HTML change or block).
+
 ### 4.8. Languages — `languages`
 
 The program uses its own language codes internally (`en`, `ru`, `de`, `pt-BR`, `zh-Hans`…).
@@ -1119,6 +1207,13 @@ Portuguese code; `closest()` maps `pt-PT` to `pt-BR`). `yandexWebCodeOf()` is th
 and no `LanguageInfo` column is added or table column changed. A detected `zh` reverses to
 `zh-Hans` (the first table match), `no` to `nb`, `pt` to `pt-BR`; `zh-Hant` is a known limitation
 because it is sent as `zh`, so Traditional Chinese is served as Simplified.
+
+Bing web uses the observed code catalogue of its upstream plugin, with `auto` sent as
+`auto-detect` and the overrides `pt-BR` → `pt`, `pt-PT` → `pt-PT`, `sr` → `sr-Cyrl`, `nb` → `nb`;
+`zh-Hans`, `zh-Hant`, `he`, `fil`, `jv`, `hmn` and `sm` are sent unchanged. A detected `pt`
+reverses to `pt-BR`, and `sr-Cyrl`/`sr-Latn` to `sr`. Codes outside the catalogue (for example
+`ceb`, `kk`, `pa`, `haw`) are not declared. `bingWebCodeOf()` is the single fix point, and no
+`LanguageInfo` column is added or table column changed.
 
 The module stores a table `{code, English name, native name, service codes}`
 (about 110 Google languages, of which about 35 are available in DeepL) and provides functions in the
@@ -1212,6 +1307,11 @@ Yandex web is the third real service with `requiresOptIn() == true` (§4.7.5); t
 unchanged. `AppController` hides it from the pickers while the gate is off and, if
 `translation/service=yandex-web` is configured with the gate off, keeps Google active and logs that
 the configured service needs free web services to be enabled.
+
+Bing web is the fourth real service with `requiresOptIn() == true` (§4.7.6); the gate logic is
+unchanged. `AppController` registers it after Yandex, hides it from the pickers while the gate is
+off, and if `translation/service=bing-web` is configured with the gate off, keeps Google active and
+logs that the configured service needs free web services to be enabled.
 
 ### 4.10. Network and proxy — `NetworkManager`
 
@@ -1569,7 +1669,7 @@ buttons and menus for Hindi remain English.
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
 `*_win.cpp`; the Linux backends are `*_linux.cpp`, and `*_stub.cpp` remains only for platforms
 without a backend. `qtranslate_core`, `net/`, `services/`, and the UI do not use WinAPI. The Linux
-tree configures, builds, and links: 35 tests (27 shared plus 8 Linux platform tests) pass under
+tree configures, builds, and links: 37 tests (29 shared plus 8 Linux platform tests) pass under
 `xvfb-run` on Debian 13 (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2;
 Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
 X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
@@ -1611,7 +1711,7 @@ the shell read the `.desktop` file; `Icon=qtranslate` matches the installed icon
 builds the native Astra `-astra.tar.gz` and `+astra1` `.deb` with Astra's Qt 6.10.2; those are local
 verification artifacts, not CI-published. CI publishes only trixie artifacts. The Windows platform
 tests (`tst_hotkeymanager`, Windows variants of `tst_autostart`/`tst_secretprotector`) have Linux
-analogues; the other 27 tests are shared.
+analogues; the other 29 tests are shared.
 
 **Wayland limitations.** Global shortcuts and synthetic input are not base capabilities of
 Wayland. The `GlobalShortcuts` portal is not supported by all desktops and versions; insertion into
@@ -1838,10 +1938,12 @@ are linked into separate test targets):
 | `tst_mozhiwebservice` | Mozhi against a local HTTP server: the `GET /api/translate` query, an instance path prefix, `engine`/`from`/`to`/`text`, Google-style codes, `auto`, 5000-unit chunks, 500 ms pacing, serialization, cancellation, HTTP/HTML/JSON/timeout errors, a refused cross-origin redirect, `applySettings()` and the non-abort behaviour |
 | `tst_yandexwebparser` | Parsing Yandex fixtures: the array response with `text`/`from`, extra fields and a second element ignored, `from` mapping, empty/non-object/malformed bodies, HTML/captcha, JSON and plain-text rate-limit/block bodies, the status mapping and fixed messages without the text, body or URL |
 | `tst_yandexwebservice` | Yandex web against a local HTTP server: the POST form, content type, all fields, UTF-8 percent-encoding, the browser User-Agent on this request only, mapped target codes, constant `targetLang=auto`, `auto` source, 5000-unit chunks, the 750 ms default pause, serialization, cancellation, a refused cross-origin redirect, HTTP/HTML/JSON/rate-limit/timeout errors and messages without the text or URL |
+| `tst_bingwebparser` | Parsing Bing fixtures: the token-page markers (`IG`, the first `data-iid`, the abuse-prevention key/token/lifetime, the optional `muid`/`sid`/`tid`), `MUID` from `Set-Cookie` values (exact name; `MUIDB` is not matched), the `detectedLanguage`/`translations[].text` response, provider/HTML/plain-text errors and fixed messages without the page, text or URL |
+| `tst_bingwebservice` | Bing web against a local HTTP server: the two-step GET/POST, browser User-Agent, manual cookie attributes and the explicit `MUID`, the urlencoded fields/order/UTF-8 encoding, mapped target codes and `auto-detect`, 5000-unit chunks, 1000 ms pacing, the token+MUID cache, the one-time 401 refresh/retry, 403 as a block, serialization/cancellation, a refused cross-origin redirect, cookie isolation and message/log hygiene |
 | `tst_queuedwebservice` | The shared per-host queue on a fake service: one reply at a time, the rate pause, aborting a queued reply, deleting the active reply, `noteRequestSent()` restarting the pause, a multi-chunk reply holding its slot |
 | `tst_openaichat` | Chat Completions request serialization (model, messages, temperature, `max_tokens`, stream), response parsing, error and finish-reason mapping, model list, endpoint building |
 | `tst_openaicompatibleservice` | The OpenAI-compatible service against a local HTTP server: configuration errors, chat request, source language, plain-text and fenced-JSON responses, whitespace, HTTP errors, timeout, cancellation, OpenRouter key rules, model loading and edited base URL |
-| `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, MyMemory codes (`zh-CN`, `zh-TW`, `no`, `tl`), Mozhi codes (`zh-CN`, `zh-TW`, `iw`, `jw`, `no`, `tl`, `pt`) and Yandex codes (`zh`, `no`, `pt`, `he`; `zh` reverses to `zh-Hans`), `closest` when the service changes, unknown codes |
+| `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, MyMemory codes (`zh-CN`, `zh-TW`, `no`, `tl`), Mozhi codes (`zh-CN`, `zh-TW`, `iw`, `jw`, `no`, `tl`, `pt`), Yandex codes (`zh`, `no`, `pt`, `he`; `zh` reverses to `zh-Hans`), and Bing codes (`pt`, `pt-PT`, `sr-Cyrl`, `nb`, `sr-Latn`→`sr`), `closest` when the service changes, unknown codes |
 | `tst_networkmanager` | Proxy types, HTTP proxy with authentication and `CONNECT`, SOCKS5 with login/password, `testProxy`, clear errors and no password in the text |
 | `tst_popupplacement` | Positioning of the Ctrl+Q window: reflection at edges, pressing against the screen, a second monitor with negative coordinates |
 | `tst_popupwindow` | Popup states (offscreen): request, result, copying, error/"Retry", language change, pinning, automatic hint closing |
@@ -1855,7 +1957,7 @@ are linked into separate test targets):
 | `tst_windowactivation_linux` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus`, `_NET_WM_STATE_FULLSCREEN`, `_NET_WM_PID`, XTest paste, Wayland 0/false (13 cases) |
 | `tst_cli` | CLI parser, mutual exclusion, two-process forwarding, legacy wire (20 cases, Linux) |
 | `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption, the `[mozhi]` defaults, normalization and canonical round trip |
-| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate, the Mozhi group (instance, engine, effective value, warning and gate), the Yandex hint and its gate (offscreen) |
+| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate, the Mozhi group (instance, engine, effective value, warning and gate), the Yandex hint and its gate, the Bing group and its gate (offscreen) |
 | `tst_secretprotector` | Windows: DPAPI round-trip, empty and corrupted data. Linux: libsecret token round-trip, `0600` fallback, capability probe, migration (7+1 in trixie, 8/8 on Astra) |
 | `tst_autostart` | Windows: `Run` command format. Linux: desktop entry quoting, `--minimized`, repair, removal (6 cases) |
 | `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language — on a fake service; the real MyMemory service refused while the gate is off |
@@ -2045,9 +2147,9 @@ Possible development:
    the installed version.
 8. **Free web endpoints** — DeepL web is implemented as the `free-web` mode of a single "DeepL"
    service without a key (§4.7.1); MyMemory is implemented as the first opt-in free API
-   (§4.7.3), Mozhi is the second (§4.7.4), and Yandex web is the third (§4.7.5); only Bing web
-   and Reverso remain experimental. Rate limits and an unofficial-status warning apply to all.
-   Details and priorities — [`free-endpoints.md`](free-endpoints.md).
+   (§4.7.3), Mozhi is the second (§4.7.4), Yandex web is the third (§4.7.5), and Bing web is the
+   fourth (§4.7.6); only Reverso remains research. Rate limits and an unofficial-status warning
+   apply to all. Details and priorities — [`free-endpoints.md`](free-endpoints.md).
 9. **Local offline translation** — Argos models + CTranslate2 without Python: model download by
    button, pivot through English, fallback to the cloud. Details and PoC — [`local-translation.md`](local-translation.md).
 10. **Spelling, grammar, and punctuation checking** — a separate tab, LanguageTool/Hunspell/

@@ -1,6 +1,7 @@
 ---
 kind: task
-status: todo
+status: done
+detailed: true
 depends: [02-bing-web-service, 03-bing-web-settings]
 ---
 
@@ -87,6 +88,18 @@ the 32/37 counts and the 37-tests/29-shared statement with `ctest -N` from `02-b
 `git diff --stat` must show only `doc/architecture.md`, `doc/free-endpoints.md` and `AGENTS.md`. No
 commit is made.
 
+## Steps
+
+1. Update `doc/architecture.md`: §3.1 tree, fixtures and test list; §3.2 source/test lists and counts;
+   §4.5 the `id()` example and the queue users; new §4.7.6 for `BingWebService`; §4.8 the language
+   mapping; §4.9 the fourth opt-in consumer; §8 the two test rows and the updated language/settings
+   rows; §4.14 the 37/29 counts; §9.2 item 8.
+2. Update `doc/free-endpoints.md`: the status line, the §3 `Format:` bullet and the implementation
+   note, §8 items 2-4, and §9 item 5.
+3. Update `AGENTS.md` to 32 Windows/37 Linux.
+4. Verify links, section references, counts, the absence of stale "Bing web ... research" claims and a
+   documentation-only diff; record the outcome.
+
 ## Done when
 
 - `doc/architecture.md` §3.1 lists `bingwebservice`/`bingwebparser`, the `bingweb/` fixtures and both
@@ -131,3 +144,30 @@ commit is made.
   keep their current wording until the final pass; do not "fix" them here.
 - A live smoke is not performed by this task; record it as passed only if `02` actually ran it,
   otherwise as not performed with the reason.
+
+## Outcome
+
+Done. The active documentation now describes the implemented Bing web service; no code, tests, UI,
+translations or CMake changed, and `README.md`, `README.ru.md`, `doc/handoff.md`, the root plan and
+`07-fallback-chain` were not edited here.
+
+- `doc/architecture.md`: §3.1 lists `bingwebservice.h/.cpp`/`bingwebparser.h/.cpp`, the `bingweb/`
+  fixtures and both tests; §3.2 lists both sources and tests and says 32 Windows/37 Linux; §4.5 has
+  `bing-web` in the `id()` example and `BingWebService` with 1000 ms among the queue users; the new
+  §4.7.6 documents the two-step handshake, the markers, the urlencoded fields, the browser UA, the
+  explicit `MUID` and manual jar attributes, the token+MUID cache and the one-time 401 refresh (403
+  as a block), the 1000 ms/5000 UTF-16 assumptions, the response, the error table and the tests;
+  §4.8 has the Bing mapping paragraph; §4.9 names Bing as the fourth opt-in consumer; §8 adds
+  `tst_bingwebparser`/`tst_bingwebservice` and the updated `tst_languages`/`tst_settingsdialog`
+  rows; §4.14 says 37 tests, 29 shared and "the other 29 tests"; §9.2 item 8 names Bing as
+  implemented with only Reverso research.
+- `doc/free-endpoints.md`: the status line, the §3 `Format:` bullet, the 2026-11-09 implementation
+  note, §8 items 2-4 (four gated services, Bing 1000 ms and 5000 UTF-16) and §9 item 5.
+- `AGENTS.md`: 32 Windows/37 Linux.
+
+Verification: all relative links in both documents resolve (0 broken), `git diff --check` is clean,
+`ctest -N` reports 37 Linux tests (29 shared plus 8 Linux-only), and the only changed files are
+`doc/architecture.md`, `doc/free-endpoints.md`, `AGENTS.md` and this plan. The historical 0.12.0
+sentence in §9.2 (33 tests) is intentionally left unchanged. The live smoke was performed in
+`02-bing-web-service` and passed (`Hallo Welt`, detected `en`); this task did not rerun it. Windows
+Debug/Release and its 32 tests were not performed (no MSVC). No real problems were found.
