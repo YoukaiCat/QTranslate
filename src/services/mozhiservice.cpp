@@ -1,6 +1,7 @@
 #include "services/mozhiservice.h"
 
 #include "core/languages.h"
+#include "core/settings.h"
 #include "core/textchunker.h"
 #include "net/networkmanager.h"
 #include "services/mozhiparser.h"
@@ -361,8 +362,10 @@ QStringList MozhiService::targetLanguages() const
     return Languages::supported(kServiceId, Languages::Direction::Target);
 }
 
-void MozhiService::applySettings(const AppSettings &)
+void MozhiService::applySettings(const AppSettings &settings)
 {
+    setInstance(QUrl(normalizedMozhiInstance(settings.mozhi.instance)));
+    setEngine(normalizedMozhiEngine(settings.mozhi.engine));
 }
 
 TranslationReply *MozhiService::translate(const TranslationRequest &request)
@@ -416,10 +419,10 @@ QString MozhiService::engine() const
 
 QUrl MozhiService::defaultInstance()
 {
-    return QUrl(QStringLiteral("https://mozhi.adminforge.de"));
+    return QUrl(MozhiSettings{}.instance);
 }
 
 QString MozhiService::defaultEngine()
 {
-    return QStringLiteral("google");
+    return MozhiSettings{}.engine;
 }

@@ -605,6 +605,14 @@ void AppController::applySettings(const AppSettings &oldSettings,
     if (m_mozhi)
         m_mozhi->applySettings(newSettings);
 
+    // A cached translation from the old instance or engine must not be
+    // reused. The active reply keeps its captured endpoint, so it is not
+    // cancelled here.
+    if (oldSettings.mozhi.instance != newSettings.mozhi.instance
+        || oldSettings.mozhi.engine != newSettings.mozhi.engine) {
+        m_translations->clearCache();
+    }
+
     if (oldSettings.llm.model != newSettings.llm.model
         || oldSettings.llm.baseUrl != newSettings.llm.baseUrl) {
         m_translations->clearCache();

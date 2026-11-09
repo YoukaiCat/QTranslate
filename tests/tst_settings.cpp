@@ -102,6 +102,13 @@ private slots:
         QCOMPARE(settings.google.mode, QStringLiteral("free"));
         QCOMPARE(settings.deepl.mode, QStringLiteral("api"));
         QCOMPARE(settings.deepl.englishVariant, QStringLiteral("EN-US"));
+        QCOMPARE(settings.mozhi.instance, QStringLiteral("https://mozhi.adminforge.de"));
+        QCOMPARE(settings.mozhi.engine, QStringLiteral("google"));
+        QCOMPARE(mozhiEngineIds(),
+                 QStringList({QStringLiteral("google"), QStringLiteral("deepl"),
+                              QStringLiteral("duckduckgo"), QStringLiteral("libretranslate"),
+                              QStringLiteral("mymemory"), QStringLiteral("reverso"),
+                              QStringLiteral("yandex")}));
         QCOMPARE(settings.llm.baseUrl, QStringLiteral("https://openrouter.ai/api/v1"));
         QVERIFY(settings.llm.apiKey.isEmpty());
         QCOMPARE(settings.llm.model, QStringLiteral("openrouter/free"));
@@ -110,6 +117,82 @@ private slots:
         QCOMPARE(settings.popup.width, 460);
         QCOMPARE(settings.popup.height, 260);
         QVERIFY(settings.popup.autoCloseOnFocusLoss);
+    }
+
+    void mozhiInstanceIsNormalized_data()
+    {
+        QTest::addColumn<QString>("input");
+        QTest::addColumn<QString>("expected");
+        QTest::addColumn<bool>("valid");
+
+        const QString defaultInstance = QStringLiteral("https://mozhi.adminforge.de");
+        QTest::newRow("default") << defaultInstance << defaultInstance << true;
+        QTest::newRow("empty") << QString() << defaultInstance << false;
+        QTest::newRow("whitespace") << QStringLiteral("   ") << defaultInstance << false;
+        QTest::newRow("bare host") << QStringLiteral("mozhi.adminforge.de") << defaultInstance
+                                   << false;
+        QTest::newRow("ftp") << QStringLiteral("ftp://host") << defaultInstance << false;
+        QTest::newRow("no host") << QStringLiteral("https://") << defaultInstance << false;
+        QTest::newRow("malformed ipv6") << QStringLiteral("http://[::1") << defaultInstance
+                                        << false;
+        QTest::newRow("bad port") << QStringLiteral("https://host:bad") << defaultInstance
+                                  << false;
+        QTest::newRow("user and password") << QStringLiteral("https://user:pass@host")
+                                           << defaultInstance << false;
+        QTest::newRow("user") << QStringLiteral("https://user@host") << defaultInstance
+                              << false;
+        QTest::newRow("query") << QStringLiteral("https://host/?engine=google")
+                               << defaultInstance << false;
+        QTest::newRow("fragment") << QStringLiteral("https://host/#fragment") << defaultInstance
+                                  << false;
+        QTest::newRow("port and path prefix")
+            << QStringLiteral("http://127.0.0.1:8080/mozhi/")
+            << QStringLiteral("http://127.0.0.1:8080/mozhi") << true;
+        QTest::newRow("path case is kept") << QStringLiteral("https://host/Mozhi/")
+                                           << QStringLiteral("https://host/Mozhi") << true;
+        QTest::newRow("surrounding whitespace") << QStringLiteral("  https://host/mozhi  ")
+                                                << QStringLiteral("https://host/mozhi") << true;
+    }
+
+    void mozhiInstanceIsNormalized()
+    {
+        QFETCH(QString, input);
+        QFETCH(QString, expected);
+        QFETCH(bool, valid);
+
+        QCOMPARE(isValidMozhiInstance(input), valid);
+        QCOMPARE(normalizedMozhiInstance(input), expected);
+    }
+
+    void mozhiEngineIsNormalized_data()
+    {
+        QTest::addColumn<QString>("input");
+        QTest::addColumn<QString>("expected");
+
+        QTest::newRow("google") << QStringLiteral("google") << QStringLiteral("google");
+        QTest::newRow("deepl") << QStringLiteral("deepl") << QStringLiteral("deepl");
+        QTest::newRow("duckduckgo") << QStringLiteral("duckduckgo")
+                                    << QStringLiteral("duckduckgo");
+        QTest::newRow("libretranslate") << QStringLiteral("libretranslate")
+                                        << QStringLiteral("libretranslate");
+        QTest::newRow("mymemory") << QStringLiteral("mymemory") << QStringLiteral("mymemory");
+        QTest::newRow("reverso") << QStringLiteral("reverso") << QStringLiteral("reverso");
+        QTest::newRow("yandex") << QStringLiteral("yandex") << QStringLiteral("yandex");
+        QTest::newRow("uppercase") << QStringLiteral("DEEPL") << QStringLiteral("deepl");
+        QTest::newRow("surrounding whitespace") << QStringLiteral("  Google ")
+                                                << QStringLiteral("google");
+        QTest::newRow("empty") << QString() << QStringLiteral("google");
+        QTest::newRow("whitespace") << QStringLiteral("   ") << QStringLiteral("google");
+        QTest::newRow("unknown") << QStringLiteral("unknown") << QStringLiteral("google");
+        QTest::newRow("auto") << QStringLiteral("auto") << QStringLiteral("google");
+    }
+
+    void mozhiEngineIsNormalized()
+    {
+        QFETCH(QString, input);
+        QFETCH(QString, expected);
+
+        QCOMPARE(normalizedMozhiEngine(input), expected);
     }
 
     void roundTrip()
@@ -144,6 +227,8 @@ private slots:
         settings.deepl.mode = QStringLiteral("free-web");
         settings.deepl.apiKey = QStringLiteral("deepl-secret");
         settings.deepl.englishVariant = QStringLiteral("EN-GB");
+        settings.mozhi.instance = QStringLiteral("http://127.0.0.1:8080/mozhi/");
+        settings.mozhi.engine = QStringLiteral("deepl");
         settings.llm.baseUrl = QStringLiteral("http://127.0.0.1:11434/v1");
         settings.llm.apiKey = QStringLiteral("llm-secret");
         settings.llm.model = QStringLiteral("local-model");
@@ -197,6 +282,8 @@ private slots:
         QCOMPARE(result.deepl.mode, QStringLiteral("free-web"));
         QCOMPARE(result.deepl.apiKey, QStringLiteral("deepl-secret"));
         QCOMPARE(result.deepl.englishVariant, QStringLiteral("EN-GB"));
+        QCOMPARE(result.mozhi.instance, QStringLiteral("http://127.0.0.1:8080/mozhi"));
+        QCOMPARE(result.mozhi.engine, QStringLiteral("deepl"));
         QCOMPARE(result.llm.baseUrl, QStringLiteral("http://127.0.0.1:11434/v1"));
         QCOMPARE(result.llm.apiKey, QStringLiteral("llm-secret"));
         QCOMPARE(result.llm.model, QStringLiteral("local-model"));
@@ -216,6 +303,16 @@ private slots:
 
         QCOMPARE(result.mainWindow.geometry, QByteArray::fromHex("0011223344ff"));
         QCOMPARE(result.mainWindow.state, QByteArray("state-data"));
+
+        // The INI itself holds the canonical values, not only the loaded
+        // settings.
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            QCOMPARE(raw.value(QStringLiteral("mozhi/instance")).toString(),
+                     QStringLiteral("http://127.0.0.1:8080/mozhi"));
+            QCOMPARE(raw.value(QStringLiteral("mozhi/engine")).toString(),
+                     QStringLiteral("deepl"));
+        }
 
         const QByteArray ini = readFile(path);
         QVERIFY(!ini.isEmpty());
@@ -292,6 +389,10 @@ private slots:
             raw.setValue(QStringLiteral("popup/width"), 10);
             raw.setValue(QStringLiteral("popup/height"), 10000);
             raw.setValue(QStringLiteral("network/timeoutMs"), 1);
+            raw.setValue(
+                QStringLiteral("mozhi/instance"),
+                QStringLiteral("https://user:secret@example.invalid/?engine=google#fragment"));
+            raw.setValue(QStringLiteral("mozhi/engine"), QStringLiteral("unknown-engine"));
             raw.sync();
         }
 
@@ -307,6 +408,34 @@ private slots:
         QCOMPARE(result.popup.width, 460);
         QCOMPARE(result.popup.height, 260);
         QCOMPARE(result.network.timeoutMs, 10000);
+        QCOMPARE(result.mozhi.instance, QStringLiteral("https://mozhi.adminforge.de"));
+        QCOMPARE(result.mozhi.engine, QStringLiteral("google"));
+    }
+
+    void mozhiGroupIsOptional()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("app/startMinimized"), false);
+            raw.sync();
+        }
+        const QByteArray before = readFile(path);
+        QVERIFY(!before.isEmpty());
+        QVERIFY(!before.contains("[mozhi]"));
+
+        SettingsStore store(path, fakeCodec());
+        store.load();
+        QCOMPARE(store.current().settingsVersion, 1);
+        QCOMPARE(store.current().general.startMinimized, false);
+        QCOMPARE(store.current().mozhi.instance,
+                 QStringLiteral("https://mozhi.adminforge.de"));
+        QCOMPARE(store.current().mozhi.engine, QStringLiteral("google"));
+        // Loading an old file must not rewrite it.
+        QCOMPARE(readFile(path), before);
     }
 
     void portablePath()

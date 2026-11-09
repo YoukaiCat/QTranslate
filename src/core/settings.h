@@ -4,6 +4,7 @@
 #include <QKeySequence>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 #include <functional>
 
@@ -51,6 +52,12 @@ struct DeepLSettings
     QString englishVariant = QStringLiteral("EN-US");
 };
 
+struct MozhiSettings
+{
+    QString instance = QStringLiteral("https://mozhi.adminforge.de");
+    QString engine = QStringLiteral("google");
+};
+
 struct LlmSettings
 {
     QString baseUrl = QStringLiteral("https://openrouter.ai/api/v1");
@@ -93,6 +100,7 @@ struct AppSettings
     TranslationSettings translation;
     GoogleSettings google;
     DeepLSettings deepl;
+    MozhiSettings mozhi;
     LlmSettings llm;
     NetworkSettings network;
     PopupSettings popup;
@@ -102,6 +110,13 @@ struct AppSettings
 };
 
 Q_DECLARE_METATYPE(AppSettings)
+
+// Pure helpers shared by SettingsStore and the Mozhi settings UI, so the
+// instance and engine rules live in one place. They never log.
+QStringList mozhiEngineIds();
+bool isValidMozhiInstance(const QString &instance);
+QString normalizedMozhiInstance(const QString &instance);
+QString normalizedMozhiEngine(const QString &engine);
 
 // Injected by the application so that core/settings stays free of WinAPI.
 // Without a codec secrets are not stored at all.

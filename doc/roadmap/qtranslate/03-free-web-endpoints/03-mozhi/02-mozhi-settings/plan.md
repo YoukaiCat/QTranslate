@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-mozhi-service]
 ---
@@ -277,3 +277,55 @@ Windows.
 - There is no `AppController` test target. The cache reset is a two-line wiring change that mirrors
   the LLM block; do not claim `tst_settings` or `tst_mozhiwebservice` covers it. The service-level
   behaviour (values applied, active reply not aborted) is covered in `tst_mozhiwebservice`.
+
+## Outcome
+
+Done on 2026-11-09. `MozhiSettings` lives in `src/core/settings.h` after `DeepLSettings`, is part of
+`AppSettings` after `deepl`, and is the only place that holds the default instance and engine
+literals. `mozhiEngineIds()`, `isValidMozhiInstance()`, `normalizedMozhiInstance()` and
+`normalizedMozhiEngine()` are pure, do not log and are ready for the `03` dialog. The helpers use
+`QUrl(..., QUrl::StrictMode)`, require `http`/`https` with a host, no user info, no query and no
+fragment, keep a port and a path prefix, and remove every trailing slash; `fromUserInput()` is not
+used. `kCurrentVersion` stays `1`.
+
+`SettingsStore` loads and saves `[mozhi] instance` and `[mozhi] engine`; an absent group loads the
+defaults without a warning and `load()` does not rewrite the file, an explicitly empty or malformed
+value falls back with the fixed warnings `Mozhi instance is not a base http(s) URL; using the
+default` / `Mozhi engine is not supported; using the default`, without echoing the typed value. A
+trailing slash, scheme/host case or surrounding whitespace is a silent canonicalization, and
+`save()` writes the canonical values. `MozhiService::applySettings()` applies the normalized values
+(so a hand-built `AppSettings` cannot send an invalid URL) and `defaultInstance()`/`defaultEngine()`
+delegate to `MozhiSettings`. `AppController` clears the translation cache when the effective
+instance or engine changes, without cancelling the active reply; this wiring has no test target and
+was checked by inspection only.
+
+`tst_settings` covers the defaults, the seven engine ids in order, the instance and engine
+normalization rows, a round trip that checks the raw INI for canonical values, the corrupt-value
+fallback and an old version-1 file without `[mozhi]` whose bytes do not change. `tst_mozhiwebservice`
+covers `applySettings()` with a local server (path prefix plus `engine=deepl`), the invalid-value
+fallback that never contacts the real instance, and the non-abort behaviour where the in-flight
+reply keeps its captured endpoint and engine. No new test target: 33 Linux / 28 Windows.
+
+Verification: Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie:latest` (Qt 6.8.2,
+GCC 14.2), Debug and Release: zero `warning:` lines, targeted `tst_settings` and
+`tst_mozhiwebservice` passed, `ctest -N` is 33, the full suite is 33/33 in all four configurations,
+and `tst_mozhiwebservice` passed 5/5 repeats per configuration. The trixie runs needed read-only
+`/etc/passwd` and `/etc/group` mounts from the host for `dbus-daemon` under `--user`; that is an
+environment workaround, not repository content. Windows Debug/Release and its 28 tests were not
+performed (no MSVC).
+
+Review found one real issue that was not fixed here: a reply started before the settings change can
+finish after `AppController::clearCache()` and repopulate the cache, because
+`TranslationManager::cacheKey()` does not include the instance or engine and
+`Reply::finishResult()` stores a successful result unconditionally. The reported scenario is a
+translation still in flight while the user changes the instance or engine; the old result then
+becomes the cached result for the same service and text. A truthful fix needs a cache-generation
+guard in `TranslationManager` (increment in `clearCache()`, remember it in `Reply`, skip
+`storeCached()` for an older generation) and a `tst_translationmanager` case, which is outside this
+task's declared six-file boundary and conflicts with the planned "do not abort the active request"
+behaviour. It is recorded as deferred, not fixed. The same pre-existing gap exists for
+`google.mode`, `deepl.mode` and `deepl.englishVariant`, which are not part of the cache key either;
+that predates this task and was left untouched. The SettingsDialog, `.ts` files,
+`doc/architecture.md`, `doc/free-endpoints.md`, `AGENTS.md`, both READMEs, `doc/handoff.md`, the root
+plan and `07-fallback-chain` were not touched; a live smoke against the default instance was not
+performed.

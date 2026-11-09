@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QLoggingCategory>
 #include <QSettings>
+#include <QUrl>
 
 #include <utility>
 
@@ -175,6 +176,22 @@ void normalize(AppSettings &settings)
         settings.deepl.mode = QStringLiteral("free-web");
     }
 
+    // The instance is user input and may contain credentials, so the warning
+    // is fixed and never echoes the typed value. A trailing slash or a
+    // case-only scheme/host change is a silent canonicalization.
+    if (!isValidMozhiInstance(settings.mozhi.instance)) {
+        qCWarning(lcSettings) << "Mozhi instance is not a base http(s) URL; using the default";
+        settings.mozhi.instance = defaults.mozhi.instance;
+    } else {
+        settings.mozhi.instance = normalizedMozhiInstance(settings.mozhi.instance);
+    }
+    if (!mozhiEngineIds().contains(settings.mozhi.engine.trimmed().toLower())) {
+        qCWarning(lcSettings) << "Mozhi engine is not supported; using the default";
+        settings.mozhi.engine = defaults.mozhi.engine;
+    } else {
+        settings.mozhi.engine = normalizedMozhiEngine(settings.mozhi.engine);
+    }
+
     settings.network.proxyMode =
         choice(settings.network.proxyMode, defaults.network.proxyMode,
                {"none", "system", "manual"});
@@ -205,6 +222,49 @@ AppSettings::AppSettings()
     translation.secondaryLang = translation.primaryLang == QStringLiteral("en")
         ? QStringLiteral("ru")
         : QStringLiteral("en");
+}
+
+QStringList mozhiEngineIds()
+{
+    return {
+        QStringLiteral("google"),        QStringLiteral("deepl"),
+        QStringLiteral("duckduckgo"),    QStringLiteral("libretranslate"),
+        QStringLiteral("mymemory"),      QStringLiteral("reverso"),
+        QStringLiteral("yandex"),
+    };
+}
+
+bool isValidMozhiInstance(const QString &instance)
+{
+    const QString text = instance.trimmed();
+    if (text.isEmpty())
+        return false;
+    // Not fromUserInput(): a bare host or malformed text must not be guessed
+    // into an http URL and silently sent somewhere the user did not confirm.
+    const QUrl url(text, QUrl::StrictMode);
+    return url.isValid()
+        && (url.scheme() == QLatin1String("http")
+            || url.scheme() == QLatin1String("https"))
+        && !url.host().isEmpty() && url.userInfo().isEmpty() && !url.hasQuery()
+        && !url.hasFragment();
+}
+
+QString normalizedMozhiInstance(const QString &instance)
+{
+    if (!isValidMozhiInstance(instance))
+        return MozhiSettings{}.instance;
+    QString text = QUrl(instance.trimmed(), QUrl::StrictMode).toString(QUrl::FullyEncoded);
+    while (text.endsWith(QLatin1Char('/')))
+        text.chop(1);
+    return text;
+}
+
+QString normalizedMozhiEngine(const QString &engine)
+{
+    const QString id = engine.trimmed().toLower();
+    if (mozhiEngineIds().contains(id))
+        return id;
+    return MozhiSettings{}.engine;
 }
 
 SettingsStore::SettingsStore(QObject *parent)
@@ -335,6 +395,13 @@ void SettingsStore::load()
             .toString();
     settings.endGroup();
 
+    settings.beginGroup(QStringLiteral("mozhi"));
+    loaded.mozhi.instance =
+        settings.value(QStringLiteral("instance"), loaded.mozhi.instance).toString();
+    loaded.mozhi.engine =
+        settings.value(QStringLiteral("engine"), loaded.mozhi.engine).toString();
+    settings.endGroup();
+
     settings.beginGroup(QStringLiteral("llm"));
     loaded.llm.baseUrl =
         settings.value(QStringLiteral("baseUrl"), loaded.llm.baseUrl).toString();
@@ -458,6 +525,11 @@ void SettingsStore::save(const AppSettings &settings)
     writeSecret(out, QStringLiteral("apiKey"), normalized.deepl.apiKey,
                 old.deepl.apiKey, m_codec);
     out.setValue(QStringLiteral("englishVariant"), normalized.deepl.englishVariant);
+    out.endGroup();
+
+    out.beginGroup(QStringLiteral("mozhi"));
+    out.setValue(QStringLiteral("instance"), normalized.mozhi.instance);
+    out.setValue(QStringLiteral("engine"), normalized.mozhi.engine);
     out.endGroup();
 
     out.beginGroup(QStringLiteral("llm"));

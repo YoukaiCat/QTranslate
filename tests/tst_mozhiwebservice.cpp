@@ -1,3 +1,4 @@
+#include "core/settings.h"
 #include "core/textchunker.h"
 #include "net/networkmanager.h"
 #include "services/mozhiservice.h"
@@ -214,6 +215,68 @@ private slots:
         QCOMPARE(service.rateLimitMs(), 500);
         QCOMPARE(service.instance(), QUrl(QStringLiteral("https://mozhi.adminforge.de")));
         QCOMPARE(service.engine(), QStringLiteral("google"));
+    }
+
+    void appliesSettings()
+    {
+        m_server->handler = [](const FakeHttpServer::Request &request) {
+            return FakeHttpServer::Response{200, echoResponse(request.url), true};
+        };
+
+        AppSettings settings;
+        settings.mozhi.instance =
+            QStringLiteral("http://127.0.0.1:%1/mozhi").arg(m_server->port());
+        settings.mozhi.engine = QStringLiteral("deepl");
+        m_service->applySettings(settings);
+
+        QCOMPARE(m_service->instance(),
+                 QUrl(QStringLiteral("http://127.0.0.1:%1/mozhi").arg(m_server->port())));
+        QCOMPARE(m_service->engine(), QStringLiteral("deepl"));
+
+        std::unique_ptr<TranslationReply> reply(m_service->translate(
+            {QStringLiteral("Hello"), QStringLiteral("en"), QStringLiteral("ru")}));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(5000));
+        QVERIFY2(reply->result().ok(), qPrintable(reply->result().errorMessage));
+        QCOMPARE(m_server->requests.size(), 1);
+        const QUrl &url = m_server->requests.first().url;
+        QCOMPARE(url.path(), QStringLiteral("/mozhi/api/translate"));
+        QCOMPARE(queryValue(url, QStringLiteral("engine")), QStringLiteral("deepl"));
+
+        // An invalid setting falls back to the defaults and is never used for
+        // a request, so the real instance is not contacted.
+        settings.mozhi.instance = QStringLiteral("ftp://example.invalid/x");
+        settings.mozhi.engine = QStringLiteral("unknown");
+        m_service->applySettings(settings);
+        QCOMPARE(m_service->instance(), MozhiService::defaultInstance());
+        QCOMPARE(m_service->engine(), QStringLiteral("google"));
+    }
+
+    void applySettingsDoesNotAbortActiveRequest()
+    {
+        m_server->handler = [](const FakeHttpServer::Request &) {
+            return FakeHttpServer::Response{200, {}, false};
+        };
+
+        std::unique_ptr<TranslationReply> reply(m_service->translate(
+            {QStringLiteral("Hello"), QStringLiteral("en"), QStringLiteral("ru")}));
+        QTRY_COMPARE(m_server->requests.size(), 1);
+        QCOMPARE(m_server->requests.first().url.path(), QStringLiteral("/api/translate"));
+        QCOMPARE(queryValue(m_server->requests.first().url, QStringLiteral("engine")),
+                 QStringLiteral("google"));
+
+        AppSettings settings;
+        settings.mozhi.instance =
+            QStringLiteral("http://127.0.0.1:%1/changed").arg(m_server->port());
+        settings.mozhi.engine = QStringLiteral("deepl");
+        m_service->applySettings(settings);
+
+        // The in-flight request keeps the endpoint and engine it copied.
+        QVERIFY(!reply->isFinished());
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        reply->abort();
+        QCOMPARE(finished.size(), 1);
+        QCOMPARE(reply->result().error, TranslationError::Cancelled);
     }
 
     void sendsGetRequest()
