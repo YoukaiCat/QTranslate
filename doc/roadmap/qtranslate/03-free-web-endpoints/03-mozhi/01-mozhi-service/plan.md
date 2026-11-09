@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -346,3 +346,80 @@ rate-limit body), and the parser/service must follow the observed shapes:
   `ServiceUnavailable`, not to `UnsupportedLanguage`.
 - Windows Debug/Release and its 28 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+
+## Outcome
+
+Done on 2026-11-09. The `mozhi` parser and service are registered in the app and covered by
+fixtures and two platform-neutral tests; Google, DeepL (including `free-web`), the LLM service,
+MyMemory and the shared `QueuedWebService`/`TextChunker`/`Languages` behaviour are unchanged. No
+`[mozhi]` settings key, `AppSettings` field, Settings UI, `.ts` file or documentation is part of
+this task.
+
+- **Parser:** `src/services/mozhiparser.h/.cpp`. `Response` carries the `TranslationResult`, the raw
+  `source_language` and the raw `target_transliteration`. `parseResponse()` classifies the body as an
+  error first (HTML, a JSON `error` string or `error.message`, or a plain-text error), so an HTTP 200
+  with a rate-limit body is not taken for a translation; malformed JSON, a non-object root and a
+  missing/empty `translated-text` are `BadResponse` with "no translated text in the response".
+  `detected` goes through `Languages::fromServiceCode("mozhi", ...)` and falls back to
+  `source_language` unless it is empty or `"auto"`. `parseErrorBody()` recognises only error bodies
+  and returns `TranslationError::None` otherwise; `errorForHttpStatus()` maps 403/429 → `RateLimited`,
+  413/414 → `TooLong`, 5xx → `Network` and every other non-2xx → `BadResponse`. Every message is a
+  fixed English literal and never contains the body, the text or a URL.
+- **Service:** `src/services/mozhiservice.h/.cpp`. Id `mozhi`, display name `Mozhi`,
+  `isConfigured()`/`requiresOptIn()` true, languages from `Languages::supported()`, a 500 ms default
+  pause, defaults `https://mozhi.adminforge.de` and `google`, and `setInstance()`/`instance()`/
+  `setEngine()`/`engine()`/`defaultInstance()`/`defaultEngine()` as the seams for tests and
+  `02-mozhi-settings`; `applySettings(const AppSettings &)` is a no-op with an unnamed parameter.
+  `translate()` rejects empty/whitespace-only text with `EmptyText`, sends `auto` as `auto`, maps the
+  other codes with `Languages::toServiceCode` (empty source/target → `UnsupportedLanguage` before a
+  request), splits with `TextChunker::split(text, 5000)`, keeps every part's edge whitespace out of
+  the request and restores it in the result, never sends a whitespace-only part, and holds one queue
+  slot for all chunks. The endpoint clears the instance query/fragment and appends `/api/translate`,
+  so a path prefix is preserved. `Reply` sends one GET per chunk with `engine`, `from`, `to`, `text`,
+  `Accept: application/json`, no `Authorization` and `SameOriginRedirectPolicy`, calls
+  `noteRequestSent()` before every request, paces the chunks with `rateLimitMs()` and fails the whole
+  reply without a partial result; a timeout/abort finishes with `Timeout`/`Cancelled`, and network
+  errors use `NetworkManager::describeNetworkError(request, false)`. A literal `+` is sent as `%2B`.
+  The 500 ms pause and the 5000 UTF-16-unit chunk are documented in the header as assumptions from
+  `doc/free-endpoints.md` §5/§8, not measured limits. Logs contain only the part count, language
+  codes, engine, HTTP status, elapsed time and fixed messages; `QNetworkReply::errorString()` is not
+  used.
+- **Languages:** `src/core/languages.cpp` adds `mozhiCodeOf()`, which returns `info.google` and is the
+  single fix point for a later engine, plus the `mozhi` branch in `serviceCodeOf()`; no
+  `LanguageInfo` column or synonym table is added. `tst_languages` covers the forward rows
+  (`pt-BR`→`pt`, `pt-PT`→`pt-PT`, `zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`, `he`→`iw`, `jv`→`jw`,
+  `nb`→`no`, `fil`→`tl`), the reverse rows, `roundTrip` and a Mozhi list equal to the Google list in
+  both directions without `auto`.
+- **App and build:** `AppController` constructs `MozhiService` after MyMemory, applies its no-op
+  settings and registers it after MyMemory; `applySettings()` forwards to it. No `AppSettings` field
+  or INI key is added and `tst_translationmanager` is not changed. Both source pairs are in
+  `qtranslate_core` before `mymemory*`, and both tests are in `tests/CMakeLists.txt` before
+  `tst_mymemory*`.
+- **Tests:** `tests/fixtures/mozhi/` holds the 16 planned fixtures; `tst_mozhiparser` covers the
+  normal/detected/source-language/auto/transliteration cases, the empty/missing/malformed bodies,
+  HTML, JSON errors (string and object), the five plain-text bodies, the "not an error" cases and the
+  `errorForHttpStatus` rows, with a helper that proves every message is non-empty and free of the
+  text marker, `<` and `://`. `tst_mozhiwebservice` uses a local `QTcpServer` (the MyMemory
+  `FakeHttpServer` plus a `Location` header) and covers the properties, defaults, GET path and prefix,
+  encoding, engine change, language-code mapping, `auto`, endpoint-rejected language, unknown language
+  and empty text without a request, edge whitespace, 5000-unit chunking, chunk pacing, queue
+  serialization, cancelling a queued reply and aborting an active one, a failed middle chunk (whole
+  reply fails, no partial translation, no third request), the HTTP status rows, HTML/JSON/malformed
+  bodies, the rate-limit body, timeout, a closed server, a cross-origin redirect that must not reach
+  the second server, and message hygiene. CTest never contacts a real instance.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie:latest`
+  (Qt 6.8.2, GCC 14.2), Debug and Release: zero `warning:` lines, `ctest -N` 33, the six targeted
+  tests 6/6, the full suite 33/33 in every configuration, and `tst_mozhiwebservice` 10 repeats per
+  configuration without a timing flake. The Astra X11 tests ran after `sudo /usr/bin/fly-set-execid.sh`.
+  The trixie runs used `--user`/`HOME=/tmp` and synthetic `/etc/passwd`/`/etc/group` mounts for
+  `dbus-daemon` in `tst_hotkeymanager_wayland` (an environment workaround, not repository content);
+  no root-owned files were left in the tree.
+- **Review:** one accepted finding — the multi-chunk failure path had no test — fixed by
+  `failedChunkFailsTheWholeReply` (200 on the first chunk, a 500 rate-limit body on the second:
+  `RateLimited`, empty `translatedText`, exactly two requests). No rejected findings and no real
+  problem was deferred because of cost.
+- **Not performed and deferred by design:** Windows/MSVC Debug and Release and its 28 tests (no
+  MSVC; both new tests are platform-neutral), and a live smoke against a real instance (optional,
+  owned by `03-mozhi-ui-and-docs`/the lead). The settings keys, the settings group, the 14 `.ts`
+  files, `doc/architecture.md`, `doc/free-endpoints.md`, the `AGENTS.md` counts, both READMEs,
+  `doc/handoff.md`, the root plan and `07-fallback-chain` are untouched.

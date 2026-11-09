@@ -12,6 +12,7 @@ const QString google = QStringLiteral("google");
 const QString deepl = QStringLiteral("deepl");
 const QString deeplWeb = QStringLiteral("deepl-web");
 const QString llm = QStringLiteral("llm");
+const QString mozhi = QStringLiteral("mozhi");
 const QString mymemory = QStringLiteral("mymemory");
 } // namespace
 
@@ -74,6 +75,17 @@ private slots:
                                                     << "ZH-HANS";
         QTest::newRow("llm pt-BR") << llm << "pt-BR" << Direction::Target << "pt-BR";
         QTest::newRow("llm zh-Hans") << llm << "zh-Hans" << Direction::Source << "zh-Hans";
+        QTest::newRow("mozhi en") << mozhi << "en" << Direction::Target << "en";
+        QTest::newRow("mozhi ru") << mozhi << "ru" << Direction::Source << "ru";
+        QTest::newRow("mozhi pt-BR") << mozhi << "pt-BR" << Direction::Target << "pt";
+        QTest::newRow("mozhi pt-PT") << mozhi << "pt-PT" << Direction::Source << "pt-PT";
+        QTest::newRow("mozhi zh-Hans") << mozhi << "zh-Hans" << Direction::Target << "zh-CN";
+        QTest::newRow("mozhi zh-Hant") << mozhi << "zh-Hant" << Direction::Source << "zh-TW";
+        QTest::newRow("mozhi he") << mozhi << "he" << Direction::Target << "iw";
+        QTest::newRow("mozhi jv") << mozhi << "jv" << Direction::Source << "jw";
+        QTest::newRow("mozhi nb") << mozhi << "nb" << Direction::Target << "no";
+        QTest::newRow("mozhi fil") << mozhi << "fil" << Direction::Source << "tl";
+        QTest::newRow("mozhi unknown code") << mozhi << "xx" << Direction::Target << "";
         QTest::newRow("mymemory en") << mymemory << "en" << Direction::Target << "en";
         QTest::newRow("mymemory ru") << mymemory << "ru" << Direction::Source << "ru";
         QTest::newRow("mymemory pt-BR") << mymemory << "pt-BR" << Direction::Target << "pt-BR";
@@ -131,6 +143,14 @@ private slots:
                                             << "zh-Hans";
         QTest::newRow("llm en") << llm << "EN" << Direction::Source << "en";
         QTest::newRow("llm pt-BR") << llm << "pt-BR" << Direction::Target << "pt-BR";
+        QTest::newRow("mozhi zh-CN") << mozhi << "zh-CN" << Direction::Source << "zh-Hans";
+        QTest::newRow("mozhi zh-TW") << mozhi << "zh-TW" << Direction::Target << "zh-Hant";
+        QTest::newRow("mozhi iw") << mozhi << "iw" << Direction::Source << "he";
+        QTest::newRow("mozhi jw") << mozhi << "jw" << Direction::Source << "jv";
+        QTest::newRow("mozhi no") << mozhi << "no" << Direction::Source << "nb";
+        QTest::newRow("mozhi tl") << mozhi << "tl" << Direction::Target << "fil";
+        QTest::newRow("mozhi pt") << mozhi << "pt" << Direction::Source << "pt-BR";
+        QTest::newRow("mozhi pt-PT") << mozhi << "pt-PT" << Direction::Target << "pt-PT";
         QTest::newRow("mymemory zh-CN") << mymemory << "zh-CN" << Direction::Source << "zh-Hans";
         QTest::newRow("mymemory zh-TW") << mymemory << "zh-TW" << Direction::Target << "zh-Hant";
         QTest::newRow("mymemory no") << mymemory << "no" << Direction::Source << "nb";
@@ -154,7 +174,7 @@ private slots:
     {
         // Every supported language maps to a service code and back to itself,
         // except where several internal codes share a service code (DeepL "PT", "ZH").
-        for (const QString &service : {google, deepl, deeplWeb, llm, mymemory}) {
+        for (const QString &service : {google, deepl, deeplWeb, llm, mozhi, mymemory}) {
             for (Direction direction : {Direction::Source, Direction::Target}) {
                 for (const QString &code : Languages::supported(service, direction)) {
                     const QString serviceCode = Languages::toServiceCode(service, code, direction);
@@ -191,6 +211,13 @@ private slots:
         QVERIFY(mymemoryCatalogue.contains(QStringLiteral("pt-BR")));
         QVERIFY(mymemoryCatalogue.contains(QStringLiteral("zh-Hans")));
         QVERIFY(!mymemoryCatalogue.contains(Languages::autoCode()));
+        const QStringList mozhiCatalogue = Languages::supported(mozhi, Direction::Target);
+        QCOMPARE(mozhiCatalogue, googleTargets);
+        QCOMPARE(Languages::supported(mozhi, Direction::Source), googleTargets);
+        QVERIFY(mozhiCatalogue.contains(QStringLiteral("ru")));
+        QVERIFY(mozhiCatalogue.contains(QStringLiteral("pt-BR")));
+        QVERIFY(mozhiCatalogue.contains(QStringLiteral("zh-Hans")));
+        QVERIFY(!mozhiCatalogue.contains(Languages::autoCode()));
         for (const QString &code : deeplTargets)
             QVERIFY2(googleTargets.contains(code), qPrintable(code));
         QVERIFY(Languages::supported(QStringLiteral("yandex"), Direction::Target).isEmpty());

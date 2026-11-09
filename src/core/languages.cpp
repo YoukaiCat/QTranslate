@@ -155,6 +155,7 @@ constexpr QLatin1String kDeepL("deepl");
 constexpr QLatin1String kDeepLWeb("deepl-web");
 constexpr QLatin1String kLlm("llm");
 constexpr QLatin1String kMyMemory("mymemory");
+constexpr QLatin1String kMozhi("mozhi");
 
 // MyMemory takes ISO 639-1/RFC 3066 codes and follows the Google catalogue,
 // but a few of its codes differ from the internal ones.
@@ -191,6 +192,14 @@ const char *mymemoryCodeOf(const LanguageInfo &info)
     return info.code;
 }
 
+// Mozhi expects Google-style codes and converts them per engine, so the
+// Google column is reused as is; this function is the single fix point if a
+// later engine needs a different code.
+const char *mozhiCodeOf(const LanguageInfo &info)
+{
+    return info.google;
+}
+
 const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
                           Languages::Direction d)
 {
@@ -203,6 +212,8 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
         return info.google ? info.code : nullptr;
     if (serviceId == kMyMemory)
         return mymemoryCodeOf(info);
+    if (serviceId == kMozhi)
+        return mozhiCodeOf(info);
     return nullptr;
 }
 
