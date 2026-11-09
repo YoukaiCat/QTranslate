@@ -214,6 +214,8 @@ qtranslate/
 │   │   ├── mymemoryparser.h/.cpp     pure parsing for the MyMemory API
 │   │   ├── mozhiservice.h/.cpp       free Mozhi API (no key, opt-in)
 │   │   ├── mozhiparser.h/.cpp        pure parsing for the Mozhi API
+│   │   ├── yandexwebservice.h/.cpp   unofficial Yandex web endpoint (no key, opt-in)
+│   │   ├── yandexwebparser.h/.cpp    pure parsing for the Yandex web endpoint
 │   │   ├── queuedwebservice.h/.cpp   serialized per-host request queue
 │   │   └── openaicompatibleservice.h/.cpp  OpenAI-compatible provider
 │   ├── platform/
@@ -245,7 +247,7 @@ qtranslate/
 │       └── appicon.h/.cpp
 └── tests/
     ├── CMakeLists.txt
-    ├── fixtures/                     saved Google/DeepL/MyMemory/Mozhi responses (google/, deepl/, mymemory/, mozhi/)
+    ├── fixtures/                     saved Google/DeepL/MyMemory/Mozhi/Yandex responses (google/, deepl/, mymemory/, mozhi/, yandexweb/)
     ├── tst_appinfo.cpp
     ├── tst_autostart.cpp               Windows and Linux variants
     ├── tst_cli.cpp                     Linux: parser and two-process forwarding
@@ -279,7 +281,9 @@ qtranslate/
     ├── tst_translationmanager.cpp
     ├── tst_translations.cpp            shipped .ts files: completeness and placeholders
     ├── tst_uilanguages.cpp             UI language table
-    └── tst_windowactivation_linux.cpp  Linux window helpers
+    ├── tst_windowactivation_linux.cpp  Linux window helpers
+    ├── tst_yandexwebparser.cpp
+    └── tst_yandexwebservice.cpp        service against a local HTTP server
 ```
 
 ### 3.2. Mapping to the current `CMakeLists.txt`
@@ -289,9 +293,9 @@ targets. Currently:
 
 | Target | What is included now (0.12.0) |
 |---|---|
-| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice` |
+| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `yandexwebparser`, `yandexwebservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_queuedwebservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`; 28 tests on Windows and 33 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_queuedwebservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 30 tests on Windows and 35 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
@@ -641,7 +645,7 @@ protected:
 class TranslationService : public QObject {
     Q_OBJECT
 public:
-    virtual QString id() const = 0;            // "google", "deepl", "llm", "mymemory", "mozhi"
+    virtual QString id() const = 0;            // "google", "deepl", "llm", "mymemory", "mozhi", "yandex-web"
     virtual QString displayName() const = 0;
     virtual bool isConfigured() const = 0;     // DeepL without a key — false
     virtual QString configurationError() const { return {}; } // hint if not configured
@@ -689,8 +693,8 @@ multi-chunk protocol therefore sends its chunks sequentially inside one slot and
 queued is skipped, and a reply deleted while active is dropped through `QPointer`/`destroyed`. The
 default pause is 2000 ms (the moved DeepL value); a service overrides it in its constructor, and
 `setRateLimitMs(0)` disables the pause for tests only. The base knows no endpoints, service
-settings, the opt-in gate, or UI; `DeepLWebService`, `MyMemoryService` and `MozhiService` use it;
-MyMemory sets 350 ms and Mozhi 500 ms.
+settings, the opt-in gate, or UI; `DeepLWebService`, `MyMemoryService`, `MozhiService` and
+`YandexWebService` use it; MyMemory sets 350 ms, Mozhi 500 ms and Yandex web 750 ms.
 
 Each service receives a `NetworkManager` pointer (the shared `QNetworkAccessManager` and
 `makeRequest()` with a timeout and `User-Agent`) and does not create its own manager — this way the
@@ -1010,6 +1014,77 @@ The instance is a base URL, and a path prefix is kept: `https://host/mozhi` beco
   `mozhi` branch in `tst_languages`, and the settings/UI cases in `tst_settings` and
   `tst_settingsdialog`. CTest never contacts a real instance; a live smoke is manual only.
 
+### 4.7.5. `YandexWebService` — unofficial Yandex web endpoint
+
+`YandexWebService` implements the unofficial `api.browser.yandex.com` endpoint. Its id is
+`yandex-web`, its display name is `Yandex`, it needs no key (`isConfigured() == true`), and it is the
+third real opt-in consumer after MyMemory (§4.7.3) and Mozhi (§4.7.4): `requiresOptIn() == true`,
+`TranslationManager` refuses it while `translation/allowFreeServices` is false, and `AppController`
+hides it from the pickers. There is no key or URL field and no `[yandex]` settings group;
+`applySettings()` is a no-op and no `AppSettings`/INI key or cache reset is added. `AppController`
+registers it after Mozhi.
+
+Request:
+
+```
+POST https://api.browser.yandex.com/instaserp/translate
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+text=<text>&brandID=int&statLang=<target>&targetLang=auto&locale=<target>&clid=2270494&disable=serp&use_llm_srv=0
+```
+
+Both names and values are percent-encoded as UTF-8 (`QUrl::toPercentEncoding`), so a space, `&`, `=`,
+`+` or `%` in the text cannot break the body. The endpoint is fixed (`defaultEndpoint()`);
+`setEndpoint()` is only the test seam for a local `QTcpServer`.
+
+- Browser User-Agent: `browserUserAgent()` returns a fixed desktop Chrome/YaBrowser string and is set
+  on this request only, after `NetworkManager::makeRequest()`. The shared `makeRequest()`,
+  `AppInfo::userAgent()` and every other service keep the application User-Agent. This is protocol
+  emulation, not a claim that the application is a browser and not a secret; the value is not logged
+  as one, and there is no captcha solver, cookie harvesting or block bypass.
+- Source and target: the protocol has no source-language field. Every request sends
+  `targetLang=auto`; the target is sent in `statLang` and `locale`. An explicit source is validated
+  through `Languages::toServiceCode()` but never sent; `auto` is accepted. The endpoint detects the
+  source and returns it in `from`. An unsupported source or target finishes with
+  `UnsupportedLanguage` before any request.
+- Languages: see §4.8. The service declares the observed 71-code catalogue with the overrides
+  `zh-Hans`/`zh-Hant` → `zh`, `nb` → `no`, `pt-BR` → `pt`, and unchanged `he`; `pt-PT` is not
+  declared and `closest()` maps it to `pt-BR`. `yandexWebCodeOf()` is the single fix point; no
+  `LanguageInfo` column is added.
+- Chunking and pacing: at most 5000 UTF-16 code units per request via `TextChunker::split`,
+  sequential chunks inside one `QueuedWebService` slot, a 750 ms pause, edge whitespace removed
+  before the request and restored at the joints, whitespace-only parts not sent, and a failed chunk
+  failing the whole reply without a partial result. Both values are conservative assumptions, not
+  measured limits; the pause follows `free-endpoints.md` §8.
+- Redirects: `SameOriginRedirectPolicy` on every request; a cross-origin redirect is refused, so the
+  text cannot silently move to another host.
+- Response: a JSON array whose first element is an object. `text` is required and is the
+  translation; `from` is mapped through `Languages::fromServiceCode()` into `detectedSourceLang`.
+  `to`, extra fields and a second element are tolerated and ignored. A missing or unknown `from`
+  leaves `detectedSourceLang` empty and is not an error. An empty array, a non-object first element,
+  a JSON object or string, malformed JSON, or a missing/whitespace-only `text` is `BadResponse`.
+- Errors: the body is classified before the HTTP status and also for 2xx responses (a 200 with an
+  error body is not a success).
+
+  | Condition | `TranslationError` |
+  |---|---|
+  | a rate-limit body (`rate limit`, `too many requests`, `quota`, `status code: 429`/`403`) | `RateLimited` |
+  | HTTP 403/429 without a recognised body | `RateLimited` |
+  | HTTP 413 | `TooLong` |
+  | HTTP 5xx without a recognised body | `Network` |
+  | an HTML page, a captcha/blocked body, or a JSON `error` | `ServiceUnavailable` |
+  | malformed JSON, a missing/whitespace-only `text`, an empty/non-object response, an unknown non-2xx status | `BadResponse` |
+  | a network error | `Network` |
+  | timeout / `abort()` | `Timeout` / `Cancelled` |
+
+  Messages are fixed literals and never contain the text, the body or the URL; network errors use
+  `NetworkManager::describeNetworkError(request, false)`, never `QNetworkReply::errorString()`.
+- Tests: `tst_yandexwebparser` (saved fixtures), `tst_yandexwebservice` (a local `QTcpServer`), the
+  `yandex-web` branch in `tst_languages`, and the `Yandex` group in `tst_settingsdialog`. CTest never
+  contacts the real endpoint; a live smoke is manual only and is recorded as not performed with the
+  reason, never as passed.
+
 ### 4.8. Languages — `languages`
 
 The program uses its own language codes internally (`en`, `ru`, `de`, `pt-BR`, `zh-Hans`…).
@@ -1035,6 +1110,14 @@ Mozhi reuses the Google column: `zh-Hans` → `zh-CN`, `zh-Hant` → `zh-TW`, `h
 `nb` → `no`, `fil` → `tl`, `pt-BR` → `pt`. `mozhiCodeOf()` returns `info.google` and is the single
 fix point if an engine later needs a different code. No `LanguageInfo` column is added, and the
 table's columns are unchanged.
+
+Yandex web keeps the internal ISO 639-1 code and declares only the codes of its observed
+71-language catalogue, with the overrides `zh-Hans`/`zh-Hant` → `zh`, `nb` → `no`, `pt-BR` → `pt`;
+`he` is already sent as `he`, unlike Google/Mozhi's `iw`. `pt-PT` is deliberately not declared (one
+Portuguese code; `closest()` maps `pt-PT` to `pt-BR`). `yandexWebCodeOf()` is the single fix point,
+and no `LanguageInfo` column is added or table column changed. A detected `zh` reverses to
+`zh-Hans` (the first table match), `no` to `nb`, `pt` to `pt-BR`; `zh-Hant` is a known limitation
+because it is sent as `zh`, so Traditional Chinese is served as Simplified.
 
 The module stores a table `{code, English name, native name, service codes}`
 (about 110 Google languages, of which about 35 are available in DeepL) and provides functions in the
@@ -1123,6 +1206,11 @@ Mozhi is the second real service with `requiresOptIn() == true` (§4.7.4); the g
 unchanged. `AppController` hides it from the pickers while the gate is off and, if
 `translation/service=mozhi` is configured with the gate off, keeps Google active and logs that the
 configured service needs free web services to be enabled.
+
+Yandex web is the third real service with `requiresOptIn() == true` (§4.7.5); the gate logic is
+unchanged. `AppController` hides it from the pickers while the gate is off and, if
+`translation/service=yandex-web` is configured with the gate off, keeps Google active and logs that
+the configured service needs free web services to be enabled.
 
 ### 4.10. Network and proxy — `NetworkManager`
 
@@ -1480,7 +1568,7 @@ buttons and menus for Hindi remain English.
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
 `*_win.cpp`; the Linux backends are `*_linux.cpp`, and `*_stub.cpp` remains only for platforms
 without a backend. `qtranslate_core`, `net/`, `services/`, and the UI do not use WinAPI. The Linux
-tree configures, builds, and links: 33 tests (25 shared plus 8 Linux platform tests) pass under
+tree configures, builds, and links: 35 tests (27 shared plus 8 Linux platform tests) pass under
 `xvfb-run` on Debian 13 (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2;
 Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
 X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
@@ -1522,7 +1610,7 @@ the shell read the `.desktop` file; `Icon=qtranslate` matches the installed icon
 builds the native Astra `-astra.tar.gz` and `+astra1` `.deb` with Astra's Qt 6.10.2; those are local
 verification artifacts, not CI-published. CI publishes only trixie artifacts. The Windows platform
 tests (`tst_hotkeymanager`, Windows variants of `tst_autostart`/`tst_secretprotector`) have Linux
-analogues; the other 25 tests are shared.
+analogues; the other 27 tests are shared.
 
 **Wayland limitations.** Global shortcuts and synthetic input are not base capabilities of
 Wayland. The `GlobalShortcuts` portal is not supported by all desktops and versions; insertion into
@@ -1747,10 +1835,12 @@ are linked into separate test targets):
 | `tst_mymemoryservice` | MyMemory against a local HTTP server: the `GET` query and `mt=1`, language codes, rejected `auto`, 500-byte UTF-8 chunks and edge whitespace, 350 ms chunk pacing, serialized requests, cancellation, HTTP/HTML/quota/timeout errors, messages without the text or URL |
 | `tst_mozhiparser` | Parsing Mozhi fixtures: `translated-text`, `detected`, `source_language`, `target_transliteration`, `auto`, HTML/JSON/plain-text errors, the HTTP status mapping and fixed messages without the body or URL |
 | `tst_mozhiwebservice` | Mozhi against a local HTTP server: the `GET /api/translate` query, an instance path prefix, `engine`/`from`/`to`/`text`, Google-style codes, `auto`, 5000-unit chunks, 500 ms pacing, serialization, cancellation, HTTP/HTML/JSON/timeout errors, a refused cross-origin redirect, `applySettings()` and the non-abort behaviour |
+| `tst_yandexwebparser` | Parsing Yandex fixtures: the array response with `text`/`from`, extra fields and a second element ignored, `from` mapping, empty/non-object/malformed bodies, HTML/captcha, JSON and plain-text rate-limit/block bodies, the status mapping and fixed messages without the text, body or URL |
+| `tst_yandexwebservice` | Yandex web against a local HTTP server: the POST form, content type, all fields, UTF-8 percent-encoding, the browser User-Agent on this request only, mapped target codes, constant `targetLang=auto`, `auto` source, 5000-unit chunks, 750 ms pacing, serialization, cancellation, a refused cross-origin redirect, HTTP/HTML/JSON/rate-limit/timeout errors and messages without the text or URL |
 | `tst_queuedwebservice` | The shared per-host queue on a fake service: one reply at a time, the rate pause, aborting a queued reply, deleting the active reply, `noteRequestSent()` restarting the pause, a multi-chunk reply holding its slot |
 | `tst_openaichat` | Chat Completions request serialization (model, messages, temperature, `max_tokens`, stream), response parsing, error and finish-reason mapping, model list, endpoint building |
 | `tst_openaicompatibleservice` | The OpenAI-compatible service against a local HTTP server: configuration errors, chat request, source language, plain-text and fenced-JSON responses, whitespace, HTTP errors, timeout, cancellation, OpenRouter key rules, model loading and edited base URL |
-| `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, MyMemory codes (`zh-CN`, `zh-TW`, `no`, `tl`) and Mozhi codes (`zh-CN`, `zh-TW`, `iw`, `jw`, `no`, `tl`, `pt`), `closest` when the service changes, unknown codes |
+| `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, MyMemory codes (`zh-CN`, `zh-TW`, `no`, `tl`), Mozhi codes (`zh-CN`, `zh-TW`, `iw`, `jw`, `no`, `tl`, `pt`) and Yandex codes (`zh`, `no`, `pt`, `he`; `zh` reverses to `zh-Hans`), `closest` when the service changes, unknown codes |
 | `tst_networkmanager` | Proxy types, HTTP proxy with authentication and `CONNECT`, SOCKS5 with login/password, `testProxy`, clear errors and no password in the text |
 | `tst_popupplacement` | Positioning of the Ctrl+Q window: reflection at edges, pressing against the screen, a second monitor with negative coordinates |
 | `tst_popupwindow` | Popup states (offscreen): request, result, copying, error/"Retry", language change, pinning, automatic hint closing |
@@ -1764,7 +1854,7 @@ are linked into separate test targets):
 | `tst_windowactivation_linux` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus`, `_NET_WM_STATE_FULLSCREEN`, `_NET_WM_PID`, XTest paste, Wayland 0/false (13 cases) |
 | `tst_cli` | CLI parser, mutual exclusion, two-process forwarding, legacy wire (20 cases, Linux) |
 | `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption, the `[mozhi]` defaults, normalization and canonical round trip |
-| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate, the Mozhi group (instance, engine, effective value, warning and gate) (offscreen) |
+| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate, the Mozhi group (instance, engine, effective value, warning and gate), the Yandex hint and its gate (offscreen) |
 | `tst_secretprotector` | Windows: DPAPI round-trip, empty and corrupted data. Linux: libsecret token round-trip, `0600` fallback, capability probe, migration (7+1 in trixie, 8/8 on Astra) |
 | `tst_autostart` | Windows: `Run` command format. Linux: desktop entry quoting, `--minimized`, repair, removal (6 cases) |
 | `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language — on a fake service; the real MyMemory service refused while the gate is off |
@@ -1954,8 +2044,8 @@ Possible development:
    the installed version.
 8. **Free web endpoints** — DeepL web is implemented as the `free-web` mode of a single "DeepL"
    service without a key (§4.7.1); MyMemory is implemented as the first opt-in free API
-   (§4.7.3), and Mozhi is the second implemented opt-in free service (§4.7.4); Yandex web, Bing
-   web, and Reverso remain experimental. Rate limits and an unofficial-status warning apply to all.
+   (§4.7.3), Mozhi is the second (§4.7.4), and Yandex web is the third (§4.7.5); only Bing web
+   and Reverso remain experimental. Rate limits and an unofficial-status warning apply to all.
    Details and priorities — [`free-endpoints.md`](free-endpoints.md).
 9. **Local offline translation** — Argos models + CTranslate2 without Python: model download by
    button, pivot through English, fallback to the cloud. Details and PoC — [`local-translation.md`](local-translation.md).

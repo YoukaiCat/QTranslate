@@ -1,8 +1,8 @@
 # Free web translation endpoints
 
 Date: 2026-11-09. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
-mode of the DeepL service, and MyMemory and Mozhi are implemented as gated no-key services; the
-other endpoints are research**.
+mode of the DeepL service; MyMemory, Mozhi, and Yandex web are implemented as gated no-key services;
+Bing web and Reverso are research**.
 
 This document records the free endpoints without an API key that can be added to qtranslate as
 experimental services. The main source is the open project
@@ -58,9 +58,37 @@ made the only translation method.
 - **Fields:** `text`, `brandID=int`, `statLang=<target>`, `targetLang=auto`, `locale=<target>`,
   `clid=2270494`, `disable=serp`, `use_llm_srv=0`.
 - **Response:** a JSON array; the first element contains `text` and the detected language.
-- **Limits:** unofficial endpoint; QTranslate keeps a 750 ms pause and on error tries Mozhi with
-  `engine=yandex`.
+- **Limits:** unofficial endpoint; the implementation keeps a 750 ms pause and sends at most 5000
+  UTF-16 code units per request. The research note that QTranslate falls back to Mozhi with
+  `engine=yandex` on error is **not** implemented by this service; the fallback chain belongs to
+  `07-fallback-chain`.
 - **Why:** good coverage of ru/uk/tr and CIS languages.
+
+**Implementation in qtranslate (2026-11-09).**
+
+- Service `yandex-web`, opt-in (`requiresOptIn() == true`), no key, behind
+  `translation/allowFreeServices`; the fixed `POST` and the form fields above, with both names and
+  values percent-encoded as UTF-8.
+- The browser User-Agent is set on this request only; `AppInfo::userAgent()` and every other service
+  keep the application UA. This is protocol emulation, not a claim that the application is a
+  browser.
+- The protocol has no source-language field: `targetLang=auto` is constant, the target goes to
+  `statLang`/`locale`, and an explicit source is validated but not sent.
+- Languages: the observed 71-code whitelist with `zh-Hans`/`zh-Hant`→`zh`, `nb`→`no`, `pt-BR`→`pt`,
+  and `he` unchanged; `pt-PT` is not declared (`closest()` maps it to `pt-BR`); `zh-Hant` is a
+  known limitation because it is sent as `zh`, so Traditional Chinese is served as Simplified.
+- 5000 UTF-16 code units and a 750 ms pause are conservative named assumptions; chunks are
+  sequential inside one queue slot, edge whitespace is restored, and `SameOriginRedirectPolicy`
+  refuses a cross-origin redirect.
+- Response `[{"text","from","to"}]`: `text` is required and `from` is mapped back; extra fields and
+  a second element are ignored.
+- Errors are classified body-first: a rate-limit body or a bare 403/429 → `RateLimited`, 413 →
+  `TooLong`, 5xx without a recognised body → `Network`, an HTML/captcha/blocked body or a JSON
+  `error` → `ServiceUnavailable`, malformed/empty/missing `text` and an unknown non-2xx status →
+  `BadResponse`, timeout/abort → `Timeout`/`Cancelled`. Messages never contain the text, body, or
+  URL.
+- Tests: `tst_yandexwebparser`, `tst_yandexwebservice`, `tst_languages`, and
+  `tst_settingsdialog`; CTest never contacts the real endpoint, and a live smoke is manual only.
 
 ## 3. Bing web
 
@@ -179,13 +207,14 @@ remains unofficial.
    with `ServiceUnavailable` until the user enables it. The DeepL `free-web` mode stays outside the
    gate as an explicit mode with its own warning.
 2. For each service — its own `TranslationService` and parser; no keys are needed. Implemented for
-   MyMemory (`src/services/mymemory*`) and Mozhi (`src/services/mozhi*`); they are the first two
-   real services behind the gate.
+   MyMemory (`src/services/mymemory*`), Mozhi (`src/services/mozhi*`), and Yandex web
+   (`src/services/yandexweb*`); they are the three real services behind the gate.
 3. Per-host rate limiting: implemented infrastructure in `QueuedWebService` — replies of one host
    are serialized and paused by the service-specific value (DeepL 2 s, MyMemory 350 ms, Mozhi
-   500 ms; Yandex 750 ms and Reverso 600 ms are planned); no parallel requests to one host.
-4. Text splitting: implemented for DeepL (5000 characters), MyMemory (500 UTF-8 bytes) and Mozhi
-   (5000 UTF-16 code units); the rest — according to the service limits.
+   500 ms, Yandex web 750 ms; Reverso 600 ms is planned); no parallel requests to one host.
+4. Text splitting: implemented for DeepL (5000 characters), MyMemory (500 UTF-8 bytes), Mozhi
+   (5000 UTF-16 code units), and Yandex web (5000 UTF-16 code units); the rest — according to the
+   service limits.
 5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,
    without a retry storm.
 6. Fallback: the official API → free web → Mozhi/another service; do not show raw HTML.
@@ -198,7 +227,8 @@ remains unofficial.
 1. **DeepL web** — implemented: high quality but high risk; available as a DeepL mode.
 2. **MyMemory** — implemented: the simplest and relatively official free API.
 3. **Mozhi** — implemented: one integration, many engines, self-hosting possible.
-4. **Yandex web** — important for the Russian audience.
+4. **Yandex web** — implemented: important for the Russian audience, but an unofficial scraped
+   endpoint.
 5. **Bing web** — fragile auth and HTML; do it after the rest.
 6. **Reverso** — niche, fewer languages.
 
