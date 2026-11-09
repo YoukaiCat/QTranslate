@@ -2,21 +2,20 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/04-yandex-web/01-yandex-web-service` — `in-progress`, detailed;
-the coordinator is next. Yandex became a stage with the service/parser (current), the settings/UI,
-and the docs; the new tests take Linux to 35 and Windows to 30. The Mozhi stage is `done`
-(`c4d3eed..52e5196`); Linux is 33/33, Windows 28 (not run). The top-level stage 3 continues with
-Yandex, Bing, Reverso, and the fallback chain. Real deferred problem: an active reply can store a
-result fetched from the old instance/engine after `clearCache()`; a cache-generation counter in
-`TranslationManager` plus a test is the follow-up (it also covers `google.mode`, `deepl.mode`, and
-`deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a later shared-UI decision.
-Decisions: one configured fallback step, not a literal multi-step chain; Bing and Reverso stay in
-the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is `done`; the user deferred
-the 0.12.0 release on 2026-11-08 (no version bump, tag, push, or release; the CI publication is not
-performed). The working tree is clean after the Yandex-split commit; branch `main` matches the root
-`branch:` and is ahead of `origin/main`; nothing is pushed. Next: the Yandex service coordinator,
-then the settings/UI and docs tasks. In a new session: `/new`, choose the `lead` agent, and enter
-`@continue`.
+Current node: `03-free-web-endpoints/04-yandex-web/02-yandex-web-settings` — `todo`, not detailed;
+the planner is next. The Yandex service/parser task is `done` (`34dd4a6`): Linux is 35/35, Windows 30
+is not run. The settings/UI task adds the Yandex group and the new strings in the 14 `.ts`; the docs
+task follows, then the Yandex stage acceptance. The Mozhi stage is `done` (`c4d3eed..52e5196`).
+Real deferred problem: an active reply can store a result fetched from the old instance/engine after
+`clearCache()` (cache-generation counter in `TranslationManager` plus a test; also covers
+`google.mode`, `deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a
+later shared-UI decision. Decisions: one configured fallback step, not a literal multi-step chain;
+Bing and Reverso stay in the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is
+`done`; the user deferred the 0.12.0 release on 2026-11-08 (no version bump, tag, push, or release;
+the CI publication is not performed). The working tree is clean after the Yandex-service commit;
+branch `main` matches the root `branch:` and is ahead of `origin/main`; nothing is pushed. Next: the
+settings/UI planner, then its coordinator, then the docs task. In a new session: `/new`, choose the
+`lead` agent, and enter `@continue`.
 
 ## Journal
 
@@ -105,3 +104,4 @@ then the settings/UI and docs tasks. In a new session: `/new`, choose the `lead`
 - 2026-11-09 — Planner detailed `03-mozhi-ui-and-docs` (detailed; ~19 files, 14 of them `.ts`). Decisions: group order `freeWeb` → `MyMemory` → `Mozhi`, effective-value label with `Qt::PlainText`, validation through the settings helpers, six strings (301 → 307), engine names are product names and do not enter `.ts`, `tst_settingsdialog` grows to 24, the docs update `architecture.md` §3.1/§3.2/§4.5/§4.7.4/§4.8/§4.9/§4.11/§8/§4.14 and §9.2, `free-endpoints.md` §5/§8/§9 and `AGENTS.md` 28/33; no new test target; the parent stage's `tst_mozhiservice` typo was corrected by the lead. The task stays one node because the `.ts` edit is mechanical and the stage already has three children. Status `in-progress`; coordinator next.
 - 2026-11-09 — Stage `03-free-web-endpoints/03-mozhi` accepted and closed `done` over `c4d3eed..52e5196`; all three children are done (`7e88d9c`, `2cda61a`, `52e5196`). The acceptance repeated Astra/trixie Debug/Release 33/33 with no warnings, checked the service/settings/UI/docs integration and the gate/INI path, and found no code defects; no fixes were needed. The lead fixed the stale lead-owned lines (architecture §9.2/§11.7, READMEs/root plan 28/33, handoff state and counts) and wrote the stage outcome. Real deferred problem: the cache-generation race (an active reply can store a result fetched from the old instance/engine after `clearCache()`; the same applies to `google.mode`/`deepl.mode`/`deepl.englishVariant`) needs a counter in `TranslationManager` and a test; MyMemory's Auto-detect rough edge remains. Windows 28 and the live Mozhi smoke were not performed. Next: `04-yandex-web` (`todo`, needs planner detail).
 - 2026-11-09 — Planner split `04-yandex-web` into a stage with `01-yandex-web-service` (detailed), `02-yandex-web-settings`, and `03-yandex-web-docs`. Decisions: the documented form fields and `POST` body; a browser User-Agent (Chrome/YaBrowser constant) set only on the Yandex request, leaving `NetworkManager`/`AppInfo` unchanged; the response is `[{"text","from","to"}]` read as an array; a 71-code whitelist plus `zh-Hans`/`zh-Hant`→`zh`, `nb`→`no`, `pt-BR`→`pt` overrides; the documented protocol has no source field, so an explicit source is validated but the request sends `targetLang=auto` and the target goes to `statLang`/`locale`; body-first errors, `SameOriginRedirectPolicy`, 750 ms and 5000 UTF-16 as named assumptions; README/handoff/root deferred to 07/lead. Counts become 35 Linux / 30 Windows. The first child is `in-progress`; coordinator next.
+- 2026-11-09 — Task `03-free-web-endpoints/04-yandex-web/01-yandex-web-service` done as `34dd4a6`. Added `YandexWebParser` (first array element `text`/`from`, HTML/captcha and JSON/plain-text error classification, fixed messages) and `YandexWebService` (`QueuedWebService`, `requiresOptIn`, POST form with the documented fields, browser Chrome/YaBrowser UA only on this request, `SameOriginRedirectPolicy`, 750 ms, 5000 UTF-16 chunks, edge whitespace, sequential chunks, no text/body/URL/UA in logs), the `yandex-web` language whitelist with `zh-Hans`/`zh-Hant`→`zh`, `nb`→`no`, `pt-BR`→`pt`, and `AppController` registration after Mozhi. Verification: Astra/trixie Debug/Release 35/35, no warnings, 21 fixtures, `tst_yandexwebservice` 10 repeats per configuration; no reviewer remarks. Known limitations: `zh-Hant` sends `zh` (back as `zh-Hans`), `pt-PT` is not declared, and the 750 ms/5000 UTF-16 limits are documented assumptions. Windows 30 and the live smoke were not performed. Next: detail `02-yandex-web-settings`.
