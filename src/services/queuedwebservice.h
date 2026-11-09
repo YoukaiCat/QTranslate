@@ -2,11 +2,7 @@
 
 #include "core/translationservice.h"
 
-#include <QElapsedTimer>
-#include <QList>
-#include <QPointer>
-
-class QTimer;
+class RequestQueue;
 
 // A service whose replies are serialized per host. One instance handles one
 // host: at most one reply is active, and the next one starts no sooner than
@@ -36,7 +32,7 @@ public:
     explicit QueuedWebService(QObject *parent = nullptr);
 
     void setRateLimitMs(int ms);
-    int rateLimitMs() const { return m_rateLimitMs; }
+    int rateLimitMs() const;
 
     // Records that the reply has just handed a request to the network.
     void noteRequestSent();
@@ -45,12 +41,5 @@ protected:
     void enqueue(Reply *reply);
 
 private:
-    void schedule();
-    void startNext();
-
-    QList<QPointer<Reply>> m_queue;
-    QPointer<Reply> m_active;
-    QElapsedTimer m_lastRequest;
-    QTimer *m_timer = nullptr;
-    int m_rateLimitMs = 2000;
+    RequestQueue *m_queue = nullptr;
 };

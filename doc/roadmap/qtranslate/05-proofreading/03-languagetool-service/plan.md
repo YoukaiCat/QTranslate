@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-proofreading-core, 02-languagetool-parser]
 ---
@@ -366,3 +366,88 @@ for the response parser, `errorForHttpStatus()` and the language codes.
 - **Timing tests are the flake risk.** Use `setRateLimitMs(0)` everywhere except the pacing case,
   assert lower bounds with a tolerance, and give `QTRY_*` generous timeouts.
 - **Windows is not built here.** Record the count and the build as not performed, never as passed.
+
+## Outcome
+
+Done. `LanguageToolService` is the first real `ProofreadingService`, registered in `AppController`
+through `ProofreadingManager`, and the accepted per-host queue is shared through `RequestQueue`;
+`tst_languagetoolservice` is green.
+
+- Files: new `src/services/requestqueue.{h,cpp}`, `src/services/languagetoolservice.{h,cpp}` and
+  `tests/tst_languagetoolservice.cpp`; modified `src/services/queuedwebservice.{h,cpp}`,
+  `src/app/appcontroller.{h,cpp}`, `CMakeLists.txt` and `tests/CMakeLists.txt`. No settings, UI,
+  `.ts`, documentation, README, `doc/handoff.md` or later-child file changed;
+  `grep -c '<message' i18n/qtranslate_ru_RU.ts` stayed 316.
+- `RequestQueue` owns the serialization, the `noteRequestSent()` clock, the pause and the
+  `finished`/`destroyed` handling, with the `Task { QPointer owner, isDone, start }` shape and the
+  default 2000 ms pause. The `QPointer` is checked before `isDone()`/`start()`, and `taskFinished()`
+  only clears the slot when the owner is the active task. `QueuedWebService` keeps its public API
+  (`Reply`, `setRateLimitMs`, `rateLimitMs`, `noteRequestSent`, `enqueue(Reply *)`) and delegates
+  to one `RequestQueue`; no existing test was edited, and `tst_queuedwebservice`, the six free-web
+  service tests and `tst_deeplservice` stay green, so the extraction changed no behaviour.
+- `LanguageToolService` returns id `languagetool`, display name `LanguageTool`,
+  `isConfigured() == true`, `isLocal() == false`, `supportsAutoLanguage() == true`, and
+  `Languages::supported("languagetool", Source)` without `auto`. `applySettings()` reads only
+  `proofreading.endpoint`: an empty/invalid value falls back to
+  `https://api.languagetool.org/v2/check`, and the queue pause is 3000 ms for
+  `api.languagetool.org` and 500 ms for any other host. An active reply keeps its captured endpoint;
+  `setEndpoint()` is a test seam and does not change the pause.
+- The request is a `POST` to the endpoint with `Content-Type: application/x-www-form-urlencoded`,
+  `Accept: application/json`, `SameOriginRedirectPolicy`, manual cookie load/save attributes and a
+  body with exactly `text`, `language`, `enabledOnly=false` in that order. Both names and values are
+  percent-encoded as UTF-8 with `QUrl::toPercentEncoding` (space is `%20`, never `+`); no `apiKey`,
+  `username`, `Authorization`, cookie or other credential is sent, and the body always has no
+  `enabledCategories` field.
+- `auto` is accepted before the explicit-language check, sent literally as `language=auto`, and is
+  not required to be in `languages()`. A successful 200 keeps the issues; an HTTP 400 or a body
+  that is not a check response is `BadResponse` with a fixed message that contains neither the body
+  nor the text. The detected language is ignored (no field in `ProofreadingResult`).
+- Long text uses `TextChunker::splitWithOffsets(text, 20000)`: the parts are sent sequentially in
+  one queue slot with `noteRequestSent()`/`rateLimitMs()` pacing, every issue's `offset` is shifted
+  by `part.offset`, the category filter is client-side ("empty = all four"), and the merged list is
+  sorted by `offset`/`length`/`ruleId` with exact duplicates removed. A failed middle chunk fails
+  the whole reply with no partial issues. The reply finishes immediately after the last chunk; the
+  pause only separates chunks.
+- Errors: 401/403 → `Auth` "the endpoint rejected the request", 413 → `TooLong`, 429 →
+  `RateLimited`, 5xx → `Network`, 400 and other statuses → `BadResponse` with `HTTP %1`, an HTML
+  200 body → `ServiceUnavailable`, malformed JSON → `BadResponse`, a timeout → `Timeout` with the
+  configured seconds, a closed server → `Network`. A cross-origin redirect is refused without a
+  request to the other host. Messages and logs never contain the text, an issue message, a
+  replacement, the URL or a body; the log carries only the chunk/issue counts, the language, the
+  category count, the HTTP status and the error class.
+- `abort()` finishes with `Cancelled` and stops the request; a queued reply aborted or deleted
+  before its `start()` sends nothing; a service destroyed mid-request makes the reply fail with
+  `Network` instead of crashing.
+- `AppController` owns a `ProofreadingManager`, creates and registers `LanguageToolService` right
+  after `createTranslation()`, applies its settings on startup and on every change, keeps
+  `setOnlineServicesAllowed()` in sync with `proofreading/allowOnlineServices`, switches the active
+  provider when `proofreading.provider` changes and calls `cancelAll()` in `prepareForQuit()`. No
+  translation setting, service or cache is touched.
+- `tests/tst_languagetoolservice.cpp` is platform-neutral, registered after
+  `tst_languagetoolparser`, and has no fixture files: a local `FakeHttpServer` with POST bodies,
+  delays and redirects plus inline `matchJson()` responses. It covers properties/defaults/pauses,
+  endpoint fallback, the request shape and percent-encoding, all mapped and rejected languages,
+  `auto` success and its failure path, three-chunk checks with the offset shift and de-duplication,
+  the category filter, every HTTP error row, HTML and malformed bodies, timeout, closed server,
+  cross-origin redirect, queue serialization, abort/cancel/delete, mid-request service destruction,
+  cookie isolation, and the `TOPSECRET` message/log hygiene. 56 cases pass in both configurations.
+- Review: two findings were accepted and fixed. (1) The success path scheduled a final `send()`
+  after `rateLimitMs()`, so every check waited an extra 3000/500 ms after the last response and
+  kept the queue slot; it now calls `finishCheck()` immediately, with the regression test
+  `finishesWithoutTrailingPause`. (2) The cookie test now preloads a cookie into the shared jar and
+  checks it is neither sent nor receives a `Set-Cookie` from the response
+  (`cookiesAreIsolated`), so the manual cookie attributes are actually exercised. No rejected
+  findings and no open issues.
+- Verification (Linux only): Debug and Release build with `-Wall -Wextra` and zero warnings;
+  `xvfb-run -a ctest --test-dir build/linux-{release,debug} --output-on-failure` is 42/42 in both;
+  `ctest -N` shows 42 tests (41 + `tst_languagetoolservice`). Windows would be 37 (36 + 1) and is
+  **not performed** — no MSVC on this machine.
+
+Notes for the later children:
+
+- `04-text-checking-tab` owns the endpoint/provider/category UI and the 14 `.ts` files; the service
+  already applies the endpoint and category settings without being recreated.
+- The LanguageTool rules stay in `languagetoolparser.cpp`; a live response with a misfiled
+  category id is a parser-table change, not a service or UI change.
+- `auto` is wired end to end but the detected language is still not exposed; a UI hint for it would
+  need a new `ProofreadingResult` field and a separate task.

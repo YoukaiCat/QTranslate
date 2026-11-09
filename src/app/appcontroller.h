@@ -11,9 +11,11 @@
 #include <memory>
 
 class HotkeyManager;
+class LanguageToolService;
 class MainWindow;
 class NetworkManager;
 class PopupWindow;
+class ProofreadingManager;
 class QMimeData;
 class QTimer;
 class SelectionGrabber;
@@ -56,6 +58,7 @@ public:
 
 private:
     void createTranslation();
+    void createProofreading();
     void createHotkeys();
     void executeCommand(SingleInstance::Command command);
     void initMainWindowLanguages();
@@ -108,6 +111,8 @@ private:
     YandexWebService *m_yandexWeb = nullptr;
     BingWebService *m_bingWeb = nullptr;
     ReversoService *m_reverso = nullptr;
+    ProofreadingManager *m_proofreading = nullptr;
+    LanguageToolService *m_languageTool = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for
     QPointer<TranslationReply> m_popupReply;      // the request the popup waits for
     QPointer<TranslationReply> m_inPlaceReply;    // the request for replacing a selection

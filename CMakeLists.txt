@@ -61,12 +61,14 @@ qt_add_library(qtranslate_core STATIC
     src/services/googleparser.cpp           src/services/googleparser.h
     src/services/googletranslateservice.cpp src/services/googletranslateservice.h
     src/services/languagetoolparser.cpp     src/services/languagetoolparser.h
+    src/services/languagetoolservice.cpp    src/services/languagetoolservice.h
     src/services/mozhiparser.cpp            src/services/mozhiparser.h
     src/services/mozhiservice.cpp           src/services/mozhiservice.h
     src/services/mymemoryparser.cpp         src/services/mymemoryparser.h
     src/services/mymemoryservice.cpp        src/services/mymemoryservice.h
     src/services/openaicompatibleservice.cpp src/services/openaicompatibleservice.h
     src/services/queuedwebservice.cpp       src/services/queuedwebservice.h
+    src/services/requestqueue.cpp           src/services/requestqueue.h
     src/services/reversoparser.cpp          src/services/reversoparser.h
     src/services/reversoservice.cpp         src/services/reversoservice.h
     src/services/yandexwebparser.cpp        src/services/yandexwebparser.h

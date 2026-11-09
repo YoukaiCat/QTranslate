@@ -4,6 +4,7 @@
 #include "app/singleinstance.h"
 #include "core/appinfo.h"
 #include "core/languages.h"
+#include "core/proofreadingmanager.h"
 #include "core/settings.h"
 #include "core/translationmanager.h"
 #include "core/translationservice.h"
@@ -21,6 +22,7 @@
 #include "services/bingwebservice.h"
 #include "services/deeplservice.h"
 #include "services/googletranslateservice.h"
+#include "services/languagetoolservice.h"
 #include "services/mozhiservice.h"
 #include "services/mymemoryservice.h"
 #include "services/openaicompatibleservice.h"
@@ -107,6 +109,7 @@ void AppController::start()
     applyUiLanguage(settings.general.uiLanguage);
 
     createTranslation();
+    createProofreading();
     connect(m_translations, &TranslationManager::activeServiceChanged, this,
             &AppController::onActiveServiceChanged);
 
@@ -265,6 +268,21 @@ void AppController::createTranslation()
         qCWarning(lcApp) << "Configured service is not available:"
                          << settings.translation.service;
     }
+}
+
+void AppController::createProofreading()
+{
+    const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
+
+    m_proofreading = new ProofreadingManager(this);
+    m_proofreading->setOnlineServicesAllowed(settings.proofreading.allowOnlineServices);
+
+    m_languageTool = new LanguageToolService(m_network);
+    m_languageTool->applySettings(settings);
+    m_proofreading->registerService(m_languageTool);
+    // An unknown id is ignored by the manager with its fixed warning; the
+    // settings normalise it to "languagetool".
+    m_proofreading->setActiveService(settings.proofreading.provider);
 }
 
 void AppController::createHotkeys()
@@ -626,6 +644,13 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_bingWeb->applySettings(newSettings);
     if (m_reverso)
         m_reverso->applySettings(newSettings);
+    if (m_languageTool)
+        m_languageTool->applySettings(newSettings);
+    if (m_proofreading) {
+        m_proofreading->setOnlineServicesAllowed(newSettings.proofreading.allowOnlineServices);
+        if (oldSettings.proofreading.provider != newSettings.proofreading.provider)
+            m_proofreading->setActiveService(newSettings.proofreading.provider);
+    }
 
     // A cached translation from the old service mode or variant must not be
     // reused. The active reply keeps its captured endpoint, so it is not
@@ -1131,6 +1156,8 @@ void AppController::prepareForQuit()
         m_grabber->cancel();
     if (m_translations)
         m_translations->cancelAll();
+    if (m_proofreading)
+        m_proofreading->cancelAll();
     if (m_popup)
         m_popup->hide();
     if (m_mainWindow)
