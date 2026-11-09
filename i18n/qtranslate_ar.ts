@@ -4,86 +4,108 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="174"/>
-        <location filename="../src/app/appcontroller.cpp" line="726"/>
+        <location filename="../src/app/appcontroller.cpp" line="176"/>
+        <location filename="../src/app/appcontroller.cpp" line="738"/>
         <source>Autostart</source>
         <translation>تشغيل تلقائي</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="175"/>
-        <location filename="../src/app/appcontroller.cpp" line="727"/>
+        <location filename="../src/app/appcontroller.cpp" line="177"/>
+        <location filename="../src/app/appcontroller.cpp" line="739"/>
         <source>Could not update the autostart entry.</source>
         <translation>تعذر تحديث إدخال التشغيل التلقائي.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="347"/>
+        <location filename="../src/app/appcontroller.cpp" line="353"/>
         <source>Hotkey unavailable</source>
         <translation>مفتاح التشغيل السريع غير متاح</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="348"/>
+        <location filename="../src/app/appcontroller.cpp" line="354"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 مستخدم بالفعل بواسطة برنامج آخر. أغلق هذا البرنامج أو اختر مجموعة أخرى في الإعدادات.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="409"/>
+        <location filename="../src/app/appcontroller.cpp" line="415"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="779"/>
+        <location filename="../src/app/appcontroller.cpp" line="791"/>
         <source>DeepL is not available.</source>
         <translation>DeepL غير متوفر.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="794"/>
+        <location filename="../src/app/appcontroller.cpp" line="806"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>مزوّد الخدمة المتوافق مع OpenAI غير متاح.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="838"/>
+        <location filename="../src/app/appcontroller.cpp" line="850"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>تُخزَّن الأسرار دون تشفير في ملف لا يمكن قراءته إلا من قبل المستخدم الخاص بك لأن حلقة مفاتيح النظام غير متاحة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1026"/>
+        <location filename="../src/app/appcontroller.cpp" line="1038"/>
+        <location filename="../src/app/appcontroller.cpp" line="1116"/>
         <source>Nothing is selected.</source>
         <translation>لم يتم تحديد أي شيء.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1068"/>
+        <location filename="../src/app/appcontroller.cpp" line="1080"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>تغيرت النافذة النشطة. تم نسخ الترجمة إلى الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1149"/>
+        <location filename="../src/app/appcontroller.cpp" line="1178"/>
+        <source>Could not paste automatically; the corrected text is on the clipboard.</source>
+        <translation>لا يمكن اللصق تلقائيًا؛ النص المصحح موجود في الحافظة.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1185"/>
+        <source>The active window changed; the corrected text was copied to the clipboard.</source>
+        <translation>تغيرت النافذة النشطة. تم نسخ النص المصحح إلى الحافظة.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1198"/>
+        <source>Corrected text copied to the clipboard</source>
+        <translation>تم نسخ النص المصحح إلى الحافظة</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1276"/>
+        <location filename="../src/app/appcontroller.cpp" line="1279"/>
+        <source>Check the selection</source>
+        <translation>تحقق من التحديد</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1352"/>
         <source>System tray unavailable</source>
         <translation>علبة النظام غير متاحة</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1150"/>
+        <location filename="../src/app/appcontroller.cpp" line="1353"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>علبة النظام غير متاحة، لذلك لا يمكن للتطبيق البقاء في الخلفية. إغلاق النافذة ينهي التطبيق.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1059"/>
-        <location filename="../src/app/appcontroller.cpp" line="1107"/>
+        <location filename="../src/app/appcontroller.cpp" line="1071"/>
+        <location filename="../src/app/appcontroller.cpp" line="1310"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>لا يمكن اللصق تلقائيًا؛ الترجمة موجودة في الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="152"/>
+        <location filename="../src/app/appcontroller.cpp" line="154"/>
         <source>Limited Wayland support</source>
         <translation>دعم محدود لـ Wayland</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="154"/>
+        <location filename="../src/app/appcontroller.cpp" line="156"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>تتطلب اختصارات لوحة المفاتيح العامة بوابة GlobalShortcuts. إذا لم يوفر سطح المكتب هذه البوابة، فانسخ النص المحدد باستخدام Ctrl+C واستخدم أوامر CLI أو اختصارًا على سطح المكتب؛ حيث ينسخ الاستبدال في المكان الترجمة إلى الحافظة بدلاً من لصقها.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1131"/>
-        <location filename="../src/app/appcontroller.cpp" line="1134"/>
+        <location filename="../src/app/appcontroller.cpp" line="1334"/>
+        <location filename="../src/app/appcontroller.cpp" line="1337"/>
         <source>Translate and replace</source>
         <translation>ترجمة واستبدال</translation>
     </message>
@@ -1978,9 +2000,14 @@
         <translation>ترجمة النص المحدد واستبداله.</translation>
     </message>
     <message>
-        <location filename="../src/app/commandline.cpp" line="43"/>
-        <source>The --translate-popup, --translate-main and --translate-inplace options are mutually exclusive.</source>
-        <translation>خيارات --translate-popup و--translate-main و--translate-inplace متنافية.</translation>
+        <location filename="../src/app/commandline.cpp" line="26"/>
+        <source>Check the selected text and replace it.</source>
+        <translation>تحقق من النص المحدد واستبداله.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="47"/>
+        <source>The --translate-popup, --translate-main, --translate-inplace and --proofread-selection options are mutually exclusive.</source>
+        <translation>خيارات --translate-popup و--translate-main و--translate-inplace و--proofread-selection متنافية.</translation>
     </message>
 </context>
 </TS>

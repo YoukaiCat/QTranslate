@@ -4,86 +4,108 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="174"/>
-        <location filename="../src/app/appcontroller.cpp" line="726"/>
+        <location filename="../src/app/appcontroller.cpp" line="176"/>
+        <location filename="../src/app/appcontroller.cpp" line="738"/>
         <source>Autostart</source>
         <translation>Otomatik başlatma</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="175"/>
-        <location filename="../src/app/appcontroller.cpp" line="727"/>
+        <location filename="../src/app/appcontroller.cpp" line="177"/>
+        <location filename="../src/app/appcontroller.cpp" line="739"/>
         <source>Could not update the autostart entry.</source>
         <translation>Otomatik başlatma girişi güncellenemedi.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="347"/>
+        <location filename="../src/app/appcontroller.cpp" line="353"/>
         <source>Hotkey unavailable</source>
         <translation>Kısayol tuşu kullanılamıyor</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="348"/>
+        <location filename="../src/app/appcontroller.cpp" line="354"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 zaten başka bir program tarafından kullanılıyor. Bu programı kapatın veya ayarlardan başka bir kombinasyon seçin.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="409"/>
+        <location filename="../src/app/appcontroller.cpp" line="415"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="779"/>
+        <location filename="../src/app/appcontroller.cpp" line="791"/>
         <source>DeepL is not available.</source>
         <translation>DeepL mevcut değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="794"/>
+        <location filename="../src/app/appcontroller.cpp" line="806"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI uyumlu sağlayıcı kullanılamıyor.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="838"/>
+        <location filename="../src/app/appcontroller.cpp" line="850"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>Sırlar, sistem anahtarlık hizmeti kullanılamadığı için yalnızca kullanıcınızın okuyabileceği bir dosyada şifrelenmeden saklanır.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1026"/>
+        <location filename="../src/app/appcontroller.cpp" line="1038"/>
+        <location filename="../src/app/appcontroller.cpp" line="1116"/>
         <source>Nothing is selected.</source>
         <translation>Hiçbir şey seçilmedi.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1068"/>
+        <location filename="../src/app/appcontroller.cpp" line="1080"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>Etkin pencere değişti; çeviri panoya kopyalandı.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1149"/>
+        <location filename="../src/app/appcontroller.cpp" line="1178"/>
+        <source>Could not paste automatically; the corrected text is on the clipboard.</source>
+        <translation>Otomatik olarak yapıştırılamadı; düzeltilmiş metin panodadır.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1185"/>
+        <source>The active window changed; the corrected text was copied to the clipboard.</source>
+        <translation>Etkin pencere değişti; düzeltilmiş metin panoya kopyalandı.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1198"/>
+        <source>Corrected text copied to the clipboard</source>
+        <translation>Düzeltilmiş metin panoya kopyalandı</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1276"/>
+        <location filename="../src/app/appcontroller.cpp" line="1279"/>
+        <source>Check the selection</source>
+        <translation>Seçimi denetle</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1352"/>
         <source>System tray unavailable</source>
         <translation>Sistem tepsisi kullanılamıyor</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1150"/>
+        <location filename="../src/app/appcontroller.cpp" line="1353"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>Sistem tepsisi kullanılamadığından uygulama arka planda kalamaz. Pencereyi kapatmak uygulamadan çıkar.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1059"/>
-        <location filename="../src/app/appcontroller.cpp" line="1107"/>
+        <location filename="../src/app/appcontroller.cpp" line="1071"/>
+        <location filename="../src/app/appcontroller.cpp" line="1310"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>Otomatik olarak yapıştırılamadı; çeviri panodadır.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="152"/>
+        <location filename="../src/app/appcontroller.cpp" line="154"/>
         <source>Limited Wayland support</source>
         <translation>Sınırlı Wayland desteği</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="154"/>
+        <location filename="../src/app/appcontroller.cpp" line="156"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>Genel klavye kısayolları GlobalShortcuts portalını gerektirir. Bu masaüstü portalı sağlamıyorsa seçili metni Ctrl+C ile kopyalayın ve CLI komutlarını veya masaüstü kısayolunu kullanın; yerinde değiştirme, çeviriyi yapıştırmak yerine panoya kopyalar.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1131"/>
-        <location filename="../src/app/appcontroller.cpp" line="1134"/>
+        <location filename="../src/app/appcontroller.cpp" line="1334"/>
+        <location filename="../src/app/appcontroller.cpp" line="1337"/>
         <source>Translate and replace</source>
         <translation>Çevir ve değiştir</translation>
     </message>
@@ -1978,9 +2000,14 @@
         <translation>Seçili metni çevir ve değiştir.</translation>
     </message>
     <message>
-        <location filename="../src/app/commandline.cpp" line="43"/>
-        <source>The --translate-popup, --translate-main and --translate-inplace options are mutually exclusive.</source>
-        <translation>--translate-popup, --translate-main ve --translate-inplace seçenekleri birbirini dışlar.</translation>
+        <location filename="../src/app/commandline.cpp" line="26"/>
+        <source>Check the selected text and replace it.</source>
+        <translation>Seçili metni denetle ve değiştir.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="47"/>
+        <source>The --translate-popup, --translate-main, --translate-inplace and --proofread-selection options are mutually exclusive.</source>
+        <translation>--translate-popup, --translate-main, --translate-inplace ve --proofread-selection seçenekleri birbirini dışlar.</translation>
     </message>
 </context>
 </TS>

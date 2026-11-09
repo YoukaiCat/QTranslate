@@ -6,6 +6,7 @@
 #include "core/languages.h"
 #include "core/proofreadingmanager.h"
 #include "core/proofreadingservice.h"
+#include "core/proofreadingtext.h"
 #include "core/settings.h"
 #include "core/translationmanager.h"
 #include "core/translationservice.h"
@@ -32,6 +33,7 @@
 #include "ui/appicon.h"
 #include "ui/mainwindow.h"
 #include "ui/popupwindow.h"
+#include "ui/proofreadingpopupwindow.h"
 #include "ui/settingsdialog.h"
 #include "ui/trayicon.h"
 #include "ui/translationerrortext.h"
@@ -189,7 +191,8 @@ void AppController::start()
     // after the tray, hotkeys, autostart, and signal wiring.
     const bool hasStartupCommand = m_options.command == SingleInstance::Command::TranslatePopup
         || m_options.command == SingleInstance::Command::TranslateMain
-        || m_options.command == SingleInstance::Command::TranslateInplace;
+        || m_options.command == SingleInstance::Command::TranslateInplace
+        || m_options.command == SingleInstance::Command::ProofreadSelection;
     m_showMainWindowAfterInPlace =
         !m_trayAvailable && m_options.command == SingleInstance::Command::TranslateInplace;
 
@@ -220,6 +223,9 @@ void AppController::executeCommand(SingleInstance::Command command)
         break;
     case SingleInstance::Command::TranslateInplace:
         translateSelectionInPlace();
+        break;
+    case SingleInstance::Command::ProofreadSelection:
+        proofreadSelectionInPlace();
         break;
     case SingleInstance::Command::None:
         break;
@@ -662,6 +668,12 @@ void AppController::applySettings(const AppSettings &oldSettings,
             m_proofreading->setActiveService(newSettings.proofreading.provider);
     }
 
+    if (oldSettings.proofreading.enabled && !newSettings.proofreading.enabled) {
+        // An open confirmation belongs to a feature that has just been turned
+        // off; nothing may be replaced or copied from it afterwards.
+        closeProofreadingPopup();
+    }
+
     // A cached translation from the old service mode or variant must not be
     // reused. The active reply keeps its captured endpoint, so it is not
     // cancelled here.
@@ -1071,13 +1083,204 @@ void AppController::translateSelectionInPlace()
                 return;
             }
 
-            pasteTranslation(result.translatedText);
+            pasteText(result.translatedText);
             finishInPlaceCommand();
         });
     });
 }
 
-void AppController::pasteTranslation(const QString &text)
+void AppController::proofreadSelectionInPlace()
+{
+    if (!m_proofreading)
+        return;
+
+    if (m_grabber->isBusy()) {
+        // A grab is already talking to the source application; sending
+        // another Ctrl+C now would break both operations.
+        qCDebug(lcApp) << "Proofread selection ignored: a selection grab is already in progress";
+        return;
+    }
+
+    // A new invocation replaces the previous check and its confirmation.
+    closeProofreadingPopup();
+
+    // The window is captured before the grab: it is the window the user is
+    // typing in and it must still be foreground when the confirmation
+    // arrives. On Wayland (and when X11 focus is PointerRoot/None) there is no
+    // handle; the grabber reads the manually copied clipboard and the
+    // corrected text goes to the clipboard instead of being pasted.
+    const quintptr target = Platform::foregroundWindow();
+
+    m_grabber->grab([this, target](const QString &text) {
+        if (text.isEmpty()) {
+            showProofreadingMessage(tr("Nothing is selected."));
+            return;
+        }
+
+        const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
+        const ProofreadingRequest request{text, settings.proofreading.language,
+                                          settings.proofreading.categories};
+
+        // The confirmation window appears only after the grab returned:
+        // showing it earlier would steal the focus and break Ctrl+C.
+        ProofreadingPopupWindow *popup = ensureProofreadingPopup();
+        popup->showChecking(text, QCursor::pos());
+
+        ProofreadingReply *reply =
+            m_proofreading->check(request, ProofreadingManager::Channel::InPlace);
+        reply->setParent(this); // freed with the controller if still pending at exit
+        m_inPlaceCheck = reply;
+        m_proofreadTarget = target;
+        startProofreadingFocusWatch();
+
+        connect(reply, &ProofreadingReply::finished, this, [this, reply, text] {
+            const bool current = reply == m_inPlaceCheck;
+            if (current)
+                m_inPlaceCheck = nullptr;
+            const ProofreadingResult result = reply->result();
+            reply->deleteLater();
+
+            if (!current || result.error == TranslationError::Cancelled)
+                return;
+            if (!m_proofreadingPopup || !m_proofreadingPopup->isVisible())
+                return;
+            if (result.ok() && !result.issues.isEmpty()) {
+                // The same text as the popup preview, kept for the
+                // confirmation that may arrive after the reply is gone.
+                m_proofreadCorrected = ProofreadingText::corrected(text, result.issues);
+                m_hasInPlaceCheckResult = true;
+            }
+            m_proofreadingPopup->showResult(result);
+        });
+    });
+}
+
+ProofreadingPopupWindow *AppController::ensureProofreadingPopup()
+{
+    if (m_proofreadingPopup)
+        return m_proofreadingPopup.get();
+
+    m_proofreadingPopup = std::make_unique<ProofreadingPopupWindow>();
+
+    connect(m_proofreadingPopup.get(), &ProofreadingPopupWindow::replaceRequested, this, [this] {
+        if (!m_hasInPlaceCheckResult || !m_proofreadingPopup)
+            return;
+        const QString corrected = m_proofreadCorrected;
+        const quintptr target = m_proofreadTarget;
+        // Stop watching and hide before the paste: a visible popup would be
+        // withdrawn by the focus loss caused by the paste itself.
+        closeProofreadingPopup();
+
+        if (target == 0) {
+            // No window handle: Wayland, or X11 focus is PointerRoot/None.
+            QGuiApplication::clipboard()->setText(corrected);
+            showProofreadingMessage(
+                tr("Could not paste automatically; the corrected text is on the clipboard."));
+            return;
+        }
+        if (!Platform::isForegroundWindow(target)) {
+            // Do not paste into whatever window happened to become active
+            // while the check was running.
+            QGuiApplication::clipboard()->setText(corrected);
+            showProofreadingMessage(tr("The active window changed; the corrected text was "
+                                       "copied to the clipboard."));
+            return;
+        }
+
+        pasteText(corrected);
+    });
+    connect(m_proofreadingPopup.get(), &ProofreadingPopupWindow::copyRequested, this, [this] {
+        if (!m_hasInPlaceCheckResult || !m_proofreadingPopup)
+            return;
+        const QString corrected = m_proofreadCorrected;
+        closeProofreadingPopup();
+        QGuiApplication::clipboard()->setText(corrected);
+        showProofreadingMessage(tr("Corrected text copied to the clipboard"));
+    });
+    connect(m_proofreadingPopup.get(), &ProofreadingPopupWindow::closed, this, [this] {
+        if (m_closingProofreadPopup)
+            return;
+        // The user cancelled: the answer of the pending check is no longer
+        // wanted and nothing may be pasted.
+        closeProofreadingPopup();
+    });
+    return m_proofreadingPopup.get();
+}
+
+void AppController::closeProofreadingPopup()
+{
+    stopProofreadingFocusWatch();
+    hideProofreadingPopup();
+    if (m_proofreading)
+        m_proofreading->cancel(ProofreadingManager::Channel::InPlace);
+    resetProofreadingCheck();
+}
+
+void AppController::hideProofreadingPopup()
+{
+    if (!m_proofreadingPopup || !m_proofreadingPopup->isVisible())
+        return;
+    // hide() emits closed() synchronously; that handler must not cancel the
+    // check this flow is already handling.
+    m_closingProofreadPopup = true;
+    m_proofreadingPopup->hide();
+    m_closingProofreadPopup = false;
+}
+
+void AppController::resetProofreadingCheck()
+{
+    m_inPlaceCheck = nullptr;
+    m_proofreadCorrected.clear();
+    m_hasInPlaceCheckResult = false;
+    m_proofreadTarget = 0;
+}
+
+void AppController::startProofreadingFocusWatch()
+{
+    // Without a window handle (Wayland, or X11 focus is PointerRoot/None)
+    // there is nothing to compare; the confirmation falls back to the
+    // clipboard.
+    if (m_proofreadTarget == 0)
+        return;
+
+    if (!m_proofreadFocusTimer) {
+        m_proofreadFocusTimer = new QTimer(this);
+        m_proofreadFocusTimer->setInterval(400);
+        connect(m_proofreadFocusTimer, &QTimer::timeout, this, [this] {
+            if (!m_proofreadingPopup || !m_proofreadingPopup->isVisible()
+                || m_proofreadTarget == 0) {
+                stopProofreadingFocusWatch();
+                return;
+            }
+            if (Platform::isForegroundWindow(m_proofreadTarget))
+                return;
+            // The user moved to another window: pasting would type into the
+            // wrong place, so withdraw the confirmation and leave the text.
+            qCDebug(lcApp) << "Proofreading cancelled: the target window lost the foreground";
+            closeProofreadingPopup();
+        });
+    }
+    m_proofreadFocusTimer->start();
+}
+
+void AppController::stopProofreadingFocusWatch()
+{
+    if (m_proofreadFocusTimer)
+        m_proofreadFocusTimer->stop();
+}
+
+void AppController::showProofreadingMessage(const QString &message)
+{
+    qCDebug(lcApp) << "Proofread selection:" << message;
+    if (m_tray) {
+        m_tray->showMessage(tr("Check the selection"), message);
+        return;
+    }
+    showNonModalMessage(m_mainWindow.get(), tr("Check the selection"), message,
+                        QMessageBox::Information);
+}
+
+void AppController::pasteText(const QString &text)
 {
     QClipboard *clipboard = QGuiApplication::clipboard();
 
@@ -1215,6 +1418,7 @@ void AppController::prepareForQuit()
         m_translations->cancelAll();
     if (m_proofreading)
         m_proofreading->cancelAll();
+    closeProofreadingPopup();
     if (m_popup)
         m_popup->hide();
     if (m_mainWindow)

@@ -4,86 +4,108 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="174"/>
-        <location filename="../src/app/appcontroller.cpp" line="726"/>
+        <location filename="../src/app/appcontroller.cpp" line="176"/>
+        <location filename="../src/app/appcontroller.cpp" line="738"/>
         <source>Autostart</source>
         <translation>自動起動</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="175"/>
-        <location filename="../src/app/appcontroller.cpp" line="727"/>
+        <location filename="../src/app/appcontroller.cpp" line="177"/>
+        <location filename="../src/app/appcontroller.cpp" line="739"/>
         <source>Could not update the autostart entry.</source>
         <translation>自動開始エントリを更新できませんでした。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="347"/>
+        <location filename="../src/app/appcontroller.cpp" line="353"/>
         <source>Hotkey unavailable</source>
         <translation>ホットキーは使用できません</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="348"/>
+        <location filename="../src/app/appcontroller.cpp" line="354"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 はすでに別のプログラムによって使用されています。そのプログラムを閉じるか、設定で別の組み合わせを選択してください。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="409"/>
+        <location filename="../src/app/appcontroller.cpp" line="415"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="779"/>
+        <location filename="../src/app/appcontroller.cpp" line="791"/>
         <source>DeepL is not available.</source>
         <translation>DeepLは使用できません。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="794"/>
+        <location filename="../src/app/appcontroller.cpp" line="806"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI 互換プロバイダーを利用できません。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="838"/>
+        <location filename="../src/app/appcontroller.cpp" line="850"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>システムキーリングが利用できないため、シークレットはお使いのユーザーだけが読めるファイルに暗号化されずに保存されます。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1026"/>
+        <location filename="../src/app/appcontroller.cpp" line="1038"/>
+        <location filename="../src/app/appcontroller.cpp" line="1116"/>
         <source>Nothing is selected.</source>
         <translation>何も選択されていません。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1068"/>
+        <location filename="../src/app/appcontroller.cpp" line="1080"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>アクティブなウィンドウが変更されました。翻訳がクリップボードにコピーされました。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1149"/>
+        <location filename="../src/app/appcontroller.cpp" line="1178"/>
+        <source>Could not paste automatically; the corrected text is on the clipboard.</source>
+        <translation>自動的に貼り付けることができませんでした。修正後のテキストはクリップボードにあります。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1185"/>
+        <source>The active window changed; the corrected text was copied to the clipboard.</source>
+        <translation>アクティブなウィンドウが変更されました。修正後のテキストがクリップボードにコピーされました。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1198"/>
+        <source>Corrected text copied to the clipboard</source>
+        <translation>修正後のテキストをクリップボードにコピーしました</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1276"/>
+        <location filename="../src/app/appcontroller.cpp" line="1279"/>
+        <source>Check the selection</source>
+        <translation>選択範囲をチェック</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1352"/>
         <source>System tray unavailable</source>
         <translation>システムトレイを利用できません</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1150"/>
+        <location filename="../src/app/appcontroller.cpp" line="1353"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>システムトレイを利用できないため、アプリケーションはバックグラウンドに留まることができません。ウィンドウを閉じるとアプリケーションが終了します。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1059"/>
-        <location filename="../src/app/appcontroller.cpp" line="1107"/>
+        <location filename="../src/app/appcontroller.cpp" line="1071"/>
+        <location filename="../src/app/appcontroller.cpp" line="1310"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>自動的に貼り付けることができませんでした。翻訳はクリップボードにあります。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="152"/>
+        <location filename="../src/app/appcontroller.cpp" line="154"/>
         <source>Limited Wayland support</source>
         <translation>Wayland のサポートは限定的です</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="154"/>
+        <location filename="../src/app/appcontroller.cpp" line="156"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>グローバルホットキーには GlobalShortcuts ポータルが必要です。このデスクトップが提供していない場合は、Ctrl+C で選択したテキストをコピーし、CLI コマンドまたはデスクトップショートカットを使用してください。その場での置き換えでは、貼り付けの代わりに翻訳がクリップボードにコピーされます。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1131"/>
-        <location filename="../src/app/appcontroller.cpp" line="1134"/>
+        <location filename="../src/app/appcontroller.cpp" line="1334"/>
+        <location filename="../src/app/appcontroller.cpp" line="1337"/>
         <source>Translate and replace</source>
         <translation>翻訳して置き換える</translation>
     </message>
@@ -1978,9 +2000,14 @@
         <translation>選択したテキストを翻訳して置き換えます。</translation>
     </message>
     <message>
-        <location filename="../src/app/commandline.cpp" line="43"/>
-        <source>The --translate-popup, --translate-main and --translate-inplace options are mutually exclusive.</source>
-        <translation>--translate-popup、--translate-main、--translate-inplace の各オプションは同時に指定できません。</translation>
+        <location filename="../src/app/commandline.cpp" line="26"/>
+        <source>Check the selected text and replace it.</source>
+        <translation>選択したテキストをチェックして置き換えます。</translation>
+    </message>
+    <message>
+        <location filename="../src/app/commandline.cpp" line="47"/>
+        <source>The --translate-popup, --translate-main, --translate-inplace and --proofread-selection options are mutually exclusive.</source>
+        <translation>--translate-popup、--translate-main、--translate-inplace、--proofread-selection の各オプションは同時に指定できません。</translation>
     </message>
 </context>
 </TS>

@@ -21,6 +21,9 @@ CommandLineOptions::CommandLineOptions()
     , translateInplaceOption(
           QStringLiteral("translate-inplace"),
           QCoreApplication::translate("main", "Translate the selected text and replace it."))
+    , proofreadSelectionOption(
+          QStringLiteral("proofread-selection"),
+          QCoreApplication::translate("main", "Check the selected text and replace it."))
 {
 }
 
@@ -31,19 +34,20 @@ void CommandLineOptions::addTo(QCommandLineParser &parser) const
     parser.addOption(translatePopupOption);
     parser.addOption(translateMainOption);
     parser.addOption(translateInplaceOption);
+    parser.addOption(proofreadSelectionOption);
 }
 
 SingleInstance::Command CommandLineOptions::scenario(const QCommandLineParser &parser,
                                                     QString *error) const
 {
     const int count = parser.isSet(translatePopupOption) + parser.isSet(translateMainOption)
-        + parser.isSet(translateInplaceOption);
+        + parser.isSet(translateInplaceOption) + parser.isSet(proofreadSelectionOption);
     if (count > 1) {
         if (error) {
             *error = QCoreApplication::translate(
                 "main",
-                "The --translate-popup, --translate-main and --translate-inplace options "
-                "are mutually exclusive.");
+                "The --translate-popup, --translate-main, --translate-inplace and "
+                "--proofread-selection options are mutually exclusive.");
         }
         return SingleInstance::Command::None;
     }
@@ -54,6 +58,8 @@ SingleInstance::Command CommandLineOptions::scenario(const QCommandLineParser &p
         return SingleInstance::Command::TranslateMain;
     if (parser.isSet(translateInplaceOption))
         return SingleInstance::Command::TranslateInplace;
+    if (parser.isSet(proofreadSelectionOption))
+        return SingleInstance::Command::ProofreadSelection;
     return SingleInstance::Command::None;
 }
 

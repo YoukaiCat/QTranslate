@@ -17,9 +17,10 @@ struct CommandLineOptions
 
     void addTo(QCommandLineParser &parser) const;
 
-    // The scenario selected by --translate-popup, --translate-main, or
-    // --translate-inplace. Returns Command::None when none or several are set;
-    // several set *error to the translated mutual-exclusion message.
+    // The scenario selected by --translate-popup, --translate-main,
+    // --translate-inplace or --proofread-selection. Returns Command::None when
+    // none or several are set; several set *error to the translated
+    // mutual-exclusion message.
     SingleInstance::Command scenario(const QCommandLineParser &parser, QString *error) const;
 
     bool isStartHidden(const QCommandLineParser &parser) const;
@@ -30,4 +31,5 @@ struct CommandLineOptions
     QCommandLineOption translatePopupOption;
     QCommandLineOption translateMainOption;
     QCommandLineOption translateInplaceOption;
+    QCommandLineOption proofreadSelectionOption;
 };

@@ -23,6 +23,7 @@ const QByteArray kNoopMessage = QByteArrayLiteral("noop\n");
 const QByteArray kTranslatePopupMessage = QByteArrayLiteral("translate-popup\n");
 const QByteArray kTranslateMainMessage = QByteArrayLiteral("translate-main\n");
 const QByteArray kTranslateInplaceMessage = QByteArrayLiteral("translate-inplace\n");
+const QByteArray kProofreadSelectionMessage = QByteArrayLiteral("proofread-selection\n");
 
 QByteArray messageFor(SingleInstance::Command command)
 {
@@ -35,6 +36,8 @@ QByteArray messageFor(SingleInstance::Command command)
         return kTranslateMainMessage;
     case SingleInstance::Command::TranslateInplace:
         return kTranslateInplaceMessage;
+    case SingleInstance::Command::ProofreadSelection:
+        return kProofreadSelectionMessage;
     case SingleInstance::Command::None:
         break;
     }
@@ -51,6 +54,8 @@ SingleInstance::Command commandForMessage(const QByteArray &line)
         return SingleInstance::Command::TranslateMain;
     if (line == kTranslateInplaceMessage)
         return SingleInstance::Command::TranslateInplace;
+    if (line == kProofreadSelectionMessage)
+        return SingleInstance::Command::ProofreadSelection;
     // "noop" and unknown lines are ignored.
     return SingleInstance::Command::None;
 }

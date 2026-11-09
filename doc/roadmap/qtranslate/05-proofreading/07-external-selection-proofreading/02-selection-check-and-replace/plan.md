@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-proofreading-popup-window]
 ---
@@ -94,3 +94,72 @@ legacy wire lines stay byte-identical.
   in the log.
 - `tst_cli` passes with the new parser and forwarding cases; Linux 44/44; Windows 39 not performed;
   the measured `.ts` total is recorded.
+
+## Outcome
+
+Done. The external-selection scenario is wired end to end in `AppController` and reachable from the
+CLI before the hotkey exists. Task `03-x11-replacement-integration` still owns the real X11 paste
+test and task `04-proofreading-hotkey` the fifth hotkey; neither was attempted here.
+
+- Files: `src/app/singleinstance.{h,cpp}`, `src/app/commandline.{h,cpp}`,
+  `src/app/appcontroller.{h,cpp}`, `tests/tst_cli.cpp` and the 14 `i18n/*.ts`. No change to
+  `src/main.cpp`, `CMakeLists.txt`, `tests/CMakeLists.txt`, `src/ui/*`, platform code, `doc/`
+  (except this Outcome), README or `AGENTS.md`.
+- CLI: `Command::ProofreadSelection` maps to `proofread-selection\n` and back; the parser gains
+  `--proofread-selection` ("Check the selected text and replace it."), the mutual-exclusion count
+  and message now name all four options. `activate`/`noop`, the three translate lines and the
+  `--minimized`/`--verbose`/`--translate-*` behaviour are unchanged. `hasStartupCommand` includes
+  the new command and does not set `m_showMainWindowAfterInPlace`.
+- Flow: `AppController::proofreadSelectionInPlace()` keeps the `isBusy()` guard, closes a previous
+  popup and cancels the previous `Channel::InPlace` check, captures
+  `Platform::foregroundWindow()` before the grab, shows
+  `ProofreadingPopupWindow::showChecking(text, QCursor::pos())` only after the grab returned and then
+  calls `ProofreadingManager::check()` with `settings.proofreading.{language,categories}`. The
+  `finished` handler accepts only the current reply and a non-`Cancelled` result, stores
+  `ProofreadingText::corrected()` for the later confirmation and always deletes the reply.
+- Confirmation: the focus watchdog is a `QTimer` with a 400 ms interval, created lazily and started
+  only for a non-zero target; a lost foreground hides the popup, cancels the check, stops the timer
+  and leaves the target text untouched. `replaceRequested` re-checks `target == 0` and
+  `isForegroundWindow(target)` and falls back to the clipboard with one of the two fixed messages,
+  otherwise it calls the shared paste path. `copyRequested` copies the corrected text and reports
+  through the existing `Corrected text copied to the clipboard` string. `hideProofreadingPopup()`
+  sets a closing flag so the `closed` signal does not cancel the check a second time; a user Cancel
+  goes through `closed` and cancels it once. `prepareForQuit()` and `applySettings()` when
+  `proofreading.enabled` turns false close the popup and cancel the check. Nothing is gated by
+  `proofreading.enabled` for an explicit invocation, and no `translation.*` value is read or written.
+- Reuse: `pasteTranslation()` is now `pasteText()` (declaration, definition and call sites); the
+  clipboard guard, snapshot, history markers and the 500 ms restore are unchanged. The proofreading
+  flow is its second caller.
+- Messages: `showProofreadingMessage()` uses the `Check the selection` title and the same
+  tray/non-modal fallback as `showInPlaceMessage()`; only the fixed message text is logged, never
+  the selection, an issue message or the corrected text.
+- Tests: `tst_cli` gained the single-option case, `--proofread-selection` with `--minimized` and
+  `--verbose`, all six pairs and the four-way conflict (also asserting that the error text names
+  every option), the positional-argument case, two-process forwarding with a real `SingleInstance`
+  and the raw-socket `proofread-selection\n` line next to the four legacy lines. A temporary
+  mutation of either mapping direction made the corresponding case fail, after which the mapping
+  was restored: 30/30 passed.
+- Translations: the measured total is **382** `<message>` in each of the 14 files. The plan's
+  expected baseline of 376 was stale: task 01 already measured 377 (the panel's `Replace
+  selection` was the fifth message). 382 = 377 + 5 net new messages: the CLI description, the two
+  copy-fallback messages, and `Check the selection` and `Corrected text copied to the clipboard`
+  in the `AppController` context. The mutual-exclusion message changed in place, so it did not
+  change the count. No file has `unfinished`, `vanished` or an empty translation.
+- Verification: Linux Debug and Release build with `-Wall -Wextra` and zero warnings; the full
+  `xvfb-run -a ctest` is 44/44 in both configurations (no new target). `tst_translations`,
+  `tst_proofreadingpopup`, `tst_proofreadingpanel` and `tst_cli` pass in both. `git diff --check`
+  is clean. Windows 39 tests are **not performed** (no MSVC in this environment).
+- Review: one remark, rejected. When `Platform::sendPasteShortcut()` fails inside the shared
+  `pasteText()`, the proofreading flow shows the existing translation-worded message and the
+  `Translate and replace` title. The corrected text is still on the clipboard and nothing is lost;
+  the wording is only inaccurate in that rare branch, and making it caller-specific would change
+  the shared paste path that step 4 explicitly keeps behaviour-identical. Left as a possible
+  follow-up, not a defect of this task.
+- Found while working: `doc/architecture.md` and both READMEs still list only the three translate
+  CLI commands; this task was not allowed to touch them, so the documentation update is still
+  pending. The popup also keeps the default width instead of `popup.width`, which belongs to the
+  translation popup.
+- Known gaps for the next tasks: the popup is non-activating, but on some window managers clicking
+  it may still change `_NET_ACTIVE_WINDOW` and force the clipboard fallback; verifying and, if
+  needed, fixing that is part of `03-x11-replacement-integration`. A real portal-capable Wayland
+  desktop remains a manual gap.

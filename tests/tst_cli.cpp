@@ -80,6 +80,7 @@ private slots:
     void scenarioOptions();
     void scenarioWithStartupFlags_data();
     void scenarioWithStartupFlags();
+    void mutuallyExclusive_data();
     void mutuallyExclusive();
     void unknownOption();
     void positionalArgumentsAreIgnored();
@@ -113,6 +114,9 @@ void TestCli::scenarioOptions_data()
     QTest::newRow("translate-inplace")
         << QStringList{QStringLiteral("--translate-inplace")}
         << static_cast<int>(SingleInstance::Command::TranslateInplace);
+    QTest::newRow("proofread-selection")
+        << QStringList{QStringLiteral("--proofread-selection")}
+        << static_cast<int>(SingleInstance::Command::ProofreadSelection);
 }
 
 void TestCli::scenarioOptions()
@@ -141,6 +145,7 @@ void TestCli::scenarioWithStartupFlags_data()
         {QStringLiteral("--translate-popup"), SingleInstance::Command::TranslatePopup},
         {QStringLiteral("--translate-main"), SingleInstance::Command::TranslateMain},
         {QStringLiteral("--translate-inplace"), SingleInstance::Command::TranslateInplace},
+        {QStringLiteral("--proofread-selection"), SingleInstance::Command::ProofreadSelection},
     };
     for (const auto &scenario : scenarios) {
         const QByteArray prefix = scenario.first.toLatin1();
@@ -172,18 +177,43 @@ void TestCli::scenarioWithStartupFlags()
     QCOMPARE(options.isVerbose(parser), verbose);
 }
 
+void TestCli::mutuallyExclusive_data()
+{
+    QTest::addColumn<QStringList>("arguments");
+
+    const QString popup = QStringLiteral("--translate-popup");
+    const QString main = QStringLiteral("--translate-main");
+    const QString inplace = QStringLiteral("--translate-inplace");
+    const QString proofread = QStringLiteral("--proofread-selection");
+
+    QTest::newRow("popup-main") << QStringList{popup, main};
+    QTest::newRow("popup-inplace") << QStringList{popup, inplace};
+    QTest::newRow("popup-proofread") << QStringList{popup, proofread};
+    QTest::newRow("main-inplace") << QStringList{main, inplace};
+    QTest::newRow("main-proofread") << QStringList{main, proofread};
+    QTest::newRow("inplace-proofread") << QStringList{inplace, proofread};
+    QTest::newRow("all-four") << QStringList{popup, main, inplace, proofread};
+}
+
 void TestCli::mutuallyExclusive()
 {
+    QFETCH(QStringList, arguments);
+
     QCommandLineParser parser;
     const CommandLineOptions options;
     options.addTo(parser);
-    QVERIFY(parser.parse(argumentsFor(
-        {QStringLiteral("--translate-popup"), QStringLiteral("--translate-main")})));
+    QVERIFY(parser.parse(argumentsFor(arguments)));
 
     QString error;
     QCOMPARE(static_cast<int>(options.scenario(parser, &error)),
              static_cast<int>(SingleInstance::Command::None));
     QVERIFY(!error.isEmpty());
+    // The error must name every option of the group, not only the ones that
+    // happened to be set.
+    QVERIFY(error.contains(QStringLiteral("--translate-popup")));
+    QVERIFY(error.contains(QStringLiteral("--translate-main")));
+    QVERIFY(error.contains(QStringLiteral("--translate-inplace")));
+    QVERIFY(error.contains(QStringLiteral("--proofread-selection")));
 }
 
 void TestCli::unknownOption()
@@ -203,11 +233,11 @@ void TestCli::positionalArgumentsAreIgnored()
     const CommandLineOptions options;
     options.addTo(parser);
     QVERIFY(parser.parse(argumentsFor(
-        {QStringLiteral("--translate-main"), QStringLiteral("file.txt")})));
+        {QStringLiteral("--proofread-selection"), QStringLiteral("file.txt")})));
 
     QCOMPARE(parser.positionalArguments(), QStringList{QStringLiteral("file.txt")});
     QCOMPARE(static_cast<int>(options.scenario(parser, nullptr)),
-             static_cast<int>(SingleInstance::Command::TranslateMain));
+             static_cast<int>(SingleInstance::Command::ProofreadSelection));
 }
 
 void TestCli::forwarding_data()
@@ -222,6 +252,9 @@ void TestCli::forwarding_data()
     QTest::newRow("translate-inplace")
         << QStringList{QStringLiteral("--translate-inplace")}
         << static_cast<int>(SingleInstance::Command::TranslateInplace);
+    QTest::newRow("proofread-selection")
+        << QStringList{QStringLiteral("--proofread-selection")}
+        << static_cast<int>(SingleInstance::Command::ProofreadSelection);
     QTest::newRow("minimized-noop") << QStringList{QStringLiteral("--minimized")}
                                     << static_cast<int>(SingleInstance::Command::None);
 }
@@ -289,14 +322,17 @@ void TestCli::legacyWireFormat()
     socket.connectToServer(key);
     QVERIFY2(socket.waitForConnected(kTimeoutMs), qPrintable(socket.errorString()));
 
-    // Byte-exact lines of the wire contract: the previous "activate" plus the
-    // three translate commands. Both ends share the mapping helpers, so this
-    // raw-socket test is what catches a symmetric typo in them.
+    // Byte-exact lines of the wire contract: the previous "activate", the
+    // three translate commands and the proofreading command. Both ends share
+    // the mapping helpers, so this raw-socket test is what catches a
+    // symmetric typo in them.
     const QList<QPair<QByteArray, SingleInstance::Command>> commands = {
         {QByteArrayLiteral("activate\n"), SingleInstance::Command::Activate},
         {QByteArrayLiteral("translate-popup\n"), SingleInstance::Command::TranslatePopup},
         {QByteArrayLiteral("translate-main\n"), SingleInstance::Command::TranslateMain},
         {QByteArrayLiteral("translate-inplace\n"), SingleInstance::Command::TranslateInplace},
+        {QByteArrayLiteral("proofread-selection\n"),
+         SingleInstance::Command::ProofreadSelection},
     };
     for (const auto &command : commands) {
         QCOMPARE(socket.write(command.first), qint64(command.first.size()));

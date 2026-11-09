@@ -19,11 +19,12 @@ class SingleInstance : public QObject
 
 public:
     enum class Command {
-        None,             // just exit (e.g. a second autostart with --minimized)
-        Activate,         // show the main window of the running instance
-        TranslatePopup,   // translate the selection into the popup
-        TranslateMain,    // translate the selection in the main window
-        TranslateInplace, // translate the selection and replace it
+        None,               // just exit (e.g. a second autostart with --minimized)
+        Activate,           // show the main window of the running instance
+        TranslatePopup,     // translate the selection into the popup
+        TranslateMain,      // translate the selection in the main window
+        TranslateInplace,   // translate the selection and replace it
+        ProofreadSelection, // check the selection and replace it after confirmation
     };
 
     // `key` identifies the instance group; use defaultKey() normally.

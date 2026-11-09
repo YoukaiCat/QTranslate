@@ -16,6 +16,7 @@ class MainWindow;
 class NetworkManager;
 class PopupWindow;
 class ProofreadingManager;
+class ProofreadingPopupWindow;
 class ProofreadingReply;
 class QMimeData;
 class QTimer;
@@ -80,11 +81,19 @@ private:
     void translateSelectionInMainWindow();
     void translateSelectionInPopup();
     void translateSelectionInPlace();
+    void proofreadSelectionInPlace();
     void translateInPopup(const TranslationRequest &request);
-    void pasteTranslation(const QString &text);
+    void pasteText(const QString &text);
     void restoreClipboardAfterPaste();
     void showInPlaceMessage(const QString &message);
     void finishInPlaceCommand();
+    ProofreadingPopupWindow *ensureProofreadingPopup();
+    void closeProofreadingPopup();
+    void hideProofreadingPopup();
+    void resetProofreadingCheck();
+    void startProofreadingFocusWatch();
+    void stopProofreadingFocusWatch();
+    void showProofreadingMessage(const QString &message);
     void showTrayUnavailableWarning();
     std::unique_ptr<QMimeData> snapshotClipboard() const;
     void openPopupInMainWindow(const TranslationRequest &request,
@@ -122,6 +131,11 @@ private:
     QPointer<TranslationReply> m_inPlaceReply;    // the request for replacing a selection
     quintptr m_inPlaceTarget = 0;                 // window that had the selection
     std::unique_ptr<QMimeData> m_pasteSnapshot;   // clipboard to restore after pasting
+    QPointer<ProofreadingReply> m_inPlaceCheck;   // the check the confirmation waits for
+    quintptr m_proofreadTarget = 0;               // window that had the checked selection
+    QString m_proofreadCorrected;                 // corrected text of the shown result
+    bool m_hasInPlaceCheckResult = false;
+    bool m_closingProofreadPopup = false;         // hidden by this class, not by the user
 
     QStringList m_targetLanguages;
     QString m_sourceLanguage;
@@ -129,9 +143,11 @@ private:
 
     std::unique_ptr<MainWindow> m_mainWindow;
     std::unique_ptr<PopupWindow> m_popup;
+    std::unique_ptr<ProofreadingPopupWindow> m_proofreadingPopup;
     TrayIcon *m_tray = nullptr;
     HotkeyManager *m_hotkeys = nullptr;
     QTimer *m_fullscreenTimer = nullptr;
+    QTimer *m_proofreadFocusTimer = nullptr;
     bool m_hotkeyEditing = false;
     bool m_hotkeysPaused = false;
     bool m_fullscreenAppActive = false;
