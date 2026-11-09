@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-yandex-web-service]
 ---
@@ -263,3 +263,49 @@ This task does not touch `doc/architecture.md`, `doc/free-endpoints.md`, `AGENTS
   number instead of adjusting the expectation.
 - Windows Debug/Release and its 30 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+
+## Outcome
+
+Done on 2026-11-09. The Services page exposes the implemented `yandex-web` service as a gate-aware
+`Yandex` group, and the two new strings are complete in all 14 `.ts` files. No service, parser,
+`AppSettings`/INI key, `settings()` value, `validate()` condition or `AppController` path changed.
+
+- **UI:** `src/ui/settingsdialog.h` declares `updateYandexControls()` after the Mozhi one and
+  `m_yandexGroup` after the whole Mozhi member block. `buildUi()` creates the `Yandex` group
+  (`yandexGroup`) after the Mozhi group and before the stretch, with one `QVBoxLayout` and a single
+  word-wrapped `yandexHint` label; the hint is one `tr()` message and contains no `%` placeholder.
+  The group has no `QLineEdit`, key, password or URL field. `updateYandexControls()` enables the
+  group from `m_allowFreeServices`, is connected to the gate `toggled` and runs at the end of
+  `loadValues()`, so the default-off dialog starts visible but disabled. The hint is never hidden.
+- **Test:** `tst_settingsdialog::yandexGroup` covers the title, the visible/disabled default
+  (`isHidden()`/`isEnabled()`), both gate directions, word wrap, the seven hint keywords, the absent
+  `QLineEdit`, the order after `mozhiGroup` and `settings().translation.allowFreeServices`. It uses
+  `{de, en, ru}` and does not call `validate()`, so it does not depend on the host locale. The case
+  also fails if the `loadValues()` call is removed, because `AppSettings{}` leaves the group enabled
+  otherwise.
+- **Translations:** the CMake `update_translations` target rewrote all 14 `i18n/qtranslate_*.ts`.
+  Every file has 309 messages (actual count; baseline 307), 0 unfinished, 0 vanished and no empty
+  translations; `lrelease` builds all 14 with 309 complete translations. `Yandex` stays untranslated
+  everywhere and the hint is translated as one message with all five points (unofficial/no key, the
+  free-web-services gate, rate limits/blocks, several requests, third party). The Windows-only
+  `HotkeyManager` message "The key combination is not supported." from
+  `src/platform/hotkeymanager_win.cpp` remains in every file.
+- **Location churn:** besides the expected shift from the 15 new lines in `settingsdialog.cpp`,
+  `lupdate` brought the `<location>` lines of `appcontroller.cpp` and `languages.cpp` up to date;
+  the `.ts` at HEAD were still stale after `01-yandex-web-service`. A structural comparison with
+  HEAD shows exactly two added messages and no existing translation changed.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2), Debug and Release: zero `warning:`
+  lines, `ctest -N` 35, `tst_settingsdialog` 25 passed, `tst_translations` passed, the full suite
+  35/35 in both trees. An additional fresh trixie Release build in `qtranslate-trixie:latest`
+  (Qt 6.8.2) with a read-only source mount and a `/tmp` build directory also had zero warnings and
+  the full suite 35/35. No new test target was added. Windows Debug/Release and its 30 tests were
+  not performed (no MSVC).
+- **Review:** no accepted remarks. Two taste remarks were rejected: the order assertion proves
+  only "after Mozhi" (the plan names it as the only order check; "before the stretch" is visible in
+  the code), and the `contains("rate")`/`contains("block")` checks are substring matches copied from
+  the plan snippet. No real problem was deferred because of cost.
+- **Not performed and deferred by design:** the optional manual visual check of the Services page
+  (covered by the offscreen case), Windows 30, and the documentation updates (`doc/architecture.md`,
+  `doc/free-endpoints.md`, `AGENTS.md`, READMEs, `doc/handoff.md`, the root plan and
+  `07-fallback-chain`), which belong to `03-yandex-web-docs` and the lead. No known limitation of
+  the group itself.

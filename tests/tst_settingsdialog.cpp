@@ -9,6 +9,7 @@
 #include <QGroupBox>
 #include <QKeySequenceEdit>
 #include <QLabel>
+#include <QLayout>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QScrollArea>
@@ -510,6 +511,50 @@ private slots:
                  QStringLiteral("Effective instance: https://mozhi.example.org/proxy"));
         QCOMPARE(dialog.settings().mozhi.instance,
                  QStringLiteral("https://mozhi.example.org/proxy"));
+    }
+
+    void yandexGroup()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true);
+        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("yandexGroup"));
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("yandexHint"));
+        auto *mozhiGroup = dialog.findChild<QGroupBox *>(QStringLiteral("mozhiGroup"));
+        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
+        QVERIFY(group);
+        QVERIFY(hint);
+        QVERIFY(mozhiGroup);
+        QVERIFY(checkbox);
+
+        QCOMPARE(group->title(), QStringLiteral("Yandex"));
+        QVERIFY(!checkbox->isChecked());
+        QVERIFY(!group->isHidden());
+        QVERIFY(!group->isEnabled());
+        QVERIFY(hint->wordWrap());
+        QVERIFY(hint->text().contains(QStringLiteral("unofficial")));
+        QVERIFY(hint->text().contains(QStringLiteral("no key")));
+        QVERIFY(hint->text().contains(QStringLiteral("rate")));
+        QVERIFY(hint->text().contains(QStringLiteral("block")));
+        QVERIFY(hint->text().contains(QStringLiteral("free web services")));
+        QVERIFY(hint->text().contains(QStringLiteral("several requests")));
+        QVERIFY(hint->text().contains(QStringLiteral("third party")));
+        QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
+        QVERIFY(!dialog.settings().translation.allowFreeServices);
+
+        const QLayout *servicesLayout = group->parentWidget()->layout();
+        QVERIFY(servicesLayout);
+        QVERIFY(servicesLayout->indexOf(mozhiGroup) >= 0);
+        QVERIFY(servicesLayout->indexOf(mozhiGroup) < servicesLayout->indexOf(group));
+
+        checkbox->setChecked(true);
+        QVERIFY(group->isEnabled());
+        QVERIFY(dialog.settings().translation.allowFreeServices);
+
+        checkbox->setChecked(false);
+        QVERIFY(!group->isEnabled());
+        QVERIFY(!dialog.settings().translation.allowFreeServices);
     }
 
     void llmModels()

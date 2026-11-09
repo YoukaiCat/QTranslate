@@ -382,6 +382,21 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     connect(m_mozhiInstance, &QLineEdit::textChanged, this,
             &SettingsDialog::updateMozhiControls);
 
+    m_yandexGroup = new QGroupBox(tr("Yandex"), servicesContent);
+    m_yandexGroup->setObjectName(QStringLiteral("yandexGroup"));
+    auto *yandexLayout = new QVBoxLayout(m_yandexGroup);
+    auto *yandexHint = new QLabel(
+        tr("Yandex web is an unofficial endpoint and needs no key. Enable free web services above "
+           "to use it. It may stop working, apply rate limits or block requests. Long text is sent "
+           "in several requests. The text is sent to a third party."),
+        m_yandexGroup);
+    yandexHint->setObjectName(QStringLiteral("yandexHint"));
+    yandexHint->setWordWrap(true);
+    yandexLayout->addWidget(yandexHint);
+    servicesLayout->addWidget(m_yandexGroup);
+    connect(m_allowFreeServices, &QCheckBox::toggled, this,
+            &SettingsDialog::updateYandexControls);
+
     servicesLayout->addStretch();
     servicesScroll->setWidget(servicesContent);
     servicesPageLayout->addWidget(servicesScroll);
@@ -545,6 +560,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     updateProxyControls();
     updateMyMemoryControls();
     updateMozhiControls();
+    updateYandexControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -655,6 +671,11 @@ void SettingsDialog::updateMozhiControls()
     m_mozhiEffectiveInstance->setText(
         tr("Effective instance: %1").arg(normalizedMozhiInstance(text)));
     m_mozhiInstanceWarning->setVisible(!isValidMozhiInstance(text));
+}
+
+void SettingsDialog::updateYandexControls()
+{
+    m_yandexGroup->setEnabled(m_allowFreeServices->isChecked());
 }
 
 void SettingsDialog::updateProxyControls()
