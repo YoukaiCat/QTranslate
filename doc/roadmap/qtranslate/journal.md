@@ -2,23 +2,19 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/03-mozhi/01-mozhi-service` — `in-progress`, detailed; the
-coordinator is next. Mozhi is a stage with three tasks: the service/parser (current), the settings,
-and the UI/docs pass. The planner checked the public instance protocol on 2026-11-09: the response
-fields are `translated-text`/`detected`/`source_language`/`target_transliteration`, `auto` works for
-`google`, and several errors arrive as HTTP 500 bodies (429, invalid engine, invalid language).
-Decisions: Mozhi uses the Google code column (`iw`, `jw`, `tl`, `no`, `zh-CN`, `zh-TW`, `pt`),
-body-first error classification, `SameOriginRedirectPolicy`, 500 ms and 5000 UTF-16 as named
-assumptions, `+` encoded as `%2B`, settings version stays 1, cache reset on instance/engine change.
-The MyMemory stage is `done` (`371ab1e..082dac4`); Linux is 31/31, Windows 26 (not run). MyMemory's
-Auto-detect rough edge remains a later shared-UI decision. The infrastructure stage is `done`
-(`fee1bcf..fb531fa`). Decisions: one configured fallback step, not a literal multi-step chain; Bing
-and Reverso stay in the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is `done`;
-the user deferred the 0.12.0 release on 2026-11-08 (no version bump, tag, push, or release; the CI
-publication is not performed). The working tree is clean after the Mozhi-split commit; branch `main`
-matches the root `branch:` and is ahead of `origin/main`; nothing is pushed. Next: the Mozhi service
-coordinator, then the settings and UI/docs tasks. In a new session: `/new`, choose the `lead` agent,
-and enter `@continue`.
+Current node: `03-free-web-endpoints/03-mozhi/02-mozhi-settings` — `todo`, not detailed; the planner
+is next. The Mozhi service/parser task is `done` (`7e88d9c`): `MozhiParser` and `MozhiService` are
+behind the opt-in gate with a 500 ms pause, 5000 UTF-16 chunks, `auto`, Google codes, body-first
+errors and `SameOriginRedirectPolicy`; Linux is 33/33 and Windows 28 is not run. The settings task
+adds `[mozhi] instance`/`engine`, normalization, `applySettings` and the cache reset; the UI/docs
+task follows. The MyMemory stage is `done` (`371ab1e..082dac4`); MyMemory's Auto-detect rough edge
+remains a later shared-UI decision. The infrastructure stage is `done` (`fee1bcf..fb531fa`).
+Decisions: one configured fallback step, not a literal multi-step chain; Bing and Reverso stay in
+the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is `done`; the user deferred the
+0.12.0 release on 2026-11-08 (no version bump, tag, push, or release; the CI publication is not
+performed). The working tree is clean after the Mozhi-service commit; branch `main` matches the root
+`branch:` and is ahead of `origin/main`; nothing is pushed. Next: the settings planner, then the
+UI/docs task. In a new session: `/new`, choose the `lead` agent, and enter `@continue`.
 
 ## Journal
 
@@ -101,3 +97,4 @@ and enter `@continue`.
 - 2026-11-08 — Planner detailed `03-mymemory-settings-and-docs` (6 steps, `detailed: true`) and stopped at its context threshold with the file complete. Decisions: the group is visible but disabled while the gate is off; only two new `tr()` strings; `.ts` go from 299 to 301; `doc/architecture.md` §4.5/§4.7.3/§4.8/§4.9/§8/§4.14, `doc/free-endpoints.md` §6/§8/§9 and `AGENTS.md` 26/31 are updated here; READMEs, `doc/handoff.md`, the root plan and `07-fallback-chain` stay for the final pass; live smoke and Windows 26 are not performed. Status `in-progress`; coordinator next.
 - 2026-11-08 — Stage `03-free-web-endpoints/02-mymemory` accepted and closed `done` over `371ab1e..082dac4`; all three children are done (`d3fc444`, `f8fb880`, `9cfbdde`). The acceptance repeated Astra/trixie Debug/Release 31/31 with no warnings and found one real defect, fixed in `082dac4`: a literal `+` in the query was not encoded and reached MyMemory as a space (`C++`, `1+1`, `+7...`); the query now sends `%2B`, and `tst_mymemoryservice` checks the raw and decoded values. The lead fixed the stale counters and the "MyMemory remains experimental" line in architecture §9.2, the READMEs/root plan counts (26/31), the handoff state, and the stage outcome. Real problem left: Auto-detect remains selectable for MyMemory, which has no auto-detection, so it returns `UnsupportedLanguage` until the user picks a language; fixing the shared language combos is a later decision. A possible HTML-entity decoding of `translatedText` is unconfirmed without a live smoke. Windows 26 and the live smoke were not performed. Next: `03-mozhi` (`todo`, needs planner detail).
 - 2026-11-09 — Planner split `03-mozhi` into a stage with `01-mozhi-service` (detailed), `02-mozhi-settings`, and `03-mozhi-ui-and-docs`. The planner checked the public instance protocol (not an automated test): the response fields are `translated-text`/`detected`/`source_language`/`target_transliteration`, `auto` works for `google`, and several errors arrive as HTTP 500 bodies (`status code: 429`, invalid engine, invalid language). Decisions: Mozhi uses the Google code column (`iw`, `jw`, `tl`, `no`, `zh-CN`, `zh-TW`, `pt`), a body-first error classification, `SameOriginRedirectPolicy` so a redirect cannot silently change the recipient, 500 ms and 5000 UTF-16 code units as named assumptions, `+` encoded as `%2B`, settings version stays 1, and the cache is reset on an instance/engine change. The original `03-mozhi` task would have been ~45–50 files with three independent parts, hence the split. Counts become 33 Linux / 28 Windows after the two new tests. The first child is `in-progress`; coordinator next.
+- 2026-11-09 — Task `03-free-web-endpoints/03-mozhi/01-mozhi-service` done as `7e88d9c`. Added `MozhiParser` (`Response`, `parseResponse`, `parseErrorBody`, `errorForHttpStatus`, body-first classification with fixed messages) and `MozhiService` (`QueuedWebService`, `requiresOptIn`, 500 ms, 5000 UTF-16 via `TextChunker::split`, `GET <instance>/api/translate`, `auto`, Google codes, prefix instance, `SameOriginRedirectPolicy`, `+` → `%2B`, edge whitespace, sequential chunks, timeout/abort, no text/URL/body in logs), the `mozhi` language branch, `AppController` registration after MyMemory, 16 fixtures, `tst_mozhiparser` and `tst_mozhiwebservice` (local `QTcpServer`). The reviewer added `failedChunkFailsTheWholeReply`; no rejected remarks. Verification: Astra/trixie Debug/Release 33/33, no warnings, `tst_mozhiwebservice` 10 repeats per configuration. Windows 28 and the live smoke were not performed. Next: detail `02-mozhi-settings`.
