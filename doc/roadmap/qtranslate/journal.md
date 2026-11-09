@@ -8,18 +8,16 @@ stays `blocked` by the user's 2026-11-05 decision and is not dropped. The root i
 `Done when` requires every stage to be done or dropped, so stage 4's blocked state is a deliberate
 exception. Work is on `main` (matches the root `branch:`); the working tree is clean and nothing is
 pushed. Linux is 39/39, Windows 34 (derived, not run); the `.ts` count is 316 in every file.
-Stage `03-free-web-endpoints` is `in-progress`: `01-free-web-infrastructure`, `02-mymemory`,
-`03-mozhi`, `04-yandex-web`, `05-bing-web` and `06-reverso` are `done`; `07-fallback-chain` is in
-progress. Real deferred problem: an active reply can store a result fetched from the old
-instance/engine after `clearCache()` (cache-generation counter in `TranslationManager` plus a test;
-also covers `google.mode`, `deepl.mode`, `deepl.englishVariant`; the fallback-in-flight case is the
-same class). MyMemory's Auto-detect rough edge remains a later shared-UI decision (Reverso has the
-same issue: it rejects `auto` with a clear message); Yandex's `zh-Hant`→`zh` and the absent `pt-PT`
-are recorded limitations. Decisions: one configured fallback step, not a literal multi-step chain;
-Bing and Reverso stay in the stage; DeepL `free-web` stays outside the gate; the Bing POST is
-urlencoded, not multipart; Reverso has six languages and no `auto`. Stage `02-linux` is `done`; the
-user deferred the 0.12.0 release on 2026-11-08 (no version bump, tag, push, or release). Next: the
-lead's `03-fallback-docs` child, then the stage acceptance.
+
+The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
+captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
+clears the cache for `google.mode`, `deepl.mode` and `deepl.englishVariant`. Recorded limitations:
+MyMemory's Auto-detect rough edge and Reverso's rejection of `auto` remain a later shared-UI
+decision; Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded. Decisions: one configured
+fallback step, not a literal multi-step chain; DeepL `free-web` stays outside the gate; the Bing
+POST is urlencoded, not multipart; Reverso has six languages and no `auto`. The user deferred the
+0.12.0 release on 2026-11-08 (no version bump, tag, push, or release). Next: split and detail
+`05-proofreading` with the planner, then run it.
 
 ## Journal
 
