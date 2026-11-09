@@ -473,6 +473,32 @@ private slots:
         QCOMPARE(countPath(kPostPath), 0);
     }
 
+    // A control character in the scraped MUID means the page or a proxy is
+    // mangled: the value is dropped exactly like a missing one.
+    void muidWithControlCharacterIsRejected()
+    {
+        const QString muid = QStringLiteral("001122\t3344");
+        m_server->handler = [muid](const FakeHttpServer::Request &request) {
+            if (request.url.path() == kTokenPath)
+                return FakeHttpServer::Response{200, tokenPage(kToken, muid)};
+            return FakeHttpServer::Response{200, translationResponse(QStringLiteral("Hallo"))};
+        };
+
+        std::unique_ptr<TranslationReply> reply = translate(QStringLiteral("Hello"));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(5000));
+        QCOMPARE(reply->result().error, TranslationError::ServiceUnavailable);
+        QCOMPARE(reply->result().errorMessage,
+                 QStringLiteral("the token page has no session cookie"));
+        verifyFixedMessage(reply->result().errorMessage);
+        QVERIFY2(!reply->result().errorMessage.contains(muid),
+                 qPrintable(reply->result().errorMessage));
+        QVERIFY2(!reply->result().errorMessage.contains(QStringLiteral("3344")),
+                 qPrintable(reply->result().errorMessage));
+        QCOMPARE(countPath(kTokenPath), 1);
+        QCOMPARE(countPath(kPostPath), 0);
+    }
+
     void mapsLanguageCodes_data()
     {
         QTest::addColumn<QString>("source");
@@ -682,6 +708,46 @@ private slots:
             QVERIFY(!sent.at(sent.size() - 1).isHighSurrogate());
         }
         QCOMPARE(index, sentParts.size());
+    }
+
+    // The middle chunk is all spaces: it is never POSTed, and its whitespace is
+    // restored through the unsent-part branch.
+    void whitespaceOnlyPartsAreNotSent()
+    {
+        m_server->handler = [](const FakeHttpServer::Request &request) {
+            if (request.url.path() == kTokenPath)
+                return FakeHttpServer::Response{200, tokenPage()};
+            return FakeHttpServer::Response{200, echoResponse(request.body)};
+        };
+
+        const QString text = QStringLiteral("Hello") + QString(12000, QLatin1Char(' '))
+            + QStringLiteral("World");
+        const QStringList expectedParts = TextChunker::split(text, 5000);
+        QCOMPARE(expectedParts.size(), 3);
+        QVERIFY(expectedParts.at(1).trimmed().isEmpty());
+
+        std::unique_ptr<TranslationReply> reply =
+            translate(text, QStringLiteral("ru"), QStringLiteral("en"));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(30000));
+        QVERIFY2(reply->result().ok(), qPrintable(reply->result().errorMessage));
+        QCOMPARE(reply->result().translatedText, text);
+        QCOMPARE(reply->result().detectedSourceLang, QStringLiteral("en"));
+
+        // One token GET and two POSTs: the whitespace-only chunk produces none.
+        QCOMPARE(countPath(kTokenPath), 1);
+        QCOMPARE(countPath(kPostPath), 2);
+        qsizetype posts = 0;
+        for (const FakeHttpServer::Request &request : std::as_const(m_server->requests)) {
+            if (request.url.path() != kPostPath)
+                continue;
+            ++posts;
+            const QString sent = formValue(request.body, QStringLiteral("text"));
+            QVERIFY2(!sent.isEmpty() && !sent.trimmed().isEmpty(), qPrintable(sent));
+            QVERIFY2(sent.size() <= 5000,
+                     qPrintable(QStringLiteral("%1 UTF-16 units").arg(sent.size())));
+        }
+        QCOMPARE(posts, 2);
     }
 
     void pacesChunks()

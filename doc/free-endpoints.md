@@ -127,7 +127,7 @@ made the only translation method.
 - Response `[{"translations":[{"text":...}],"detectedLanguage":{"language":...}}]`: the first element
   with translations is used, `text` values are joined, and `detectedLanguage` is mapped back. Errors
   are body-first: 401/403/429 and rate-limit bodies → `RateLimited`, 413 → `TooLong`, 5xx →
-  `Network`, HTML/missing markers/missing MUID/blocked/provider errors → `ServiceUnavailable`,
+  `Network`, HTML/missing markers/missing MUID/blocked/other provider errors → `ServiceUnavailable`,
   malformed/empty responses → `BadResponse`, timeout/abort → `Timeout`/`Cancelled`.
 - Tests: `tst_bingwebparser`, `tst_bingwebservice`, `tst_languages`, `tst_settingsdialog`; CTest
   never contacts the real endpoint, and a live smoke is manual only.

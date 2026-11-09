@@ -1158,10 +1158,10 @@ text=<text>&fromLang=<source>&to=<target>&token=<token>&key=<key>&isAuthv2=true&
   | Condition | `TranslationError` |
   |---|---|
   | a second 401 (HTTP or body `statusCode`) in the same reply | `RateLimited` |
-  | HTTP 403/429 or a rate-limit body | `RateLimited` |
-  | HTTP 413 | `TooLong` |
-  | HTTP 5xx without a recognised body | `Network` |
-  | an HTML page, a missing token marker, a missing MUID, a blocked body, or a provider error object with a status other than 401/403/429 | `ServiceUnavailable` |
+  | HTTP 403/429, a body `statusCode` 403/429, or a rate-limit body | `RateLimited` |
+  | HTTP 413 or a body `statusCode` 413 | `TooLong` |
+  | HTTP 5xx without a recognised body, or a body `statusCode` 5xx | `Network` |
+  | an HTML page, a missing token marker, a missing MUID, a blocked body, or another provider error object (including one with only an `errorMessage`) | `ServiceUnavailable` |
   | malformed JSON, an empty array, a missing/empty `translations` array or `text`, or an unknown non-2xx status | `BadResponse` |
   | a network error | `Network` |
   | timeout / `abort()` | `Timeout` / `Cancelled` |
