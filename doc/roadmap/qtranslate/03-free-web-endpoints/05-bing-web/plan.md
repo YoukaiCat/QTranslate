@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 53b43a5
 depends: [01-free-web-infrastructure]
 ---
@@ -167,3 +167,24 @@ counts. `06-reverso` follows in the stage order but depends only on `01-free-web
   recorded as not performed.
 - Windows Debug/Release and its 32 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+
+## Outcome
+
+Accepted over `53b43a5..169dff6` on 2026-11-09. The Bing web endpoint is implemented as the fourth
+opt-in free service: `BingWebParser` and `BingWebService`, the `bing-web` language branch, the
+gate-aware `Bing` settings group and the documentation. Commits: `444764a` parser, `ef510a0`
+service, `fb04851` settings, `639f234` docs, `7cc5244` lead README/handoff/root-plan pass, `169dff6`
+acceptance fixes. `tst_bingwebparser` 55/55 and `tst_bingwebservice` 74/74 (the acceptance added the
+all-whitespace and control-character MUID cases); `tst_settingsdialog` 26/26; `tst_translations`
+4/4; Astra and trixie Debug/Release 37/37 with no warnings. The live smoke from `02` passed
+(`Hallo Welt`, detected `en`). Windows Debug/Release and its 32 tests were not performed (no MSVC).
+The acceptance corrected the §4.7.6 error table for body `statusCode` 403/413/429/5xx and the
+matching `free-endpoints.md` sentence.
+
+Known gaps carried forward: the `m_service` guard in `BingWebService::Reply::onFinished()` has no
+test for destroying the service during the token GET (reviewed by reading); the count-mismatch branch
+in `finishTranslation()` has no wire test and is not reachable with the current success path; the
+generic `pt-PT`/`zh-Hant` `roundTrip()` exception also skips those two Bing pairs, while explicit
+forward/reverse rows cover them; the 1000 ms pause and 5000 UTF-16 chunk remain conservative
+assumptions. No real problems were left unfixed because of cost. The READMEs now separate MyMemory
+(a free API) from the unofficial Mozhi, Yandex web and Bing web endpoints.

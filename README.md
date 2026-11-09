@@ -98,9 +98,10 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
   in **Settings → Services → Google Translate**.
 - **DeepL** — official API with a key or the unofficial free web mode without a key. Both modes are
   in **Settings → Services → DeepL**.
-- **Free web services** — MyMemory, Mozhi, Yandex web and Bing web are optional no-key endpoints.
-  They are unofficial and may be rate-limited, change or stop working; enable them under
-  **Settings → Services → Allow free web services**. Google and DeepL remain the primary providers.
+- **Free web services** — MyMemory is a free no-key API; Mozhi, Yandex web and Bing web are
+  unofficial no-key endpoints. All are optional and gated by **Settings → Services → Allow free web
+  services**; the unofficial ones may be rate-limited, change or stop working. Google and DeepL
+  remain the primary providers.
 - **OpenAI-compatible provider** — the default server is [OpenRouter](https://openrouter.ai)
   (`https://openrouter.ai/api/v1`). OpenRouter **requires a key**; it offers free models such as
   `openrouter/free` and paid models. Paste the key, keep or change the model, and press
@@ -245,9 +246,9 @@ security policy's approval. To revoke it, run
   Cloud/DeepL with an API key.
 - DeepL free web mode is an unofficial endpoint without an API key. It may be rate-limited, change
   or stop working; the official DeepL API is more reliable.
-- MyMemory, Mozhi, Yandex web and Bing web are unofficial endpoints without an API key. They may be
-  rate-limited, change or stop working, and the text is sent to a third party; the official APIs are
-  more reliable.
+- Mozhi, Yandex web and Bing web are unofficial endpoints without an API key. They may be
+  rate-limited, change or stop working; MyMemory is a free no-key API with its own quota and a
+  500-byte request limit. All of them send the text to a third party.
 - OpenRouter and other OpenAI-compatible providers need an API key and an available model. Quality,
   speed and cost depend on the chosen model; free models have strict rate limits. The text is sent
   to the selected provider.

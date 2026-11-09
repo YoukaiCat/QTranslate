@@ -86,8 +86,8 @@ documentation is English. The migration to the tree roadmap and the English base
 - Release 0.12.0 is deferred by user decision on 2026-11-08. When it happens, the version bump, the
   README download links, and `doc/releases/0.12.0.md` are needed; the old 0.11.1 GitHub release is
   deleted then (user decision). The roadmap is in stage 3: the opt-in gate, the shared queue,
-  MyMemory, Mozhi, Yandex web and Bing web are done; the `05-bing-web` acceptance and `06-reverso`
-  are next.
+  MyMemory, Mozhi, Yandex web and Bing web are done; the Bing stage is accepted and `06-reverso`
+  is next.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 

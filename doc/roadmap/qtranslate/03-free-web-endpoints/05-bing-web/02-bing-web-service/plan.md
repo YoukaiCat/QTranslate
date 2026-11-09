@@ -529,4 +529,6 @@ after Yandex, and no settings group, `.ts`, documentation, README, `doc/handoff.
   `QPointer` dereference in `finishTokenPage()` if the service was destroyed while the GET was in
   flight) — fixed by the guard that fails the reply with `Network`. No rejected findings and no real
   problem was deferred because of cost. The count-mismatch branch in `finishTranslation()` has no wire
-  test, because a successful POST always returns one translation per chunk.
+  test, because a successful POST always returns one translation per chunk. The `05-bing-web`
+  acceptance added `whitespaceOnlyPartsAreNotSent` and `muidWithControlCharacterIsRejected`, so
+  `tst_bingwebservice` is 74/74; the full suite stayed 37/37.

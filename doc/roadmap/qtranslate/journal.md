@@ -2,22 +2,21 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/05-bing-web` — stage `in-progress`, all four children `done`;
-the stage acceptance over `53b43a5..HEAD` is next. The task commits are `444764a` (parser),
-`ef510a0` (service), `fb04851` (settings) and `639f234` (docs); the lead's README/handoff/root-plan
-pass is `7cc5244`. Linux is 37/37, Windows 32 (derived, not run); `tst_settingsdialog` is 26 and the
-`.ts` files have 311 messages. The working tree is clean; `main` matches the root `branch:` and is
-ahead of `origin/main`; nothing is pushed. Stage `03-free-web-endpoints` is `in-progress`:
-`01-free-web-infrastructure`, `02-mymemory`, `03-mozhi` and `04-yandex-web` are `done`;
-`06-reverso` and `07-fallback-chain` are `todo`. Real deferred problem: an active reply can store a
-result fetched from the old instance/engine after `clearCache()` (cache-generation counter in
-`TranslationManager` plus a test; also covers `google.mode`, `deepl.mode`, `deepl.englishVariant`).
-MyMemory's Auto-detect rough edge remains a later shared-UI decision; Yandex's `zh-Hant`→`zh` and the
-absent `pt-PT` are recorded limitations. Decisions: one configured fallback step, not a literal
-multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web` stays outside the gate; the
-Bing POST is urlencoded, not multipart. Stage `02-linux` is `done`; the user deferred the 0.12.0
-release on 2026-11-08 (no version bump, tag, push, or release). Next: the stage acceptance for
-`05-bing-web`.
+Current node: `03-free-web-endpoints/06-reverso` — `todo`, not detailed; the planner is next. The
+Bing stage `05-bing-web` is `done` (accepted over `53b43a5..169dff6`; tasks `444764a`, `ef510a0`,
+`fb04851`, `639f234`; lead pass `7cc5244`; acceptance fixes `169dff6`). Linux is 37/37, Windows 32
+(derived, not run); `tst_settingsdialog` is 26 and the `.ts` files have 311 messages. The working
+tree is clean; `main` matches the root `branch:` and is ahead of `origin/main`; nothing is pushed.
+Stage `03-free-web-endpoints` is `in-progress`: `01-free-web-infrastructure`, `02-mymemory`,
+`03-mozhi`, `04-yandex-web` and `05-bing-web` are `done`; `06-reverso` and `07-fallback-chain` are
+`todo`. Real deferred problem: an active reply can store a result fetched from the old instance/engine
+after `clearCache()` (cache-generation counter in `TranslationManager` plus a test; also covers
+`google.mode`, `deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a
+later shared-UI decision; Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations.
+Decisions: one configured fallback step, not a literal multi-step chain; Bing and Reverso stay in
+the stage; DeepL `free-web` stays outside the gate; the Bing POST is urlencoded, not multipart.
+Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version bump,
+tag, push, or release). Next: the planner splits or details `06-reverso`.
 
 ## Journal
 
@@ -118,4 +117,5 @@ release on 2026-11-08 (no version bump, tag, push, or release). Next: the stage 
 - 2026-11-09 — Planner detailed `03-bing-web-settings` (6 steps, `detailed: true`). Decisions: the task stays one (17 files, 14 `.ts` mechanical); the hint is one `tr()` message, not a runtime `%1` built from the Yandex string; no `m_bingHint` member; the test uses `{de, en, ru}`, `isHidden()`/`isEnabled()` and checks the order only after Yandex; `update_translations` must keep `src/platform/hotkeymanager_win.cpp` in the scan; `.ts` 309 → 311; `tst_settingsdialog` 25 → 26 (23 named cases plus init/cleanup before, 24 named after); `Bing` stays untranslated in `displayName()`; the stale `<location>` churn from `01`/`02` is expected. No user question; no code touched. Coordinator next; no push.
 - 2026-11-09 — Task `03-free-web-endpoints/05-bing-web/03-bing-web-settings` done as `fb04851`. Added the gate-aware `Bing` group after Yandex with one word-wrapped `bingHint` (unofficial/no-key, gate, rate limits/blocks, several requests, third party) and no key/URL/`AppSettings` field; `updateBingControls()` follows `translation/allowFreeServices`, is connected to the toggle and called at the end of `loadValues()`. Added `tst_settingsdialog::bingGroup` (26 passed, 24 named cases) and two messages in all 14 `.ts` (309 → 311, 0 unfinished/empty/vanished; `Bing` untranslated, the hint translated; the Windows-only hotkey message stayed; the `fr`/`it` apostrophe serialization changed from `'` to `&apos;` for an existing Yandex string — not a translation loss). Verification: Astra Debug/Release and a fresh trixie Release, 0 warnings, 37/37; Windows 32 not performed. Review found no blockers; no real problems. Next: `04-bing-web-docs`.
 - 2026-11-09 — Task `03-free-web-endpoints/05-bing-web/04-bing-web-docs` done by the lead (documentation-only, no coordinator) as `639f234`. Updated `doc/architecture.md` §3.1/§3.2/§4.5/new §4.7.6/§4.8/§4.9/§8/§4.14/§9.2, `doc/free-endpoints.md` status/§3/§8/§9, and `AGENTS.md` 32/37; the link check found 0 broken links, `ctest -N` reports 37 Linux tests (29 shared plus 8 Linux-only), and the historical 0.12.0 sentence (33 tests) in §9.2 stays unchanged. No code, tests, UI, `.ts` or CMake changed. Next: the lead's README/handoff/root-plan pass, then the stage acceptance.
-- 2026-11-09 — Lead final pass `7cc5244`: `README.md`/`README.ru.md` now list the free web services (MyMemory, Mozhi, Yandex web, Bing web) as optional unofficial fallbacks and say 37 tests/29 shared; `doc/handoff.md` has the current state, 32/37 counts, the Bing implementation details and the passed live smoke; the root plan says 32/37 and lists Bing as implemented. All four children of `05-bing-web` are done; the stage acceptance over `53b43a5..HEAD` is next. No push.
+- 2026-11-09 — Lead final pass `7cc5244`: `README.md`/`README.ru.md` now list the free web services (MyMemory, Mozhi, Yandex web, Bing web) as optional fallbacks and say 37 tests/29 shared; `doc/handoff.md` has the current state, 32/37 counts, the Bing implementation details and the passed live smoke; the root plan says 32/37 and lists Bing as implemented. All four children of `05-bing-web` are done; the stage acceptance over `53b43a5..HEAD` is next. No push.
+- 2026-11-09 — Stage `03-free-web-endpoints/05-bing-web` accepted and closed `done` over `53b43a5..169dff6`; all four children are done (`444764a`, `ef510a0`, `fb04851`, `639f234`; lead pass `7cc5244`). The acceptance repeated Astra/trixie Debug/Release 37/37 with no warnings; `tst_bingwebparser` 55/55, `tst_bingwebservice` 74/74 (two acceptance tests added), `tst_settingsdialog` 26/26, `tst_translations` 4/4; it checked the gate/INI, cookie isolation, 401-refresh, urlencoded POST, 1000 ms/5000 UTF-16, the language mapping and the docs/README counts. Three accepted fixes in `169dff6`: the §4.7.6 error table now maps body `statusCode` 403/413/429/5xx correctly, `free-endpoints.md` matches it, and the all-whitespace chunk and control-character MUID cases are covered. Known gaps: the `m_service` guard has no destruction test, the count-mismatch branch has no wire test, the `roundTrip()` exception skips `pt-PT`/`zh-Hant` (explicit rows cover them), and the 1000 ms/5000 UTF-16 values remain assumptions. No real problems were left unfixed because of cost. The READMEs were corrected to call MyMemory a free API and only Mozhi/Yandex/Bing unofficial. Next: `06-reverso`; no push.
