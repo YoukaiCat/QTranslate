@@ -2,20 +2,20 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/04-yandex-web/02-yandex-web-settings` — `todo`, not detailed;
-the planner is next. The Yandex service/parser task is `done` (`34dd4a6`): Linux is 35/35, Windows 30
-is not run. The settings/UI task adds the Yandex group and the new strings in the 14 `.ts`; the docs
-task follows, then the Yandex stage acceptance. The Mozhi stage is `done` (`c4d3eed..52e5196`).
-Real deferred problem: an active reply can store a result fetched from the old instance/engine after
-`clearCache()` (cache-generation counter in `TranslationManager` plus a test; also covers
-`google.mode`, `deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a
-later shared-UI decision. Decisions: one configured fallback step, not a literal multi-step chain;
-Bing and Reverso stay in the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is
-`done`; the user deferred the 0.12.0 release on 2026-11-08 (no version bump, tag, push, or release;
-the CI publication is not performed). The working tree is clean after the Yandex-service commit;
-branch `main` matches the root `branch:` and is ahead of `origin/main`; nothing is pushed. Next: the
-settings/UI planner, then its coordinator, then the docs task. In a new session: `/new`, choose the
-`lead` agent, and enter `@continue`.
+Current node: `03-free-web-endpoints/04-yandex-web/02-yandex-web-settings` — `in-progress`, detailed;
+the coordinator is next. The Yandex service is `done` (`34dd4a6`); this task adds the Yandex group
+with the unofficial/opt-in hint and the two new strings in the 14 `.ts` (307 → 309); the docs task
+follows, then the Yandex stage acceptance. Linux is 35/35, Windows 30 is not run. The Mozhi stage is
+`done` (`c4d3eed..52e5196`). Real deferred problem: an active reply can store a result fetched from
+the old instance/engine after `clearCache()` (cache-generation counter in `TranslationManager` plus
+a test; also covers `google.mode`, `deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect
+rough edge remains a later shared-UI decision. Decisions: one configured fallback step, not a
+literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web` stays outside the
+gate. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version
+bump, tag, push, or release; the CI publication is not performed). The working tree is clean after
+the Yandex-settings-plan commit; branch `main` matches the root `branch:` and is ahead of
+`origin/main`; nothing is pushed. Next: the settings coordinator, then the docs task. In a new
+session: `/new`, choose the `lead` agent, and enter `@continue`.
 
 ## Journal
 
@@ -105,3 +105,4 @@ settings/UI planner, then its coordinator, then the docs task. In a new session:
 - 2026-11-09 — Stage `03-free-web-endpoints/03-mozhi` accepted and closed `done` over `c4d3eed..52e5196`; all three children are done (`7e88d9c`, `2cda61a`, `52e5196`). The acceptance repeated Astra/trixie Debug/Release 33/33 with no warnings, checked the service/settings/UI/docs integration and the gate/INI path, and found no code defects; no fixes were needed. The lead fixed the stale lead-owned lines (architecture §9.2/§11.7, READMEs/root plan 28/33, handoff state and counts) and wrote the stage outcome. Real deferred problem: the cache-generation race (an active reply can store a result fetched from the old instance/engine after `clearCache()`; the same applies to `google.mode`/`deepl.mode`/`deepl.englishVariant`) needs a counter in `TranslationManager` and a test; MyMemory's Auto-detect rough edge remains. Windows 28 and the live Mozhi smoke were not performed. Next: `04-yandex-web` (`todo`, needs planner detail).
 - 2026-11-09 — Planner split `04-yandex-web` into a stage with `01-yandex-web-service` (detailed), `02-yandex-web-settings`, and `03-yandex-web-docs`. Decisions: the documented form fields and `POST` body; a browser User-Agent (Chrome/YaBrowser constant) set only on the Yandex request, leaving `NetworkManager`/`AppInfo` unchanged; the response is `[{"text","from","to"}]` read as an array; a 71-code whitelist plus `zh-Hans`/`zh-Hant`→`zh`, `nb`→`no`, `pt-BR`→`pt` overrides; the documented protocol has no source field, so an explicit source is validated but the request sends `targetLang=auto` and the target goes to `statLang`/`locale`; body-first errors, `SameOriginRedirectPolicy`, 750 ms and 5000 UTF-16 as named assumptions; README/handoff/root deferred to 07/lead. Counts become 35 Linux / 30 Windows. The first child is `in-progress`; coordinator next.
 - 2026-11-09 — Task `03-free-web-endpoints/04-yandex-web/01-yandex-web-service` done as `34dd4a6`. Added `YandexWebParser` (first array element `text`/`from`, HTML/captcha and JSON/plain-text error classification, fixed messages) and `YandexWebService` (`QueuedWebService`, `requiresOptIn`, POST form with the documented fields, browser Chrome/YaBrowser UA only on this request, `SameOriginRedirectPolicy`, 750 ms, 5000 UTF-16 chunks, edge whitespace, sequential chunks, no text/body/URL/UA in logs), the `yandex-web` language whitelist with `zh-Hans`/`zh-Hant`→`zh`, `nb`→`no`, `pt-BR`→`pt`, and `AppController` registration after Mozhi. Verification: Astra/trixie Debug/Release 35/35, no warnings, 21 fixtures, `tst_yandexwebservice` 10 repeats per configuration; no reviewer remarks. Known limitations: `zh-Hant` sends `zh` (back as `zh-Hans`), `pt-PT` is not declared, and the 750 ms/5000 UTF-16 limits are documented assumptions. Windows 30 and the live smoke were not performed. Next: detail `02-yandex-web-settings`.
+- 2026-11-09 — Planner detailed `02-yandex-web-settings` (6 steps, `detailed: true`). Decisions: one `m_yandexGroup` after the whole Mozhi block; one `tr()` hint covering unofficial/no-key, the gate, rate limits/blocks, several requests, and the third party; two new strings (307 → 309); `tst_settingsdialog` grows to 25, using `{de, en, ru}` and `isHidden()/isEnabled()`; no key/URL field, no `AppSettings` field, no new target. The planner confirmed 307 messages in each `.ts`, no `Yandex` message yet (`settingsdialog.cpp:350` is a `QStringLiteral`), and the gate-aware pattern. Status `in-progress`; coordinator next.
