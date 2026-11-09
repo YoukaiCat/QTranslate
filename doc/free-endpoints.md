@@ -1,8 +1,8 @@
 # Free web translation endpoints
 
-Date: 2026-11-08. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
-mode of the DeepL service, and MyMemory is implemented as a gated no-key service; the other
-endpoints are research**.
+Date: 2026-11-09. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
+mode of the DeepL service, and MyMemory and Mozhi are implemented as gated no-key services; the
+other endpoints are research**.
 
 This document records the free endpoints without an API key that can be added to qtranslate as
 experimental services. The main source is the open project
@@ -93,6 +93,42 @@ made the only translation method.
 - **Pro:** one integration gives several engines and a self-hosted option.
 - **Con:** it is a proxy to third-party endpoints; stability and terms depend on the instance.
 
+**Implementation in qtranslate (2026-11-09).**
+
+- The `mozhi` service: `GET <instance>/api/translate?engine=<engine>&from=<src>&to=<dst>&text=<text>`
+  with `Accept: application/json`; no key (`isConfigured() == true`). The instance is a base URL, so
+  a path prefix is kept (`https://host/mozhi` → `https://host/mozhi/api/translate`), and the settings
+  reject credentials, a query and a fragment. The instance is editable, with the default
+  `https://mozhi.adminforge.de`; there is no hidden instance rotation, so the text goes only to the
+  configured instance.
+- The engine is editable, default `google`, with the documented ids `google`, `deepl`,
+  `duckduckgo`, `libretranslate`, `mymemory`, `reverso` and `yandex`; no key or other secret field.
+- Language codes reuse the Google column: `zh-Hans`→`zh-CN`, `zh-Hant`→`zh-TW`, `he`→`iw`,
+  `jv`→`jw`, `nb`→`no`, `fil`→`tl`, `pt-BR`→`pt`; `mozhiCodeOf()` is the single fix point. `auto`
+  is sent as `auto` (the default `google` engine accepts it); a rejected pair becomes
+  `UnsupportedLanguage`. An engine can pass an upstream error through `translated-text` with HTTP
+  200 (seen with `engine=mymemory` and `auto`), so `auto` depends on the engine.
+- 5000 UTF-16 code units per request (`TextChunker::split`) and a 500 ms pause between chunks are
+  conservative assumptions, not measured limits; chunks are sent sequentially inside one queue slot
+  of `QueuedWebService`, edge whitespace is restored, and HTTP 413/414 → `TooLong` means the
+  percent-encoded URL got too long.
+- Every request uses `SameOriginRedirectPolicy`: a cross-origin redirect is refused.
+- Response fields: `translated-text` (required), `detected`, `source_language`,
+  `target_transliteration`; `detected` fills `detectedSourceLang`, falling back to a non-`auto`
+  `source_language`.
+- Errors: 403/429 or a rate-limit body → `RateLimited`; 413/414 → `TooLong`; 5xx without a
+  recognised body → `Network`; an HTML page, a disabled engine or a JSON `error` →
+  `ServiceUnavailable`; an invalid-language body → `UnsupportedLanguage`; malformed JSON, a
+  missing/empty text or an unknown non-2xx status → `BadResponse`; timeout/abort →
+  `Timeout`/`Cancelled`. The body is classified before the status; messages are fixed literals
+  without the text, the body or the URL.
+- Behind the opt-in gate `translation/allowFreeServices` (off by default), like MyMemory:
+  `requiresOptIn() == true`, hidden from the pickers and refused by `TranslationManager` while the
+  gate is off. `applySettings()` reads the normalized `[mozhi]` values.
+- Code: `src/services/mozhiparser.*`, `src/services/mozhiservice.*`; tests: `tst_mozhiparser`,
+  `tst_mozhiwebservice`, `tst_languages`, `tst_settings`, `tst_settingsdialog`. CTest never contacts
+  a real instance; a live smoke is manual only.
+
 ## 6. MyMemory
 
 - **Request:** `GET https://api.mymemory.translated.net/get?q=...&langpair=en|ru&mt=1`
@@ -143,12 +179,13 @@ remains unofficial.
    with `ServiceUnavailable` until the user enables it. The DeepL `free-web` mode stays outside the
    gate as an explicit mode with its own warning.
 2. For each service — its own `TranslationService` and parser; no keys are needed. Implemented for
-   MyMemory (`src/services/mymemory*`); it is the first real service behind the gate.
+   MyMemory (`src/services/mymemory*`) and Mozhi (`src/services/mozhi*`); they are the first two
+   real services behind the gate.
 3. Per-host rate limiting: implemented infrastructure in `QueuedWebService` — replies of one host
-   are serialized and paused by the service-specific value (DeepL 2 s, MyMemory 350 ms; Yandex
-   750 ms and Reverso 600 ms are planned); no parallel requests to one host.
-4. Text splitting: implemented for DeepL (5000 characters) and MyMemory (500 UTF-8 bytes); the
-   rest — according to the service limits.
+   are serialized and paused by the service-specific value (DeepL 2 s, MyMemory 350 ms, Mozhi
+   500 ms; Yandex 750 ms and Reverso 600 ms are planned); no parallel requests to one host.
+4. Text splitting: implemented for DeepL (5000 characters), MyMemory (500 UTF-8 bytes) and Mozhi
+   (5000 UTF-16 code units); the rest — according to the service limits.
 5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,
    without a retry storm.
 6. Fallback: the official API → free web → Mozhi/another service; do not show raw HTML.
@@ -160,7 +197,7 @@ remains unofficial.
 
 1. **DeepL web** — implemented: high quality but high risk; available as a DeepL mode.
 2. **MyMemory** — implemented: the simplest and relatively official free API.
-3. **Mozhi** — one integration, many engines, self-hosting possible.
+3. **Mozhi** — implemented: one integration, many engines, self-hosting possible.
 4. **Yandex web** — important for the Russian audience.
 5. **Bing web** — fragile auth and HTML; do it after the rest.
 6. **Reverso** — niche, fewer languages.

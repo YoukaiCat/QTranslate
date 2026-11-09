@@ -13,6 +13,7 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHash>
 #include <QKeySequenceEdit>
 #include <QLabel>
 #include <QLineEdit>
@@ -328,6 +329,59 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     connect(m_allowFreeServices, &QCheckBox::toggled, this,
             &SettingsDialog::updateMyMemoryControls);
 
+    m_mozhiGroup = new QGroupBox(tr("Mozhi"), servicesContent);
+    m_mozhiGroup->setObjectName(QStringLiteral("mozhiGroup"));
+    auto *mozhiLayout = new QVBoxLayout(m_mozhiGroup);
+    auto *mozhiForm = new QFormLayout;
+    m_mozhiInstance = new QLineEdit(m_mozhiGroup);
+    m_mozhiInstance->setObjectName(QStringLiteral("mozhiInstance"));
+    m_mozhiInstance->setPlaceholderText(MozhiSettings{}.instance);
+    mozhiForm->addRow(tr("Instance URL:"), m_mozhiInstance);
+    m_mozhiEngine = new QComboBox(m_mozhiGroup);
+    m_mozhiEngine->setObjectName(QStringLiteral("mozhiEngine"));
+    // Display names are product names, so they stay untranslated.
+    const QHash<QString, QString> engineNames = {
+        {QStringLiteral("google"), QStringLiteral("Google")},
+        {QStringLiteral("deepl"), QStringLiteral("DeepL")},
+        {QStringLiteral("duckduckgo"), QStringLiteral("DuckDuckGo")},
+        {QStringLiteral("libretranslate"), QStringLiteral("LibreTranslate")},
+        {QStringLiteral("mymemory"), QStringLiteral("MyMemory")},
+        {QStringLiteral("reverso"), QStringLiteral("Reverso")},
+        {QStringLiteral("yandex"), QStringLiteral("Yandex")},
+    };
+    for (const QString &id : mozhiEngineIds())
+        m_mozhiEngine->addItem(engineNames.value(id, id), id);
+    mozhiForm->addRow(tr("Engine:"), m_mozhiEngine);
+    mozhiLayout->addLayout(mozhiForm);
+    m_mozhiEffectiveInstance = new QLabel(m_mozhiGroup);
+    m_mozhiEffectiveInstance->setObjectName(QStringLiteral("mozhiEffectiveInstance"));
+    m_mozhiEffectiveInstance->setWordWrap(true);
+    m_mozhiEffectiveInstance->setTextFormat(Qt::PlainText);
+    mozhiLayout->addWidget(m_mozhiEffectiveInstance);
+    m_mozhiInstanceWarning = new QLabel(
+        tr("Enter a base http(s) instance URL without credentials, a query or a fragment. "
+           "The default instance will be used."),
+        m_mozhiGroup);
+    m_mozhiInstanceWarning->setObjectName(QStringLiteral("mozhiInstanceWarning"));
+    m_mozhiInstanceWarning->setWordWrap(true);
+    m_mozhiInstanceWarning->setVisible(false);
+    mozhiLayout->addWidget(m_mozhiInstanceWarning);
+    m_mozhiHint = new QLabel(
+        tr("Mozhi is a proxy to public translation engines. Instances are unofficial: they may "
+           "stop working or rate-limit requests, and some engines may be disabled on an instance. "
+           "A self-hosted instance's terms and stability are your responsibility. Enable free web "
+           "services above to use Mozhi. Long text is sent in several requests. The text is sent "
+           "to the selected instance and engine."),
+        m_mozhiGroup);
+    m_mozhiHint->setObjectName(QStringLiteral("mozhiHint"));
+    m_mozhiHint->setWordWrap(true);
+    mozhiLayout->addWidget(m_mozhiHint);
+    servicesLayout->addWidget(m_mozhiGroup);
+    connect(m_allowFreeServices, &QCheckBox::toggled, this,
+            &SettingsDialog::updateMozhiControls);
+    connect(m_mozhiInstance, &QLineEdit::textChanged, this,
+            &SettingsDialog::updateMozhiControls);
+
     servicesLayout->addStretch();
     servicesScroll->setWidget(servicesContent);
     servicesPageLayout->addWidget(servicesScroll);
@@ -448,6 +502,13 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_maxLength->setValue(settings.translation.maxLength);
     m_autoTranslateDelay->setValue(settings.translation.autoTranslateDelayMs);
     m_allowFreeServices->setChecked(settings.translation.allowFreeServices);
+    {
+        const QSignalBlocker blocker(m_mozhiInstance);
+        m_mozhiInstance->setText(settings.mozhi.instance);
+    }
+    const int mozhiEngine =
+        m_mozhiEngine->findData(normalizedMozhiEngine(settings.mozhi.engine));
+    m_mozhiEngine->setCurrentIndex(mozhiEngine >= 0 ? mozhiEngine : 0);
 
     const int googleMode = m_googleMode->findData(settings.google.mode);
     m_googleMode->setCurrentIndex(googleMode >= 0 ? googleMode : 0);
@@ -483,6 +544,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_testProxy->setEnabled(true);
     updateProxyControls();
     updateMyMemoryControls();
+    updateMozhiControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -509,6 +571,8 @@ AppSettings SettingsDialog::settings() const
     result.deepl.mode = m_deeplMode->currentData().toString();
     result.deepl.apiKey = m_deeplApiKey->text().trimmed();
     result.deepl.englishVariant = m_deeplEnglishVariant->currentData().toString();
+    result.mozhi.instance = normalizedMozhiInstance(m_mozhiInstance->text());
+    result.mozhi.engine = normalizedMozhiEngine(m_mozhiEngine->currentData().toString());
     result.llm.baseUrl = m_llmBaseUrl->text().trimmed();
     result.llm.apiKey = m_llmApiKey->text().trimmed();
     result.llm.model = m_llmModel->currentText().trimmed();
@@ -582,6 +646,15 @@ void SettingsDialog::updateDeepLControls()
 void SettingsDialog::updateMyMemoryControls()
 {
     m_mymemoryGroup->setEnabled(m_allowFreeServices->isChecked());
+}
+
+void SettingsDialog::updateMozhiControls()
+{
+    m_mozhiGroup->setEnabled(m_allowFreeServices->isChecked());
+    const QString text = m_mozhiInstance->text();
+    m_mozhiEffectiveInstance->setText(
+        tr("Effective instance: %1").arg(normalizedMozhiInstance(text)));
+    m_mozhiInstanceWarning->setVisible(!isValidMozhiInstance(text));
 }
 
 void SettingsDialog::updateProxyControls()

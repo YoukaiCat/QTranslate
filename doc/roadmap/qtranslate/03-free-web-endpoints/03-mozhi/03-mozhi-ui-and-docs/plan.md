@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [02-mozhi-settings]
 ---
@@ -547,3 +547,65 @@ Debug/Release and its 28 tests as not performed (no MSVC).
   on this Linux machine; record them as not performed, not as passed.
 - Do not add the README/handoff/root/`07` edits here; duplicating the provider/fallback tables would
   create two sources of truth, and the final pass belongs to `07-fallback-chain`/the lead.
+
+## Outcome
+
+Done on 2026-11-09. The Services page has a `Mozhi` group (`mozhiGroup`) after `Free web services`
+and `MyMemory`, so the gate checkbox stays above both groups. The group contains the only text
+field `mozhiInstance` (prefilled from `settings.mozhi.instance`, placeholder `MozhiSettings{}.instance`),
+the `mozhiEngine` combo built in `mozhiEngineIds()` order with the seven product names as
+`QStringLiteral` display names and the ids as item data, the `Qt::PlainText` word-wrapped
+`mozhiEffectiveInstance`, the word-wrapped `mozhiInstanceWarning` and the word-wrapped `mozhiHint`.
+There is no key, password or other secret field. `updateMozhiControls()` follows the gate checkbox
+and the field text, `loadValues()` ends with it so the default-off dialog starts disabled, and
+`settings()` returns the normalized instance and engine. `validate()` has no new failure condition;
+an invalid instance is replaced by the default in `settings()`. No service, parser,
+`MozhiSettings`, `SettingsStore`, `AppController` or CMake file was changed.
+
+`tst_settingsdialog` gained `mozhiGroup` and `mozhiGroupShowsCustomSettings` and reports 24 passed
+functions. They cover the default gate-off state, both gate directions, the seven engine data ids
+and display names, `isHidden()` for the warning, the three invalid inputs (`ftp://host`, an empty
+field, a query) with the default effective value and `settings().mozhi`, `validate()` still passing,
+the trailing-slash canonicalization, the `deepl` selection and a custom `AppSettings` with
+`https://mozhi.example.org/proxy` and `libretranslate`. The first case passes `{de, en, ru}` as the
+target languages instead of the two-language set used by older cases because the default
+`AppSettings{}` primary/secondary languages collapse into one entry with `{de, en}` and `validate()`
+then fails for a reason unrelated to Mozhi; the Mozhi checks are not weakened by that.
+
+All 14 `i18n/qtranslate_*.ts` contain the six new `SettingsDialog` messages translated, with `%1`
+exactly once in the effective-instance message and the product names untranslated. The message count
+is 307 in every file (baseline 301); `lupdate` reported 0 new and 307 existing and no
+unfinished/obsolete/vanished messages. The Windows-only hotkey message from
+`src/platform/hotkeymanager_win.cpp` is still present in `qtranslate_ru_RU.ts` (now at line 133
+because of the new messages). The `<location>` churn in all 14 files is expected from `lupdate` and
+was not reverted.
+
+`doc/architecture.md` now lists `mozhiservice`/`mozhiparser`, the `mozhi/` fixtures and the two new
+tests in §3.1 and §3.2 with the 28 Windows/33 Linux counts; §4.5 has `mozhi` in the `id()` example
+and the three queue users with 350/500 ms; the new §4.7.4 documents the instance/engine settings, the
+GET query, the Google-style codes and `mozhiCodeOf()`, `auto`/`UnsupportedLanguage`, 5000 UTF-16
+units via `TextChunker::split`, the 500 ms assumption, the same-origin redirect policy, the response
+fields, the error table, `applySettings()` and the tests; §4.8 documents the Google column without a
+new `LanguageInfo` column; §4.9 names Mozhi as the second opt-in consumer; §4.11 has the `mozhi`
+group, both file keys and the `settingsVersion == 1` statement; §8 has the two new rows and the
+updated `tst_languages`/`tst_settings`/`tst_settingsdialog` descriptions; §4.14 says 33 tests, 25
+shared and "the other 25 tests"; §9.2 item 8 names Mozhi as the second implemented opt-in free
+service. `doc/free-endpoints.md` has the 2026-11-09 status line, the §5 implementation note, Mozhi
+implemented in §8 items 2-4 and §9 item 3; the instance/engine/privacy rules are kept. `AGENTS.md`
+says 28 Windows/33 Linux. `README.md`, `README.ru.md`, `doc/handoff.md`, the root `plan.md` and the
+`07-fallback-chain` plans are not edited, and no commit was made by the programmer.
+
+Verification on Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2), Debug and Release: both build with zero
+`warning:` lines, `ctest -N` shows 33 in each tree, the full suite is 33/33 in both, and
+`tst_settingsdialog` is 24/24 with `tst_translations` passing. The picker gate was confirmed by
+`AppController::updateServiceSelectors()` (`requiresOptIn() && !freeServicesAllowed`), by
+`tst_mozhiwebservice::properties` (`requiresOptIn() == true`) and by
+`tst_translationmanager::gatedRealServiceIsRefused`. An offscreen run with a temporary
+`XDG_CONFIG_HOME`, `service=mozhi` and `allowFreeServices=false` kept Google active and logged
+`Configured service needs free web services to be enabled: "mozhi"`; the picker itself was checked
+by code and the log, not by UI introspection. The optional live smoke was not performed because a
+public instance may be down or rate-limited. Windows Debug/Release and its 28 tests were not
+performed (no MSVC). Trixie was not rerun for this UI/docs-only task.
+
+Review found no issues. One note for the final pass: `doc/handoff.md:184` still lists Mozhi as
+research; that file is outside this task and belongs to `07-fallback-chain`/the lead.

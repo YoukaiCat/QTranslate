@@ -385,6 +385,133 @@ private slots:
         QVERIFY(!dialog.settings().translation.allowFreeServices);
     }
 
+    void mozhiGroup()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true);
+        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("mozhiGroup"));
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("mozhiHint"));
+        auto *instance = dialog.findChild<QLineEdit *>(QStringLiteral("mozhiInstance"));
+        auto *engine = dialog.findChild<QComboBox *>(QStringLiteral("mozhiEngine"));
+        auto *effective =
+            dialog.findChild<QLabel *>(QStringLiteral("mozhiEffectiveInstance"));
+        auto *warning =
+            dialog.findChild<QLabel *>(QStringLiteral("mozhiInstanceWarning"));
+        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
+        QVERIFY(group);
+        QVERIFY(hint);
+        QVERIFY(instance);
+        QVERIFY(engine);
+        QVERIFY(effective);
+        QVERIFY(warning);
+        QVERIFY(checkbox);
+
+        const QString defaultInstance = QStringLiteral("https://mozhi.adminforge.de");
+        QCOMPARE(group->title(), QStringLiteral("Mozhi"));
+        QVERIFY(!checkbox->isChecked());
+        QVERIFY(!group->isEnabled());
+        QCOMPARE(instance->text(), defaultInstance);
+        QCOMPARE(instance->placeholderText(), defaultInstance);
+        QCOMPARE(engine->currentData().toString(), QStringLiteral("google"));
+        QCOMPARE(effective->text(),
+                 QStringLiteral("Effective instance: ") + defaultInstance);
+        QVERIFY(warning->isHidden());
+        QVERIFY(hint->wordWrap());
+        QVERIFY(warning->wordWrap());
+        QVERIFY(effective->wordWrap());
+        QVERIFY(hint->text().contains(QStringLiteral("unofficial")));
+        QVERIFY(hint->text().contains(QStringLiteral("rate-limit")));
+        QVERIFY(hint->text().contains(QStringLiteral("self-hosted")));
+        QVERIFY(hint->text().contains(QStringLiteral("several requests")));
+        QVERIFY(hint->text().contains(QStringLiteral("selected instance")));
+        QVERIFY(warning->text().contains(QStringLiteral("http(s)")));
+        QVERIFY(warning->text().contains(QStringLiteral("default instance")));
+
+        const QList<QLineEdit *> fields = group->findChildren<QLineEdit *>();
+        QCOMPARE(fields.size(), 1);
+        QCOMPARE(fields.first(), instance);
+
+        QCOMPARE(engine->count(), mozhiEngineIds().size());
+        const QStringList engineNames = {QStringLiteral("Google"), QStringLiteral("DeepL"),
+                                         QStringLiteral("DuckDuckGo"),
+                                         QStringLiteral("LibreTranslate"),
+                                         QStringLiteral("MyMemory"), QStringLiteral("Reverso"),
+                                         QStringLiteral("Yandex")};
+        QCOMPARE(engineNames.size(), mozhiEngineIds().size());
+        for (int i = 0; i < engine->count(); ++i) {
+            QCOMPARE(engine->itemData(i).toString(), mozhiEngineIds().at(i));
+            QCOMPARE(engine->itemText(i), engineNames.at(i));
+        }
+
+        checkbox->setChecked(true);
+        QVERIFY(group->isEnabled());
+        checkbox->setChecked(false);
+        QVERIFY(!group->isEnabled());
+
+        for (const QString &invalid : {QStringLiteral("ftp://host"), QString(),
+                                       QStringLiteral("https://host/?engine=google")}) {
+            instance->setText(invalid);
+            QVERIFY(!warning->isHidden());
+            QCOMPARE(effective->text(),
+                     QStringLiteral("Effective instance: ") + defaultInstance);
+            QCOMPARE(dialog.settings().mozhi.instance, defaultInstance);
+            QString error;
+            QVERIFY2(dialog.validate(&error), qPrintable(error));
+        }
+
+        instance->setText(QStringLiteral("http://127.0.0.1:8080/mozhi/"));
+        QVERIFY(warning->isHidden());
+        QCOMPARE(effective->text(),
+                 QStringLiteral("Effective instance: http://127.0.0.1:8080/mozhi"));
+        QCOMPARE(dialog.settings().mozhi.instance,
+                 QStringLiteral("http://127.0.0.1:8080/mozhi"));
+
+        QCOMPARE(engine->currentData().toString(), QStringLiteral("google"));
+        QCOMPARE(dialog.settings().mozhi.engine, QStringLiteral("google"));
+        engine->setCurrentIndex(engine->findData(QStringLiteral("deepl")));
+        QCOMPARE(dialog.settings().mozhi.engine, QStringLiteral("deepl"));
+    }
+
+    void mozhiGroupShowsCustomSettings()
+    {
+        AppSettings settings;
+        settings.translation.allowFreeServices = true;
+        settings.mozhi.instance = QStringLiteral("https://mozhi.example.org/proxy");
+        settings.mozhi.engine = QStringLiteral("libretranslate");
+
+        SettingsDialog dialog(settings, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("mozhiGroup"));
+        auto *instance = dialog.findChild<QLineEdit *>(QStringLiteral("mozhiInstance"));
+        auto *engine = dialog.findChild<QComboBox *>(QStringLiteral("mozhiEngine"));
+        auto *effective =
+            dialog.findChild<QLabel *>(QStringLiteral("mozhiEffectiveInstance"));
+        auto *warning =
+            dialog.findChild<QLabel *>(QStringLiteral("mozhiInstanceWarning"));
+        QVERIFY(group);
+        QVERIFY(instance);
+        QVERIFY(engine);
+        QVERIFY(effective);
+        QVERIFY(warning);
+
+        QVERIFY(group->isEnabled());
+        QCOMPARE(instance->text(), QStringLiteral("https://mozhi.example.org/proxy"));
+        QCOMPARE(engine->currentData().toString(), QStringLiteral("libretranslate"));
+        QCOMPARE(engine->currentText(), QStringLiteral("LibreTranslate"));
+        QVERIFY(warning->isHidden());
+        QCOMPARE(effective->text(),
+                 QStringLiteral("Effective instance: https://mozhi.example.org/proxy"));
+
+        instance->setText(QStringLiteral("https://mozhi.example.org/proxy/"));
+        QVERIFY(warning->isHidden());
+        QCOMPARE(effective->text(),
+                 QStringLiteral("Effective instance: https://mozhi.example.org/proxy"));
+        QCOMPARE(dialog.settings().mozhi.instance,
+                 QStringLiteral("https://mozhi.example.org/proxy"));
+    }
+
     void llmModels()
     {
         AppSettings settings;

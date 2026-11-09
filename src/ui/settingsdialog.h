@@ -69,6 +69,7 @@ private:
     void updateGoogleControls();
     void updateDeepLControls();
     void updateMyMemoryControls();
+    void updateMozhiControls();
     void updateProxyControls();
 
     AppSettings m_initial;
@@ -113,6 +114,13 @@ private:
     QLabel *m_llmStatus = nullptr;
 
     QGroupBox *m_mymemoryGroup = nullptr;
+
+    QGroupBox *m_mozhiGroup = nullptr;
+    QLineEdit *m_mozhiInstance = nullptr;
+    QComboBox *m_mozhiEngine = nullptr;
+    QLabel *m_mozhiEffectiveInstance = nullptr;
+    QLabel *m_mozhiInstanceWarning = nullptr;
+    QLabel *m_mozhiHint = nullptr;
 
     QComboBox *m_proxyMode = nullptr;
     QComboBox *m_proxyType = nullptr;
