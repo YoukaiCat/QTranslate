@@ -73,7 +73,6 @@ struct ProofreadingSettings
     QString provider = QStringLiteral("languagetool"); // the only id of this stage
     QString language = QStringLiteral("auto");
     QString endpoint; // empty: the provider default
-    QString apiKey;
     // proofreadingCategoryIds(); initialised in AppSettings' constructor.
     QStringList categories;
     bool checkBeforeTranslation = false;

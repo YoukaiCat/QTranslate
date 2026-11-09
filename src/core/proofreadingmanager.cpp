@@ -152,7 +152,7 @@ ProofreadingReply *ProofreadingManager::check(const ProofreadingRequest &request
         const QString hint = m_active->configurationError();
         reply = finishedWithError(serviceId, TranslationError::Auth,
                                   hint.isEmpty()
-                                      ? tr("The text checking provider needs a key.")
+                                      ? tr("The text checking provider is not configured.")
                                       : hint);
     } else if (!m_active->isLocal() && !m_onlineServicesAllowed) {
         reply = finishedWithError(

@@ -58,7 +58,7 @@ public:
 
     virtual QString id() const = 0; // "languagetool" (stage 6 adds "llm")
     virtual QString displayName() const = 0;
-    virtual bool isConfigured() const = 0;           // e.g. LanguageTool without a key: false
+    virtual bool isConfigured() const = 0; // False when the provider's settings are incomplete.
     // Optional user-facing hint when isConfigured() is false.
     virtual QString configurationError() const { return {}; }
     virtual QStringList languages() const = 0; // internal codes, without "auto"
@@ -69,8 +69,7 @@ public:
     // return true; no provider of this stage does.
     virtual bool isLocal() const { return false; }
 
-    // Applies the endpoint, API key and category changes without recreating the
-    // service.
+    // Applies the endpoint and category changes without recreating the service.
     virtual void applySettings(const AppSettings &settings) = 0;
 
     // Returns a reply owned by the caller. Errors detected before any request

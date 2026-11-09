@@ -540,7 +540,6 @@ void SettingsStore::load()
         settings.value(QStringLiteral("language"), loaded.proofreading.language).toString();
     loaded.proofreading.endpoint =
         settings.value(QStringLiteral("endpoint"), loaded.proofreading.endpoint).toString();
-    loaded.proofreading.apiKey = readSecret(settings, QStringLiteral("apiKey"), m_codec);
     loaded.proofreading.categories =
         settings.value(QStringLiteral("categories"), loaded.proofreading.categories)
             .toStringList();
@@ -690,8 +689,6 @@ void SettingsStore::save(const AppSettings &settings)
     out.setValue(QStringLiteral("provider"), normalized.proofreading.provider);
     out.setValue(QStringLiteral("language"), normalized.proofreading.language);
     out.setValue(QStringLiteral("endpoint"), normalized.proofreading.endpoint);
-    writeSecret(out, QStringLiteral("apiKey"), normalized.proofreading.apiKey,
-                old.proofreading.apiKey, m_codec);
     out.setValue(QStringLiteral("categories"), normalized.proofreading.categories);
     out.setValue(QStringLiteral("checkBeforeTranslation"),
                  normalized.proofreading.checkBeforeTranslation);

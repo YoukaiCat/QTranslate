@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -264,8 +264,8 @@ default and no provider is registered yet, so the transient state is harmless).
      where the provider supplies its own `configurationError` stays unchanged. The 14 `.ts` files are
      not touched here: the string is added with the others in `04-text-checking-tab`.
    - An INI written by the completed version may still contain `proofreading/apiKey`; `load()` now
-     ignores it and the next `save()` rewrites the group without it. Do not add a migration for an
-     unused key.
+     ignores it and `save()` never writes one, but `QSettings` keeps the stale key in the file
+     because it does not clear unknown keys. Do not add a migration for an unused key.
    - `grep -rn "proofreading.*apiKey\|apiKey.*proofreading" src tests` returns nothing; the
      `google`/`deepl`/`llm`/proxy keys are unrelated and stay.
    - `## Done when` and `## Outcome` are updated to the post-removal state (the outcome carries the
@@ -310,7 +310,8 @@ default and no provider is registered yet, so the transient state is harmless).
   Load/save round-trip, `provider` is lowercased and validated, `language` falls back to `auto`,
   `endpoint` is validated as an absolute `http(s)` URL without user info/query/fragment (empty
   allowed) and `categories` is normalized to the known four in order (empty or unknown → all). An
-  INI key left by an earlier build is ignored and dropped on the next save; no migration is added.
+  INI key left by an earlier build is ignored and is not written again (`QSettings` leaves the stale
+  key in the file); no migration is added.
   `kCurrentVersion` stays `1`, the group is optional, and no translation setting is read or written.
 - `proofreadingCategoryIds()` and `proofreadingProviderIds()` are the single source of the id
   strings — the provider list contains only `languagetool` in this stage — and
@@ -365,12 +366,14 @@ network and no UI code, and is proven with a local fake service. LanguageTool is
 of this stage; Yandex Speller and Hunspell/Nuspell are not present anywhere.
 
 **Scope correction (2026-11-09).** After this task was accepted, the user decided that stage 5 sends
-no credentials. The `apiKey` field, its `load()`/`save()` path and its `tst_settings` case (listed
-below) are therefore removed in the reopened task, step 8, and the manager's `Auth` fallback text
-changes from `The text checking provider needs a key.` to
-`The text checking provider is not configured.` (a non-empty `configurationError()` still wins);
-`tst_proofreadingmanager` follows. The rest of the outcome stands. The task was reopened as
-`in-progress` for that removal only.
+no credentials. The reopened task removed the `apiKey` field from `ProofreadingSettings`, its
+`readSecret`/`writeSecret` path in `load()`/`save()` and its `tst_settings` case, changed the
+manager's `Auth` fallback from `The text checking provider needs a key.` to
+`The text checking provider is not configured.` (a non-empty `configurationError()` still wins),
+retargeted `tst_proofreadingmanager` to the new text, and dropped the key wording from the
+`proofreadingservice.h` comments. No migration is added: `load()` ignores a stale
+`[proofreading] apiKey` and `save()` never writes one, but `QSettings` leaves the old key in the file
+because it does not clear unknown keys. The rest of the outcome stands.
 
 - Files: new `src/core/proofreadingtypes.h`, `src/core/proofreadingservice.{h,cpp}`,
   `src/core/proofreadingmanager.{h,cpp}` and `tests/tst_proofreadingmanager.cpp`; modified
@@ -396,7 +399,7 @@ changes from `The text checking provider needs a key.` to
 - `TextChunker::splitWithOffsets()` is a thin loop over the unchanged `split()` with a running
   UTF-16 offset, so the parts join back to the input and `offset + text.size()` is the next offset.
 - Settings: `ProofreadingSettings` sits after `llm`, so the INI order is `[proofreading]` before
-  `[network]`; the `apiKey` secret path of the original plan is removed in step 8 (decision of
+  `[network]`; the `apiKey` field and its secret path were removed in step 8 (decision of
   2026-11-09). `proofreadingCategoryIds()`/`proofreadingProviderIds()` are the single source of the
   id strings (`{"languagetool"}`), and `isValidProofreadingEndpoint()`/
   `normalizedProofreadingEndpoint()` are the single endpoint rule: an empty value is valid and means
@@ -410,13 +413,15 @@ changes from `The text checking provider needs a key.` to
   calls and an asynchronous `finished()`, pass-through of the result and request, channel
   cancellation including the untouched `InPlace` request, `cancel()` on an empty channel,
   `cancelAll()`, a caller-deleted reply, and log hygiene with `TOPSECRET`. `tst_textchunker` adds the
-  six `splitWithOffsets()` cases and `tst_settings` the defaults, the full round trip, the raw
-  `[proofreading]` group, normalization fallbacks, the optional group, the version and the
-  independence from `translation.*`.
+  six `splitWithOffsets()` cases and `tst_settings` the defaults, the round trip of the remaining
+  fields, the raw `[proofreading]` group, normalization fallbacks, the optional group, the version and
+  the independence from `translation.*`.
 - Verification (Linux only): Release and Debug configured and built with `-Wall -Wextra`, zero
   warnings; `xvfb-run -a ctest --test-dir build/linux-release --output-on-failure` is 40/40 and
-  `ctest -N` shows 40 tests (39 + `tst_proofreadingmanager`). Windows would be 35 (34 + 1) and is
-  **not performed** — no MSVC on this machine.
+  `ctest -N` shows 40 tests (39 + `tst_proofreadingmanager`). The reopened tree was re-checked after
+  step 8: both configurations still build without warnings, the suite is 40/40, `ctest -N` is 40,
+  `.ts` stays 316 and `rg -n "proofreading.*apiKey|apiKey.*proofreading" src tests` is empty. Windows
+  would be 35 (34 + 1) and is **not performed** — no MSVC on this machine.
 
 Notes for the later children:
 

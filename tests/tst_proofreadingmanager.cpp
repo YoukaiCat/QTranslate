@@ -260,7 +260,7 @@ private slots:
         QVERIFY(secondFinished.wait(1000));
         QCOMPARE(second->result().error, TranslationError::Auth);
         QCOMPARE(second->result().errorMessage,
-                 QStringLiteral("The text checking provider needs a key."));
+                 QStringLiteral("The text checking provider is not configured."));
         QCOMPARE(service->checkCalls, 0);
     }
 

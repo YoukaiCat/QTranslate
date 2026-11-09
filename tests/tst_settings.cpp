@@ -124,7 +124,6 @@ private slots:
                  QStringList({QStringLiteral("languagetool")}));
         QCOMPARE(settings.proofreading.language, Languages::autoCode());
         QVERIFY(settings.proofreading.endpoint.isEmpty());
-        QVERIFY(settings.proofreading.apiKey.isEmpty());
         QCOMPARE(settings.proofreading.categories, proofreadingCategoryIds());
         QCOMPARE(settings.proofreading.categories,
                  QStringList({QStringLiteral("spelling"), QStringLiteral("grammar"),
@@ -404,7 +403,6 @@ private slots:
         settings.proofreading.provider = QStringLiteral("languagetool");
         settings.proofreading.language = QStringLiteral("ru");
         settings.proofreading.endpoint = QStringLiteral("https://lt.example.invalid/v2/check");
-        settings.proofreading.apiKey = QStringLiteral("proofreading-secret");
         settings.proofreading.categories =
             QStringList({QStringLiteral("style"), QStringLiteral("grammar")});
         settings.proofreading.checkBeforeTranslation = true;
@@ -420,7 +418,6 @@ private slots:
         QCOMPARE(result.proofreading.language, QStringLiteral("ru"));
         QCOMPARE(result.proofreading.endpoint,
                  QStringLiteral("https://lt.example.invalid/v2/check"));
-        QCOMPARE(result.proofreading.apiKey, QStringLiteral("proofreading-secret"));
         QCOMPARE(result.proofreading.categories,
                  QStringList({QStringLiteral("grammar"), QStringLiteral("style")}));
         QVERIFY(result.proofreading.checkBeforeTranslation);
@@ -428,17 +425,15 @@ private slots:
         QVERIFY(result.proofreading.allowOnlineServices);
         QCOMPARE(result.settingsVersion, 1);
 
-        // The INI itself holds the group and a protected key, never the secret.
+        // The INI holds the group itself and no apiKey.
         {
             QSettings raw(path, QSettings::IniFormat);
             QVERIFY(raw.childGroups().contains(QStringLiteral("proofreading")));
             QCOMPARE(raw.value(QStringLiteral("proofreading/provider")).toString(),
                      QStringLiteral("languagetool"));
-            QVERIFY(!raw.value(QStringLiteral("proofreading/apiKey")).toString().isEmpty());
         }
         const QByteArray ini = readFile(path);
         QVERIFY(ini.contains("[proofreading]"));
-        QVERIFY(!ini.contains("proofreading-secret"));
     }
 
     void proofreadingValuesAreNormalized()
