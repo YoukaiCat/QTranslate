@@ -1,6 +1,7 @@
 ---
 kind: stage
-status: todo
+status: in-progress
+base: 62e5cea
 depends: [05-main-window-check-and-replace]
 ---
 
@@ -16,21 +17,50 @@ undo caveat is stated where the user sees the confirmation.
 
 ## What to do, what is touched
 
-Two children, each with its own result:
+Four children in execution order, each with its own result and test gate. The external replacement is
+reachable from the CLI before the hotkey exists, so the risky path is proven first; the fifth global
+hotkey comes last because it touches the frozen `HotkeyManager` API across the Windows, X11 and
+Wayland backends.
 
-- **The hotkey and the command** — a fifth `HotkeyAction` (for example `ProofreadSelection`) in
-  `src/platform/hotkeymanager.h`, registered in the Windows backend, in the X11 backend and in the
-  Wayland `GlobalShortcuts` portal (with the asynchronous bind semantics recorded in stage 2), the
-  `proofreading/hotkey` key (empty by default, so nothing is registered until the user assigns it),
-  the row in the **Hotkeys** tab, the tray/`registrationFailed` handling, the CLI command that
-  forwards to a running instance, and the updates to `tst_hotkeysequence`,
-  `tst_hotkeymanager_x11`, `tst_hotkeymanager_wayland` and `tst_cli`.
-- **The confirmation window and the replacement** — a `ProofreadingPopupWindow` near the cursor with
-  the issue list and the corrected text, the same buttons as the main-window panel, a confirmation
-  step before touching another application, the active-window and fullscreen checks, clipboard
-  restoration, the `InPlace` channel of the manager, cancellation on focus loss or on a new request,
-  and `tst_proofreadingpopup` (offscreen) plus a Linux integration test that replaces a focused
-  editor's selection under X11.
+1. [01-proofreading-popup-window](01-proofreading-popup-window/plan.md) — the non-activating
+   confirmation window near the cursor, built on `ProofreadingPanel` and
+   `ProofreadingText::corrected()`: the issue list, the corrected text, the undo caveat and explicit
+   Replace selection / Copy / Cancel; offscreen `tst_proofreadingpopup`; no grab, no paste and no
+   manager.
+2. [02-selection-check-and-replace](02-selection-check-and-replace/plan.md) — `AppController` wires
+   the grab, the `InPlace` channel of `ProofreadingManager`, the popup and the guarded replacement,
+   and the new `--proofread-selection` command forwards to a running instance through
+   `SingleInstance`; copy fallback when the target is gone or absent, clipboard restore, cancellation
+   on focus loss/new request, and the manager's gate message with `proofreading/allowOnlineServices`
+   off.
+3. [03-x11-replacement-integration](03-x11-replacement-integration/plan.md) — a Linux X11 test that
+   replaces the selection of a focused editor through the real grabber, popup and
+   `WindowActivation`; the guard paths that cannot be automated without linking `AppController` are
+   recorded as manual.
+4. [04-proofreading-hotkey](04-proofreading-hotkey/plan.md) — the fifth `HotkeyAction`, the
+   `proofreading/hotkey` setting (empty by default), the **Hotkeys** tab row, the Windows, X11 and
+   Wayland-portal registrations, duplicate checks, the tray tooltip and the backend tests.
+
+Boundaries recorded by the split:
+
+- The confirmation window is **non-activating** (`Qt::WindowDoesNotAcceptFocus` and
+  `Qt::WA_ShowWithoutActivating`, no `activateWindow()`): the source application must stay foreground
+  until the paste, otherwise `Platform::isForegroundWindow()` cannot pass and the guarded replacement
+  is unusable. The window therefore has no Esc shortcut; Cancel is the explicit close.
+- A synthetic paste cannot edit another application fragment by fragment, so the external window
+  offers the whole-selection result only: `ProofreadingPanel`'s per-issue Replace/Ignore and the
+  replacement combo are hidden in its external mode and Replace all is labelled Replace selection.
+  The main-window panel is unchanged.
+- The external check uses `ProofreadingManager::Channel::InPlace`; a new invocation cancels the
+  previous one, exactly as the translation in-place flow does.
+- The hotkey and `--proofread-selection` are explicit actions: they are gated by
+  `proofreading/allowOnlineServices` through the manager, not by the main-window
+  `proofreading/enabled` switch. Assigning the key (or running the command) is the opt-in; do not add
+  a second silent gate.
+- No text, issue message or replacement goes to the log. New strings join the 14 `.ts` files; each
+  outcome records the measured total.
+- Windows is not built here (no MSVC), and a real portal-capable Wayland desktop remains a manual
+  gap.
 
 ## Done when
 
@@ -67,5 +97,9 @@ Two children, each with its own result:
 - Replacement in another application is the dangerous path: it needs the confirmation, the
   active-window check, the clipboard restore and the undo caveat. Never replace without the user's
   confirmation, and never claim undo works there.
+- The confirmation window must not take the foreground before the paste, or the active-window check
+  can never pass. Show it only after the grab has returned (showing it earlier steals focus from the
+  source application), keep it non-activating, and cancel the check when the captured window is no
+  longer foreground.
 - The X11/Wayland test counts and the trusted-client step on Astra change; the Windows build and a
   real portal desktop are recorded as not performed.
