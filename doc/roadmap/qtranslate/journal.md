@@ -2,12 +2,16 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints` — accepted `done` over `fee1bcf..2c2b1b7`; the seven
-children are done. The next stage is `05-proofreading` (`todo`); stage 4 `04-local-offline-translation`
-stays `blocked` by the user's 2026-11-05 decision and is not dropped. The root is `in-progress`; its
-`Done when` requires every stage to be done or dropped, so stage 4's blocked state is a deliberate
-exception. Work is on `main` (matches the root `branch:`); the working tree is clean and nothing is
-pushed. Linux is 39/39, Windows 34 (derived, not run); the `.ts` count is 316 in every file.
+Current node: `05-proofreading` — stage `blocked` on three user questions from the 2026-11-09 split:
+the provider set (all three vs LanguageTool + Yandex Speller vs LanguageTool only), the
+proofreading-scoped online switch (`proofreading/allowOnlineServices`, default off), and whether
+external-selection checking (`07`) stays in the stage. The planner wrote seven children;
+`01-proofreading-core` is detailed and `in-progress`, the rest are `todo`. No code or commit yet.
+`03-free-web-endpoints` is `done` (accepted over `fee1bcf..2c2b1b7`, seven children done); stage 4
+`04-local-offline-translation` stays `blocked` by the user's 2026-11-05 decision and is not dropped.
+The root is `in-progress`; its `Done when` requires every stage to be done or dropped, so stage 4's
+blocked state is a deliberate exception. Work is on `main` (matches the root `branch:`); the working
+tree is clean. Linux is 39/39, Windows 34 (derived, not run).
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
