@@ -71,6 +71,7 @@ private:
     void updateMyMemoryControls();
     void updateMozhiControls();
     void updateYandexControls();
+    void updateBingControls();
     void updateProxyControls();
 
     AppSettings m_initial;
@@ -124,6 +125,8 @@ private:
     QLabel *m_mozhiHint = nullptr;
 
     QGroupBox *m_yandexGroup = nullptr;
+
+    QGroupBox *m_bingGroup = nullptr;
 
     QComboBox *m_proxyMode = nullptr;
     QComboBox *m_proxyType = nullptr;

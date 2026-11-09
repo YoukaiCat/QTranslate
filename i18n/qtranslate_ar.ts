@@ -4,86 +4,86 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="161"/>
-        <location filename="../src/app/appcontroller.cpp" line="666"/>
+        <location filename="../src/app/appcontroller.cpp" line="162"/>
+        <location filename="../src/app/appcontroller.cpp" line="672"/>
         <source>Autostart</source>
         <translation>تشغيل تلقائي</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="162"/>
-        <location filename="../src/app/appcontroller.cpp" line="667"/>
+        <location filename="../src/app/appcontroller.cpp" line="163"/>
+        <location filename="../src/app/appcontroller.cpp" line="673"/>
         <source>Could not update the autostart entry.</source>
         <translation>تعذر تحديث إدخال التشغيل التلقائي.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="310"/>
+        <location filename="../src/app/appcontroller.cpp" line="314"/>
         <source>Hotkey unavailable</source>
         <translation>مفتاح التشغيل السريع غير متاح</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="311"/>
+        <location filename="../src/app/appcontroller.cpp" line="315"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 مستخدم بالفعل بواسطة برنامج آخر. أغلق هذا البرنامج أو اختر مجموعة أخرى في الإعدادات.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="372"/>
+        <location filename="../src/app/appcontroller.cpp" line="376"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="702"/>
+        <location filename="../src/app/appcontroller.cpp" line="708"/>
         <source>DeepL is not available.</source>
         <translation>DeepL غير متوفر.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="717"/>
+        <location filename="../src/app/appcontroller.cpp" line="723"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>مزوّد الخدمة المتوافق مع OpenAI غير متاح.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="761"/>
+        <location filename="../src/app/appcontroller.cpp" line="767"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>تُخزَّن الأسرار دون تشفير في ملف لا يمكن قراءته إلا من قبل المستخدم الخاص بك لأن حلقة مفاتيح النظام غير متاحة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="913"/>
+        <location filename="../src/app/appcontroller.cpp" line="919"/>
         <source>Nothing is selected.</source>
         <translation>لم يتم تحديد أي شيء.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="955"/>
+        <location filename="../src/app/appcontroller.cpp" line="961"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>تغيرت النافذة النشطة. تم نسخ الترجمة إلى الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1036"/>
+        <location filename="../src/app/appcontroller.cpp" line="1042"/>
         <source>System tray unavailable</source>
         <translation>علبة النظام غير متاحة</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1037"/>
+        <location filename="../src/app/appcontroller.cpp" line="1043"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>علبة النظام غير متاحة، لذلك لا يمكن للتطبيق البقاء في الخلفية. إغلاق النافذة ينهي التطبيق.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="946"/>
-        <location filename="../src/app/appcontroller.cpp" line="994"/>
+        <location filename="../src/app/appcontroller.cpp" line="952"/>
+        <location filename="../src/app/appcontroller.cpp" line="1000"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>لا يمكن اللصق تلقائيًا؛ الترجمة موجودة في الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="139"/>
+        <location filename="../src/app/appcontroller.cpp" line="140"/>
         <source>Limited Wayland support</source>
         <translation>دعم محدود لـ Wayland</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="141"/>
+        <location filename="../src/app/appcontroller.cpp" line="142"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>تتطلب اختصارات لوحة المفاتيح العامة بوابة GlobalShortcuts. إذا لم يوفر سطح المكتب هذه البوابة، فانسخ النص المحدد باستخدام Ctrl+C واستخدم أوامر CLI أو اختصارًا على سطح المكتب؛ حيث ينسخ الاستبدال في المكان الترجمة إلى الحافظة بدلاً من لصقها.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1018"/>
-        <location filename="../src/app/appcontroller.cpp" line="1021"/>
+        <location filename="../src/app/appcontroller.cpp" line="1024"/>
+        <location filename="../src/app/appcontroller.cpp" line="1027"/>
         <source>Translate and replace</source>
         <translation>ترجمة واستبدال</translation>
     </message>
@@ -687,7 +687,7 @@
         <translation>الزولو</translation>
     </message>
     <message>
-        <location filename="../src/core/languages.cpp" line="292"/>
+        <location filename="../src/core/languages.cpp" line="332"/>
         <source>Auto-detect</source>
         <translation>الكشف التلقائي</translation>
     </message>
@@ -1022,7 +1022,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="38"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="761"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="782"/>
         <source>Settings</source>
         <translation>الإعدادات</translation>
     </message>
@@ -1103,7 +1103,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="157"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="438"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="453"/>
         <source> ms</source>
         <translation> مللي ثانية</translation>
     </message>
@@ -1228,7 +1228,7 @@
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="247"/>
         <location filename="../src/ui/settingsdialog.cpp" line="292"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="467"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="482"/>
         <source>Checking…</source>
         <translation>جارٍ التحقق…</translation>
     </message>
@@ -1338,152 +1338,162 @@
         <translation>نقطة نهاية Yandex على الويب غير رسمية ولا تحتاج إلى مفتاح. لتستخدمها، فعّل خدمات الويب المجانية أعلاه. قد تتوقف عن العمل أو تفرض حدودًا على معدل الطلبات أو تحظر الطلبات. يُرسل النص الطويل في عدة طلبات. يُرسل النص إلى طرف ثالث.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="403"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="400"/>
+        <source>Bing</source>
+        <translation>Bing</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="404"/>
+        <source>Bing web is an unofficial endpoint and needs no key. Enable free web services above to use it. It may stop working, apply rate limits or block requests. Long text is sent in several requests. The text is sent to a third party.</source>
+        <translation>نقطة نهاية Bing على الويب غير رسمية ولا تحتاج إلى مفتاح. لتستخدمها، فعّل خدمات الويب المجانية أعلاه. قد تتوقف عن العمل أو تفرض حدودًا على معدل الطلبات أو تحظر الطلبات. يُرسل النص الطويل في عدة طلبات. يُرسل النص إلى طرف ثالث.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="418"/>
         <source>Services</source>
         <translation>خدمات</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="411"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="426"/>
         <source>No proxy</source>
         <translation>لا وكيل</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="412"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="427"/>
         <source>System proxy</source>
         <translation>وكيل النظام</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="413"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="428"/>
         <source>Manual proxy</source>
         <translation>الوكيل اليدوي</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="416"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="431"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="417"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="432"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="420"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="435"/>
         <source>Proxy host</source>
         <translation>المضيف الوكيل</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="424"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="439"/>
         <source>Not set</source>
         <translation>لم يتم ضبطه</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="425"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="440"/>
         <source>The proxy requires authentication</source>
         <translation>يتطلب الوكيل المصادقة</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="429"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="444"/>
         <source>User name</source>
         <translation>اسم المستخدم</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="433"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="448"/>
         <source>Password</source>
         <translation>كلمة المرور</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="439"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="454"/>
         <source>Test connection</source>
         <translation>اتصال الاختبار</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="446"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="461"/>
         <source>Proxy mode:</source>
         <translation>وضع الوكيل:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="447"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="462"/>
         <source>Proxy type:</source>
         <translation>نوع الوكيل:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="448"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="463"/>
         <source>Host:</source>
         <translation>يستضيف:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="449"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="464"/>
         <source>Port:</source>
         <translation>ميناء:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="451"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="466"/>
         <source>User name:</source>
         <translation>اسم المستخدم:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="452"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="467"/>
         <source>Password:</source>
         <translation>كلمة المرور:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="453"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="468"/>
         <source>Request timeout:</source>
         <translation>مهلة الطلب:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="458"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="473"/>
         <source>Network</source>
         <translation>شبكة</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="672"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="688"/>
         <source>Effective instance: %1</source>
         <translation>النسخة الفعلية: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="700"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="721"/>
         <source>Translate in a popup</source>
         <translation>ترجمة في نافذة منبثقة</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="702"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="723"/>
         <source>Replace the selected text with the translation</source>
         <translation>استبدل النص المحدد بالترجمة</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="703"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="724"/>
         <source>Translate in the main window</source>
         <translation>ترجمة في النافذة الرئيسية</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="704"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="725"/>
         <source>Show the main window</source>
         <translation>إظهار النافذة الرئيسية</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="712"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="733"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>يستخدم &quot;%1&quot; أكثر من مجموعة مفاتيح واحدة. تدعم مفاتيح الاختصار العالمية مجموعة واحدة.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="720"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="741"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>لا يمكن استخدام &quot;%1&quot; كمفتاح تشغيل سريع عالمي.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="733"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="754"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>تم تعيين نفس مجموعة المفاتيح أكثر من مرة: %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="744"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="765"/>
         <source>The primary and additional languages must differ.</source>
         <translation>يجب أن تختلف اللغات الأساسية والإضافية.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="751"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="772"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>أدخل مضيف الوكيل والمنفذ، أو اختر وضع وكيل آخر.</translation>
     </message>

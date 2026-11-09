@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [02-bing-web-service]
 ---
@@ -288,3 +288,52 @@ This task does not touch `doc/architecture.md`, `doc/free-endpoints.md`, `AGENTS
   23 named cases; the new case makes 26 passed, not 27.
 - Windows Debug/Release and its 32 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+
+## Outcome
+
+Done on 2026-11-09. The Services page exposes the implemented `bing-web` service as a gate-aware
+`Bing` group, and the two new strings are complete in all 14 `.ts` files. No service, parser,
+`AppSettings`/INI key, `settings()` value, `validate()` condition or `AppController` path changed.
+
+- **UI:** `src/ui/settingsdialog.h` declares `updateBingControls()` after `updateYandexControls()`
+  and `m_bingGroup` after `m_yandexGroup`. `buildUi()` creates the `Bing` group (`bingGroup`) after
+  the Yandex group and before the stretch, with one `QVBoxLayout` and a single word-wrapped
+  `bingHint` label; the hint is one `tr()` message with the planned text and no `%` placeholder.
+  The group has no `QLineEdit`, key, password or URL field. `updateBingControls()` enables the
+  group from `m_allowFreeServices`, is connected to the gate `toggled` and runs at the end of
+  `loadValues()`, so the default-off dialog starts visible but disabled. The hint is never hidden.
+- **Test:** `tst_settingsdialog::bingGroup` covers the title, the visible/disabled default
+  (`isHidden()`/`isEnabled()`), both gate directions, word wrap, the seven hint keywords, the absent
+  `QLineEdit`, the order after `yandexGroup` and `settings().translation.allowFreeServices`. It uses
+  `{de, en, ru}` and does not call `validate()`, so it does not depend on the host locale; it also
+  fails if the `loadValues()` call is removed, because `AppSettings{}` leaves the group enabled
+  otherwise. `tst_settingsdialog` reports 26 passed (25 before plus the new case; 24 named cases
+  plus `initTestCase`/`cleanupTestCase`).
+- **Translations:** the CMake `update_translations` target rewrote all 14 `i18n/qtranslate_*.ts`
+  (`lupdate` reported 311 source texts: 2 new and 309 already existing). Every file has 311 messages
+  (actual count; baseline 309), 0 unfinished, 0 vanished and no empty translations; `lrelease`
+  builds all 14 with 311 complete translations. `Bing` stays untranslated everywhere and the hint is
+  translated as one message with all five points (unofficial/no key, the free-web-services gate,
+  rate limits/blocks, several requests, third party), without a `%` placeholder or edge whitespace.
+  The Windows-only `HotkeyManager` message "The key combination is not supported." from
+  `src/platform/hotkeymanager_win.cpp` remains in every file; `lupdate` prints "Qualifying with
+  unknown namespace/class ::HotkeyManager" for it, which is a scan diagnostic, not a dropped entry.
+- **Location churn:** besides the shift caused by the new lines in `settingsdialog.cpp`, `lupdate`
+  brought the stale `<location>` lines of `appcontroller.cpp` and `languages.cpp` up to date. In
+  `fr` and `it` two existing Yandex translations changed only by re-encoding `'` as `&apos;`
+  (lupdate's writer), not in content. A structural comparison with HEAD shows exactly two added
+  messages and no existing translation changed.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2), Debug and Release: zero `warning:`
+  lines with `-Wall -Wextra`, `ctest -N` 37, `tst_settingsdialog` 26 passed, `tst_translations`
+  passed, the full suite 37/37 in both trees. An additional fresh trixie Release build in
+  `qtranslate-trixie:latest` (Qt 6.8.2, GCC 14.2) was warning-free and passed 37/37; that container
+  needs the known external `/etc/passwd`/`/etc/group` mount for `dbus-daemon`, otherwise only
+  `tst_hotkeymanager_wayland` fails in `initTestCase` ("dbus-daemon did not print a session
+  address") because the run uid has no passwd entry. No new test target was added. Windows
+  Debug/Release and its 32 tests were **not performed**, not passed (no MSVC).
+- **Review:** no remarks to accept or reject. No real problem was deferred because of cost.
+- **Not performed and deferred by design:** the optional manual visual check of the Services page
+  (covered by the offscreen case), Windows, and the documentation updates (`doc/architecture.md`,
+  `doc/free-endpoints.md`, `AGENTS.md`, READMEs, `doc/handoff.md`, the root plan and
+  `07-fallback-chain`), which belong to `04-bing-web-docs` and the lead. No known limitation of the
+  group itself.

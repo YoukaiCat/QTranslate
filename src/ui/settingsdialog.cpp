@@ -397,6 +397,21 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     connect(m_allowFreeServices, &QCheckBox::toggled, this,
             &SettingsDialog::updateYandexControls);
 
+    m_bingGroup = new QGroupBox(tr("Bing"), servicesContent);
+    m_bingGroup->setObjectName(QStringLiteral("bingGroup"));
+    auto *bingLayout = new QVBoxLayout(m_bingGroup);
+    auto *bingHint = new QLabel(
+        tr("Bing web is an unofficial endpoint and needs no key. Enable free web services above "
+           "to use it. It may stop working, apply rate limits or block requests. Long text is sent "
+           "in several requests. The text is sent to a third party."),
+        m_bingGroup);
+    bingHint->setObjectName(QStringLiteral("bingHint"));
+    bingHint->setWordWrap(true);
+    bingLayout->addWidget(bingHint);
+    servicesLayout->addWidget(m_bingGroup);
+    connect(m_allowFreeServices, &QCheckBox::toggled, this,
+            &SettingsDialog::updateBingControls);
+
     servicesLayout->addStretch();
     servicesScroll->setWidget(servicesContent);
     servicesPageLayout->addWidget(servicesScroll);
@@ -561,6 +576,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     updateMyMemoryControls();
     updateMozhiControls();
     updateYandexControls();
+    updateBingControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -676,6 +692,11 @@ void SettingsDialog::updateMozhiControls()
 void SettingsDialog::updateYandexControls()
 {
     m_yandexGroup->setEnabled(m_allowFreeServices->isChecked());
+}
+
+void SettingsDialog::updateBingControls()
+{
+    m_bingGroup->setEnabled(m_allowFreeServices->isChecked());
 }
 
 void SettingsDialog::updateProxyControls()
