@@ -218,6 +218,8 @@ qtranslate/
 │   │   ├── yandexwebparser.h/.cpp    pure parsing for the Yandex web endpoint
 │   │   ├── bingwebservice.h/.cpp     unofficial Bing web endpoint (no key, opt-in)
 │   │   ├── bingwebparser.h/.cpp      pure parsing for the Bing web endpoint
+│   │   ├── reversoservice.h/.cpp     unofficial Reverso endpoint (no key, opt-in)
+│   │   ├── reversoparser.h/.cpp      pure parsing for the Reverso endpoint
 │   │   ├── queuedwebservice.h/.cpp   serialized per-host request queue
 │   │   └── openaicompatibleservice.h/.cpp  OpenAI-compatible provider
 │   ├── platform/
@@ -249,7 +251,7 @@ qtranslate/
 │       └── appicon.h/.cpp
 └── tests/
     ├── CMakeLists.txt
-    ├── fixtures/                     saved Google/DeepL/MyMemory/Mozhi/Yandex/Bing responses (google/, deepl/, mymemory/, mozhi/, yandexweb/, bingweb/)
+    ├── fixtures/                     saved Google/DeepL/MyMemory/Mozhi/Yandex/Bing/Reverso responses (google/, deepl/, mymemory/, mozhi/, yandexweb/, bingweb/, reverso/)
     ├── tst_appinfo.cpp
     ├── tst_autostart.cpp               Windows and Linux variants
     ├── tst_bingwebparser.cpp
@@ -277,6 +279,8 @@ qtranslate/
     ├── tst_popupplacement.cpp
     ├── tst_popupwindow.cpp
     ├── tst_queuedwebservice.cpp        serialized request queue with a fake service
+    ├── tst_reversoparser.cpp           pure Reverso response parsing
+    ├── tst_reversoservice.cpp          service against a local HTTP server
     ├── tst_secretprotector.cpp         Windows and Linux variants
     ├── tst_selectiongrabber_linux.cpp  Linux selection capture
     ├── tst_settings.cpp
@@ -297,9 +301,9 @@ targets. Currently:
 
 | Target | What is included now (0.12.0) |
 |---|---|
-| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `bingwebparser`, `bingwebservice`, `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `yandexwebparser`, `yandexwebservice` |
+| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language); `net/networkmanager`; `services/`: `bingwebparser`, `bingwebservice`, `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `reversoparser`, `reversoservice`, `yandexwebparser`, `yandexwebservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_queuedwebservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 32 tests on Windows and 37 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_queuedwebservice`, `tst_reversoparser`, `tst_reversoservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 34 tests on Windows and 39 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
@@ -649,7 +653,7 @@ protected:
 class TranslationService : public QObject {
     Q_OBJECT
 public:
-    virtual QString id() const = 0;            // "google", "deepl", "llm", "mymemory", "mozhi", "yandex-web", "bing-web"
+    virtual QString id() const = 0;            // "google", "deepl", "llm", "mymemory", "mozhi", "yandex-web", "bing-web", "reverso"
     virtual QString displayName() const = 0;
     virtual bool isConfigured() const = 0;     // DeepL without a key — false
     virtual QString configurationError() const { return {}; } // hint if not configured
@@ -698,8 +702,8 @@ queued is skipped, and a reply deleted while active is dropped through `QPointer
 default pause is 2000 ms (the moved DeepL value); a service overrides it in its constructor, and
 `setRateLimitMs(0)` disables the pause for tests only. The base knows no endpoints, service
 settings, the opt-in gate, or UI; `DeepLWebService`, `MyMemoryService`, `MozhiService`,
-`YandexWebService` and `BingWebService` use it; MyMemory sets 350 ms, Mozhi 500 ms, Yandex web
-750 ms and Bing web 1000 ms.
+`YandexWebService`, `BingWebService` and `ReversoService` use it; MyMemory sets 350 ms, Mozhi 500 ms,
+Yandex web 750 ms, Bing web 1000 ms and Reverso 600 ms.
 
 Each service receives a `NetworkManager` pointer (the shared `QNetworkAccessManager` and
 `makeRequest()` with a timeout and `User-Agent`) and does not create its own manager — this way the
@@ -1174,6 +1178,63 @@ text=<text>&fromLang=<source>&to=<target>&token=<token>&key=<key>&isAuthv2=true&
   contacts the real endpoint; a live smoke is manual only and is recorded as passed or as not
   performed with the reason (captcha, HTML change or block).
 
+### 4.7.7. `ReversoService` — unofficial Reverso endpoint
+
+`ReversoService` implements the unofficial `cps.reverso.net` endpoint. Its id is `reverso`, its
+display name is `Reverso`, it needs no key (`isConfigured() == true`), and it is the fifth real
+opt-in consumer after MyMemory (§4.7.3), Mozhi (§4.7.4), Yandex (§4.7.5) and Bing (§4.7.6):
+`requiresOptIn() == true`, `TranslationManager` refuses it while `translation/allowFreeServices` is
+false, and `AppController` hides it from the pickers. There is no key or URL field and no `[reverso]`
+settings group; `applySettings()` is empty and no `AppSettings`/INI key is added. `AppController`
+registers it after Bing.
+
+Request:
+
+```
+POST https://cps.reverso.net/api2/TranslateText
+Content-Type: application/json
+Accept: application/json
+
+{"source":"<text>","direction":"<source>-<target>","deviceId":"0","uiLang":"en","origin":"chromeextension","accessToken":"","appId":"0"}
+```
+
+- Body: a JSON object serialized with `QJsonDocument::Compact`; all seven values are strings, and
+  `deviceId`/`appId` are `"0"`, not the numbers `0`. `source` is the chunk text and `direction` is
+  the language pair. The serializer writes UTF-8, so spaces and non-ASCII text stay readable inside
+  the string. `QJsonObject` does not preserve insertion order; nothing depends on byte order.
+- Browser User-Agent: a fixed desktop Chrome string is set on the Reverso request only, after
+  `NetworkManager::makeRequest()`. `AppInfo::userAgent()` and every other service keep the
+  application User-Agent. This is protocol emulation, not a claim that the application is a browser.
+  No cookie is read or written and no `Cookie` header is sent; a cross-origin redirect is refused
+  with `SameOriginRedirectPolicy`.
+- Languages: see §4.8. Only `en`, `fr`, `de`, `es`, `it` and `ru` are supported; the internal codes
+  equal Reverso's codes, so there is no override table, and the six languages form a full
+  cross product of 36 directions. `auto` is not supported: it finishes with `UnsupportedLanguage`
+  and the message `Reverso needs an explicit source language; choose one instead of Auto-detect`
+  before any request. Any unmapped code also finishes with `UnsupportedLanguage` before any request.
+- Chunking and pacing: at most 5000 UTF-16 code units per request via `TextChunker::split`,
+  sequential chunks inside one `QueuedWebService` slot, a 600 ms pause between every request to the
+  host, edge whitespace removed before the request and restored at the joints, whitespace-only parts
+  not sent, and a failed chunk failing the whole reply without a partial result. Both values are
+  conservative named assumptions, not measured limits; the document gives no Reverso-specific value.
+- Response: a flat JSON object. `error == true` or `success == false` is an error even with HTTP 200,
+  so the body is classified before the status. `success == true` without a non-empty string
+  `translation` is `BadResponse`. `directionFrom` is mapped through
+  `Languages::fromServiceCode("reverso", ...)` into `detectedSourceLang`; `directionTo` is parsed and
+  exposed for the tests but does not change the result. A missing or non-string direction is not a
+  failure, and extra fields (`error`, `id`, provider extras) are tolerated.
+- Errors: `ReversoParser::parseErrorBody()` recognises an HTML page, a provider error object and a
+  plain-text rate-limit/block body; HTTP 401/403/429 are `RateLimited`, 413 is `TooLong`, 5xx is
+  `Network`, and any other non-2xx status is `BadResponse`. Messages are fixed literals and never
+  contain the text, the body, an HTML page or the URL; the only variable text is the short provider
+  `message` after the length, markup and control-character check, and it may reach `errorMessage` but
+  is never logged. The log has only fixed literals, the internal language codes, the safe `direction`,
+  the HTTP status and the elapsed time.
+- Tests: `tst_reversoparser` (saved fixtures), `tst_reversoservice` (a local `QTcpServer`), the
+  `reverso` rows in `tst_languages`, and the `Reverso` group in `tst_settingsdialog`. CTest never
+  contacts the real endpoint; a live smoke is manual only and is recorded as passed or as not
+  performed with the reason (block, a rejected pair, or no live run).
+
 ### 4.8. Languages — `languages`
 
 The program uses its own language codes internally (`en`, `ru`, `de`, `pt-BR`, `zh-Hans`…).
@@ -1214,6 +1275,13 @@ Bing web uses the observed code catalogue of its upstream plugin, with `auto` se
 reverses to `pt-BR`, and `sr-Cyrl`/`sr-Latn` to `sr`. Codes outside the catalogue (for example
 `ceb`, `kk`, `pa`, `haw`) are not declared. `bingWebCodeOf()` is the single fix point, and no
 `LanguageInfo` column is added or table column changed.
+
+Reverso declares only the six languages of its upstream mapper: `en`, `fr`, `de`, `es`, `it` and
+`ru`. The internal codes equal the service codes, so `reversoCodeOf()` has no override table and
+returns the code only for those six, `nullptr` otherwise. `auto` is not supported: the service
+returns `UnsupportedLanguage` with a message telling the user to choose an explicit source language
+before any request. The six languages form the full 36-direction cross product, and `direction` is
+`<source>-<target>`. No `LanguageInfo` column is added and the table's columns are unchanged.
 
 The module stores a table `{code, English name, native name, service codes}`
 (about 110 Google languages, of which about 35 are available in DeepL) and provides functions in the
@@ -1312,6 +1380,11 @@ Bing web is the fourth real service with `requiresOptIn() == true` (§4.7.6); th
 unchanged. `AppController` registers it after Yandex, hides it from the pickers while the gate is
 off, and if `translation/service=bing-web` is configured with the gate off, keeps Google active and
 logs that the configured service needs free web services to be enabled.
+
+Reverso is the fifth real service with `requiresOptIn() == true` (§4.7.7); the gate logic is
+unchanged. `AppController` registers it after Bing, hides it from the pickers while the gate is off,
+and if `translation/service=reverso` is configured with the gate off, keeps Google active and logs
+that the configured service needs free web services to be enabled.
 
 ### 4.10. Network and proxy — `NetworkManager`
 
@@ -1669,7 +1742,7 @@ buttons and menus for Hindi remain English.
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
 `*_win.cpp`; the Linux backends are `*_linux.cpp`, and `*_stub.cpp` remains only for platforms
 without a backend. `qtranslate_core`, `net/`, `services/`, and the UI do not use WinAPI. The Linux
-tree configures, builds, and links: 37 tests (29 shared plus 8 Linux platform tests) pass under
+tree configures, builds, and links: 39 tests (31 shared plus 8 Linux platform tests) pass under
 `xvfb-run` on Debian 13 (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2;
 Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
 X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
@@ -1711,7 +1784,7 @@ the shell read the `.desktop` file; `Icon=qtranslate` matches the installed icon
 builds the native Astra `-astra.tar.gz` and `+astra1` `.deb` with Astra's Qt 6.10.2; those are local
 verification artifacts, not CI-published. CI publishes only trixie artifacts. The Windows platform
 tests (`tst_hotkeymanager`, Windows variants of `tst_autostart`/`tst_secretprotector`) have Linux
-analogues; the other 29 tests are shared.
+analogues; the other 31 tests are shared.
 
 **Wayland limitations.** Global shortcuts and synthetic input are not base capabilities of
 Wayland. The `GlobalShortcuts` portal is not supported by all desktops and versions; insertion into
@@ -1940,10 +2013,12 @@ are linked into separate test targets):
 | `tst_yandexwebservice` | Yandex web against a local HTTP server: the POST form, content type, all fields, UTF-8 percent-encoding, the browser User-Agent on this request only, mapped target codes, constant `targetLang=auto`, `auto` source, 5000-unit chunks, the 750 ms default pause, serialization, cancellation, a refused cross-origin redirect, HTTP/HTML/JSON/rate-limit/timeout errors and messages without the text or URL |
 | `tst_bingwebparser` | Parsing Bing fixtures: the token-page markers (`IG`, the first `data-iid`, the abuse-prevention key/token/lifetime, the optional `muid`/`sid`/`tid`), `MUID` from `Set-Cookie` values (exact name; `MUIDB` is not matched), the `detectedLanguage`/`translations[].text` response, provider/HTML/plain-text errors and fixed messages without the page, text or URL |
 | `tst_bingwebservice` | Bing web against a local HTTP server: the two-step GET/POST, browser User-Agent, manual cookie attributes and the explicit `MUID`, the urlencoded fields/order/UTF-8 encoding, mapped target codes and `auto-detect`, 5000-unit chunks, 1000 ms pacing, the token+MUID cache, the one-time 401 refresh/retry, 403 as a block, serialization/cancellation, a refused cross-origin redirect, cookie isolation and message/log hygiene |
+| `tst_reversoparser` | Parsing Reverso fixtures: the flat success object with `translation`/`directionFrom`/`directionTo`, `success: true`/`error: false`, the error flag and `success: false` under HTTP 200, the validated short `message` versus the fixed literals, malformed/non-object/empty bodies, HTML/rate-limit/block plain text and the status mapping without the text, body or URL |
+| `tst_reversoservice` | Reverso against a local HTTP server: the seven-field JSON `POST`, browser User-Agent on this request only, UTF-8 text, all 36 directions, `auto`/unmapped/empty rejection with zero requests, 5000-unit chunks with edge whitespace, 600 ms default and 100 ms pacing, serialization/cancellation, a failed middle chunk, classified errors, the provider message, timeout, closed server, a refused cross-origin redirect and message/log hygiene |
 | `tst_queuedwebservice` | The shared per-host queue on a fake service: one reply at a time, the rate pause, aborting a queued reply, deleting the active reply, `noteRequestSent()` restarting the pause, a multi-chunk reply holding its slot |
 | `tst_openaichat` | Chat Completions request serialization (model, messages, temperature, `max_tokens`, stream), response parsing, error and finish-reason mapping, model list, endpoint building |
 | `tst_openaicompatibleservice` | The OpenAI-compatible service against a local HTTP server: configuration errors, chat request, source language, plain-text and fenced-JSON responses, whitespace, HTTP errors, timeout, cancellation, OpenRouter key rules, model loading and edited base URL |
-| `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, MyMemory codes (`zh-CN`, `zh-TW`, `no`, `tl`), Mozhi codes (`zh-CN`, `zh-TW`, `iw`, `jw`, `no`, `tl`, `pt`), Yandex codes (`zh`, `no`, `pt`, `he`; `zh` reverses to `zh-Hans`), and Bing codes (`pt`, `pt-PT`, `sr-Cyrl`, `nb`, `sr-Latn`→`sr`), `closest` when the service changes, unknown codes |
+| `tst_languages` | Code mapping in both directions, `EN-US/EN-GB` variants, `PT-BR`, `deepl-web`, MyMemory codes (`zh-CN`, `zh-TW`, `no`, `tl`), Mozhi codes (`zh-CN`, `zh-TW`, `iw`, `jw`, `no`, `tl`, `pt`), Yandex codes (`zh`, `no`, `pt`, `he`; `zh` reverses to `zh-Hans`), Bing codes (`pt`, `pt-PT`, `sr-Cyrl`, `nb`, `sr-Latn`→`sr`), Reverso's six codes (`en`, `fr`, `de`, `es`, `it`, `ru`; `auto` and every other code empty), `closest` when the service changes, unknown codes |
 | `tst_networkmanager` | Proxy types, HTTP proxy with authentication and `CONNECT`, SOCKS5 with login/password, `testProxy`, clear errors and no password in the text |
 | `tst_popupplacement` | Positioning of the Ctrl+Q window: reflection at edges, pressing against the screen, a second monitor with negative coordinates |
 | `tst_popupwindow` | Popup states (offscreen): request, result, copying, error/"Retry", language change, pinning, automatic hint closing |
@@ -1957,7 +2032,7 @@ are linked into separate test targets):
 | `tst_windowactivation_linux` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus`, `_NET_WM_STATE_FULLSCREEN`, `_NET_WM_PID`, XTest paste, Wayland 0/false (13 cases) |
 | `tst_cli` | CLI parser, mutual exclusion, two-process forwarding, legacy wire (20 cases, Linux) |
 | `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption, the `[mozhi]` defaults, normalization and canonical round trip |
-| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate, the Mozhi group (instance, engine, effective value, warning and gate), the Yandex hint and its gate, the Bing group and its gate (offscreen) |
+| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate, the Mozhi group (instance, engine, effective value, warning and gate), the Yandex hint and its gate, the Bing group and its gate, the Reverso group and its gate (offscreen) |
 | `tst_secretprotector` | Windows: DPAPI round-trip, empty and corrupted data. Linux: libsecret token round-trip, `0600` fallback, capability probe, migration (7+1 in trixie, 8/8 on Astra) |
 | `tst_autostart` | Windows: `Run` command format. Linux: desktop entry quoting, `--minimized`, repair, removal (6 cases) |
 | `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language — on a fake service; the real MyMemory service refused while the gate is off |
@@ -2124,6 +2199,10 @@ Limitations of the environment in which the final verification was performed (no
 - Linux is implemented on `main` for 0.12.0 (33 tests, X11 full, Wayland limited); the 0.11.x
   releases remain Windows-only, so the Linux packages appear only with 0.12.0. The trixie artifacts
   do not run on Astra 1.8.7, which needs the separate native build (§4.14). macOS is not planned.
+- Reverso is a niche fallback: it supports only `en`, `fr`, `de`, `es`, `it` and `ru` and cannot
+  detect the source language, so `auto` is rejected with a message asking for an explicit source.
+  Its 600 ms pause and 5000 UTF-16-code-unit chunk are conservative assumptions, not measured
+  limits. A live `cps.reverso.net` smoke may be blocked or not performed.
 
 Possible development:
 
@@ -2147,8 +2226,8 @@ Possible development:
    the installed version.
 8. **Free web endpoints** — DeepL web is implemented as the `free-web` mode of a single "DeepL"
    service without a key (§4.7.1); MyMemory is implemented as the first opt-in free API
-   (§4.7.3), Mozhi is the second (§4.7.4), Yandex web is the third (§4.7.5), and Bing web is the
-   fourth (§4.7.6); only Reverso remains research. Rate limits and an unofficial-status warning
+   (§4.7.3), Mozhi is the second (§4.7.4), Yandex web is the third (§4.7.5), Bing web is the
+   fourth (§4.7.6), and Reverso is the fifth (§4.7.7). Rate limits and an unofficial-status warning
    apply to all. Details and priorities — [`free-endpoints.md`](free-endpoints.md).
 9. **Local offline translation** — Argos models + CTranslate2 without Python: model download by
    button, pivot through English, fallback to the cloud. Details and PoC — [`local-translation.md`](local-translation.md).

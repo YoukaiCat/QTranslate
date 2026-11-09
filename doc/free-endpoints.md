@@ -1,8 +1,8 @@
 # Free web translation endpoints
 
 Date: 2026-11-09. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
-mode of the DeepL service; MyMemory, Mozhi, Yandex web and Bing web are implemented as gated no-key
-services; Reverso is research**.
+mode of the DeepL service; MyMemory, Mozhi, Yandex web, Bing web and Reverso are implemented as gated
+no-key services**.
 
 This document records the free endpoints without an API key that can be added to qtranslate as
 experimental services. The main source is the open project
@@ -141,6 +141,43 @@ made the only translation method.
 - **Limits:** unofficial endpoint; a 600 ms pause; its own direction codes; narrower language
   coverage than Google/DeepL.
 
+**Implementation in qtranslate (2026-11-09).**
+
+- The `reverso` service: `POST https://cps.reverso.net/api2/TranslateText` with
+  `Content-Type: application/json`, `Accept: application/json` and a fixed desktop Chrome
+  `User-Agent` on this request only; no key (`isConfigured() == true`). The body is a compact JSON
+  object with seven string values: `source` (the chunk text), `direction` (`<source>-<target>`),
+  `deviceId` (`"0"`), `uiLang` (`"en"`), `origin` (`"chromeextension"`), `accessToken` (`""`) and
+  `appId` (`"0"`). `deviceId`/`appId` are strings, not numbers. No cookie is read or written and no
+  `Cookie` header is sent; `SameOriginRedirectPolicy` refuses a cross-origin redirect.
+- Languages: only `en`, `fr`, `de`, `es`, `it` and `ru`, taken from the upstream mapper; the internal
+  codes equal Reverso's, and the six languages form the full 36-direction cross product. `auto` is
+  not supported: it finishes with `UnsupportedLanguage` and the message
+  `Reverso needs an explicit source language; choose one instead of Auto-detect` before any request,
+  and any unmapped code is rejected the same way.
+- 5000 UTF-16 code units per request (`TextChunker::split`) and a 600 ms pause between requests are
+  conservative assumptions, not measured limits; chunks are sent sequentially inside one queue slot
+  of `QueuedWebService`, edge whitespace is restored, and a failed chunk fails the whole reply
+  without a partial translation.
+- Response: a flat object with `error`, `success`, `translation`, `directionFrom`, `directionTo` and
+  `message`. `error == true` or `success == false` is an error even with HTTP 200, so the body is
+  classified before the status. `success == true` without a non-empty string `translation` is
+  `BadResponse`; `directionFrom` fills `detectedSourceLang` through `Languages::fromServiceCode`,
+  `directionTo` is parsed and tolerated but does not change the result, and extra fields are ignored.
+- Errors: 403/429 or a rate-limit body → `RateLimited`; 413 → `TooLong`; 5xx → `Network`; an HTML
+  page, a blocked body or another provider error object → `ServiceUnavailable`; malformed JSON, a
+  missing success flag/translation or an unknown non-2xx status → `BadResponse`; timeout/abort →
+  `Timeout`/`Cancelled`. The only variable text is the provider `message` after the short/markup/
+  control-character check; it may reach `errorMessage` but is never logged, and the text, the body
+  and the URL never appear in a message or the log.
+- Behind the opt-in gate `translation/allowFreeServices` (off by default), like the other unofficial
+  services: `requiresOptIn() == true`, hidden from the pickers and refused by `TranslationManager`
+  while the gate is off. There is no key, URL or `AppSettings`/INI field; `applySettings()` is empty.
+- Code: `src/services/reversoparser.*`, `src/services/reversoservice.*`; tests:
+  `tst_reversoparser`, `tst_reversoservice`, `tst_languages`, `tst_settingsdialog`. CTest never
+  contacts the real endpoint; a live smoke is manual only and is recorded as passed or as not
+  performed with the reason (a block, a rejected pair, or no live run).
+
 ## 5. Mozhi
 
 - **Request:** `GET https://<instance>/api/translate?engine=<engine>&from=<src>&to=<dst>&text=...`
@@ -238,15 +275,14 @@ remains unofficial.
    gate as an explicit mode with its own warning.
 2. For each service — its own `TranslationService` and parser; no keys are needed. Implemented for
    MyMemory (`src/services/mymemory*`), Mozhi (`src/services/mozhi*`), Yandex web
-   (`src/services/yandexweb*`) and Bing web (`src/services/bingweb*`); they are the four real
-   services behind the gate.
+   (`src/services/yandexweb*`), Bing web (`src/services/bingweb*`) and Reverso
+   (`src/services/reverso*`); they are the five real services behind the gate.
 3. Per-host rate limiting: implemented infrastructure in `QueuedWebService` — replies of one host
    are serialized and paused by the service-specific value (DeepL 2 s, MyMemory 350 ms, Mozhi
-   500 ms, Yandex web 750 ms, Bing web 1000 ms; Reverso 600 ms is planned); no parallel requests to
-   one host.
+   500 ms, Yandex web 750 ms, Bing web 1000 ms, Reverso 600 ms); no parallel requests to one host.
 4. Text splitting: implemented for DeepL (5000 characters), MyMemory (500 UTF-8 bytes), Mozhi
-   (5000 UTF-16 code units), Yandex web (5000 UTF-16 code units), and Bing web (5000 UTF-16 code
-   units); the rest — according to the service limits.
+   (5000 UTF-16 code units), Yandex web (5000 UTF-16 code units), Bing web (5000 UTF-16 code units)
+   and Reverso (5000 UTF-16 code units); the rest — according to the service limits.
 5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,
    without a retry storm.
 6. Fallback: the official API → free web → Mozhi/another service; do not show raw HTML.
@@ -262,7 +298,8 @@ remains unofficial.
 4. **Yandex web** — implemented: important for the Russian audience, but an unofficial scraped
    endpoint.
 5. **Bing web** — implemented: fragile auth and HTML, but the fourth opt-in free service.
-6. **Reverso** — niche, fewer languages.
+6. **Reverso** — implemented: niche, fewer languages, no automatic detection, but a clear gated
+   fallback among its six languages.
 
 ## 10. What not to do
 

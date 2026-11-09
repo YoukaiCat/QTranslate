@@ -1,6 +1,7 @@
 ---
 kind: task
-status: todo
+status: done
+detailed: true
 depends: [02-reverso-service, 03-reverso-settings]
 ---
 
@@ -69,3 +70,32 @@ edit them, and do not touch `doc/architecture.md` §11 or any code, test or `.ts
   and `AGENTS.md`.
 - No code, test, `.ts`, README, `doc/handoff.md`, root-plan or `07-fallback-chain` file is changed;
   commit and push are the coordinator/lead's.
+
+## Outcome
+
+Done by the lead (documentation-only, no coordinator). `doc/architecture.md`
+§3.1/§3.2/§4.5/§4.7.7/§4.8/§4.9/§4.14/§8/§9.2, `doc/free-endpoints.md` status/§4/§8/§9 and
+`AGENTS.md` describe the implemented Reverso service.
+
+- §3.1/§3.2 add `reversoparser.*`/`reversoservice.*`, the two tests and the `reverso/` fixtures, and
+  the counts become 31 shared, 3 Windows-only and 8 Linux-only (34 Windows / 39 Linux).
+- The new §4.7.7 records the fixed `POST https://cps.reverso.net/api2/TranslateText`, the seven
+  string fields (`deviceId`/`appId` = `"0"`), the browser Chrome User-Agent on this request only,
+  the six-language branch and 36-direction cross product, the `auto` rejection with its message, the
+  flat response with `error`/`success`/`translation`/`directionFrom`/`directionTo`/`message`,
+  5000 UTF-16-code-unit chunks with the 600 ms pause, the gate, the error classification and the
+  message/log hygiene.
+- §4.8 adds the `reverso` branch (six codes, no override table, no `auto`); §4.9 adds the fifth
+  opt-in paragraph; §4.14 records 39 Linux / 34 Windows; §8 lists the two new tests and the Reverso
+  rows in `tst_languages`/`tst_settingsdialog`; §9.2 records the six-language/no-detection
+  limitation and the 600 ms/5000-unit assumptions.
+- `doc/free-endpoints.md` marks Reverso as the fifth gated no-key service, adds the implementation
+  block in §4, lists Reverso in §8 (services, pauses, chunking) and marks item 6 in §9 as
+  implemented. `AGENTS.md` says 34 Windows / 39 Linux (31 shared, 3 Windows-only, 8 Linux-only) and
+  no longer contains a 32/37 count.
+- Verification: all relative links in the edited files resolve; `git diff --check` is clean; no
+  Cyrillic was added; the only changed non-map files are `doc/architecture.md`,
+  `doc/free-endpoints.md` and `AGENTS.md`. Windows 34 and a live Reverso smoke were not performed
+  (no MSVC; the tests never contact the endpoint). No code, test, `.ts`, README, `doc/handoff.md`,
+  root-plan or `07-fallback-chain` file was changed; the README/handoff/root-plan pass stays with the
+  lead.
