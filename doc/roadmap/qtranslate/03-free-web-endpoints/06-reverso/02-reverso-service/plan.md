@@ -330,12 +330,13 @@ machine, so its build and its 34 tests are recorded as not performed.
 - The plan described `source` as the mapped language code in steps 3 and 7, but §4 and the upstream
   plugin send the chunk text in `source` and the language pair in `direction`. The implementation
   followed the protocol; the plan wording was corrected here, with no production change.
-- `tst_reversoservice` runs 68 cases: the properties/defaults, the JSON request and the browser UA
+- `tst_reversoservice` runs 69 cases: the properties/defaults, the JSON request and the browser UA
   on this request only, the UTF-8 body, all 36 directions, the `auto`/unmapped/empty rejections
   with zero requests, edge whitespace, the 5000-unit chunks with a `\r\n` fixture, the 100 ms
   pacing, queue serialization, queued and active cancellation, the failed middle chunk, the
   classified HTTP and body errors, the provider message, the timeout, the closed server, the
-  cross-origin redirect refusal and the log/message hygiene.
+  cross-origin redirect refusal and the log/message hygiene; the acceptance added the explicit cookie
+  isolation (manual cookie attributes, no jar read/write).
 - Found while working and fixed in this task's review: `chunks()` checked that a chunk boundary
   never splits `\r\n`, but `longText()` had no `\r`; the fixture now uses `\r\n\r\n` paragraph
   breaks and asserts that it contains CRLF, so the check is no longer vacuous. The `pacesChunks()`

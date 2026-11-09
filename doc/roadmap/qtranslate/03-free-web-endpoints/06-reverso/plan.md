@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: d2cdf3c
 depends: [01-free-web-infrastructure]
 ---
@@ -163,3 +163,40 @@ counts. The node follows `05-bing-web` in the stage order but has no technical d
   local-server test; a live failure is recorded, not worked around with cookies or a captcha solver.
 - Windows Debug/Release and its 34 tests are unavailable on this Linux machine; record them as not
   performed, not as passed. The live smoke is a manual step and may be recorded as not performed.
+
+## Outcome
+
+Accepted and closed over `d2cdf3c..237579b`. All four children are done: `01-reverso-parser`
+(`b50945a`), `02-reverso-service` (`04aab67`), `03-reverso-settings` (`124c050`) and
+`04-reverso-docs` (`394063b`); the lead's README/`doc/handoff.md`/root-plan pass is `4913bf0`, and
+the acceptance fix is `237579b`.
+
+- `ReversoParser` and the `reverso` language branch support exactly `en`, `fr`, `de`, `es`, `it` and
+  `ru`; `auto` and every other code are rejected before a request, and the six languages form the
+  36-direction cross product with `direction = <source>-<target>`.
+- `ReversoService` sends the seven-field JSON `POST`, sets the browser Chrome UA on this request
+  only, uses `SameOriginRedirectPolicy`, sends 5000 UTF-16-code-unit chunks with a 600 ms pause,
+  restores edge whitespace, fails the whole reply on a failed chunk, and classifies the errors
+  body-first with fixed messages and no text/body/URL in the log. It is registered after Bing and is
+  hidden/refused while `translation/allowFreeServices` is off.
+- The Services page has a gate-aware `Reverso` group with the unofficial/no-key hint, the
+  six-language limitation and no input fields; all 14 `.ts` files are complete at 313 messages, and
+  `tst_translations` passes.
+- Documentation is updated in `doc/architecture.md`, `doc/free-endpoints.md`, `AGENTS.md`, both
+  READMEs, `doc/handoff.md` and the root plan; the counts are 34 Windows / 39 Linux (31 shared, 3
+  Windows-only, 8 Linux-only).
+- Verification: Linux Debug/Release build with no warnings and pass 39/39; `tst_reversoparser`
+  40/40, `tst_reversoservice` 69/69, `tst_languages` 200/200, `tst_settingsdialog` 27/27,
+  `tst_translations` 4/4; `git diff --check` clean.
+- Found and fixed during acceptance (`237579b`): the shared `QNetworkAccessManager` cookie jar was not
+  disabled, so a `Set-Cookie` from Reverso could be replayed on later chunks. The service now sets
+  `CookieLoadControlAttribute`/`CookieSaveControlAttribute` to `Manual`, and the new
+  `cookieIsolation` test checks both directions. The acceptance also added the missing `error` field
+  to the `doc/free-endpoints.md` §4 response summary and the cookie notes to `doc/architecture.md`
+  and `doc/handoff.md`.
+- Known gaps: the translation-count branch is defensive and unreachable from the wire; the
+  `m_service`/`m_network` guards have no dedicated test; the Reverso-specific gate scenario relies on
+  the shared `TranslationManager` tests; the Services page was not checked visually by hand (covered
+  by the offscreen test). Windows Debug/Release and its 34 tests were not performed (no MSVC); a live
+  `cps.reverso.net` smoke was not performed and is recorded as not performed with the reason. No real
+  problems were left unfixed because of cost; no push was made.

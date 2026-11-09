@@ -2,24 +2,23 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/06-reverso` — the stage's four children and the lead's README/
-`doc/handoff.md`/root-plan pass are done; the Reverso stage acceptance is next. `04-reverso-docs` was
-committed as `394063b`; `03-reverso-settings` as `124c050`; `02-reverso-service` as `04aab67`;
-`01-reverso-parser` as `b50945a`. The Reverso split is committed as `e92e4ad`; `06-reverso` is a
-stage (`in-progress`, `base: d2cdf3c`). Work is on `main` (matches the root `branch:`); the working
-tree has only this lead pass, nothing is pushed. Linux is 39/39, Windows 34 (derived, not run); the
-`.ts` count is 313 in every file. Stage `03-free-web-endpoints` is `in-progress`:
-`01-free-web-infrastructure`, `02-mymemory`, `03-mozhi`, `04-yandex-web` and `05-bing-web` are
-`done`; `06-reverso` is in progress and `07-fallback-chain` is `todo`. Real deferred problem: an
-active reply can store a result fetched from the old instance/engine after `clearCache()`
-(cache-generation counter in `TranslationManager` plus a test; also covers `google.mode`,
-`deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a later shared-UI
-decision (Reverso has the same issue: it rejects `auto` with a clear message); Yandex's
-`zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations. Decisions: one configured fallback
-step, not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web` stays
-outside the gate; the Bing POST is urlencoded, not multipart; Reverso has six languages and no
+Current node: `03-free-web-endpoints/07-fallback-chain` — `todo`, needs planner detail. Stage
+`06-reverso` is closed `done` over `d2cdf3c..237579b`; its four children are done (`b50945a`,
+`04aab67`, `124c050`, `394063b`), the lead pass is `4913bf0`, and the acceptance fix is `237579b`.
+Work is on `main` (matches the root `branch:`); the working tree has only this close-out, nothing is
+pushed. Linux is 39/39, Windows 34 (derived, not run); the `.ts` count is 313 in every file. Stage
+`03-free-web-endpoints` is `in-progress`: `01-free-web-infrastructure`, `02-mymemory`, `03-mozhi`,
+`04-yandex-web`, `05-bing-web` and `06-reverso` are `done`; `07-fallback-chain` is `todo`. Real
+deferred problem: an active reply can store a result fetched from the old instance/engine after
+`clearCache()` (cache-generation counter in `TranslationManager` plus a test; also covers
+`google.mode`, `deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a
+later shared-UI decision (Reverso has the same issue: it rejects `auto` with a clear message);
+Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations. Decisions: one configured
+fallback step, not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web`
+stays outside the gate; the Bing POST is urlencoded, not multipart; Reverso has six languages and no
 `auto`. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version
-bump, tag, push, or release). Next: run the Reverso stage acceptance over `d2cdf3c..HEAD`.
+bump, tag, push, or release). Next: detail `07-fallback-chain` (planner), then run it and the
+`03-free-web-endpoints` stage acceptance.
 
 ## Journal
 
@@ -131,3 +130,4 @@ bump, tag, push, or release). Next: run the Reverso stage acceptance over `d2cdf
 - 2026-11-09 — Task `03-free-web-endpoints/06-reverso/03-reverso-settings` done as `124c050`. Added the gate-aware `Reverso` group after `Bing` with one word-wrapped `reversoHint` (unofficial/no-key, six languages, no auto-detection, gate, rate limits/blocks, several requests, third party) and no key/URL/input field; `updateReversoControls()` follows `translation/allowFreeServices`, is connected to the toggle and called at the end of `loadValues()`. Added `tst_settingsdialog::reversoGroup` (27 passed, 25 named cases) and two messages in all 14 `.ts` (311 → 313, 0 unfinished/empty/vanished; `Reverso` untranslated, the hint translated; the Mozhi engine entry at `settingsdialog.cpp:349` and `displayName()` untouched; the `<location>` churn is expected). Verification: Linux Debug/Release 39/39 with zero warnings, `ctest -N` 39; Windows 34 and its build were not performed (no MSVC). Review found no blockers or remarks; no real problems. Next: `04-reverso-docs` (lead, documentation-only); no push.
 - 2026-11-09 — Task `03-free-web-endpoints/06-reverso/04-reverso-docs` done by the lead (documentation-only, no coordinator). Updated `doc/architecture.md` §3.1/§3.2/§4.5/§4.7.7/§4.8/§4.9/§4.14/§8/§9.2 (new §4.7.7 describes the fixed JSON `POST`, the seven string fields, the browser UA, the six-language branch and 36-direction cross product, the `auto` rejection, the flat response with the `error` flag, 5000 UTF-16 chunks/600 ms, the gate, the error table and the hygiene; the counts are 34 Windows / 39 Linux), `doc/free-endpoints.md` status/§4/§8/§9 (implemented block, services/pauses/chunks, item 6 implemented) and `AGENTS.md` 34/39 (31 shared, 3 Windows-only, 8 Linux-only). Verification: all relative links resolve, `git diff --check` clean, no Cyrillic added, the only non-map files are the three docs above. Windows 34 and a live smoke were not performed. Next: the lead's README/`doc/handoff.md`/root-plan pass and the Reverso stage acceptance; no push.
 - 2026-11-09 — Lead final pass for Reverso. `README.md`/`README.ru.md` list Reverso as the fourth unofficial no-key endpoint (with the six-language limitation), `doc/handoff.md` marks Reverso implemented and records 34 Windows / 39 Linux with the two new shared tests, and the root plan says 34/39 and lists Reverso. No code, test, UI or `.ts` change. Next: the Reverso stage acceptance over `d2cdf3c..HEAD`; no push.
+- 2026-11-09 — Stage `03-free-web-endpoints/06-reverso` accepted and closed `done` over `d2cdf3c..237579b`; all four children are done (`b50945a`, `04aab67`, `124c050`, `394063b`; lead pass `4913bf0`). The acceptance repeated Linux Debug/Release 39/39 with no warnings and checked the parser, the six-language branch and 36 directions, the JSON body and string `"0"` values, the browser UA on this request only, 600 ms/5000 UTF-16, the error classification, message/log hygiene, the gate, the settings group, the 313 `.ts` messages, the docs/README counts and the links. One real defect was found and fixed in `237579b`: the shared `QNetworkAccessManager` cookie jar was not disabled, so a Reverso `Set-Cookie` could be replayed on later chunks; both cookie attributes are now `Manual`, and `tst_reversoservice::cookieIsolation` checks no jar read and no jar write. The acceptance also added the missing `error` field to the `free-endpoints.md` §4 response summary and cookie notes to `architecture.md`/`handoff.md`. Known gaps: the translation-count branch is defensive and unreachable from the wire; the `m_service`/`m_network` guards have no dedicated test; the gate scenario relies on the shared `TranslationManager` tests; the Services page was not checked visually by hand. Windows 34 and a live smoke were not performed. No real problems were left unfixed because of cost. Next: detail `07-fallback-chain`; no push.
