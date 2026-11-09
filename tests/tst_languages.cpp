@@ -16,6 +16,7 @@ const QString mozhi = QStringLiteral("mozhi");
 const QString mymemory = QStringLiteral("mymemory");
 const QString yandexWeb = QStringLiteral("yandex-web");
 const QString bingWeb = QStringLiteral("bing-web");
+const QString reverso = QStringLiteral("reverso");
 } // namespace
 
 class TestLanguages : public QObject
@@ -136,6 +137,25 @@ private slots:
         QTest::newRow("bing web pa") << bingWeb << "pa" << Direction::Target << "";
         QTest::newRow("bing web haw") << bingWeb << "haw" << Direction::Source << "";
         QTest::newRow("bing web auto") << bingWeb << "auto" << Direction::Source << "";
+        QTest::newRow("reverso en source") << reverso << "en" << Direction::Source << "en";
+        QTest::newRow("reverso en target") << reverso << "en" << Direction::Target << "en";
+        QTest::newRow("reverso fr source") << reverso << "fr" << Direction::Source << "fr";
+        QTest::newRow("reverso fr target") << reverso << "fr" << Direction::Target << "fr";
+        QTest::newRow("reverso de source") << reverso << "de" << Direction::Source << "de";
+        QTest::newRow("reverso de target") << reverso << "de" << Direction::Target << "de";
+        QTest::newRow("reverso es source") << reverso << "es" << Direction::Source << "es";
+        QTest::newRow("reverso es target") << reverso << "es" << Direction::Target << "es";
+        QTest::newRow("reverso it source") << reverso << "it" << Direction::Source << "it";
+        QTest::newRow("reverso it target") << reverso << "it" << Direction::Target << "it";
+        QTest::newRow("reverso ru source") << reverso << "ru" << Direction::Source << "ru";
+        QTest::newRow("reverso ru target") << reverso << "ru" << Direction::Target << "ru";
+        QTest::newRow("reverso auto") << reverso << "auto" << Direction::Source << "";
+        QTest::newRow("reverso pt-BR") << reverso << "pt-BR" << Direction::Target << "";
+        QTest::newRow("reverso pt-PT") << reverso << "pt-PT" << Direction::Target << "";
+        QTest::newRow("reverso zh-Hans") << reverso << "zh-Hans" << Direction::Target << "";
+        QTest::newRow("reverso uk") << reverso << "uk" << Direction::Target << "";
+        QTest::newRow("reverso pl") << reverso << "pl" << Direction::Target << "";
+        QTest::newRow("reverso unknown code") << reverso << "xx" << Direction::Target << "";
         QTest::newRow("unknown code") << google << "xx" << Direction::Target << "";
         QTest::newRow("auto is not a language") << google << "auto" << Direction::Source << "";
         QTest::newRow("unknown service") << "yandex" << "en" << Direction::Target << "";
@@ -214,6 +234,20 @@ private slots:
                                           << "zh-Hant";
         QTest::newRow("bing web he") << bingWeb << "he" << Direction::Source << "he";
         QTest::newRow("bing web unknown") << bingWeb << "xx" << Direction::Source << "";
+        QTest::newRow("reverso en source") << reverso << "en" << Direction::Source << "en";
+        QTest::newRow("reverso en target") << reverso << "en" << Direction::Target << "en";
+        QTest::newRow("reverso fr source") << reverso << "fr" << Direction::Source << "fr";
+        QTest::newRow("reverso fr target") << reverso << "fr" << Direction::Target << "fr";
+        QTest::newRow("reverso de source") << reverso << "de" << Direction::Source << "de";
+        QTest::newRow("reverso de target") << reverso << "de" << Direction::Target << "de";
+        QTest::newRow("reverso es source") << reverso << "es" << Direction::Source << "es";
+        QTest::newRow("reverso es target") << reverso << "es" << Direction::Target << "es";
+        QTest::newRow("reverso it source") << reverso << "it" << Direction::Source << "it";
+        QTest::newRow("reverso it target") << reverso << "it" << Direction::Target << "it";
+        QTest::newRow("reverso ru source") << reverso << "ru" << Direction::Source << "ru";
+        QTest::newRow("reverso ru target") << reverso << "ru" << Direction::Target << "ru";
+        QTest::newRow("reverso unknown") << reverso << "xx" << Direction::Source << "";
+        QTest::newRow("reverso pt") << reverso << "pt" << Direction::Source << "";
         QTest::newRow("unknown") << google << "xx-unknown" << Direction::Source << "";
         QTest::newRow("empty") << google << "" << Direction::Source << "";
         QTest::newRow("google code for deepl") << deepl << "iw" << Direction::Source << "";
@@ -233,7 +267,7 @@ private slots:
         // Every supported language maps to a service code and back to itself,
         // except where several internal codes share a service code (DeepL "PT", "ZH").
         for (const QString &service : {google, deepl, deeplWeb, llm, mozhi, mymemory, yandexWeb,
-                                       bingWeb}) {
+                                       bingWeb, reverso}) {
             for (Direction direction : {Direction::Source, Direction::Target}) {
                 for (const QString &code : Languages::supported(service, direction)) {
                     const QString serviceCode = Languages::toServiceCode(service, code, direction);
@@ -310,6 +344,19 @@ private slots:
              {Languages::autoCode(), QStringLiteral("ceb"), QStringLiteral("kk"),
               QStringLiteral("pa"), QStringLiteral("haw")}) {
             QVERIFY2(!bingWebSources.contains(code), qPrintable(code));
+        }
+        const QStringList reversoSources = Languages::supported(reverso, Direction::Source);
+        QCOMPARE(Languages::supported(reverso, Direction::Target), reversoSources);
+        QCOMPARE(reversoSources.size(), 6);
+        for (const QString &code : {QStringLiteral("en"), QStringLiteral("fr"),
+                                    QStringLiteral("de"), QStringLiteral("es"),
+                                    QStringLiteral("it"), QStringLiteral("ru")}) {
+            QVERIFY2(reversoSources.contains(code), qPrintable(code));
+        }
+        for (const QString &code :
+             {Languages::autoCode(), QStringLiteral("pt-BR"), QStringLiteral("zh-Hans"),
+              QStringLiteral("uk"), QStringLiteral("pl")}) {
+            QVERIFY2(!reversoSources.contains(code), qPrintable(code));
         }
         QVERIFY(Languages::supported(QStringLiteral("yandex"), Direction::Target).isEmpty());
     }

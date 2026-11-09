@@ -3,24 +3,24 @@
 ## Where we left off
 
 Current node: `03-free-web-endpoints/06-reverso/01-reverso-parser` — `in-progress`, detailed; the
-coordinator has **not** started. The Reverso split is committed as `e92e4ad`; `06-reverso` is a
-stage (`in-progress`, `base: d2cdf3c`) with four children: parser (detailed), service, settings and
-docs. Work is on `main` (matches the root `branch:`); the working tree is clean and nothing is
-pushed. Linux is 37/37, Windows 32 (derived, not run); the parser adds `tst_reversoparser` (38/33)
-and the service `tst_reversoservice` (39/34); the `.ts` count grows from 311 to 313. Stage
-`03-free-web-endpoints` is `in-progress`: `01-free-web-infrastructure`, `02-mymemory`, `03-mozhi`,
-`04-yandex-web` and `05-bing-web` are `done`; `06-reverso` is in progress and `07-fallback-chain` is
-`todo`. Real deferred problem: an active reply can store a result fetched from the old
-instance/engine after `clearCache()` (cache-generation counter in `TranslationManager` plus a test;
-also covers `google.mode`, `deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge
-remains a later shared-UI decision (Reverso has the same issue: it rejects `auto` with a clear
-message); Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations. Decisions: one
-configured fallback step, not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL
-`free-web` stays outside the gate; the Bing POST is urlencoded, not multipart; Reverso has six
-languages and no `auto`. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on
-2026-11-08 (no version bump, tag, push, or release). **Context stop at ~380k.** In a new session:
-`/new`, choose the `lead` agent, enter `@continue`, then start the coordinator for
-`01-reverso-parser` (the plan is detailed and committed).
+coordinator is running (started 2026-11-09 in the resumed session). The Reverso split is committed
+as `e92e4ad`; `06-reverso` is a stage (`in-progress`, `base: d2cdf3c`) with four children: parser
+(detailed), service, settings and docs. Work is on `main` (matches the root `branch:`); the working
+tree was clean before the coordinator and nothing is pushed. Linux is 37/37, Windows 32 (derived,
+not run); the parser adds `tst_reversoparser` (38/33) and the service `tst_reversoservice` (39/34);
+the `.ts` count grows from 311 to 313. Stage `03-free-web-endpoints` is `in-progress`:
+`01-free-web-infrastructure`, `02-mymemory`, `03-mozhi`, `04-yandex-web` and `05-bing-web` are
+`done`; `06-reverso` is in progress and `07-fallback-chain` is `todo`. Real deferred problem: an
+active reply can store a result fetched from the old instance/engine after `clearCache()`
+(cache-generation counter in `TranslationManager` plus a test; also covers `google.mode`,
+`deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a later shared-UI
+decision (Reverso has the same issue: it rejects `auto` with a clear message); Yandex's
+`zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations. Decisions: one configured fallback
+step, not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web` stays
+outside the gate; the Bing POST is urlencoded, not multipart; Reverso has six languages and no
+`auto`. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version
+bump, tag, push, or release). Next: finish the parser task, then detail and run `02-reverso-service`
+(planner), then `03-reverso-settings`, `04-reverso-docs` and the Reverso stage acceptance.
 
 ## Journal
 

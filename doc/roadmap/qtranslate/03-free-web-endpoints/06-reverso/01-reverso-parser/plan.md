@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -283,3 +283,30 @@ URL or an extracted value into a message.
   fail with `BadResponse`, not crash or read out of bounds.
 - Windows Debug/Release and its 33 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+
+## Outcome
+
+Done. The `reverso` language branch and the pure `ReversoParser` are in place. `tst_reversoparser`
+is registered platform-neutrally after `tst_queuedwebservice`; the full Linux suite passes 38/38,
+and Debug and Release build without warnings. Windows/MSVC is unavailable on this machine, so its
+build and its 33 tests are recorded as not performed.
+
+- `src/core/languages.cpp` maps only `en`, `fr`, `de`, `es`, `it` and `ru` to themselves in both
+  directions; `auto`, `pt-BR`, `pt-PT`, `zh-Hans`, `uk`, `pl` and `xx` map to empty. No
+  `LanguageInfo` column, override table or synonym was added; `supported()` and `fromServiceCode()`
+  reuse the mapping.
+- `src/services/reversoparser.{h,cpp}` classifies `error: true`/`success: false` before the HTTP
+  status, accepts `translation` only as a non-empty string, exposes `directionFrom`/`directionTo`
+  raw and maps `directionFrom` to `detectedSourceLang`. The provider `message` is echoed only after
+  the 1–200, markup and control-character check; the fixed literals never contain the body, the
+  text or a URL.
+- 29 saved fixtures under `tests/fixtures/reverso/` carry fake values and `SECRET` sentinels; no
+  live token, cookie or identifier is committed. `tst_reversoparser` runs 40 cases and
+  `tst_languages` 200.
+
+Found while working: the protocol's flat `error` flag is missing from the §4 field list, so the
+parser handles it while `doc/free-endpoints.md` §4 still needs the update (`04-reverso-docs`). The
+test counters in `AGENTS.md` (32 Windows / 37 Linux) also need that documentation update. The
+`ReversoService`, the `auto` rejection message and the settings/UI are `02-reverso-service` and
+`03-reverso-settings`. No live smoke test was run, because network access is out of scope for this
+task; a rejected direction pair must still surface as a clear provider error in the service.

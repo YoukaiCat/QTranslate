@@ -159,6 +159,7 @@ constexpr QLatin1String kMyMemory("mymemory");
 constexpr QLatin1String kMozhi("mozhi");
 constexpr QLatin1String kYandexWeb("yandex-web");
 constexpr QLatin1String kBingWeb("bing-web");
+constexpr QLatin1String kReverso("reverso");
 
 // MyMemory takes ISO 639-1/RFC 3066 codes and follows the Google catalogue,
 // but a few of its codes differ from the internal ones.
@@ -211,6 +212,12 @@ constexpr const char *kBingWebCodes[] = {
 constexpr CodeOverride kBingWebOverrides[] = {
     {"pt-BR", "pt"},
     {"sr", "sr-Cyrl"},
+};
+
+// The observed Reverso catalogue (doc/free-endpoints.md, §4). The upstream
+// mapper declares exactly these six languages and rejects `auto`.
+constexpr const char *kReversoCodes[] = {
+    "en", "fr", "de", "es", "it", "ru",
 };
 
 const LanguageInfo *findInfo(const QString &code)
@@ -277,6 +284,18 @@ const char *bingWebCodeOf(const LanguageInfo &info)
     return nullptr;
 }
 
+// Reverso takes the internal ISO 639-1 codes and declares exactly the codes in
+// its observed catalogue. Every internal code equals the Reverso code, so no
+// override table is needed.
+const char *reversoCodeOf(const LanguageInfo &info)
+{
+    for (const char *candidate : kReversoCodes) {
+        if (QLatin1String(candidate) == QLatin1String(info.code))
+            return candidate;
+    }
+    return nullptr;
+}
+
 const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
                           Languages::Direction d)
 {
@@ -295,6 +314,8 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
         return yandexWebCodeOf(info);
     if (serviceId == kBingWeb)
         return bingWebCodeOf(info);
+    if (serviceId == kReverso)
+        return reversoCodeOf(info);
     return nullptr;
 }
 
