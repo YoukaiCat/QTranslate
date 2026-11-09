@@ -137,7 +137,7 @@ made the only translation method.
 - **Request:** `POST https://cps.reverso.net/api2/TranslateText`
 - **Body:** JSON `{"source":"...","direction":"...","deviceId":"0","uiLang":"en",
   "origin":"chromeextension","accessToken":"","appId":"0"}`.
-- **Response:** `translation`, `directionFrom`, `directionTo`, `success`, `message`.
+- **Response:** `translation`, `directionFrom`, `directionTo`, `success`, `message`, `error`.
 - **Limits:** unofficial endpoint; a 600 ms pause; its own direction codes; narrower language
   coverage than Google/DeepL.
 

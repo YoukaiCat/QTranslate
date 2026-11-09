@@ -11,6 +11,8 @@
 #include <QJsonObject>
 #include <QLoggingCategory>
 #include <QNetworkAccessManager>
+#include <QNetworkCookie>
+#include <QNetworkCookieJar>
 #include <QNetworkReply>
 #include <QSignalSpy>
 #include <QTcpServer>
@@ -41,7 +43,8 @@ public:
         int status = 200;
         QByteArray body;
         bool respond = true;
-        QByteArray location; // Location header; empty for a normal response
+        QByteArray location;  // Location header; empty for a normal response
+        QByteArray setCookie; // Set-Cookie header; empty for none
 
         Response() = default;
         Response(int responseStatus, QByteArray responseBody, bool responseRespond = true,
@@ -114,6 +117,8 @@ private:
             "Content-Length: " + QByteArray::number(response.body.size()) + "\r\n";
         if (!response.location.isEmpty())
             head += "Location: " + response.location + "\r\n";
+        if (!response.setCookie.isEmpty())
+            head += "Set-Cookie: " + response.setCookie + "\r\n";
         head += "Connection: close\r\n\r\n";
         socket->write(head + response.body);
         socket->disconnectFromHost();
@@ -822,6 +827,46 @@ private slots:
         QTest::qWait(100);
         QCOMPARE(other.requests.size(), 0);
         verifyFixedMessage(reply->result().errorMessage);
+    }
+
+    void cookieIsolation()
+    {
+        const QByteArray setCookie = QByteArrayLiteral("reverso=TOPSECRET; Path=/");
+        m_server->handler = [setCookie](const FakeHttpServer::Request &request) {
+            FakeHttpServer::Response response{200, echoResponse(request), true};
+            response.setCookie = setCookie;
+            return response;
+        };
+
+        const QUrl origin(QStringLiteral("http://127.0.0.1:%1/").arg(m_server->port()));
+        QNetworkCookieJar *jar = m_network->nam()->cookieJar();
+        QVERIFY(jar);
+        QNetworkCookie preloaded(QByteArray("jar"), QByteArray("value"));
+        preloaded.setDomain(QStringLiteral("127.0.0.1"));
+        preloaded.setPath(QStringLiteral("/"));
+        QVERIFY(jar->setCookiesFromUrl({preloaded}, origin));
+
+        const QString text = longText();
+        QVERIFY(TextChunker::split(text, 5000).size() > 2);
+
+        std::unique_ptr<TranslationReply> reply =
+            translate(text, QStringLiteral("ru"), QStringLiteral("en"));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QVERIFY(finished.wait(30000));
+        QVERIFY2(reply->result().ok(), qPrintable(reply->result().errorMessage));
+        QCOMPARE(reply->result().translatedText, text);
+
+        // Every chunk request is free of a Cookie header: the shared jar neither
+        // supplied the preloaded cookie nor one saved from Set-Cookie.
+        QCOMPARE(m_server->requests.size(), TextChunker::split(text, 5000).size());
+        for (const FakeHttpServer::Request &request : std::as_const(m_server->requests)) {
+            const QByteArray cookie = request.headers.value("cookie");
+            QVERIFY2(cookie.isEmpty(), qPrintable(cookie));
+        }
+
+        // The cookie from the Reverso host did not enter the shared jar.
+        for (const QNetworkCookie &cookie : jar->cookiesForUrl(origin))
+            QVERIFY2(cookie.name() != "reverso", qPrintable(cookie.name()));
     }
 
     void logsAreClean()

@@ -217,6 +217,10 @@ void ReversoService::Reply::send()
     // Overrides AppInfo::userAgent() for this request only; the other services
     // and the shared makeRequest() keep the application User-Agent.
     request.setHeader(QNetworkRequest::UserAgentHeader, browserUserAgent());
+    // The attributes are client-side only: the shared cookie jar neither
+    // supplies nor receives a cookie for these requests.
+    request.setAttribute(QNetworkRequest::CookieLoadControlAttribute, QNetworkRequest::Manual);
+    request.setAttribute(QNetworkRequest::CookieSaveControlAttribute, QNetworkRequest::Manual);
     // The text must never move to another host behind the user's back.
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                          QNetworkRequest::SameOriginRedirectPolicy);

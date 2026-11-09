@@ -220,7 +220,8 @@ documentation is English. The migration to the tree roadmap and the English base
   (`en`, `fr`, `de`, `es`, `it`, `ru`), no `auto` (a dedicated `UnsupportedLanguage` message), and a
   36-direction cross product. `success: false`/`error: true` are errors even under HTTP 200;
   `directionFrom` fills `detectedSourceLang` and `directionTo` is tolerated. The pause/chunk are
-  600 ms/5000 UTF-16; tests `tst_reversoparser`/`tst_reversoservice`; a live smoke was not run.
+  600 ms/5000 UTF-16; tests `tst_reversoparser`/`tst_reversoservice`; a live smoke was not run (the
+  tests use a local server and the endpoint was not contacted in this environment).
 - Yandex web: `api.browser.yandex.com/instaserp/translate`, form-urlencoded; Reverso:
   `cps.reverso.net/api2/TranslateText`; Mozhi: `/api/translate` on a public/own instance; MyMemory:
   `api.mymemory.translated.net/get`, ~500 bytes per request, the source language is required.
