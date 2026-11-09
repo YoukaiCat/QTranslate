@@ -1,6 +1,6 @@
 # Handoff: work state
 
-Date: 2026-11-08. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
+Date: 2026-11-09. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
 
 The active roadmap is [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md); the old plan is
 archived at [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); the active
@@ -50,13 +50,13 @@ documentation is English. The migration to the tree roadmap and the English base
   in-place feedback, and explicit warnings; no `ydotool`/`wtype`. A real portal-capable desktop was
   not available; the portal is covered by a mock DBus (20/20) and Weston headless confirms the
   fallback.
-- Tests: 35 on Linux (27 shared plus `tst_hotkeymanager_x11` 16/16,
+- Tests: 37 on Linux (29 shared plus `tst_hotkeymanager_x11` 16/16,
   `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
   `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
   `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 20/20; `tst_queuedwebservice`,
   `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_mozhiparser`, `tst_mozhiwebservice`,
-  `tst_yandexwebparser`, and `tst_yandexwebservice` are the new shared tests). Windows keeps 30
-  tests and was not run here (no MSVC).
+  `tst_yandexwebparser`, `tst_yandexwebservice`, `tst_bingwebparser`, and `tst_bingwebservice` are
+  the new shared tests). Windows keeps 32 tests and was not run here (no MSVC).
 - Packaging: `packaging/linux/package.sh` builds the trixie `tar.gz`, `.deb`, AppImage, and
   `SHA256SUMS-linux.txt` in `qtranslate-trixie`; the `.deb` uses `dpkg-shlibdeps` (including
   `libsecret-1-0`/`libqt6dbus6` only when linked). `--target astra` builds
@@ -86,7 +86,8 @@ documentation is English. The migration to the tree roadmap and the English base
 - Release 0.12.0 is deferred by user decision on 2026-11-08. When it happens, the version bump, the
   README download links, and `doc/releases/0.12.0.md` are needed; the old 0.11.1 GitHub release is
   deleted then (user decision). The roadmap is in stage 3: the opt-in gate, the shared queue,
-  MyMemory, Mozhi, and Yandex web are done, and the next task is `05-bing-web`.
+  MyMemory, Mozhi, Yandex web and Bing web are done; the `05-bing-web` acceptance and `06-reverso`
+  are next.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
@@ -180,10 +181,9 @@ documentation is English. The migration to the tree roadmap and the English base
 
 ## Free web endpoints (roadmap stage 3 (old stage 13), partial)
 
-- [`free-endpoints.md`](free-endpoints.md): DeepL web, MyMemory, Mozhi, and Yandex web are
+- [`free-endpoints.md`](free-endpoints.md): DeepL web, MyMemory, Mozhi, Yandex web and Bing web are
   implemented; the opt-in gate (`translation/allowFreeServices`) and the shared `QueuedWebService`
-  queue are implemented infrastructure; Bing web and Reverso are research and the next roadmap
-  tasks. MyMemory cannot auto-detect the source language, so Auto-detect stays a selectable value and
+  queue are implemented infrastructure; Reverso is research and the next roadmap task. MyMemory cannot auto-detect the source language, so Auto-detect stays a selectable value and
   returns `UnsupportedLanguage` until the user picks a language; the settings hint and the error
   explain it. Fixing the shared language combos is a later decision.
 - A deferred cache problem affects Mozhi and the other setting changes: an active reply that finishes
@@ -204,13 +204,17 @@ documentation is English. The migration to the tree roadmap and the English base
   endpoint silently returns an uppercase base code without translation, so the normalization is
   mandatory. `DE`, `PT-BR`, `EN-US`, `zh-Hans` were verified with live requests.
 - `tst_deeplwebparser`, `tst_deeplwebservice` and `tst_deeplservice` (`free-web` mode); Debug and
-  Release: 23/23 tests at that time (the suite is 26 Windows / 31 Linux now).
+  Release: 23/23 tests at that time (the suite is 32 Windows / 37 Linux now).
 - Live smoke through the built `DeepLWebService`: `Hello, world` → `Hallo, Welt`,
   `detected_source_language=en`, no errors.
-- Yandex web: `api.browser.yandex.com/instaserp/translate`, form-urlencoded; Bing web:
-  `www.bing.com/ttranslatev3` with tokens from HTML; Reverso: `cps.reverso.net/api2/TranslateText`;
-  Mozhi: `/api/translate` on a public/own instance; MyMemory: `api.mymemory.translated.net/get`,
-  ~500 bytes per request, the source language is required.
+- **Bing web is implemented:** `src/services/bingwebparser.*` and `bingwebservice.*`; the token page
+  yields `IG`/`data-iid`/key/token/lifetime/MUID, the POST is urlencoded with the explicit `MUID`
+  cookie, the token+MUID cache lasts the page lifetime, a 401 refreshes once, 403 is a block, and the
+  pause/chunk are 1000 ms/5000 UTF-16; tests `tst_bingwebparser`/`tst_bingwebservice`; the live
+  smoke passed (`Hallo Welt`, detected `en`).
+- Yandex web: `api.browser.yandex.com/instaserp/translate`, form-urlencoded; Reverso:
+  `cps.reverso.net/api2/TranslateText`; Mozhi: `/api/translate` on a public/own instance; MyMemory:
+  `api.mymemory.translated.net/get`, ~500 bytes per request, the source language is required.
 - All except MyMemory and self-hosted Mozhi/LibreTranslate are unofficial: no SLA, possible `429`,
   HTML/API changes and terms-of-service restrictions. They need a rate limit and a fallback.
 - **DeepL API Developer** (formerly Free): 1 000 000 characters **in total**, no monthly reset; after

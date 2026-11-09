@@ -24,19 +24,19 @@ The active roadmap is this file. The detailed Russian history of the old flat pl
   archive. Windows Debug/Release builds and the 23 tests that existed at that time were unavailable
   in the current Linux environment; the outcome records them as not performed, not as passed.
 - After any other code changes, the application builds in Debug and Release without `/W4` warnings
-  and all 30 Windows tests pass; on Linux the same holds with `-Wall -Wextra` and 35 tests.
+  and all 32 Windows tests pass; on Linux the same holds with `-Wall -Wextra` and 37 tests.
 
 ## History
 
 The old flat plan completed stages 1-12 and delivered releases 0.9.0, 0.9.1, 0.10.0, and 0.11.0. It covers the application skeleton, the translation core and Google Translate, global hotkeys and selection capture, the popup and main-window scenarios, settings and autostart, DeepL and Google Cloud, proxies, release polish, in-place replacement, the installer and CI, and localisation into 15 UI languages. After 0.11.0 the project also added fullscreen hotkey pause behaviour and the QTranslate branding.
 
-Old stages 13 (free web endpoints) and 16 (LLM actions) are partially implemented. DeepL free web is a `free-web` mode of the DeepL service; MyMemory, Mozhi, and Yandex web are implemented as opt-in free APIs; the OpenAI-compatible translation provider, OpenRouter by default, is implemented. Old stage 11 (Linux support) is implemented on `main` for 0.12.0: 35 Linux tests, X11 full, Wayland limited, trixie and native Astra packages. Old stages 14, 15, and 17 are design-only. The old plan records known manual gaps: tray behaviour, Word/VS Code/Telegram capture, Win+V clipboard history, a real second monitor, autostart after a real reboot, real DeepL/Google Cloud keys, and an external authenticated proxy. These gaps are recorded in `doc/handoff.md` and do not block new work. The detailed rationale and step-by-step history remain in the Russian archive.
+Old stages 13 (free web endpoints) and 16 (LLM actions) are partially implemented. DeepL free web is a `free-web` mode of the DeepL service; MyMemory, Mozhi, Yandex web and Bing web are implemented as opt-in free APIs; the OpenAI-compatible translation provider, OpenRouter by default, is implemented. Old stage 11 (Linux support) is implemented on `main` for 0.12.0: 37 Linux tests, X11 full, Wayland limited, trixie and native Astra packages. Old stages 14, 15, and 17 are design-only. The old plan records known manual gaps: tray behaviour, Word/VS Code/Telegram capture, Win+V clipboard history, a real second monitor, autostart after a real reboot, real DeepL/Google Cloud keys, and an external authenticated proxy. These gaps are recorded in `doc/handoff.md` and do not block new work. The detailed rationale and step-by-step history remain in the Russian archive.
 
 ## Stages
 
 1. [Documentation migration and English baseline](01-documentation-migration/plan.md) — migrate to the tree roadmap and translate all active documentation to English; no code changes except one approved comment line.
 2. [Linux support (old stage 11)](02-linux/plan.md) — Linux x86_64 build, X11 as the full target, Wayland limited with clear warnings.
-3. [Free web endpoints (old stage 13)](03-free-web-endpoints/plan.md) — MyMemory, Mozhi, and other no-key endpoints as optional fallbacks.
+3. [Free web endpoints (old stage 13)](03-free-web-endpoints/plan.md) — MyMemory, Mozhi, Yandex web, Bing web and other no-key endpoints as optional fallbacks.
 4. [Local offline translation (old stage 14)](04-local-offline-translation/plan.md) — blocked: design only; Argos Translate through CTranslate2 is not being implemented now, and LLM providers cover the need.
 5. [Proofreading (old stage 15)](05-proofreading/plan.md) — separate spelling, grammar, and punctuation checking mode.
 6. [LLM actions (old stage 16)](06-llm-actions/plan.md) — summarise, rewrite, explain, pronounce, and structured proofreading.

@@ -98,6 +98,9 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
   in **Settings → Services → Google Translate**.
 - **DeepL** — official API with a key or the unofficial free web mode without a key. Both modes are
   in **Settings → Services → DeepL**.
+- **Free web services** — MyMemory, Mozhi, Yandex web and Bing web are optional no-key endpoints.
+  They are unofficial and may be rate-limited, change or stop working; enable them under
+  **Settings → Services → Allow free web services**. Google and DeepL remain the primary providers.
 - **OpenAI-compatible provider** — the default server is [OpenRouter](https://openrouter.ai)
   (`https://openrouter.ai/api/v1`). OpenRouter **requires a key**; it offers free models such as
   `openrouter/free` and paid models. Paste the key, keep or change the model, and press
@@ -159,7 +162,7 @@ these artifacts; the tag must match the version in `CMakeLists.txt`.
 
 ### Linux (0.12.0)
 
-QTranslate builds, links, and passes 35 tests (27 shared plus 8 Linux platform tests) in Debug and
+QTranslate builds, links, and passes 37 tests (29 shared plus 8 Linux platform tests) in Debug and
 Release with `-Wall -Wextra` and no warnings on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7
 (Qt 6.10.2). X11 is the full target: global hotkeys, selection capture, in-place replacement,
 autostart, the three CLI commands, and tray integration are implemented. Wayland is limited: the
@@ -242,6 +245,9 @@ security policy's approval. To revoke it, run
   Cloud/DeepL with an API key.
 - DeepL free web mode is an unofficial endpoint without an API key. It may be rate-limited, change
   or stop working; the official DeepL API is more reliable.
+- MyMemory, Mozhi, Yandex web and Bing web are unofficial endpoints without an API key. They may be
+  rate-limited, change or stop working, and the text is sent to a third party; the official APIs are
+  more reliable.
 - OpenRouter and other OpenAI-compatible providers need an API key and an available model. Quality,
   speed and cost depend on the chosen model; free models have strict rate limits. The text is sent
   to the selected provider.
