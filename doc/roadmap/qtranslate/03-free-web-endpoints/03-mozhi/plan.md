@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: c4d3eed
 depends: [01-free-web-infrastructure]
 ---
@@ -115,3 +115,34 @@ a real dependency, not only numbering.
 - Windows Debug/Release and its 28 tests are unavailable on this Linux machine; record them as not
   performed, not as passed. A live smoke may fail because a public instance is down or rate-limited;
   record it as not performed rather than claiming success.
+
+## Outcome
+
+Accepted on 2026-11-09 over `c4d3eed..52e5196`. Three children are `done`: `01-mozhi-service`
+(`7e88d9c`), `02-mozhi-settings` (`2cda61a`), and `03-mozhi-ui-and-docs` (`52e5196`).
+
+- **Service:** `Mozhi` is an opt-in `QueuedWebService` (`requiresOptIn() == true`) with a 500 ms
+  pause, `GET <instance>/api/translate` with `engine`/`from`/`to`/`text`, 5000 UTF-16 chunks,
+  `auto` passed through, Google-style language codes, body-first error classification (429, invalid
+  engine, and invalid language bodies arrive as HTTP 500), `SameOriginRedirectPolicy`, `+` encoded as
+  `%2B`, sequential chunks in one reply, edge-whitespace restore, abort/timeout, and no text, full
+  URL, or body in the logs.
+- **Settings:** `MozhiSettings` defaults `https://mozhi.adminforge.de`/`google`; strict `http(s)`
+  normalization without credentials/query/fragment, trailing slash removed, path prefix kept;
+  unknown engine → `google`; `MozhiService::applySettings` re-normalizes; `AppController` clears the
+  cache on an effective instance/engine change without aborting the active request; version stays 1.
+- **UI/docs:** the Services page has the `Mozhi` group with the instance field, engine combo, the
+  effective-value label, the warning, and the gate-aware disabled state; six strings are in all 14
+  `.ts` (307); `architecture.md` §3.1/§3.2/§4.5/§4.7.4/§4.8/§4.9/§4.11/§8/§4.14/§9.2,
+  `free-endpoints.md` §5/§8/§9, and `AGENTS.md` 28/33 are updated.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2) and `qtranslate-trixie` (Qt 6.8.2), Debug and
+  Release, zero warnings, 33/33; `tst_settingsdialog` 24, `tst_mozhiwebservice` repeats without
+  flakes; the gate/INI behaviour checked offscreen; `.ts` 307 complete. No code defects were found;
+  no fixes were needed.
+
+Real problems left unfixed: the cache-generation race — an active reply that finishes after
+`clearCache()` can store a result fetched from the old instance/engine under the current key; the
+fix needs a generation counter in `TranslationManager` and a test, and the same applies to
+`google.mode`, `deepl.mode`, and `deepl.englishVariant`; it is a follow-up. MyMemory's Auto-detect
+rough edge remains. Windows 28 and the live Mozhi smoke were not performed (no MSVC; CTest is
+offline). Next: `04-yandex-web`.

@@ -2,20 +2,20 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/03-mozhi/03-mozhi-ui-and-docs` — `in-progress`, detailed; the
-coordinator is next. The settings task is `done` (`2cda61a`); this task adds the Mozhi group in
-Settings, six new strings in the 14 `.ts` (301 → 307), the architecture/free-endpoints docs and the
-33/28 counts; then the Mozhi stage is accepted. Real deferred problem: an active reply can re-store
-a result in the cache after the instance/engine changes (a cache generation counter in
-`TranslationManager` is the follow-up). The MyMemory stage is `done` (`371ab1e..082dac4`); its
-Auto-detect rough edge remains a later shared-UI decision. The infrastructure stage is `done`
-(`fee1bcf..fb531fa`). Decisions: one configured fallback step, not a literal multi-step chain; Bing
-and Reverso stay in the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is `done`;
-the user deferred the 0.12.0 release on 2026-11-08 (no version bump, tag, push, or release; the CI
-publication is not performed). The working tree is clean after the UI/docs-plan commit; branch `main`
-matches the root `branch:` and is ahead of `origin/main`; nothing is pushed. Next: the UI/docs
-coordinator, then the Mozhi stage acceptance. In a new session: `/new`, choose the `lead` agent, and
-enter `@continue`.
+Current node: `03-free-web-endpoints/04-yandex-web` — `todo`, not detailed; the planner is next. The
+Mozhi stage is `done` (accepted over `c4d3eed..52e5196`; service `7e88d9c`, settings `2cda61a`,
+UI/docs `52e5196`). Linux is 33/33, Windows 28 (not run). The top-level stage 3 continues with
+Yandex, Bing, Reverso, and the fallback chain. Real deferred problem: an active reply can store a
+result fetched from the old instance/engine after `clearCache()`; a cache-generation counter in
+`TranslationManager` plus a test is the follow-up (the same applies to `google.mode`, `deepl.mode`,
+and `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a later shared-UI decision.
+The infrastructure stage and MyMemory are `done`. Decisions: one configured fallback step, not a
+literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web` stays outside the
+gate. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version
+bump, tag, push, or release; the CI publication is not performed). The working tree is clean after
+the Mozhi-acceptance commit; branch `main` matches the root `branch:` and is ahead of `origin/main`;
+nothing is pushed. Next: the Yandex planner, then its coordinator. In a new session: `/new`, choose
+the `lead` agent, and enter `@continue`.
 
 ## Journal
 
@@ -102,3 +102,4 @@ enter `@continue`.
 - 2026-11-09 — Planner detailed `02-mozhi-settings` (7 steps, `detailed: true`). Decisions: `MozhiSettings` keeps the instance/engine as strings (`QUrl` only at the service boundary); `applySettings` re-normalizes as `OpenAiCompatibleService` does; validation is strict `http(s)` with a non-empty host, no user info, query, or fragment; trailing slashes are removed and a path prefix is kept; an empty/malformed instance or unknown engine falls back to the default with a fixed warning; `kCurrentVersion` stays 1; `AppController` clears the cache only when the effective instance/engine changes and does not abort the active request; the settings are tested in `tst_settings` and `tst_mozhiwebservice`, and the cache reset itself is code-reviewed because there is no `AppController` test target. Status `in-progress`; coordinator next.
 - 2026-11-09 — Task `03-free-web-endpoints/03-mozhi/02-mozhi-settings` done as `2cda61a`. Added `MozhiSettings` with the `[mozhi] instance`/`engine` keys and four normalization helpers in `src/core/settings.*`; `MozhiService::applySettings()` re-normalizes and delegates the defaults; `AppController` clears the cache only when the effective instance/engine changes and does not abort the active request; `kCurrentVersion` stays 1. Tests: `tst_settings` defaults/normalization/round trip/corrupt values/optional group; `tst_mozhiwebservice` settings path through a local server and no-abort. Verification: Astra/trixie Debug/Release 33/33, no warnings. The coordinator documented a real deferred problem: a reply that is active while the instance/engine changes can store its result in the cache after `clearCache()`, because the cache key has no generation; fixing it needs a generation counter in `TranslationManager` and a test and is a follow-up, not this task. Windows 28 and the live smoke were not performed. Next: detail `03-mozhi-ui-and-docs`.
 - 2026-11-09 — Planner detailed `03-mozhi-ui-and-docs` (detailed; ~19 files, 14 of them `.ts`). Decisions: group order `freeWeb` → `MyMemory` → `Mozhi`, effective-value label with `Qt::PlainText`, validation through the settings helpers, six strings (301 → 307), engine names are product names and do not enter `.ts`, `tst_settingsdialog` grows to 24, the docs update `architecture.md` §3.1/§3.2/§4.5/§4.7.4/§4.8/§4.9/§4.11/§8/§4.14 and §9.2, `free-endpoints.md` §5/§8/§9 and `AGENTS.md` 28/33; no new test target; the parent stage's `tst_mozhiservice` typo was corrected by the lead. The task stays one node because the `.ts` edit is mechanical and the stage already has three children. Status `in-progress`; coordinator next.
+- 2026-11-09 — Stage `03-free-web-endpoints/03-mozhi` accepted and closed `done` over `c4d3eed..52e5196`; all three children are done (`7e88d9c`, `2cda61a`, `52e5196`). The acceptance repeated Astra/trixie Debug/Release 33/33 with no warnings, checked the service/settings/UI/docs integration and the gate/INI path, and found no code defects; no fixes were needed. The lead fixed the stale lead-owned lines (architecture §9.2/§11.7, READMEs/root plan 28/33, handoff state and counts) and wrote the stage outcome. Real deferred problem: the cache-generation race (an active reply can store a result fetched from the old instance/engine after `clearCache()`; the same applies to `google.mode`/`deepl.mode`/`deepl.englishVariant`) needs a counter in `TranslationManager` and a test; MyMemory's Auto-detect rough edge remains. Windows 28 and the live Mozhi smoke were not performed. Next: `04-yandex-web` (`todo`, needs planner detail).

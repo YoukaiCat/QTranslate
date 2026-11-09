@@ -1928,7 +1928,7 @@ Limitations of the environment in which the final verification was performed (no
 - The installer is not code-signed: Windows SmartScreen may show a warning. There is no certificate
   in the project; options and requirements are described in [`code-signing.md`](code-signing.md).
   Adding a signature does not change the artifact format.
-- Linux is implemented on `main` for 0.12.0 (31 tests, X11 full, Wayland limited); the 0.11.x
+- Linux is implemented on `main` for 0.12.0 (33 tests, X11 full, Wayland limited); the 0.11.x
   releases remain Windows-only, so the Linux packages appear only with 0.12.0. The trixie artifacts
   do not run on Astra 1.8.7, which needs the separate native build (§4.14). macOS is not planned.
 
@@ -2099,7 +2099,7 @@ The migration is stage 1 of the roadmap. The lead performs these steps:
 - Code comments and source files are not touched, except the one approved comment line in
   `src/platform/selectiongrabber_win.cpp` that now points to the archive. Any other documentation
   change that would require a code comment change is deferred to a separate task.
-- The migration is documentation-only except the one approved comment line in `src/platform/selectiongrabber_win.cpp`, which needs no build; any other code or test change requires the relevant Debug and Release checks and all 26 tests.
+- The migration is documentation-only except the one approved comment line in `src/platform/selectiongrabber_win.cpp`, which needs no build; any other code or test change requires the relevant Debug and Release checks and all 28 tests.
 
 ### 11.8. Verification
 

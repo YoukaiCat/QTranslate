@@ -50,12 +50,12 @@ documentation is English. The migration to the tree roadmap and the English base
   in-place feedback, and explicit warnings; no `ydotool`/`wtype`. A real portal-capable desktop was
   not available; the portal is covered by a mock DBus (20/20) and Weston headless confirms the
   fallback.
-- Tests: 31 on Linux (23 shared plus `tst_hotkeymanager_x11` 16/16,
+- Tests: 33 on Linux (25 shared plus `tst_hotkeymanager_x11` 16/16,
   `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
   `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
   `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 20/20; `tst_queuedwebservice`,
-  `tst_mymemoryparser`, and `tst_mymemoryservice` are the new shared tests). Windows keeps 26 tests
-  and was not run here (no MSVC).
+  `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_mozhiparser`, and `tst_mozhiwebservice` are the
+  new shared tests). Windows keeps 28 tests and was not run here (no MSVC).
 - Packaging: `packaging/linux/package.sh` builds the trixie `tar.gz`, `.deb`, AppImage, and
   `SHA256SUMS-linux.txt` in `qtranslate-trixie`; the `.deb` uses `dpkg-shlibdeps` (including
   `libsecret-1-0`/`libqt6dbus6` only when linked). `--target astra` builds
@@ -84,8 +84,8 @@ documentation is English. The migration to the tree roadmap and the English base
   no-libsecret build.
 - Release 0.12.0 is deferred by user decision on 2026-11-08. When it happens, the version bump, the
   README download links, and `doc/releases/0.12.0.md` are needed; the old 0.11.1 GitHub release is
-  deleted then (user decision). The roadmap is in stage 3: the opt-in gate, the shared queue, and
-  MyMemory are done, and the next task is `03-mozhi`.
+  deleted then (user decision). The roadmap is in stage 3: the opt-in gate, the shared queue,
+  MyMemory, and Mozhi are done, and the next task is `04-yandex-web`.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
@@ -179,12 +179,17 @@ documentation is English. The migration to the tree roadmap and the English base
 
 ## Free web endpoints (roadmap stage 3 (old stage 13), partial)
 
-- [`free-endpoints.md`](free-endpoints.md): DeepL web and MyMemory are implemented; the opt-in gate
-  (`translation/allowFreeServices`) and the shared `QueuedWebService` queue are implemented
-  infrastructure; Yandex web, Bing web, Reverso, and Mozhi are research and the next roadmap tasks.
-  MyMemory cannot auto-detect the source language, so Auto-detect stays a selectable value and
+- [`free-endpoints.md`](free-endpoints.md): DeepL web, MyMemory, and Mozhi are implemented; the
+  opt-in gate (`translation/allowFreeServices`) and the shared `QueuedWebService` queue are
+  implemented infrastructure; Yandex web, Bing web, and Reverso are research and the next roadmap
+  tasks. MyMemory cannot auto-detect the source language, so Auto-detect stays a selectable value and
   returns `UnsupportedLanguage` until the user picks a language; the settings hint and the error
   explain it. Fixing the shared language combos is a later decision.
+- A deferred cache problem affects Mozhi and the other setting changes: an active reply that finishes
+  after `clearCache()` can store a result fetched from the old instance/engine under the current
+  cache key. The fix is a cache-generation counter in `TranslationManager` (capture it in the reply
+  and skip `storeCached()` for an old generation) plus a test; the same applies to `google.mode`,
+  `deepl.mode`, and `deepl.englishVariant`. This is a follow-up, not fixed in the Mozhi stage.
 - **DeepL web is implemented as a mode:** `src/services/deeplwebservice.*` and `deeplwebparser.*` are
   used inside `DeepLService` with `deepl.mode=free-web`. No key is needed; in the service list there
   is a single "DeepL", in its settings an "API / Free web" combo box; the key field is disabled in
