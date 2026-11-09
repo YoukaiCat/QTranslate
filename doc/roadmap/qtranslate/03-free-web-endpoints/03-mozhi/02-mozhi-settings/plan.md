@@ -1,6 +1,7 @@
 ---
 kind: task
-status: todo
+status: in-progress
+detailed: true
 depends: [01-mozhi-service]
 ---
 
@@ -42,29 +43,215 @@ applies an `AppSettings` with a local-server instance and a non-default engine a
 request path and `engine` query. No new test target is added, so the counts stay 33 Linux / 28
 Windows.
 
+## Steps
+
+1. **Add `MozhiSettings` and the shared helpers to `src/core/settings.h/.cpp`.** In
+   `src/core/settings.h`, add `<QStringList>`, a `MozhiSettings` struct after `DeepLSettings` with
+   `QString instance = QStringLiteral("https://mozhi.adminforge.de");` and
+   `QString engine = QStringLiteral("google");`, and `MozhiSettings mozhi;` to `AppSettings` after
+   `deepl`. Keep `kCurrentVersion` at `1`. Declare the pure helpers after `AppSettings`:
+
+   ```cpp
+   QStringList mozhiEngineIds();
+   bool isValidMozhiInstance(const QString &instance);
+   QString normalizedMozhiInstance(const QString &instance);
+   QString normalizedMozhiEngine(const QString &engine);
+   ```
+
+   Implement them in `src/core/settings.cpp` (add `<QUrl>`), with the default literal only in
+   `MozhiSettings`:
+   - `mozhiEngineIds()` returns `google`, `deepl`, `duckduckgo`, `libretranslate`, `mymemory`,
+     `reverso`, `yandex`, in that order. The UI task `03` uses the same list for its combo; the
+     display labels stay in the dialog because they are product names, not translated strings.
+   - `isValidMozhiInstance()` trims the text and parses it with `QUrl(text, QUrl::StrictMode)`.
+     It requires `isValid()`, scheme `http` or `https`, a non-empty `host()`, an empty
+     `userInfo()`, `!hasQuery()` and `!hasFragment()`. A port and a path are allowed. Do not use
+     `QUrl::fromUserInput()`: a bare `host`, malformed text, `ftp://...` and `file://...` must
+     fall back to the default rather than be guessed into an http URL.
+   - `normalizedMozhiInstance()` returns `MozhiSettings{}.instance` when the input is invalid.
+     Otherwise it returns `QUrl::toString(QUrl::FullyEncoded)` with every trailing `/` chopped:
+     `https://host/` becomes `https://host`, `https://host/mozhi/` becomes
+     `https://host/mozhi`, and a non-empty path prefix is kept. Surrounding whitespace is trimmed
+     as part of the canonical form.
+   - `normalizedMozhiEngine()` trims and lowercases the input, returns it when it is in
+     `mozhiEngineIds()`, and otherwise returns `MozhiSettings{}.engine`; empty and unknown ids
+     therefore become `google`.
+   - The helpers are pure: no logging, no `tr()`, no settings access. `SettingsStore` owns the
+     warning, so the dialog can call the same helpers without producing log noise.
+
+2. **Read, normalize and save the `[mozhi]` group in `SettingsStore`.** In `src/core/settings.cpp`:
+   - `load()`: after the `deepl` group and before `llm`, read
+     `loaded.mozhi.instance = settings.value("instance", loaded.mozhi.instance).toString();` and
+     the same for `engine`. The second argument is the `MozhiSettings` default, so an absent group
+     loads as the defaults and must not log. Do not call `save()` from `load()`: loading an old
+     file leaves the file untouched.
+   - `save()`: after the `deepl` group, write `out.beginGroup("mozhi")`,
+     `out.setValue("instance", normalized.mozhi.instance)`,
+     `out.setValue("engine", normalized.mozhi.engine)`, `out.endGroup()`. `save()` already calls
+     `normalize()` on its copy, so the INI receives the canonical value, not the raw one.
+   - `normalize()`: after the Google/DeepL value checks, replace an invalid instance and warn with
+     the exact fixed literal:
+
+     ```cpp
+     if (!isValidMozhiInstance(settings.mozhi.instance)) {
+         qCWarning(lcSettings) << "Mozhi instance is not a base http(s) URL; using the default";
+         settings.mozhi.instance = defaults.mozhi.instance;
+     } else {
+         settings.mozhi.instance = normalizedMozhiInstance(settings.mozhi.instance);
+     }
+     ```
+
+     A trailing slash, a case-only scheme/host change or surrounding whitespace is a silent
+     canonicalization, not a warning. For the engine, lower-case the trimmed value for the
+     membership check; if it is not in `mozhiEngineIds()`, log exactly
+     `"Mozhi engine is not supported; using the default"` and assign `defaults.mozhi.engine`;
+     otherwise assign `normalizedMozhiEngine(settings.mozhi.engine)`. An absent key already loads
+     as `google` and does not warn; an explicitly empty value does warn.
+   - Both warnings are fixed literals: no `%1`, no `qPrintable` of the input, no URL, user name or
+     password. Keep `AppSettings::kCurrentVersion` at `1` and the `settingsVersion` check
+     unchanged: a new group with defaults needs no migration, and bumping the version would make
+     older builds reject the file.
+
+3. **Apply the settings in `MozhiService`.** In `src/services/mozhiservice.cpp`, include
+   `core/settings.h` and replace the empty `applySettings()`:
+
+   ```cpp
+   void MozhiService::applySettings(const AppSettings &settings)
+   {
+       setInstance(QUrl(normalizedMozhiInstance(settings.mozhi.instance)));
+       setEngine(normalizedMozhiEngine(settings.mozhi.engine));
+   }
+   ```
+
+   The store has already normalized the app path; normalizing again keeps one rule set when the
+   service is given a hand-built `AppSettings` (as the tests do) and prevents an invalid URL from
+   ever reaching a request. Change `defaultInstance()`/`defaultEngine()` to
+   `return QUrl(MozhiSettings{}.instance);` and `return MozhiSettings{}.engine;`, so the literal
+   exists only in `MozhiSettings`. Leave `setInstance()` (empty/invalid URL fallback),
+   `setEngine()` (trim and empty fallback), `endpointUrl()`, `translate()` and the parser
+   unchanged. `applySettings()` only writes the two members: the queue and the active reply are
+   untouched, and a reply already constructed keeps the endpoint/engine it copied, so it is not
+   aborted.
+
+4. **Clear the translation cache on an effective change in `AppController`.** In
+   `src/app/appcontroller.cpp::applySettings()`, after the existing
+   `if (m_mozhi) m_mozhi->applySettings(newSettings);` (around line 605), add:
+
+   ```cpp
+   if (oldSettings.mozhi.instance != newSettings.mozhi.instance
+       || oldSettings.mozhi.engine != newSettings.mozhi.engine) {
+       m_translations->clearCache();
+   }
+   ```
+
+   `SettingsStore` emits normalized old/new values, so a trailing slash or a case-only edit that
+   normalizes to the same value does not drop the cache, while a real instance/engine change does.
+   Do not call `cancel()`/`cancelAll()`: an active request belongs to the old instance and finishes
+   there. Do not call `updateServiceSelectors()`: `Mozhi` has a constant `displayName()` and the
+   language lists do not depend on the engine. The constructor already calls
+   `m_mozhi->applySettings(settings)` (lines 232-237), so no startup wiring is added. There is no
+   `AppController` test target here (tests link only `qtranslate_core`), so this two-line wiring is
+   checked by inspection, like the existing LLM reset at lines 608-612; the outcome must not claim
+   it is covered by a test.
+
+5. **Extend `tests/tst_settings.cpp` (existing target, no CMake change).**
+   - `defaults()`: assert `settings.mozhi.instance == "https://mozhi.adminforge.de"`,
+     `settings.mozhi.engine == "google"` and `mozhiEngineIds()` equals the seven documented ids in
+     order. The existing `settingsVersion` assertion stays.
+   - Add `mozhiInstanceIsNormalized_data()`/`mozhiInstanceIsNormalized()` with `input`, `expected`
+     and `valid` columns: the default row; empty and whitespace; `mozhi.adminforge.de` (no
+     scheme); `ftp://host`; `https://` (no host); `http://[::1` (malformed); `https://host:bad`;
+     `https://user:pass@host`; `https://user@host`; `https://host/?engine=google`;
+     `https://host/#fragment`; `http://127.0.0.1:8080/mozhi/`; `https://host/Mozhi/`;
+     `  https://host/mozhi  `. Assert `isValidMozhiInstance(input)` against
+     `valid` and `normalizedMozhiInstance(input)` against `expected`; invalid rows expect the
+     default, valid rows the canonical form with no trailing slash and the path prefix kept.
+   - Add `mozhiEngineIsNormalized_data()`/`mozhiEngineIsNormalized()`: all seven ids,
+     `DEEPL` becomes `deepl`, `  Google ` becomes `google`, empty becomes `google`, whitespace
+     becomes `google`, `unknown` becomes `google` and `auto` becomes `google`.
+   - `roundTrip()`: set `settings.mozhi.instance = "http://127.0.0.1:8080/mozhi/"` (trailing
+     slash) and `settings.mozhi.engine = "deepl"`, then assert the saved and loaded value is
+     `http://127.0.0.1:8080/mozhi` and `deepl`. Read the INI with a fresh `QSettings` and assert
+     `mozhi/instance` and `mozhi/engine` contain the canonical values, so the canonical form is
+     what is written, not only what is loaded.
+   - `corruptValuesAreNormalized()`: add a raw
+     `mozhi/instance = https://user:secret@example.invalid/?engine=google#fragment` and
+     `mozhi/engine = unknown-engine`; after `load()` both are the defaults. This exercises the
+     `SettingsStore` warning path; the input must not appear in the log, which is a code-review
+     check because the code uses fixed literals.
+   - Add `mozhiGroupIsOptional()`: write a version-1 INI with an `[app]` value and no `[mozhi]`;
+     load; assert `settingsVersion == 1`, the two defaults, and that the file bytes are unchanged
+     (no load-time rewrite).
+
+6. **Extend `tests/tst_mozhiwebservice.cpp` (existing target, no CMake change).** Add
+   `#include "core/settings.h"`.
+   - `appliesSettings()`: set the handler to `echoResponse`; build `AppSettings settings;` with
+     `settings.mozhi.instance = "http://127.0.0.1:<port>/mozhi"` and
+     `settings.mozhi.engine = "deepl"`; call `m_service->applySettings(settings)`; assert
+     `instance()` and `engine()`, then translate `Hello` from `en` to `ru`; wait for `finished()`;
+     assert the result is successful and the request path is `/mozhi/api/translate` with
+     `engine=deepl`. Then call `applySettings()` with an invalid `AppSettings`
+     (`ftp://example.invalid/x`, `unknown`) and assert it falls back to
+     `MozhiService::defaultInstance()` and `"google"`; do not translate after that fallback, so
+     the test never contacts the real instance.
+   - `applySettingsDoesNotAbortActiveRequest()`: make the handler return
+     `FakeHttpServer::Response{200, {}, false}`; start a translation; wait until
+     `m_server->requests.size() == 1` with `QTRY_COMPARE`; check the sent request still has
+     `/api/translate` and `engine=google`; call `applySettings()` with a changed instance prefix
+     and `engine=deepl`; `QVERIFY(!reply->isFinished())`; `reply->abort()`; compare the result
+     with `Cancelled`. This proves the settings change does not cancel the reply and the sent
+     request keeps its copied endpoint/engine.
+   - Leave `init()`, `cleanup()`, `properties()` and `defaults()` as they are; they must keep
+     passing with the `MozhiSettings` defaults. No new test target, so the counts stay 33 Linux /
+     28 Windows.
+
+7. **Build and verify on Linux; record Windows honestly.** Configure and build Debug and Release
+   with the manual CMake flow from `AGENTS.md` (`build/linux-debug`, `build/linux-release`,
+   `-Wall -Wextra`), with zero `warning:` lines. Run `tst_settings` and `tst_mozhiwebservice` in
+   both, then `ctest -N` (33 tests) and the full
+   `xvfb-run -a ctest --test-dir build/linux-release --output-on-failure` (33/33), and the Debug
+   suite as well. Run `tst_mozhiwebservice` a few times to catch timing flakes, although this task
+   adds no new timing. Check `git diff --stat` that only `src/core/settings.*`,
+   `src/services/mozhiservice.cpp`, `src/app/appcontroller.cpp`, `tests/tst_settings.cpp` and
+   `tests/tst_mozhiwebservice.cpp` changed, and that no `SettingsDialog`, `.ts`, documentation,
+   README, `doc/handoff.md`, root plan or `07-fallback-chain` file is touched. Windows
+   Debug/Release and its 28 tests are recorded as not performed (no MSVC); do not commit.
+
 ## Done when
 
-- `MozhiSettings` and `AppSettings::mozhi` exist with the documented defaults; `[mozhi] instance` and
-  `[mozhi] engine` are loaded and saved; the format version stays `1` and an old file without the
-  group loads with the defaults.
-- An empty, malformed, non-http(s), credential-bearing, query-bearing or fragment-bearing instance is
-  normalized to `https://mozhi.adminforge.de` with a fixed `qCWarning` that does not echo the typed
-  value; a valid URL keeps its path prefix and loses a trailing slash; the canonical value is what
-  the settings return and what is written to the INI.
-- An empty or unknown engine is normalized to `google` with a warning; the seven accepted ids are
-  exposed in the documented order through `mozhiEngineIds()`; a case-insensitive id becomes the
-  canonical lower-case value.
-- `MozhiService::applySettings()` uses the normalized instance and engine; `AppController` clears the
-  translation cache when either changes and does not abort an active request; no UI or translation
-  change is part of this task.
-- `tst_settings` covers the defaults, a round trip with a local-server instance and a non-default
-  engine, the invalid-instance rows, the engine rows and an old file without `[mozhi]`;
-  `tst_mozhiwebservice` proves that `applySettings()` changes the request path and the `engine`
-  query.
-- Debug and Release build without warnings on Linux; the full suite passes 33/33; Windows
-  Debug/Release and its 28 tests are recorded as not performed (no MSVC); the settings group,
-  translations, `doc/architecture.md`, `doc/free-endpoints.md`, `AGENTS.md`, README, `doc/handoff.md`,
-  the root plan and `07-fallback-chain` are not touched here.
+- `MozhiSettings` exists with `instance = "https://mozhi.adminforge.de"` and
+  `engine = "google"`, `AppSettings::mozhi` is part of the aggregate, and
+  `mozhiEngineIds()`, `isValidMozhiInstance()`, `normalizedMozhiInstance()` and
+  `normalizedMozhiEngine()` are declared in `src/core/settings.h` and implemented in
+  `src/core/settings.cpp`; the default literal lives only in `MozhiSettings`.
+- `SettingsStore` loads and saves `[mozhi] instance` and `[mozhi] engine`; a file without the group
+  loads the defaults, logs no warning and is not rewritten; `settingsVersion` stays `1`; a save
+  writes the canonical instance and engine, so a trailing slash and a mixed-case engine do not
+  survive a round trip.
+- Every invalid instance row (empty, whitespace, bare host, malformed, non-http(s), user info,
+  query, fragment) becomes `https://mozhi.adminforge.de` with the fixed `qCWarning(lcSettings)`
+  that contains no part of the input; a valid `http`/`https` URL keeps its path prefix and port and
+  loses every trailing `/`; surrounding whitespace is trimmed.
+- The seven engine ids are exposed in the documented order; an empty or unknown engine becomes
+  `google` with a fixed warning; `DEEPL`, `  Google ` and the canonical lowercase ids are accepted
+  and stored as the canonical lowercase id.
+- `MozhiService::applySettings()` applies the normalized instance and engine;
+  `defaultInstance()`/`defaultEngine()` delegate to `MozhiSettings`; an active or queued reply is
+  not aborted and keeps the endpoint/engine it captured.
+- `AppController` calls `TranslationManager::clearCache()` when the effective instance or engine
+  changes, does not cancel the active reply, and does not clear the cache for a change that
+  normalizes away; this is verified by inspection because no `AppController` test target exists,
+  and the outcome records that instead of claiming a test.
+- `tst_settings` covers the defaults, the seven ids, the instance and engine normalization rows,
+  the round trip with canonical INI values, the corrupt-value fallback and an old file without
+  `[mozhi]`; `tst_mozhiwebservice` covers `applySettings()` with a local `QTcpServer` (path and
+  `engine` query) and the non-abort behaviour.
+- No new test target is added: `ctest -N` is 33 on Linux and would be 28 on Windows; Debug and
+  Release build without warnings and pass 33/33 on Linux; Windows Debug/Release and its 28 tests
+  are recorded as not performed (no MSVC).
+- `SettingsDialog`, the `.ts` files, `doc/architecture.md`, `doc/free-endpoints.md`, `AGENTS.md`,
+  `README.md`, `README.ru.md`, `doc/handoff.md`, the root plan and `07-fallback-chain` are not
+  touched; no commit is made.
 
 ## Risks
 
@@ -84,3 +271,9 @@ Windows.
   runtime).
 - Windows Debug/Release and its 28 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+- `QUrl` is lenient: use `StrictMode` and explicit scheme/host/user-info/query/fragment checks,
+  never `fromUserInput()`. A validator that "fixes" a bare host or drops a query would send text
+  somewhere the user did not confirm.
+- There is no `AppController` test target. The cache reset is a two-line wiring change that mirrors
+  the LLM block; do not claim `tst_settings` or `tst_mozhiwebservice` covers it. The service-level
+  behaviour (values applied, active reply not aborted) is covered in `tst_mozhiwebservice`.
