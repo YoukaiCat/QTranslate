@@ -456,6 +456,31 @@ private slots:
         QCOMPARE(service->requests.size(), 1);
     }
 
+    void resultArrivingAfterClearIsNotCached()
+    {
+        TranslationManager manager;
+        auto *service = new FakeService;
+        manager.registerService(service);
+
+        auto first = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        QCOMPARE(service->requests.size(), 1);
+
+        // The reply is already in flight when the cache is cleared: its result
+        // belongs to the old configuration and must not be stored.
+        manager.clearCache();
+        service->replies.first()->complete(QStringLiteral("Привет"));
+        QVERIFY(first->result().ok());
+        QCOMPARE(first->result().translatedText, QStringLiteral("Привет"));
+
+        auto second = std::unique_ptr<TranslationReply>(
+            manager.translate(request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        QCOMPARE(service->requests.size(), 2);
+        QVERIFY(!second->isFinished());
+        service->replies.at(1)->complete(QStringLiteral("Hallo"));
+        QCOMPARE(second->result().translatedText, QStringLiteral("Hallo"));
+    }
+
     void errorsAreNotCached()
     {
         TranslationManager manager;

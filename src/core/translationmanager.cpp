@@ -92,6 +92,7 @@ public:
         , m_service(service)
         , m_request(request)
         , m_cacheKey(cacheKey)
+        , m_cacheGeneration(manager->m_cacheGeneration)
     {
     }
 
@@ -233,7 +234,9 @@ private:
 
     void finishResult(const TranslationResult &result)
     {
-        if (result.ok())
+        // A clear while this reply was in flight means the result may belong to
+        // the old service configuration: do not repopulate the cache with it.
+        if (result.ok() && m_cacheGeneration == m_manager->m_cacheGeneration)
             m_manager->storeCached(m_cacheKey, result);
         finish(result);
     }
@@ -242,6 +245,7 @@ private:
     TranslationService *m_service = nullptr;
     TranslationRequest m_request;
     QString m_cacheKey;
+    int m_cacheGeneration = 0;
     QPointer<TranslationReply> m_inner;
     TranslationService *m_fallback = nullptr;
     TranslationResult m_firstResult;
@@ -446,6 +450,7 @@ void TranslationManager::storeCached(const QString &key, const TranslationResult
 
 void TranslationManager::clearCache()
 {
+    ++m_cacheGeneration;
     m_cache.clear();
     m_cacheOrder.clear();
 }

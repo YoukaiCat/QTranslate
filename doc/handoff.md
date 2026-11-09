@@ -63,8 +63,9 @@ documentation is English. The migration to the tree roadmap and the English base
   `Network` or `Timeout`; success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and
   `BadResponse` never fall back, there is no second hop, and a failed fallback returns the primary
   error. The fallback result keeps its own `serviceId` and the primary cache key; changing the
-  fallback or turning the gate off clears the cache. The known cache-generation race remains (a
-  running fallback can cache its result after the clear; it also covers the mode/language setters).
+  fallback or turning the gate off clears the cache. `clearCache()` also bumps a cache generation
+  that each reply captures, so a result arriving after a clear is not stored; the running request
+  is not aborted.
 - Packaging: `packaging/linux/package.sh` builds the trixie `tar.gz`, `.deb`, AppImage, and
   `SHA256SUMS-linux.txt` in `qtranslate-trixie`; the `.deb` uses `dpkg-shlibdeps` (including
   `libsecret-1-0`/`libqt6dbus6` only when linked). `--target astra` builds
@@ -196,11 +197,11 @@ documentation is English. The migration to the tree roadmap and the English base
   user picks a language; Reverso also requires an explicit source language (six languages, no
   `auto`). The settings hints and the errors explain it; fixing the shared language combos is a
   later decision.
-- A deferred cache problem affects Mozhi and the other setting changes: an active reply that finishes
-  after `clearCache()` can store a result fetched from the old instance/engine under the current
-  cache key. The fix is a cache-generation counter in `TranslationManager` (capture it in the reply
-  and skip `storeCached()` for an old generation) plus a test; the same applies to `google.mode`,
-  `deepl.mode`, and `deepl.englishVariant`. This is a follow-up, not fixed in the Mozhi stage.
+- `TranslationManager` guards the cache with a generation counter: `clearCache()` increments it and
+  each reply captures it, so a result that arrives after a clear (a Mozhi instance/engine change,
+  `google.mode`, `deepl.mode`, `deepl.englishVariant`, a language change or a fallback/gate change)
+  is returned to the caller but not stored under the current key. The active request is not aborted.
+  Covered by `tst_translationmanager::resultArrivingAfterClearIsNotCached`.
 - **DeepL web is implemented as a mode:** `src/services/deeplwebservice.*` and `deeplwebparser.*` are
   used inside `DeepLService` with `deepl.mode=free-web`. No key is needed; in the service list there
   is a single "DeepL", in its settings an "API / Free web" combo box; the key field is disabled in

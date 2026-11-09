@@ -91,6 +91,10 @@ private:
     QString m_secondaryLanguage;
     QHash<QString, TranslationResult> m_cache;
     QStringList m_cacheOrder; // oldest first
+    // Incremented by clearCache(). A Reply captures it when created and skips
+    // storeCached() when the generation moved on, so a result arriving after a
+    // clear is not stored.
+    int m_cacheGeneration = 0;
     QPointer<TranslationReply> m_mainWindowReply;
     QPointer<TranslationReply> m_popupReply;
     QPointer<TranslationReply> m_inPlaceReply;

@@ -627,6 +627,15 @@ void AppController::applySettings(const AppSettings &oldSettings,
     if (m_reverso)
         m_reverso->applySettings(newSettings);
 
+    // A cached translation from the old service mode or variant must not be
+    // reused. The active reply keeps its captured endpoint, so it is not
+    // cancelled here.
+    if (oldSettings.google.mode != newSettings.google.mode
+        || oldSettings.deepl.mode != newSettings.deepl.mode
+        || oldSettings.deepl.englishVariant != newSettings.deepl.englishVariant) {
+        m_translations->clearCache();
+    }
+
     // A cached translation from the old instance or engine must not be
     // reused. The active reply keeps its captured endpoint, so it is not
     // cancelled here.

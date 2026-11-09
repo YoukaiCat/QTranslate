@@ -1401,8 +1401,9 @@ fall back. The pre-request `Auth` path (an unconfigured primary) goes through th
 `serviceId` in the result and is cached under the primary's cache key; a failed fallback logs the
 error kind and returns the primary error. A reply retries at most once (no second hop, no loop), and
 the fallback never gets the smart secondary-language retry. `setFallbackService()` clears the cache
-on a change, and `setFreeServicesAllowed(false)` clears it as well; a running fallback can still
-cache its result after the clear (the known cache-generation defect in the roadmap journal). The log
+on a change, and `setFreeServicesAllowed(false)` clears it as well. `clearCache()` also increments a
+cache generation that each reply captures, so a result arriving after the clear is not stored; a
+running fallback is not aborted. The log
 names the service and the error kind only — never the text, the URL, the body or the key.
 
 ### 4.10. Network and proxy — `NetworkManager`
