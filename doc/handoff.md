@@ -10,8 +10,8 @@ documentation is English. The migration to the tree roadmap and the English base
 
 - The GitHub repository was recreated on 2026-11-06; the new repository contains only the clean
   local history and no pre-recreation commits, tags, or releases. Its releases are 0.11.1 (tag
-  `v0.11.1`) and 0.12.0 (tag `v0.12.0`, prepared on 2026-11-09; the tag CI publishes the assets).
-  The old repository's history and activity are gone.
+  `v0.11.1`) and 0.12.0 (tag `v0.12.0`, published on 2026-11-09 by the tag CI). The old
+  repository's history and activity are gone.
 - The local history was rewritten on 2026-11-06 to replace a wrong author/committer address; all
   local commits use the GitHub noreply identity. The rewritten history was pushed to the new
   repository; no other push was made.
@@ -159,14 +159,17 @@ documentation is English. The migration to the tree roadmap and the English base
     the tag CI built setup 11 176 182 bytes, ZIP 13 797 473 bytes and the unlisted
     `SHA256SUMS.txt`.
   - CI run of the tag: https://github.com/youkaicat/QTranslate/actions/runs/42303477455
-- `v0.12.0` — prepared on 2026-11-09 from `main`; the tag CI publishes the Windows installer and
-  ZIP plus the Linux `tar.gz`, `.deb` and AppImage and both checksum files.
+- `v0.12.0` — published on 2026-11-09 from `main`: https://github.com/YoukaiCat/QTranslate/releases/tag/v0.12.0
   - Linux support (X11 full, Wayland limited), free web providers (MyMemory, Mozhi, Yandex web,
     Bing web, Reverso), the opt-in gate and the one-hop fallback service, the fullscreen hotkey
     pause from 0.11.1, the cache-generation fix, and the English documentation baseline.
   - Local Linux Debug/Release 39/39 with no warnings; `--version` prints `QTranslate 0.12.0`.
-    Windows Debug/Release and its 34 tests were not performed (no MSVC); the tag CI is the build
+    Windows Debug/Release and its 34 tests were not performed (no MSVC); the tag CI was the build
     gate.
+  - CI (tag `v0.12.0`): setup 11 315 684 bytes, ZIP 13 958 965 bytes, Linux `tar.gz` 28 782 608
+    bytes, `.deb` 530 960 bytes, AppImage 39 410 168 bytes, plus the unlisted `SHA256SUMS.txt` and
+    `SHA256SUMS-linux.txt`; every asset digest matches its checksum file.
+  - CI run of the tag: https://github.com/YoukaiCat/QTranslate/actions/runs/42668400346
   - Release notes: [`releases/0.12.0.md`](releases/0.12.0.md).
 
 ## Localization (old stage 12, completed)
@@ -392,9 +395,10 @@ both READMEs, this handoff and the roadmap journal.
    `QTranslate 0.12.0`.
 2. Windows Debug/Release, `package.ps1` and the installer were not performed (no MSVC); the tag CI
    is the build gate. No local artifacts are uploaded manually.
-3. `main` and the annotated tag `v0.12.0` are pushed; the CI `linux` job builds the trixie `tar.gz`,
-   `.deb` and AppImage, the `windows` job builds the installer and ZIP, and the `release` job
-   publishes all of them with `SHA256SUMS.txt`/`SHA256SUMS-linux.txt` (unlisted).
+3. `main` and the annotated tag `v0.12.0` were pushed; the CI `linux` job built the trixie
+   `tar.gz`, `.deb` and AppImage, the `windows` job built the installer and ZIP, and the `release`
+   job published all of them with `SHA256SUMS.txt`/`SHA256SUMS-linux.txt` (unlisted). The tag run
+   and the `main` run both succeeded; every asset digest matches its checksum file.
 4. When the release is published, delete the old 0.11.1 GitHub release (user decision).
 5. The next milestone is stage 5 (`05-proofreading`), currently blocked on three user decisions.
 
