@@ -61,6 +61,8 @@ qt_add_library(qtranslate_core STATIC
     src/services/mymemoryservice.cpp        src/services/mymemoryservice.h
     src/services/openaicompatibleservice.cpp src/services/openaicompatibleservice.h
     src/services/queuedwebservice.cpp       src/services/queuedwebservice.h
+    src/services/yandexwebparser.cpp        src/services/yandexwebparser.h
+    src/services/yandexwebservice.cpp       src/services/yandexwebservice.h
 )
 
 target_include_directories(qtranslate_core PUBLIC src)

@@ -1,0 +1,17 @@
+[
+    {
+        "text": "Hallo Welt!",
+        "from": "en",
+        "to": "de",
+        "detected": {
+            "lang": "en",
+            "confidence": 0.99
+        },
+        "requestId": "0123456789abcdef"
+    },
+    {
+        "text": "must be ignored",
+        "from": "ru",
+        "to": "de"
+    }
+]

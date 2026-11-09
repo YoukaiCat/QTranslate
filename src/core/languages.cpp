@@ -156,13 +156,14 @@ constexpr QLatin1String kDeepLWeb("deepl-web");
 constexpr QLatin1String kLlm("llm");
 constexpr QLatin1String kMyMemory("mymemory");
 constexpr QLatin1String kMozhi("mozhi");
+constexpr QLatin1String kYandexWeb("yandex-web");
 
 // MyMemory takes ISO 639-1/RFC 3066 codes and follows the Google catalogue,
 // but a few of its codes differ from the internal ones.
 struct CodeOverride
 {
     const char *code;        // internal code
-    const char *serviceCode; // MyMemory code
+    const char *serviceCode; // code of the service
 };
 
 constexpr CodeOverride kMyMemoryOverrides[] = {
@@ -170,6 +171,26 @@ constexpr CodeOverride kMyMemoryOverrides[] = {
     {"zh-Hant", "zh-TW"},
     {"nb", "no"},
     {"fil", "tl"},
+};
+
+// The observed Yandex web catalogue (doc/free-endpoints.md, §2). Yandex has one
+// Chinese code for both variants, one Portuguese code and "no" for Norwegian.
+constexpr const char *kYandexWebCodes[] = {
+    "af", "az", "sq", "ar", "hy", "eu", "be", "bg", "ca", "zh", "hr", "cs",
+    "da", "nl", "en", "et", "fi", "fr", "gl", "de", "el", "ht", "he", "hi",
+    "hu", "is", "id", "it", "ga", "ja", "ka", "ko", "lv", "lt", "mk", "ms",
+    "mt", "no", "fa", "pl", "pt", "ro", "ru", "sr", "sk", "sl", "es", "sw",
+    "sv", "th", "tr", "uk", "ur", "vi", "cy", "yi", "eo", "la", "lo", "kk",
+    "uz", "si", "tg", "te", "km", "mn", "kn", "ta", "mr", "bn", "tt",
+};
+
+// pt-PT is deliberately not overridden: Yandex has one Portuguese code and the
+// catalogue default is pt-BR, so pt-PT is not declared for this service.
+constexpr CodeOverride kYandexWebOverrides[] = {
+    {"zh-Hans", "zh"},
+    {"zh-Hant", "zh"},
+    {"nb", "no"},
+    {"pt-BR", "pt"},
 };
 
 const LanguageInfo *findInfo(const QString &code)
@@ -200,6 +221,24 @@ const char *mozhiCodeOf(const LanguageInfo &info)
     return info.google;
 }
 
+// Yandex takes the internal ISO 639-1 codes with the exceptions in
+// kYandexWebOverrides, and only the codes in its observed catalogue.
+const char *yandexWebCodeOf(const LanguageInfo &info)
+{
+    const char *code = info.code;
+    for (const CodeOverride &codeOverride : kYandexWebOverrides) {
+        if (QLatin1String(info.code) == QLatin1String(codeOverride.code)) {
+            code = codeOverride.serviceCode;
+            break;
+        }
+    }
+    for (const char *candidate : kYandexWebCodes) {
+        if (QLatin1String(candidate) == QLatin1String(code))
+            return candidate;
+    }
+    return nullptr;
+}
+
 const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
                           Languages::Direction d)
 {
@@ -214,6 +253,8 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
         return mymemoryCodeOf(info);
     if (serviceId == kMozhi)
         return mozhiCodeOf(info);
+    if (serviceId == kYandexWeb)
+        return yandexWebCodeOf(info);
     return nullptr;
 }
 

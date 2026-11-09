@@ -14,6 +14,7 @@ const QString deeplWeb = QStringLiteral("deepl-web");
 const QString llm = QStringLiteral("llm");
 const QString mozhi = QStringLiteral("mozhi");
 const QString mymemory = QStringLiteral("mymemory");
+const QString yandexWeb = QStringLiteral("yandex-web");
 } // namespace
 
 class TestLanguages : public QObject
@@ -97,6 +98,23 @@ private slots:
         QTest::newRow("mymemory he") << mymemory << "he" << Direction::Target << "he";
         QTest::newRow("mymemory jv") << mymemory << "jv" << Direction::Source << "jv";
         QTest::newRow("mymemory unknown code") << mymemory << "xx" << Direction::Target << "";
+        QTest::newRow("yandex web en") << yandexWeb << "en" << Direction::Target << "en";
+        QTest::newRow("yandex web ru") << yandexWeb << "ru" << Direction::Target << "ru";
+        QTest::newRow("yandex web uk") << yandexWeb << "uk" << Direction::Source << "uk";
+        QTest::newRow("yandex web tr") << yandexWeb << "tr" << Direction::Target << "tr";
+        QTest::newRow("yandex web de") << yandexWeb << "de" << Direction::Target << "de";
+        QTest::newRow("yandex web zh-Hans") << yandexWeb << "zh-Hans" << Direction::Target << "zh";
+        QTest::newRow("yandex web zh-Hant") << yandexWeb << "zh-Hant" << Direction::Source << "zh";
+        QTest::newRow("yandex web nb") << yandexWeb << "nb" << Direction::Target << "no";
+        QTest::newRow("yandex web pt-BR") << yandexWeb << "pt-BR" << Direction::Target << "pt";
+        QTest::newRow("yandex web he") << yandexWeb << "he" << Direction::Target << "he";
+        QTest::newRow("yandex web pt-PT") << yandexWeb << "pt-PT" << Direction::Source << "";
+        QTest::newRow("yandex web fil") << yandexWeb << "fil" << Direction::Target << "";
+        QTest::newRow("yandex web jv") << yandexWeb << "jv" << Direction::Source << "";
+        QTest::newRow("yandex web ceb") << yandexWeb << "ceb" << Direction::Target << "";
+        QTest::newRow("yandex web zu") << yandexWeb << "zu" << Direction::Source << "";
+        QTest::newRow("yandex web unknown code") << yandexWeb << "xx" << Direction::Target << "";
+        QTest::newRow("yandex web auto") << yandexWeb << "auto" << Direction::Source << "";
         QTest::newRow("unknown code") << google << "xx" << Direction::Target << "";
         QTest::newRow("auto is not a language") << google << "auto" << Direction::Source << "";
         QTest::newRow("unknown service") << "yandex" << "en" << Direction::Target << "";
@@ -156,6 +174,13 @@ private slots:
         QTest::newRow("mymemory no") << mymemory << "no" << Direction::Source << "nb";
         QTest::newRow("mymemory tl") << mymemory << "tl" << Direction::Target << "fil";
         QTest::newRow("mymemory pt-BR") << mymemory << "pt-BR" << Direction::Source << "pt-BR";
+        QTest::newRow("yandex web zh") << yandexWeb << "zh" << Direction::Source << "zh-Hans";
+        QTest::newRow("yandex web no") << yandexWeb << "no" << Direction::Source << "nb";
+        QTest::newRow("yandex web pt") << yandexWeb << "pt" << Direction::Source << "pt-BR";
+        QTest::newRow("yandex web he") << yandexWeb << "he" << Direction::Source << "he";
+        QTest::newRow("yandex web en") << yandexWeb << "en" << Direction::Target << "en";
+        QTest::newRow("yandex web ru") << yandexWeb << "ru" << Direction::Source << "ru";
+        QTest::newRow("yandex web unknown") << yandexWeb << "xx" << Direction::Source << "";
         QTest::newRow("unknown") << google << "xx-unknown" << Direction::Source << "";
         QTest::newRow("empty") << google << "" << Direction::Source << "";
         QTest::newRow("google code for deepl") << deepl << "iw" << Direction::Source << "";
@@ -174,12 +199,16 @@ private slots:
     {
         // Every supported language maps to a service code and back to itself,
         // except where several internal codes share a service code (DeepL "PT", "ZH").
-        for (const QString &service : {google, deepl, deeplWeb, llm, mozhi, mymemory}) {
+        for (const QString &service : {google, deepl, deeplWeb, llm, mozhi, mymemory, yandexWeb}) {
             for (Direction direction : {Direction::Source, Direction::Target}) {
                 for (const QString &code : Languages::supported(service, direction)) {
                     const QString serviceCode = Languages::toServiceCode(service, code, direction);
                     QVERIFY2(!serviceCode.isEmpty(), qPrintable(code));
                     const QString back = Languages::fromServiceCode(service, serviceCode, direction);
+                    // Yandex shares "zh" between zh-Hans and zh-Hant, so only
+                    // zh-Hans can be the reverse mapping.
+                    if (service == yandexWeb && code == QLatin1String("zh-Hant"))
+                        continue;
                     if (service != google && direction == Direction::Source
                         && (code == QLatin1String("pt-PT") || code == QLatin1String("zh-Hant"))) {
                         continue;
@@ -220,6 +249,19 @@ private slots:
         QVERIFY(!mozhiCatalogue.contains(Languages::autoCode()));
         for (const QString &code : deeplTargets)
             QVERIFY2(googleTargets.contains(code), qPrintable(code));
+        const QStringList yandexWebSources = Languages::supported(yandexWeb, Direction::Source);
+        QCOMPARE(Languages::supported(yandexWeb, Direction::Target), yandexWebSources);
+        QVERIFY(!yandexWebSources.isEmpty());
+        for (const QString &code : {QStringLiteral("ru"), QStringLiteral("uk"),
+                                    QStringLiteral("tr"), QStringLiteral("zh-Hans"),
+                                    QStringLiteral("he"), QStringLiteral("nb"),
+                                    QStringLiteral("pt-BR")}) {
+            QVERIFY2(yandexWebSources.contains(code), qPrintable(code));
+        }
+        for (const QString &code : {Languages::autoCode(), QStringLiteral("fil"),
+                                    QStringLiteral("jv"), QStringLiteral("pt-PT")}) {
+            QVERIFY2(!yandexWebSources.contains(code), qPrintable(code));
+        }
         QVERIFY(Languages::supported(QStringLiteral("yandex"), Direction::Target).isEmpty());
     }
 

@@ -169,3 +169,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     )
     target_link_libraries(tst_cli PRIVATE X11::X11 X11::Xtst)
 endif()
+
+# Platform-neutral: the Yandex web service talks to a local QTcpServer only.
+qtranslate_add_test(tst_yandexwebparser)
+qtranslate_add_test(tst_yandexwebservice)

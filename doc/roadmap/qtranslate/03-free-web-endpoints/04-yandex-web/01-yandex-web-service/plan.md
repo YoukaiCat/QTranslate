@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -403,3 +403,111 @@ one, but keep the log short).
   the pacing/queue cases, with lower bounds, no upper bounds and `QTRY_*` timeouts.
 - Windows Debug/Release and its 30 tests are unavailable on this Linux machine; record them as not
   performed, not as passed.
+
+## Outcome
+
+Done on 2026-11-09. `YandexWebParser` and `YandexWebService` exist and are registered in the app
+behind the free-web opt-in gate; the `yandex-web` language branch, the parser fixtures and two new
+platform-neutral tests are in place. Google, DeepL (including `free-web`), the LLM service, MyMemory,
+Mozhi and the shared `QueuedWebService`/`TextChunker`/`Languages` behaviour are unchanged. The
+settings group, the translations and the documentation belong to `02-yandex-web-settings` and
+`03-yandex-web-docs` and are not touched here.
+
+- **Parser:** `src/services/yandexwebparser.h/.cpp`. `parseResponse()` classifies the body as an error
+  first, then reads the first element of the JSON array: a malformed document, a non-array root, an
+  empty array, a non-object first element, and a missing, non-string or empty `text` are
+  `BadResponse` with "no translated text in the response"; `to` and any extra fields, as well as
+  later array elements, are tolerated and unused; `from` is mapped with
+  `Languages::fromServiceCode("yandex-web", ..., Direction::Source)` (an unknown or missing value
+  stays empty); `serviceId` is empty on success and in errors. `parseErrorBody()` recognises a
+  trimmed body starting with `<` as `ServiceUnavailable` ("the endpoint returned an HTML page"), a
+  JSON object by its `error` string or `error.message`, falling back to the root `message`, and a
+  plain-text body by keywords; rate-limit keywords are matched first (`rate limit`, `too many
+  requests`, `quota`, `status code: 429`, `status code: 403` → `RateLimited`), then block keywords
+  (`captcha`, `blocked`, `forbidden`, `access denied`, `banned`, `robot`, `unavailable` →
+  `ServiceUnavailable`); any other non-empty JSON error text is `ServiceUnavailable`, while a
+  missing/empty JSON error text, an empty or malformed body, a JSON array and an unrecognised plain
+  text return `TranslationError::None` so the caller falls back to the HTTP status.
+  `errorForHttpStatus()` maps 403/429 → `RateLimited`, 413 → `TooLong`, 5xx → `Network` and every
+  other non-2xx → `BadResponse`. Every message is a fixed English literal and never contains the
+  body, the text or a URL.
+- **Service:** `src/services/yandexwebservice.h/.cpp`. Id `yandex-web`, display name `Yandex`,
+  `isConfigured()`/`requiresOptIn()` true, languages from `Languages::supported()` without `auto`,
+  a 750 ms default pause (from `doc/free-endpoints.md` §8) and a no-op
+  `applySettings(const AppSettings &)` with an unnamed parameter. The endpoint is the fixed
+  `https://api.browser.yandex.com/instaserp/translate`; `setEndpoint()`/`endpoint()` are the test
+  seam and an empty or invalid URL falls back to the default. `browserUserAgent()` returns the
+  observed Chrome/YaBrowser literal and its header comments the protocol emulation: the browser
+  User-Agent is set only on this service's requests, after `NetworkManager::makeRequest()` has set
+  `AppInfo::userAgent()`, and neither the shared request factory nor the app User-Agent changes.
+  `translate()` returns `EmptyText` for empty/whitespace-only text, accepts `auto`, validates an
+  explicit source and the target with `Languages::toServiceCode()` and returns
+  `UnsupportedLanguage` before any request for an unmapped code. The protocol has no source field,
+  so the source is never sent; the target is sent as `statLang` and `locale` and `targetLang` is
+  always `auto`. The text is split with `TextChunker::split(text, 5000)`; every part's edge
+  whitespace stays out of the request and is restored in the joined result, and a whitespace-only
+  part is never sent. The form body percent-encodes every name and value as UTF-8 (spaces as `%20`,
+  literal `&`, `=`, `+` and `%` escaped) and appends `text`, `brandID=int`, `statLang`,
+  `targetLang=auto`, `locale`, `clid=2270494`, `disable=serp`, `use_llm_srv=0` in that order. Each
+  request is a `POST` with `Content-Type: application/x-www-form-urlencoded`,
+  `Accept: application/json`, the browser User-Agent and `SameOriginRedirectPolicy`;
+  `noteRequestSent()` is called immediately before `nam()->post()`, and all chunks of one reply are
+  sent sequentially inside its single queue slot with the pause. A failed chunk fails the whole reply
+  without a partial result, and a translation count that does not match the sent parts is
+  `BadResponse`. A non-2xx status classifies the body first and then uses `errorForHttpStatus()`;
+  a timeout/`abort()` finishes with `Timeout`/`Cancelled`; other network errors use
+  `NetworkManager::describeNetworkError(request, false)` or the fixed "Network error". Logs contain
+  only the part count, language codes, HTTP status, elapsed time and fixed messages; the text, body,
+  URL, form fields and `QNetworkReply::errorString()` are never logged.
+- **Languages:** `src/core/languages.cpp` adds `kYandexWeb`, the observed 71-code whitelist
+  `kYandexWebCodes`, `kYandexWebOverrides` (`zh-Hans`/`zh-Hant` → `zh`, `nb` → `no`, `pt-BR` → `pt`)
+  and `yandexWebCodeOf()`, called from `serviceCodeOf()`; no `LanguageInfo` column and no synonym
+  table is added. `pt-PT` is deliberately not overridden: Yandex has one Portuguese code, `pt-BR`
+  is the catalogue default, and `closest()` maps `pt-PT` to `pt-BR`. `zh-Hant` is declared and sends
+  `zh`; a reverse `zh` maps to `zh-Hans` because of the table order. `tst_languages` covers the
+  forward and reverse rows, the `zh-Hant` exception in `roundTrip()` and the equal source/target
+  lists without `auto`, `fil`, `jv` or `pt-PT`; the existing `"yandex"` unknown-service rows are
+  kept, because the new id is `yandex-web`.
+- **App and build:** `AppController` constructs `YandexWebService` after Mozhi, applies its no-op
+  settings, registers it after Mozhi and forwards `applySettings()`; no `AppSettings` field, INI key
+  or cache reset is added, because there is no Yandex setting to change. Both source pairs are in
+  `qtranslate_core` after `queuedwebservice`, and both test targets are registered after
+  `tst_windowactivation_linux` and before `tst_yandexwebservice`, platform-neutral.
+- **Tests:** `tests/fixtures/yandexweb/` holds the 21 planned fixtures. `tst_yandexwebparser` covers
+  the normal array response with `text` and a detected language, extra fields and a second element
+  ignored, the `from` mapping rows (`en`, `zh`→`zh-Hans`, `no`→`nb`, `pt`→`pt-BR`, `he`, unknown,
+  missing), the empty array, empty/missing `text`, a non-object first element, a JSON object, a JSON
+  string, malformed JSON, an HTML/captcha body, the JSON and plain-text rate-limit and block bodies,
+  an unknown JSON error, the plain-text "not an error" fallback and the `errorForHttpStatus` rows,
+  with a helper that proves every message is non-empty and free of the text marker, `<`, `{`, `}`
+  and `://`. `tst_yandexwebservice` uses a local `QTcpServer` (the Mozhi `FakeHttpServer` with the
+  optional `Location` header) and covers the properties and defaults, the POST path, the exact
+  content type, the eight form fields in order without `Authorization`, the browser User-Agent on
+  this request and the app User-Agent on a common `makeRequest()` request, URL encoding of spaces,
+  Cyrillic, emoji and `&`/`=`/`+`/`%`, the mapped target code in `statLang` and `locale` with a
+  constant `targetLang=auto`, `auto`, rejected unmapped languages and empty text without a request,
+  edge whitespace, 5000-unit chunking at `TextChunker` boundaries, chunk pacing and queue
+  serialization, cancelling a queued reply and aborting an active one, a failed middle chunk (whole
+  reply fails, no partial translation, no third request), the HTTP status rows, the HTML/JSON/malformed
+  bodies, the rate-limit and block bodies, timeout, a closed server, a cross-origin redirect that
+  must not reach the second server, and message hygiene. CTest never contacts the real endpoint.
+- **Verification:** Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2) and `qtranslate-trixie:latest`
+  (Qt 6.8.2, GCC 14.2), Debug and Release: zero `warning:` lines, `ctest -N` 35, the six targeted
+  tests 6/6, the full suite 35/35 in every configuration, and `tst_yandexwebservice` 10 repeats per
+  host configuration without a timing flake. The trixie runs used a read-only source mount, `/tmp`
+  build directories, `--user`, `HOME=/tmp` and read-only `/etc/passwd`/`/etc/group` mounts for
+  `dbus-daemon` in `tst_hotkeymanager_wayland` (an environment workaround, not repository content);
+  no root-owned files were left in the tree.
+- **Review:** no findings — no correctness, security, regression or missing-coverage defects in the
+  new code, and no old-code problem was noticed in passing. Nothing was accepted or rejected, and no
+  real problem was deferred because of cost.
+- **Not performed and deferred by design:** Windows/MSVC Debug and Release and its 30 tests (no
+  MSVC; both new tests are platform-neutral) and a live smoke against the real endpoint (optional:
+  the endpoint is unofficial and may answer with a captcha or a 403 from this IP). The settings
+  group, the 14 `.ts` files, `doc/architecture.md`, `doc/free-endpoints.md`, `AGENTS.md`, both
+  READMEs, `doc/handoff.md`, the root plan and `07-fallback-chain` are untouched.
+- **Known limitations:** `zh-Hant` is declared but sends `zh`, so a traditional-Chinese request can
+  return simplified text, and a detected `zh` maps back to `zh-Hans`; `pt-PT` is not declared and
+  `closest()` maps it to `pt-BR`. The 5000 UTF-16 units and the 750 ms pause are documented
+  assumptions from `doc/free-endpoints.md` §8, not measured Yandex limits; a live smoke should
+  record any measured value before changing the constants.
