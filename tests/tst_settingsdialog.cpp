@@ -647,6 +647,103 @@ private slots:
         QVERIFY(!dialog.settings().translation.allowFreeServices);
     }
 
+    void fallbackGroup()
+    {
+        const QList<QPair<QString, QString>> services = {
+            {QStringLiteral("mymemory"), QStringLiteral("MyMemory")},
+            {QStringLiteral("mozhi"), QStringLiteral("Mozhi")},
+        };
+
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true, services);
+        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("fallbackGroup"));
+        auto *combo = dialog.findChild<QComboBox *>(QStringLiteral("fallbackService"));
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("fallbackHint"));
+        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
+        auto *myMemoryGroup = dialog.findChild<QGroupBox *>(QStringLiteral("mymemoryGroup"));
+        QVERIFY(group);
+        QVERIFY(combo);
+        QVERIFY(hint);
+        QVERIFY(checkbox);
+        QVERIFY(myMemoryGroup);
+
+        QCOMPARE(group->title(), QStringLiteral("Fallback service"));
+        QCOMPARE(combo->count(), 3);
+        QCOMPARE(combo->itemText(0), QStringLiteral("None"));
+        QCOMPARE(combo->itemData(0).toString(), QString());
+        QCOMPARE(combo->itemText(1), QStringLiteral("MyMemory"));
+        QCOMPARE(combo->itemData(1).toString(), QStringLiteral("mymemory"));
+        QCOMPARE(combo->itemText(2), QStringLiteral("Mozhi"));
+        QCOMPARE(combo->itemData(2).toString(), QStringLiteral("mozhi"));
+        QCOMPARE(combo->currentIndex(), 0);
+        QCOMPARE(dialog.settings().translation.fallbackService, QString());
+
+        QVERIFY(hint->wordWrap());
+        QVERIFY(hint->text().contains(QStringLiteral("no connection")));
+        QVERIFY(hint->text().contains(QStringLiteral("timeout")));
+        QVERIFY(hint->text().contains(QStringLiteral("rate limit")));
+        QVERIFY(hint->text().contains(QStringLiteral("quota")));
+        QVERIFY(hint->text().contains(QStringLiteral("invalid key")));
+        QVERIFY(hint->text().contains(QStringLiteral("free web services")));
+        QVERIFY(hint->text().contains(QStringLiteral("None")));
+        QVERIFY(hint->text().contains(QStringLiteral("third party")));
+
+        // The gate group holds the fallback, which precedes the per-service
+        // groups.
+        const QWidget *freeWebGroup = checkbox->parentWidget();
+        const QLayout *servicesLayout = group->parentWidget()->layout();
+        QVERIFY(freeWebGroup);
+        QVERIFY(servicesLayout);
+        QVERIFY(servicesLayout->indexOf(freeWebGroup) >= 0);
+        QVERIFY(servicesLayout->indexOf(freeWebGroup) < servicesLayout->indexOf(group));
+        QVERIFY(servicesLayout->indexOf(group) < servicesLayout->indexOf(myMemoryGroup));
+
+        QVERIFY(!checkbox->isChecked());
+        QVERIFY(!combo->isEnabled());
+
+        combo->setCurrentIndex(2);
+        checkbox->setChecked(true);
+        QVERIFY(combo->isEnabled());
+        QCOMPARE(combo->currentIndex(), 2);
+        QCOMPARE(dialog.settings().translation.fallbackService, QStringLiteral("mozhi"));
+
+        // Turning the gate off disables the combo but keeps the choice.
+        checkbox->setChecked(false);
+        QVERIFY(!combo->isEnabled());
+        QCOMPARE(combo->currentIndex(), 2);
+        QCOMPARE(dialog.settings().translation.fallbackService, QStringLiteral("mozhi"));
+
+        AppSettings remembered;
+        remembered.translation.allowFreeServices = false;
+        remembered.translation.fallbackService = QStringLiteral("mozhi");
+        SettingsDialog rememberedDialog(remembered, {QStringLiteral("en")},
+                                        {QStringLiteral("de"), QStringLiteral("en")}, true,
+                                        services);
+        auto *rememberedCombo =
+            rememberedDialog.findChild<QComboBox *>(QStringLiteral("fallbackService"));
+        auto *rememberedCheckbox =
+            rememberedDialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
+        QVERIFY(rememberedCombo);
+        QVERIFY(rememberedCheckbox);
+        QCOMPARE(rememberedCombo->currentIndex(), 2);
+        QVERIFY(!rememberedCombo->isEnabled());
+        QCOMPARE(rememberedDialog.settings().translation.fallbackService,
+                 QStringLiteral("mozhi"));
+
+        AppSettings unknown;
+        unknown.translation.fallbackService = QStringLiteral("nope");
+        SettingsDialog unknownDialog(unknown, {QStringLiteral("en")},
+                                     {QStringLiteral("de"), QStringLiteral("en")}, true,
+                                     services);
+        auto *unknownCombo =
+            unknownDialog.findChild<QComboBox *>(QStringLiteral("fallbackService"));
+        QVERIFY(unknownCombo);
+        QCOMPARE(unknownCombo->currentIndex(), 0);
+        QCOMPARE(unknownDialog.settings().translation.fallbackService, QString());
+    }
+
     void llmModels()
     {
         AppSettings settings;
@@ -713,7 +810,8 @@ private slots:
         }
         {
             SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
-                                  {QStringLiteral("de"), QStringLiteral("en")}, true, true);
+                                  {QStringLiteral("de"), QStringLiteral("en")}, true, {},
+                                  true);
             auto *hint = dialog.findChild<QLabel *>(QStringLiteral("secretStorageHint"));
             QVERIFY(hint);
             QVERIFY(!hint->isHidden());

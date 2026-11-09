@@ -30,10 +30,12 @@
 SettingsDialog::SettingsDialog(const AppSettings &settings,
                                const QStringList &sourceLanguages,
                                const QStringList &targetLanguages, bool autostartApproved,
+                               const QList<QPair<QString, QString>> &fallbackServices,
                                bool secretStorageFallback, QWidget *parent)
     : QDialog(parent)
     , m_initial(settings)
     , m_targetLanguages(targetLanguages)
+    , m_fallbackServices(fallbackServices)
 {
     setWindowTitle(tr("Settings"));
     setModal(true);
@@ -313,6 +315,28 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     freeWebForm->addRow(freeWebHint);
     servicesLayout->addWidget(freeWebGroup);
 
+    m_fallbackGroup = new QGroupBox(tr("Fallback service"), servicesContent);
+    m_fallbackGroup->setObjectName(QStringLiteral("fallbackGroup"));
+    auto *fallbackLayout = new QVBoxLayout(m_fallbackGroup);
+    m_fallbackService = new QComboBox(m_fallbackGroup);
+    m_fallbackService->setObjectName(QStringLiteral("fallbackService"));
+    m_fallbackService->addItem(tr("None"), QString());
+    for (const auto &service : m_fallbackServices)
+        m_fallbackService->addItem(service.second, service.first);
+    m_fallbackHint = new QLabel(
+        tr("When the selected service fails with no connection, a timeout, a rate limit, an "
+           "exceeded quota or an invalid key, the text is sent once more to the fallback "
+           "service. Enable free web services above to use a fallback; None turns it off. The "
+           "text is sent to a third party."),
+        m_fallbackGroup);
+    m_fallbackHint->setObjectName(QStringLiteral("fallbackHint"));
+    m_fallbackHint->setWordWrap(true);
+    fallbackLayout->addWidget(m_fallbackService);
+    fallbackLayout->addWidget(m_fallbackHint);
+    servicesLayout->addWidget(m_fallbackGroup);
+    connect(m_allowFreeServices, &QCheckBox::toggled, this,
+            &SettingsDialog::updateFallbackControls);
+
     auto *myMemoryGroup = new QGroupBox(tr("MyMemory"), servicesContent);
     myMemoryGroup->setObjectName(QStringLiteral("mymemoryGroup"));
     auto *myMemoryLayout = new QVBoxLayout(myMemoryGroup);
@@ -548,6 +572,9 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_maxLength->setValue(settings.translation.maxLength);
     m_autoTranslateDelay->setValue(settings.translation.autoTranslateDelayMs);
     m_allowFreeServices->setChecked(settings.translation.allowFreeServices);
+    const int fallbackIndex =
+        m_fallbackService->findData(settings.translation.fallbackService);
+    m_fallbackService->setCurrentIndex(fallbackIndex >= 0 ? fallbackIndex : 0);
     {
         const QSignalBlocker blocker(m_mozhiInstance);
         m_mozhiInstance->setText(settings.mozhi.instance);
@@ -594,6 +621,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     updateYandexControls();
     updateBingControls();
     updateReversoControls();
+    updateFallbackControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -614,6 +642,7 @@ AppSettings SettingsDialog::settings() const
     result.translation.maxLength = m_maxLength->value();
     result.translation.autoTranslateDelayMs = m_autoTranslateDelay->value();
     result.translation.allowFreeServices = m_allowFreeServices->isChecked();
+    result.translation.fallbackService = m_fallbackService->currentData().toString();
     result.popup.autoCloseOnFocusLoss = m_autoClosePopup->isChecked();
     result.google.mode = m_googleMode->currentData().toString();
     result.google.apiKey = m_googleApiKey->text().trimmed();
@@ -719,6 +748,11 @@ void SettingsDialog::updateBingControls()
 void SettingsDialog::updateReversoControls()
 {
     m_reversoGroup->setEnabled(m_allowFreeServices->isChecked());
+}
+
+void SettingsDialog::updateFallbackControls()
+{
+    m_fallbackService->setEnabled(m_allowFreeServices->isChecked());
 }
 
 void SettingsDialog::updateProxyControls()

@@ -3,6 +3,8 @@
 #include "core/settings.h"
 
 #include <QDialog>
+#include <QList>
+#include <QPair>
 #include <QStringList>
 
 class QCheckBox;
@@ -26,6 +28,7 @@ class SettingsDialog : public QDialog
 public:
     SettingsDialog(const AppSettings &settings, const QStringList &sourceLanguages,
                    const QStringList &targetLanguages, bool autostartApproved,
+                   const QList<QPair<QString, QString>> &fallbackServices = {},
                    bool secretStorageFallback = false, QWidget *parent = nullptr);
     ~SettingsDialog() override;
 
@@ -73,10 +76,12 @@ private:
     void updateYandexControls();
     void updateBingControls();
     void updateReversoControls();
+    void updateFallbackControls();
     void updateProxyControls();
 
     AppSettings m_initial;
     QStringList m_targetLanguages;
+    QList<QPair<QString, QString>> m_fallbackServices;
 
     QTabWidget *m_tabs = nullptr;
 
@@ -115,6 +120,10 @@ private:
     QComboBox *m_llmModel = nullptr;
     QPushButton *m_loadLlmModels = nullptr;
     QLabel *m_llmStatus = nullptr;
+
+    QGroupBox *m_fallbackGroup = nullptr;
+    QComboBox *m_fallbackService = nullptr;
+    QLabel *m_fallbackHint = nullptr;
 
     QGroupBox *m_mymemoryGroup = nullptr;
 

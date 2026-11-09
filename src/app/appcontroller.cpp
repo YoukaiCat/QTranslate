@@ -227,6 +227,7 @@ void AppController::createTranslation()
     m_translations->setPrimaryLanguage(settings.translation.primaryLang);
     m_translations->setSecondaryLanguage(settings.translation.secondaryLang);
     m_translations->setFreeServicesAllowed(settings.translation.allowFreeServices);
+    m_translations->setFallbackService(settings.translation.fallbackService);
 
     m_google = new GoogleTranslateService(m_network);
     m_deepl = new DeepLService(m_network);
@@ -593,6 +594,9 @@ void AppController::applySettings(const AppSettings &oldSettings,
         updateServiceSelectors();
     }
 
+    if (m_translations->fallbackService() != newSettings.translation.fallbackService)
+        m_translations->setFallbackService(newSettings.translation.fallbackService);
+
     if (oldSettings.network.timeoutMs != newSettings.network.timeoutMs)
         m_network->setTimeoutMs(newSettings.network.timeoutMs);
 
@@ -692,10 +696,16 @@ void AppController::showSettings()
 
     const TranslationService *service = m_translations->activeService();
     const bool secretStorageAvailable = SecretProtector::isAvailable();
+    QList<QPair<QString, QString>> fallbackServices;
+    for (const TranslationService *candidate : m_translations->services()) {
+        if (candidate->requiresOptIn())
+            fallbackServices.append({candidate->id(), candidate->displayName()});
+    }
+
     SettingsDialog dialog(m_settings->current(),
                           service ? service->sourceLanguages() : QStringList(),
                           service ? service->targetLanguages() : QStringList(),
-                          Autostart::isApproved(), !secretStorageAvailable,
+                          Autostart::isApproved(), fallbackServices, !secretStorageAvailable,
                           m_mainWindow.get());
     if (m_hotkeys) {
         connect(&dialog, &SettingsDialog::hotkeyEditingChanged, this,

@@ -160,6 +160,19 @@ void normalize(AppSettings &settings)
     settings.translation.autoTranslateDelayMs =
         boundedInt(settings.translation.autoTranslateDelayMs, kDefaultDelayMs, 0, kMaxDelayMs);
 
+    // The fallback id comes from a configuration file, so the warning is fixed
+    // and never echoes the typed value. An empty value is valid: no fallback.
+    const QString fallback = settings.translation.fallbackService.trimmed().toLower();
+    if (fallback.isEmpty()) {
+        settings.translation.fallbackService.clear();
+    } else if (!fallbackServiceIds().contains(fallback)) {
+        qCWarning(lcSettings)
+            << "Fallback service is not a supported opt-in service; using none";
+        settings.translation.fallbackService.clear();
+    } else {
+        settings.translation.fallbackService = fallback;
+    }
+
     settings.google.mode =
         choice(settings.google.mode, defaults.google.mode, {"free", "cloud"});
     settings.deepl.mode =
@@ -231,6 +244,15 @@ QStringList mozhiEngineIds()
         QStringLiteral("duckduckgo"),    QStringLiteral("libretranslate"),
         QStringLiteral("mymemory"),      QStringLiteral("reverso"),
         QStringLiteral("yandex"),
+    };
+}
+
+QStringList fallbackServiceIds()
+{
+    return {
+        QStringLiteral("mymemory"),   QStringLiteral("mozhi"),
+        QStringLiteral("yandex-web"), QStringLiteral("bing-web"),
+        QStringLiteral("reverso"),
     };
 }
 
@@ -378,6 +400,8 @@ void SettingsStore::load()
         settings.value(QStringLiteral("allowFreeServices"),
                        loaded.translation.allowFreeServices)
             .toBool();
+    loaded.translation.fallbackService =
+        settings.value(QStringLiteral("fallbackService"), QString()).toString();
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("google"));
@@ -512,6 +536,7 @@ void SettingsStore::save(const AppSettings &settings)
                  normalized.translation.autoTranslateDelayMs);
     out.setValue(QStringLiteral("allowFreeServices"),
                  normalized.translation.allowFreeServices);
+    out.setValue(QStringLiteral("fallbackService"), normalized.translation.fallbackService);
     out.endGroup();
 
     out.beginGroup(QStringLiteral("google"));

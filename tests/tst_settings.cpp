@@ -98,6 +98,11 @@ private slots:
         QCOMPARE(settings.translation.maxLength, 20000);
         QCOMPARE(settings.translation.autoTranslateDelayMs, 700);
         QVERIFY(!settings.translation.allowFreeServices);
+        QVERIFY(settings.translation.fallbackService.isEmpty());
+        QCOMPARE(fallbackServiceIds(),
+                 QStringList({QStringLiteral("mymemory"), QStringLiteral("mozhi"),
+                              QStringLiteral("yandex-web"), QStringLiteral("bing-web"),
+                              QStringLiteral("reverso")}));
 
         QCOMPARE(settings.google.mode, QStringLiteral("free"));
         QCOMPARE(settings.deepl.mode, QStringLiteral("api"));
@@ -221,6 +226,7 @@ private slots:
         settings.translation.maxLength = 5000;
         settings.translation.autoTranslateDelayMs = 0;
         settings.translation.allowFreeServices = true;
+        settings.translation.fallbackService = QStringLiteral("mymemory");
 
         settings.google.mode = QStringLiteral("cloud");
         settings.google.apiKey = QStringLiteral("google-secret");
@@ -276,6 +282,7 @@ private slots:
         QCOMPARE(result.translation.maxLength, 5000);
         QCOMPARE(result.translation.autoTranslateDelayMs, 0);
         QVERIFY(result.translation.allowFreeServices);
+        QCOMPARE(result.translation.fallbackService, QStringLiteral("mymemory"));
 
         QCOMPARE(result.google.mode, QStringLiteral("cloud"));
         QCOMPARE(result.google.apiKey, QStringLiteral("google-secret"));
@@ -312,11 +319,14 @@ private slots:
                      QStringLiteral("http://127.0.0.1:8080/mozhi"));
             QCOMPARE(raw.value(QStringLiteral("mozhi/engine")).toString(),
                      QStringLiteral("deepl"));
+            QCOMPARE(raw.value(QStringLiteral("translation/fallbackService")).toString(),
+                     QStringLiteral("mymemory"));
         }
 
         const QByteArray ini = readFile(path);
         QVERIFY(!ini.isEmpty());
         QVERIFY(ini.contains("allowFreeServices=true"));
+        QVERIFY(ini.contains("fallbackService=mymemory"));
         QVERIFY(!ini.contains("google-secret"));
         QVERIFY(!ini.contains("deepl-secret"));
         QVERIFY(!ini.contains("llm-secret"));
@@ -368,6 +378,7 @@ private slots:
         SettingsStore store(path, fakeCodec());
         store.load();
         QCOMPARE(store.current().translation.maxLength, 20000);
+        QVERIFY(store.current().translation.fallbackService.isEmpty());
         QCOMPARE(store.current().hotkeys.popup, QKeySequence(Qt::CTRL | Qt::Key_Q));
     }
 
@@ -410,6 +421,45 @@ private slots:
         QCOMPARE(result.network.timeoutMs, 10000);
         QCOMPARE(result.mozhi.instance, QStringLiteral("https://mozhi.adminforge.de"));
         QCOMPARE(result.mozhi.engine, QStringLiteral("google"));
+    }
+
+    void fallbackServiceIsNormalized()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("translation/fallbackService"),
+                         QStringLiteral("  Mozhi "));
+            raw.sync();
+        }
+
+        SettingsStore store(path, fakeCodec());
+        store.load();
+        QCOMPARE(store.current().settingsVersion, 1);
+        QCOMPARE(store.current().translation.fallbackService, QStringLiteral("mozhi"));
+
+        // An unknown id and a non-opt-in service are reset to none. The warning
+        // is fixed and must not echo the typed value.
+        const QString warning =
+            QStringLiteral("Fallback service is not a supported opt-in service; using none");
+        for (const QString &value :
+             {QStringLiteral("nope"), QStringLiteral("google"), QStringLiteral("deepl")}) {
+            QVERIFY(!warning.contains(value));
+            {
+                QSettings raw(path, QSettings::IniFormat);
+                raw.setValue(QStringLiteral("translation/fallbackService"), value);
+                raw.sync();
+            }
+
+            SettingsStore loaded(path, fakeCodec());
+            QTest::ignoreMessage(QtWarningMsg, qPrintable(warning));
+            loaded.load();
+            QCOMPARE(loaded.current().translation.fallbackService, QString());
+        }
     }
 
     void mozhiGroupIsOptional()

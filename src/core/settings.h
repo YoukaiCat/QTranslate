@@ -37,6 +37,8 @@ struct TranslationSettings
     // Gates services whose requiresOptIn() is true: the manager refuses them
     // while this is false.
     bool allowFreeServices = false;
+    // Empty means no fallback. One of fallbackServiceIds() otherwise.
+    QString fallbackService;
 };
 
 struct GoogleSettings
@@ -114,6 +116,10 @@ Q_DECLARE_METATYPE(AppSettings)
 // Pure helpers shared by SettingsStore and the Mozhi settings UI, so the
 // instance and engine rules live in one place. They never log.
 QStringList mozhiEngineIds();
+// The settings-layer guard for translation/fallbackService. It must track the
+// services registered with requiresOptIn(); the manager still ignores an
+// unknown id at request time.
+QStringList fallbackServiceIds();
 bool isValidMozhiInstance(const QString &instance);
 QString normalizedMozhiInstance(const QString &instance);
 QString normalizedMozhiEngine(const QString &engine);
