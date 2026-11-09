@@ -10,9 +10,10 @@ depends: [03-languagetool-service]
 
 Add the separate **Text checking** tab to `SettingsDialog` and make the `proofreading/*` settings
 group editable, without touching the Translation tab or any translation setting. The tab shows the
-mode switch, the provider, the checking language, the endpoint and key of a self-hosted or premium
-LanguageTool, the four categories, "Check before translation", "Apply corrections automatically" and
-the online-services switch with the privacy warning. `doc/proofreading.md` §5 and
+mode switch, the provider, the checking language, the endpoint of a self-hosted LanguageTool, the four
+categories, "Check before translation", "Apply corrections automatically" and the online-services
+switch with the privacy warning. There is no key, username or password field: the first version
+sends no credentials (user decision of 2026-11-09). `doc/proofreading.md` §5 and
 `doc/architecture.md` §4.13/§4.15 define the fields; `01-proofreading-core` already stores and
 normalises them, so this child is the UI plus the translations.
 
@@ -24,7 +25,7 @@ service implements cannot be selected; LanguageTool is the only entry in this st
 kept for stage 6. A stored id that is not registered keeps the saved value and shows the first
 registered provider. The language combo is filled from the selected provider's `languages()` plus
 "Auto-detect" only when `supportsAutoLanguage()` is true, and is rebuilt when the provider changes.
-Endpoint and key are enabled only for a provider that is not local; the two toggles stay independent
+The endpoint row is enabled only for a provider that is not local; the two toggles stay independent
 of the translation tab. The online switch is followed by one warning label that says the checked text
 is sent to the provider and that checking works only while the switch is on, and the whole page is
 disabled while `proofreading/enabled` is off, except the mode switch itself (the Services tab's gate
@@ -37,13 +38,14 @@ endpoint shows the established fixed warning and is not saved as typed.
 ## Done when
 
 - `SettingsDialog` has a fifth, separate **Text checking** page with `enabled`, `provider`,
-  `language`, `endpoint`, `apiKey` (password echo), the four category checkboxes,
-  `checkBeforeTranslation`, `autoReplace` and `allowOnlineServices`; the tab title and every label are
-  `tr()` strings, the page is independent of the Translation page, and no translation setting reads
-  or writes a `proofreading/*` key.
+  `language`, `endpoint`, the four category checkboxes, `checkBeforeTranslation`, `autoReplace` and
+  `allowOnlineServices`; there is no key, username or password row (stage 5 sends no credentials,
+  user decision of 2026-11-09). The tab title and every label are `tr()` strings, the page is
+  independent of the Translation page, and no translation setting reads or writes a `proofreading/*`
+  key.
 - The provider combo lists the registered proofreading providers (`LanguageTool` in this stage); the
-  language combo follows the provider (`auto` only when supported), and the category/endpoint/key
-  rows are enabled only in a state where they have an effect. The online switch carries the privacy
+  language combo follows the provider (`auto` only when supported), and the category/endpoint rows
+  are enabled only in a state where they have an effect. The online switch carries the privacy
   warning, and the whole page is disabled while the mode is off.
 - `loadValues()`/`values()` round-trip the group: defaults, an existing INI file, an invalid endpoint
   and an unknown stored provider behave as `01-proofreading-core` defines, and an invalid endpoint is

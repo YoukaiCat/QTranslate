@@ -18,7 +18,7 @@ network (the `MainWindow` contract in `mainwindow.h:16-20`).
 
 The new widget is `src/ui/proofreadingpanel.{h,cpp}`: a list of issues (message, rule id, the
 replacement choices) with the buttons Replace, Ignore, Replace all and Copy corrected text, and the
-states checking / no errors / provider unavailable / key required / request limit. It receives a
+states checking / no errors / provider unavailable / request limit. It receives a
 `ProofreadingResult` plus the error text, emits `replacementChosen(int issue, int replacement)`,
 `ignored(int issue)`, `replaceAllRequested()` and `copyCorrectedRequested()`, and never edits the
 document itself. `MainWindow` owns the panel, adds the Check button and paints the issues with
@@ -49,7 +49,7 @@ nothing is changed without the user's choice. When the option is off the behavio
 ## Done when
 
 - `src/ui/proofreadingpanel.{h,cpp}` shows the issues with message, rule id and replacement choices,
-  the four buttons and the five states, receives the error text through the new
+  the four buttons and the four states, receives the error text through the new
   `TranslationErrorText::forResult(const ProofreadingResult &)` overload, and emits only the four
   signals above; it does not edit the document and holds no manager or service.
 - The main window has a Check button next to Translate, visible only while the mode is on and a
@@ -73,7 +73,7 @@ nothing is changed without the user's choice. When the option is off the behavio
   `proofreadingpanel`, `mainwindow`, `languagecombobox` and `translationerrortext` like
   `tst_settingsdialog` in `tests/CMakeLists.txt:55-62`) covers the list and the four buttons, the
   highlight count, the change of a selected replacement, single undo after Replace, Replace all with
-  the preview, Ignore, Copy, the five states, autoReplace off/on, and the check-before-translation
+  the preview, Ignore, Copy, the four states, autoReplace off/on, and the check-before-translation
   branch with and without issues; the existing `tst_popupwindow`/`tst_settingsdialog` stay green.
 - Debug and Release build on Linux without warnings and the full suite passes; `ctest -N` shows 43
   Linux tests and would show 38 on Windows (the new target is platform-neutral); Windows is recorded

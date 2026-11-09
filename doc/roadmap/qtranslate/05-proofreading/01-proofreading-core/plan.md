@@ -1,6 +1,6 @@
 ---
 kind: task
-status: done
+status: in-progress
 detailed: true
 ---
 
@@ -24,9 +24,9 @@ second enum, so `ui/translationerrortext` and the established wording apply unch
 
 Nothing in this child talks about a specific provider: no endpoint, no HTTP, no parser, no
 `tr()` UI strings. The only translatable strings are the manager's fixed refusal messages (no
-provider, missing key, the online gate), and the gate one names the "Text checking" tab that
-`04-text-checking-tab` adds; they are added to the 14 `.ts` files there (the group is off by default
-and no provider is registered yet, so the transient state is harmless).
+provider, an unconfigured provider, the online gate), and the gate one names the "Text checking" tab
+that `04-text-checking-tab` adds; they are added to the 14 `.ts` files there (the group is off by
+default and no provider is registered yet, so the transient state is harmless).
 
 ## Steps
 
@@ -119,7 +119,7 @@ and no provider is registered yet, so the transient state is harmless).
      * no active service → `ServiceUnavailable` with the fixed
        `tr("No text checking provider is available.")`;
      * `!service->isConfigured()` → `Auth` with `service->configurationError()` (empty message falls
-       back to the generic `tr("The text checking provider needs a key.")`);
+       back to the generic `tr("The text checking provider needs a key.")`, which step 8 replaces);
      * `!service->isLocal() && !onlineServicesAllowed()` → `ServiceUnavailable` with
        `tr("Enable online text checking in Settings → Text checking.")`;
      * `language == Languages::autoCode()` and `!service->supportsAutoLanguage()`, or a code that is
@@ -142,7 +142,7 @@ and no provider is registered yet, so the transient state is harmless).
      QString provider = QStringLiteral("languagetool"); // the only id of this stage
      QString language = QStringLiteral("auto");
      QString endpoint;                                  // empty: the provider default
-     QString apiKey;
+     QString apiKey;                                    // removed again in step 8 (decision 2026-11-09)
      QStringList categories;                            // the four ids; set in the AppSettings constructor
      bool checkBeforeTranslation = false;
      bool autoReplace = false;
@@ -184,7 +184,8 @@ and no provider is registered yet, so the transient state is harmless).
    - Load and save the group in `load()`/`save()` (`settings.cpp:356-470`, `508-598`): the booleans
      and strings with `QSettings::value`, the secret through `readSecret`/`writeSecret`
      (`settings.cpp:68-119`) with the old value, so an unchanged key keeps its token and a transient
-     keyring failure does not drop it — same as `llm.apiKey`.
+     keyring failure does not drop it — same as `llm.apiKey`. The secret path is removed again in step
+     8 (decision of 2026-11-09).
    - Do not add `proofreading/hotkey` here; `07-external-selection-proofreading` adds the key when it
      registers the hotkey.
 
@@ -220,7 +221,8 @@ and no provider is registered yet, so the transient state is harmless).
    categories, the four flags false), a full round trip including `apiKey` through the test codec,
    the raw INI group name `[proofreading]`, corrupt provider/language/endpoint/categories values
    falling back with the fixed rules, an absent group loading the defaults without writing it,
-   `kCurrentVersion` staying `1`, and proofreading changes not touching `translation.*`.
+   `kCurrentVersion` staying `1`, and proofreading changes not touching `translation.*`. The `apiKey`
+   round-trip case is removed again in step 8 (decision of 2026-11-09).
    No new fixture files are needed.
 
 7. **Build, count and verify.** Configure and build Linux Debug and Release with `-Wall -Wextra`
@@ -234,6 +236,44 @@ and no provider is registered yet, so the transient state is harmless).
    `src/core/textchunker.*`, `src/core/settings.*`, `CMakeLists.txt`,
    `tests/tst_proofreadingmanager.cpp`, `tests/tst_settings.cpp`, `tests/tst_textchunker.cpp` and
    `tests/CMakeLists.txt`. Leave commit and push to the lead.
+
+8. **Remove the unused `apiKey` and the key wording (user decision of 2026-11-09).** Stage 5 sends
+   no credentials — the public API rejects them and a live 400 to a credential attempt echoed the
+   submitted value — so the field added in step 5 is dead and must go, and the manager must not tell
+   the user about a key it does not have. The rest of the completed task is unchanged and must not
+   be redone:
+   - `src/core/settings.h`: remove `QString apiKey;` from `ProofreadingSettings`; the group keeps
+     `enabled`, `provider`, `language`, `endpoint`, `categories`, `checkBeforeTranslation`,
+     `autoReplace` and `allowOnlineServices`.
+   - `src/core/settings.cpp`: remove the `readSecret` call in `load()` (`settings.cpp:543`), the
+     `writeSecret` call and the old-value argument in `save()` (`settings.cpp:693-694`), and the
+     `old.proofreading.apiKey` argument. Do not touch `SecretCodec` itself or the
+     Google/DeepL/LLM/proxy secrets.
+   - `tests/tst_settings.cpp`: remove the `apiKey` round-trip and the codec expectation for
+     `[proofreading]` (the case added in step 6), including the `proofreading-secret` value and the
+     `ini.contains("proofreading-secret")` assertion tied to it. Keep the defaults, the round trip of
+     the other fields, the raw `[proofreading]` group assertion (without `apiKey`), the
+     normalization fallbacks, the optional group, `kCurrentVersion == 1` and the independence from
+     `translation.*`. Do not remove the test's own secret helper if other groups use it.
+   - `src/core/proofreadingmanager.cpp`: the `Auth` refusal for an unconfigured service keeps using
+     `service->configurationError()` when it is non-empty and otherwise uses the fixed
+     `tr("The text checking provider is not configured.")`; the `needs a key` literal is removed.
+     Stage 6 can add a provider-specific hint with its own provider when it needs one.
+   - `tests/tst_proofreadingmanager.cpp`: change the fallback expectation (`The text checking
+     provider needs a key.` at line 263) to `The text checking provider is not configured.`; the case
+     where the provider supplies its own `configurationError` stays unchanged. The 14 `.ts` files are
+     not touched here: the string is added with the others in `04-text-checking-tab`.
+   - An INI written by the completed version may still contain `proofreading/apiKey`; `load()` now
+     ignores it and the next `save()` rewrites the group without it. Do not add a migration for an
+     unused key.
+   - `grep -rn "proofreading.*apiKey\|apiKey.*proofreading" src tests` returns nothing; the
+     `google`/`deepl`/`llm`/proxy keys are unrelated and stay.
+   - `## Done when` and `## Outcome` are updated to the post-removal state (the outcome carries the
+     scope-correction note that also covers the new manager text). No UI exists yet
+     (`04-text-checking-tab` owns the tab), so no `.ts` or documentation change; the test count stays
+     40 Linux / 35 Windows because no target is added.
+   - Build and run `tst_settings`, `tst_proofreadingmanager` and the full suite on Linux as in step
+     7; record Windows as not performed.
 
 ## Done when
 
@@ -252,8 +292,10 @@ and no provider is registered yet, so the transient state is harmless).
   surrogate pair, `\r\n` and a too-small limit.
 - `ProofreadingManager` registers services (first active, ownership taken), exposes
   `onlineServicesAllowed()`/`setOnlineServicesAllowed()`, and `check(request, channel)`:
-  - finishes `EmptyText`, `ServiceUnavailable` (no provider), `Auth` (unconfigured),
-    `ServiceUnavailable` with `Enable online text checking in Settings → Text checking.` (remote
+  - finishes `EmptyText`, `ServiceUnavailable` (no provider), `Auth` (unconfigured, with
+    `configurationError()` or, when it is empty, the fixed
+    `The text checking provider is not configured.`), `ServiceUnavailable` with
+    `Enable online text checking in Settings → Text checking.` (remote
     provider while the switch is off) and `UnsupportedLanguage` (`auto` unsupported or an unmapped
     code) before any provider call, always through `createFinished()` so `finished()` is asynchronous;
   - aborts the previous unfinished reply of the same channel (`Cancelled`) and leaves the other
@@ -261,22 +303,23 @@ and no provider is registered yet, so the transient state is harmless).
   - keeps `serviceId`, `issues`, `correctedText` and `ok()` intact, and logs only ids, counts, the
     channel, the language/categories and the error kind — never the text or an issue message.
 - `ProofreadingSettings` is part of `AppSettings` after `llm`; its INI group is `[proofreading]`
-  with `enabled`, `provider`, `language`, `endpoint`, `apiKey` (secret), `categories`,
-  `checkBeforeTranslation`, `autoReplace` and `allowOnlineServices`. Defaults are `enabled` false,
-  `languagetool`, `auto`, an empty endpoint and key, all four categories, and the three other flags
-  `false`.
-  Load/save round-trip, the secret goes through the injected codec, `provider` is lowercased and
-  validated, `language` falls back to `auto`, `endpoint` is validated as an absolute `http(s)` URL
-  without user info/query/fragment (empty allowed) and `categories` is normalized to the known four
-  in order (empty or unknown → all). `kCurrentVersion` stays `1`, the group is optional, and no
-  translation setting is read or written.
+  with `enabled`, `provider`, `language`, `endpoint`, `categories`, `checkBeforeTranslation`,
+  `autoReplace` and `allowOnlineServices` — no `apiKey` and no secret-codec path: stage 5 sends no
+  credentials (user decision of 2026-11-09). Defaults are `enabled` false, `languagetool`, `auto`, an
+  empty endpoint, all four categories, and the three other flags `false`.
+  Load/save round-trip, `provider` is lowercased and validated, `language` falls back to `auto`,
+  `endpoint` is validated as an absolute `http(s)` URL without user info/query/fragment (empty
+  allowed) and `categories` is normalized to the known four in order (empty or unknown → all). An
+  INI key left by an earlier build is ignored and dropped on the next save; no migration is added.
+  `kCurrentVersion` stays `1`, the group is optional, and no translation setting is read or written.
 - `proofreadingCategoryIds()` and `proofreadingProviderIds()` are the single source of the id
   strings — the provider list contains only `languagetool` in this stage — and
   `isValidProofreadingEndpoint()`/`normalizedProofreadingEndpoint()` are the single endpoint rule;
   no `proofreading/hotkey` key is added.
-- `tst_proofreadingmanager` covers every case in step 6, is platform-neutral and registered in the
-  platform-neutral block of `tests/CMakeLists.txt`; `tst_settings` and `tst_textchunker` carry the
-  new cases; `ctest -N` shows 40 Linux tests (39 + 1) and would show 35 on Windows (34 + 1).
+- `tst_proofreadingmanager` covers every case in step 6, including the
+  `The text checking provider is not configured.` fallback, is platform-neutral and registered in
+  the platform-neutral block of `tests/CMakeLists.txt`; `tst_settings` and `tst_textchunker` carry
+  the new cases; `ctest -N` shows 40 Linux tests (39 + 1) and would show 35 on Windows (34 + 1).
 - Debug and Release build on Linux without warnings with `-Wall -Wextra` and the full suite passes
   40/40; Windows Debug/Release and its 35 tests are recorded as not performed (no MSVC). No `.ts`,
   UI, `doc/`, `AGENTS.md`, README, `doc/handoff.md`, root-plan or later-child file changes; no
@@ -321,6 +364,14 @@ Done. The provider-independent proofreading layer lives in `qtranslate_core`, ha
 network and no UI code, and is proven with a local fake service. LanguageTool is the only provider id
 of this stage; Yandex Speller and Hunspell/Nuspell are not present anywhere.
 
+**Scope correction (2026-11-09).** After this task was accepted, the user decided that stage 5 sends
+no credentials. The `apiKey` field, its `load()`/`save()` path and its `tst_settings` case (listed
+below) are therefore removed in the reopened task, step 8, and the manager's `Auth` fallback text
+changes from `The text checking provider needs a key.` to
+`The text checking provider is not configured.` (a non-empty `configurationError()` still wins);
+`tst_proofreadingmanager` follows. The rest of the outcome stands. The task was reopened as
+`in-progress` for that removal only.
+
 - Files: new `src/core/proofreadingtypes.h`, `src/core/proofreadingservice.{h,cpp}`,
   `src/core/proofreadingmanager.{h,cpp}` and `tests/tst_proofreadingmanager.cpp`; modified
   `src/core/textchunker.{h,cpp}`, `src/core/settings.{h,cpp}`, `CMakeLists.txt`,
@@ -337,15 +388,16 @@ of this stage; Yandex Speller and Hunspell/Nuspell are not present anywhere.
   is active, ownership taken, unknown id ignored with a warning), `onlineServicesAllowed()` gate, the
   pre-network refusals in the planned order (`EmptyText`, no provider, `Auth`, the gate's
   `ServiceUnavailable`, `UnsupportedLanguage`), the per-channel `QPointer` cancellation, `cancel()`
-  and `cancelAll()`. A service that returns no reply at all yields `BadResponse` instead of a null
-  pointer. Logging uses `qtranslate.proofreading` and carries only the provider id, the channel, the
-  language/categories, the error kind and the elapsed time; success and `Cancelled` log at debug
-  level, real errors at warning level.
+  and `cancelAll()`. The `Auth` fallback text is `The text checking provider is not configured.`
+  (step 8; a non-empty `configurationError()` wins). A service that returns no reply at all yields
+  `BadResponse` instead of a null pointer. Logging uses `qtranslate.proofreading` and carries only
+  the provider id, the channel, the language/categories, the error kind and the elapsed time;
+  success and `Cancelled` log at debug level, real errors at warning level.
 - `TextChunker::splitWithOffsets()` is a thin loop over the unchanged `split()` with a running
   UTF-16 offset, so the parts join back to the input and `offset + text.size()` is the next offset.
 - Settings: `ProofreadingSettings` sits after `llm`, so the INI order is `[proofreading]` before
-  `[network]`; the secret goes through `readSecret`/`writeSecret` with the old value, like
-  `llm.apiKey`. `proofreadingCategoryIds()`/`proofreadingProviderIds()` are the single source of the
+  `[network]`; the `apiKey` secret path of the original plan is removed in step 8 (decision of
+  2026-11-09). `proofreadingCategoryIds()`/`proofreadingProviderIds()` are the single source of the
   id strings (`{"languagetool"}`), and `isValidProofreadingEndpoint()`/
   `normalizedProofreadingEndpoint()` are the single endpoint rule: an empty value is valid and means
   the provider default, otherwise an absolute `http(s)` URL with a host and without user info, query
