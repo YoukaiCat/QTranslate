@@ -15,6 +15,7 @@
 #include <QScrollArea>
 #include <QSignalSpy>
 #include <QSpinBox>
+#include <QTabWidget>
 #include <QTest>
 
 class TestSettingsDialog : public QObject
@@ -897,6 +898,174 @@ private slots:
         QCOMPARE(result.network.proxyUser, QStringLiteral("proxy-user"));
         QCOMPARE(result.network.proxyPassword, QStringLiteral("proxy-password"));
         QCOMPARE(result.network.timeoutMs, 12000);
+    }
+
+    void proofreadingTab()
+    {
+        AppSettings settings;
+        settings.proofreading.enabled = true;
+        settings.proofreading.language = QStringLiteral("ru");
+        settings.proofreading.endpoint = QStringLiteral("http://127.0.0.1:8081/v2/check");
+        settings.proofreading.categories = {QStringLiteral("grammar"),
+                                            QStringLiteral("style")};
+        settings.proofreading.checkBeforeTranslation = true;
+        settings.proofreading.autoReplace = true;
+        settings.proofreading.allowOnlineServices = true;
+
+        const QList<SettingsDialog::ProofreadingProvider> providers = {
+            {QStringLiteral("languagetool"), QStringLiteral("LanguageTool"),
+             {QStringLiteral("en"), QStringLiteral("ru"), QStringLiteral("zh-Hans")}, true},
+            {QStringLiteral("other"), QStringLiteral("Other provider"),
+             {QStringLiteral("fr")}, false},
+        };
+        SettingsDialog dialog(settings, {QStringLiteral("en"), QStringLiteral("ru")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true, {}, false,
+                              providers);
+
+        auto *tabs = dialog.findChild<QTabWidget *>(QStringLiteral("settingsTabs"));
+        auto *enabled = dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingEnabled"));
+        auto *provider =
+            dialog.findChild<QComboBox *>(QStringLiteral("proofreadingProvider"));
+        auto *language =
+            dialog.findChild<LanguageComboBox *>(QStringLiteral("proofreadingLanguage"));
+        auto *endpoint =
+            dialog.findChild<QLineEdit *>(QStringLiteral("proofreadingEndpoint"));
+        auto *hint =
+            dialog.findChild<QLabel *>(QStringLiteral("proofreadingEndpointHint"));
+        auto *spelling =
+            dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingSpelling"));
+        auto *grammar =
+            dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingGrammar"));
+        auto *punctuation =
+            dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingPunctuation"));
+        auto *style = dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingStyle"));
+        QVERIFY(tabs && enabled && provider && language && endpoint && hint && spelling
+                && grammar && punctuation && style);
+
+        QCOMPARE(tabs->count(), 6);
+        QCOMPARE(tabs->tabText(3), QStringLiteral("Services"));
+        QCOMPARE(tabs->tabText(4), QStringLiteral("Text checking"));
+        QCOMPARE(tabs->tabText(5), QStringLiteral("Network"));
+
+        QVERIFY(enabled->isChecked());
+        QCOMPARE(provider->count(), 2);
+        QCOMPARE(provider->itemText(0), QStringLiteral("LanguageTool"));
+        QCOMPARE(provider->itemData(0).toString(), QStringLiteral("languagetool"));
+        QCOMPARE(provider->itemText(1), QStringLiteral("Other provider"));
+        QCOMPARE(provider->currentData().toString(), QStringLiteral("languagetool"));
+
+        QCOMPARE(language->itemData(0).toString(), Languages::autoCode());
+        QVERIFY(language->findData(QStringLiteral("en")) >= 0);
+        QVERIFY(language->findData(QStringLiteral("ru")) >= 0);
+        QVERIFY(language->findData(QStringLiteral("zh-Hans")) >= 0);
+        QCOMPARE(language->currentCode(), QStringLiteral("ru"));
+        QCOMPARE(endpoint->text(), QStringLiteral("http://127.0.0.1:8081/v2/check"));
+        QVERIFY(hint->wordWrap());
+        QVERIFY(hint->text().contains(QStringLiteral("public")));
+        QVERIFY(!spelling->isChecked());
+        QVERIFY(grammar->isChecked());
+        QVERIFY(!punctuation->isChecked());
+        QVERIFY(style->isChecked());
+
+        const AppSettings result = dialog.settings();
+        QVERIFY(result.proofreading.enabled);
+        QCOMPARE(result.proofreading.provider, QStringLiteral("languagetool"));
+        QCOMPARE(result.proofreading.language, QStringLiteral("ru"));
+        QCOMPARE(result.proofreading.endpoint,
+                 QStringLiteral("http://127.0.0.1:8081/v2/check"));
+        QCOMPARE(result.proofreading.categories,
+                 QStringList({QStringLiteral("grammar"), QStringLiteral("style")}));
+        QVERIFY(result.proofreading.checkBeforeTranslation);
+        QVERIFY(result.proofreading.autoReplace);
+        QVERIFY(result.proofreading.allowOnlineServices);
+
+        // The language list follows the selected provider and is rebuilt on a
+        // provider change; a provider without Auto-detect offers no "auto".
+        provider->setCurrentIndex(1);
+        QCOMPARE(language->count(), 1);
+        QCOMPARE(language->itemData(0).toString(), QStringLiteral("fr"));
+        QCOMPARE(language->currentCode(), QStringLiteral("fr"));
+
+        provider->setCurrentIndex(0);
+        QCOMPARE(language->count(), 4);
+        QCOMPARE(language->itemData(0).toString(), Languages::autoCode());
+        QCOMPARE(language->currentCode(), Languages::autoCode());
+    }
+
+    void proofreadingGateAndEndpoint()
+    {
+        const QList<SettingsDialog::ProofreadingProvider> providers = {
+            {QStringLiteral("languagetool"), QStringLiteral("LanguageTool"),
+             {QStringLiteral("en"), QStringLiteral("ru")}, true},
+        };
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en"), QStringLiteral("ru")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true, {}, false, providers);
+
+        auto *enabled = dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingEnabled"));
+        auto *providerGroup =
+            dialog.findChild<QGroupBox *>(QStringLiteral("proofreadingProviderGroup"));
+        auto *optionsGroup =
+            dialog.findChild<QGroupBox *>(QStringLiteral("proofreadingOptionsGroup"));
+        auto *provider =
+            dialog.findChild<QComboBox *>(QStringLiteral("proofreadingProvider"));
+        auto *endpoint =
+            dialog.findChild<QLineEdit *>(QStringLiteral("proofreadingEndpoint"));
+        auto *endpointWarning =
+            dialog.findChild<QLabel *>(QStringLiteral("proofreadingEndpointWarning"));
+        auto *online =
+            dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingAllowOnline"));
+        auto *onlineWarning =
+            dialog.findChild<QLabel *>(QStringLiteral("proofreadingOnlineWarning"));
+        QVERIFY(enabled && providerGroup && optionsGroup && provider && endpoint
+                && endpointWarning && online && onlineWarning);
+
+        const AppSettings before = dialog.settings();
+        QVERIFY(!enabled->isChecked());
+        QVERIFY(!providerGroup->isEnabled());
+        QVERIFY(!optionsGroup->isEnabled());
+        QVERIFY(!online->isChecked());
+        QVERIFY(!onlineWarning->isHidden());
+
+        // Only the mode switch disables rows. The online switch is a warning:
+        // the provider and endpoint stay editable while it is off.
+        enabled->setChecked(true);
+        QVERIFY(providerGroup->isEnabled());
+        QVERIFY(provider->isEnabled());
+        QVERIFY(endpoint->isEnabled());
+        QVERIFY(!online->isChecked());
+        QVERIFY(!onlineWarning->isHidden());
+
+        online->setChecked(true);
+        QVERIFY(onlineWarning->isHidden());
+        QVERIFY(endpoint->isEnabled());
+
+        endpoint->setText(QStringLiteral("not a URL"));
+        QVERIFY(!endpointWarning->isHidden());
+        QVERIFY(dialog.settings().proofreading.endpoint.isEmpty());
+        QString error;
+        QVERIFY(!dialog.validate(&error));
+        QCOMPARE(error, QStringLiteral("Enter a valid http(s) LanguageTool URL, or leave the "
+                                       "field empty for the public endpoint."));
+
+        endpoint->clear();
+        QVERIFY(endpointWarning->isHidden());
+        error.clear();
+        QVERIFY(dialog.validate(&error));
+        QVERIFY(error.isEmpty());
+        QVERIFY(dialog.settings().proofreading.endpoint.isEmpty());
+
+        // The page never reads or writes a translation.* value.
+        const AppSettings after = dialog.settings();
+        QCOMPARE(after.translation.sourceLang, before.translation.sourceLang);
+        QCOMPARE(after.translation.primaryLang, before.translation.primaryLang);
+        QCOMPARE(after.translation.secondaryLang, before.translation.secondaryLang);
+        QCOMPARE(after.translation.maxLength, before.translation.maxLength);
+        QCOMPARE(after.translation.autoTranslateDelayMs,
+                 before.translation.autoTranslateDelayMs);
+        QCOMPARE(after.translation.allowFreeServices, before.translation.allowFreeServices);
+        QCOMPARE(after.translation.fallbackService, before.translation.fallbackService);
     }
 
     void proxyTest()

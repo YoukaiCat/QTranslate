@@ -26,10 +26,22 @@ class SettingsDialog : public QDialog
     Q_OBJECT
 
 public:
+    // A text checking provider registered in the application. Passed in by
+    // AppController so the page cannot select an id that no service implements.
+    struct ProofreadingProvider
+    {
+        QString id;
+        QString name;
+        QStringList languages;      // internal codes, without "auto"
+        bool supportsAutoLanguage = false;
+    };
+
     SettingsDialog(const AppSettings &settings, const QStringList &sourceLanguages,
                    const QStringList &targetLanguages, bool autostartApproved,
                    const QList<QPair<QString, QString>> &fallbackServices = {},
-                   bool secretStorageFallback = false, QWidget *parent = nullptr);
+                   bool secretStorageFallback = false,
+                   const QList<ProofreadingProvider> &proofreadingProviders = {},
+                   QWidget *parent = nullptr);
     ~SettingsDialog() override;
 
     // Exposed for tests: the current widget values as AppSettings.
@@ -77,11 +89,14 @@ private:
     void updateBingControls();
     void updateReversoControls();
     void updateFallbackControls();
+    void updateProofreadingControls();
+    void updateProofreadingLanguage();
     void updateProxyControls();
 
     AppSettings m_initial;
     QStringList m_targetLanguages;
     QList<QPair<QString, QString>> m_fallbackServices;
+    QList<ProofreadingProvider> m_proofreadingProviders;
 
     QTabWidget *m_tabs = nullptr;
 
@@ -124,6 +139,25 @@ private:
     QGroupBox *m_fallbackGroup = nullptr;
     QComboBox *m_fallbackService = nullptr;
     QLabel *m_fallbackHint = nullptr;
+
+    QCheckBox *m_proofreadingEnabled = nullptr;
+    QGroupBox *m_proofreadingProviderGroup = nullptr;
+    QComboBox *m_proofreadingProvider = nullptr;
+    LanguageComboBox *m_proofreadingLanguage = nullptr;
+    QLineEdit *m_proofreadingEndpoint = nullptr;
+    QLabel *m_proofreadingEndpointHint = nullptr;
+    QLabel *m_proofreadingEndpointWarning = nullptr;
+    QGroupBox *m_proofreadingIssuesGroup = nullptr;
+    QCheckBox *m_proofreadingSpelling = nullptr;
+    QCheckBox *m_proofreadingGrammar = nullptr;
+    QCheckBox *m_proofreadingPunctuation = nullptr;
+    QCheckBox *m_proofreadingStyle = nullptr;
+    QGroupBox *m_proofreadingOptionsGroup = nullptr;
+    QCheckBox *m_proofreadingCheckBeforeTranslation = nullptr;
+    QCheckBox *m_proofreadingAutoReplace = nullptr;
+    QGroupBox *m_proofreadingOnlineGroup = nullptr;
+    QCheckBox *m_proofreadingAllowOnline = nullptr;
+    QLabel *m_proofreadingOnlineWarning = nullptr;
 
     QGroupBox *m_mymemoryGroup = nullptr;
 

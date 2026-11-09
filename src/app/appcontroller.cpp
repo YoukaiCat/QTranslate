@@ -5,6 +5,7 @@
 #include "core/appinfo.h"
 #include "core/languages.h"
 #include "core/proofreadingmanager.h"
+#include "core/proofreadingservice.h"
 #include "core/settings.h"
 #include "core/translationmanager.h"
 #include "core/translationservice.h"
@@ -736,11 +737,20 @@ void AppController::showSettings()
             fallbackServices.append({candidate->id(), candidate->displayName()});
     }
 
+    QList<SettingsDialog::ProofreadingProvider> proofreadingProviders;
+    if (m_proofreading) {
+        for (const ProofreadingService *provider : m_proofreading->services()) {
+            proofreadingProviders.append({provider->id(), provider->displayName(),
+                                          provider->languages(),
+                                          provider->supportsAutoLanguage()});
+        }
+    }
+
     SettingsDialog dialog(m_settings->current(),
                           service ? service->sourceLanguages() : QStringList(),
                           service ? service->targetLanguages() : QStringList(),
                           Autostart::isApproved(), fallbackServices, !secretStorageAvailable,
-                          m_mainWindow.get());
+                          proofreadingProviders, m_mainWindow.get());
     if (m_hotkeys) {
         connect(&dialog, &SettingsDialog::hotkeyEditingChanged, this,
                 [this](bool editing) {

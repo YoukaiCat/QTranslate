@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [03-languagetool-service]
 ---
@@ -263,3 +263,80 @@ helpers (`proofreadingCategoryIds()`, `proofreadingProviderIds()`, `isValidProof
   two-entry list exists only in the test to prove the language rebuild. Do not add a second real
   provider or a dead id.
 - **Windows is not built here.** Record the count and the build as not performed, never as passed.
+
+## Outcome
+
+Done. `SettingsDialog` has a fifth **Text checking** page between **Services** and **Network** that
+edits only the `[proofreading]` group; the page has no key, username or password row, and it neither
+reads nor writes a `translation.*` value.
+
+- Files: `src/ui/settingsdialog.{h,cpp}`, `src/app/appcontroller.cpp`,
+  `tests/tst_settingsdialog.cpp` and the 14 `i18n/*.ts`. No service, manager, main-window, `doc/`,
+  README, `AGENTS.md`, `doc/handoff.md` or root/later-child file changed.
+- Constructor: public `SettingsDialog::ProofreadingProvider {id, name, languages,
+  supportsAutoLanguage}`, passed as a defaulted argument after `secretStorageFallback` and before
+  `QWidget *parent`, so the four-argument test calls compile unchanged. `AppController::showSettings()`
+  is the only call site: it builds the list from `m_proofreading->services()` behind an `if
+  (m_proofreading)` guard and leaves the translation language arguments and the dialog signals as
+  they were.
+- Page: "Enable text checking" (`proofreadingEnabled`) plus a mode hint; group **Provider**
+  (`proofreadingProvider`, `proofreadingLanguage`, `proofreadingEndpoint`, hint and red
+  `proofreadingEndpointWarning`); group **Issues** with a "Categories:" row of the four checkboxes
+  (`proofreadingSpelling/Grammar/Punctuation/Style`, checked by default); group **Options**
+  (`proofreadingCheckBeforeTranslation`, `proofreadingAutoReplace`, the one-undo-step warning); group
+  **Online checking** (`proofreadingAllowOnline` and `proofreadingOnlineWarning`). Every user-visible
+  string is `tr()`; provider names are data and stay untranslated; the public URL is only a
+  placeholder.
+- Gates: `proofreading/enabled` disables the four groups and keeps its own switch enabled; an empty
+  provider list additionally disables the provider combo and the endpoint. `proofreading/
+  allowOnlineServices` never calls `setEnabled`: the settings stay editable, and the warning is shown
+  while the switch is off ("...works only while this is on; a self-hosted server still needs it").
+- Language: `updateProofreadingLanguage()` uses
+  `LanguageComboBox::setLanguages(provider.languages, provider.supportsAutoLanguage)` under a
+  `QSignalBlocker`, keeps the previous code when the new provider still offers it, otherwise selects
+  Auto-detect only when the provider supports it, otherwise the first entry. `loadValues()` selects
+  the provider by data with a fallback to the first entry and then restores the stored language with
+  the same fallbacks.
+- Endpoint: an empty value is valid and means the public default. The plan's open question is
+  resolved by code: `normalizedProofreadingEndpoint()` (`src/core/settings.cpp:380`) already returns
+  an empty string for both an empty and an invalid value (`if (text.isEmpty() ||
+  !isValidProofreadingEndpoint(text)) return {};`), so `settings()` never stores a typed invalid URL
+  or a truncated one and no change to the helper was needed. An invalid non-empty value shows the
+  fixed red warning; `validate()` (after the proxy check, only while the mode is on) blocks OK with
+  the same text.
+- `settings()` writes `proofreading.enabled`, `.provider` from the current combo data, `.language`
+  from the combo, `.endpoint` through the normaliser, `.categories` in `proofreadingCategoryIds()`
+  order, `.checkBeforeTranslation`, `.autoReplace` and `.allowOnlineServices`; nothing else.
+- `.ts`: `update_translations` on the Linux build added **25** messages per file, not the 18 the
+  plan listed. Beyond the 18 were the four `QGroupBox` titles that the plan's own layout requires
+  (`Provider`, `Issues`, `Options`, `Online checking`; they are user-visible labels, so they are
+  `tr()`) and the three `ProofreadingManager` strings that had existed in code since
+  `01-proofreading-core` but were never in the `.ts` files (`.ts` stayed 316 through tasks 01 and 03
+  by design). `grep -c '<message' i18n/qtranslate_ru_RU.ts` is **341** in all 14 files; 0 unfinished,
+  0 vanished, 0 empty. `LanguageTool`, the existing `Auto-detect` and the URL placeholder add no
+  translated string. The Windows-only `HotkeyManager` message is still present, so `lupdate` kept it.
+- Tests: `proofreadingTab()` checks the tab count/order (6 tabs, `Text checking` at index 4 between
+  `Services` and `Network`), the provider items and data, the Auto-detect-first language list, the
+  endpoint text and word-wrapped hint, the category checkboxes, the `settings()` round trip and the
+  language rebuild on a provider change (a second provider without Auto-detect drops it and falls
+  back to `fr`). `proofreadingGateAndEndpoint()` checks the defaults, the mode gate, the non-gating
+  online switch and its warning, the invalid-endpoint warning with `settings()` normalising to empty
+  and `validate()` returning the fixed message, the cleared-field pass, and that no `translation.*`
+  value changes. `tst_settingsdialog` reports **30** passed cases (28 named slots + init/cleanup).
+- Verification (Linux only): Debug and Release build with `-Wall -Wextra` and zero warnings;
+  `xvfb-run -a ctest --test-dir build/linux-{release,debug} --output-on-failure` is 42/42 in both;
+  `ctest -N` shows 42 tests (no new target). Windows would be 37 and is **not performed** — no MSVC
+  on this machine.
+- Review: no findings. The reviewer confirmed the tab order, the gate semantics, the endpoint
+  normalisation, the provider/language rebuild, the single `AppController` call site, the `.ts`
+  content and the test quality, and re-ran both full suites. No rejected findings and no open
+  issues.
+
+Notes for the later children:
+
+- `05-main-window-check-and-replace` consumes the settings through `AppController`; the page is
+  already wired to the same `[proofreading]` group and needs no new key.
+- The provider row and the passed-in provider list are ready for a second provider; only
+  `proofreadingProviderIds()` and a registered service have to follow, as stage 6 plans.
+- The 25 new `.ts` entries include the three `ProofreadingManager` messages of task 01, so a later
+  task that changes those texts must update the 14 files again.

@@ -13,6 +13,7 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHBoxLayout>
 #include <QHash>
 #include <QKeySequenceEdit>
 #include <QLabel>
@@ -31,11 +32,14 @@ SettingsDialog::SettingsDialog(const AppSettings &settings,
                                const QStringList &sourceLanguages,
                                const QStringList &targetLanguages, bool autostartApproved,
                                const QList<QPair<QString, QString>> &fallbackServices,
-                               bool secretStorageFallback, QWidget *parent)
+                               bool secretStorageFallback,
+                               const QList<ProofreadingProvider> &proofreadingProviders,
+                               QWidget *parent)
     : QDialog(parent)
     , m_initial(settings)
     , m_targetLanguages(targetLanguages)
     , m_fallbackServices(fallbackServices)
+    , m_proofreadingProviders(proofreadingProviders)
 {
     setWindowTitle(tr("Settings"));
     setModal(true);
@@ -457,6 +461,126 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     servicesPageLayout->addWidget(servicesScroll);
     m_tabs->addTab(servicesPage, tr("Services"));
 
+    // Text checking. A separate mode with its own settings: the page never
+    // reads or writes a translation.* value (see doc/proofreading.md, §5).
+    auto *textCheckingPage = new QWidget(m_tabs);
+    auto *textCheckingLayout = new QVBoxLayout(textCheckingPage);
+    m_proofreadingEnabled = new QCheckBox(tr("Enable text checking"), textCheckingPage);
+    m_proofreadingEnabled->setObjectName(QStringLiteral("proofreadingEnabled"));
+    auto *textCheckingHint = new QLabel(
+        tr("Finds spelling, grammar, and punctuation errors in a separate mode and does not "
+           "change translation settings."),
+        textCheckingPage);
+    textCheckingHint->setWordWrap(true);
+    textCheckingLayout->addWidget(m_proofreadingEnabled);
+    textCheckingLayout->addWidget(textCheckingHint);
+
+    m_proofreadingProviderGroup = new QGroupBox(tr("Provider"), textCheckingPage);
+    m_proofreadingProviderGroup->setObjectName(QStringLiteral("proofreadingProviderGroup"));
+    auto *proofreadingProviderForm = new QFormLayout(m_proofreadingProviderGroup);
+    m_proofreadingProvider = new QComboBox(m_proofreadingProviderGroup);
+    m_proofreadingProvider->setObjectName(QStringLiteral("proofreadingProvider"));
+    // Display names are product names, so they stay untranslated.
+    for (const ProofreadingProvider &provider : m_proofreadingProviders)
+        m_proofreadingProvider->addItem(provider.name, provider.id);
+    m_proofreadingProvider->setEnabled(!m_proofreadingProviders.isEmpty());
+    m_proofreadingLanguage = new LanguageComboBox(m_proofreadingProviderGroup);
+    m_proofreadingLanguage->setObjectName(QStringLiteral("proofreadingLanguage"));
+    m_proofreadingEndpoint = new QLineEdit(m_proofreadingProviderGroup);
+    m_proofreadingEndpoint->setObjectName(QStringLiteral("proofreadingEndpoint"));
+    m_proofreadingEndpoint->setPlaceholderText(
+        QStringLiteral("https://api.languagetool.org/v2/check"));
+    m_proofreadingEndpointHint = new QLabel(
+        tr("Leave empty to use the public LanguageTool endpoint. A self-hosted server keeps the "
+           "text on your machine; the public service has rate limits and sees the checked text."),
+        m_proofreadingProviderGroup);
+    m_proofreadingEndpointHint->setObjectName(QStringLiteral("proofreadingEndpointHint"));
+    m_proofreadingEndpointHint->setWordWrap(true);
+    m_proofreadingEndpointWarning = new QLabel(
+        tr("Enter a valid http(s) LanguageTool URL, or leave the field empty for the public "
+           "endpoint."),
+        m_proofreadingProviderGroup);
+    m_proofreadingEndpointWarning->setObjectName(QStringLiteral("proofreadingEndpointWarning"));
+    m_proofreadingEndpointWarning->setWordWrap(true);
+    m_proofreadingEndpointWarning->setStyleSheet(QStringLiteral("color: #d32f2f;"));
+    m_proofreadingEndpointWarning->setVisible(false);
+    proofreadingProviderForm->addRow(tr("Provider:"), m_proofreadingProvider);
+    proofreadingProviderForm->addRow(tr("Checking language:"), m_proofreadingLanguage);
+    proofreadingProviderForm->addRow(tr("LanguageTool URL:"), m_proofreadingEndpoint);
+    proofreadingProviderForm->addRow(m_proofreadingEndpointHint);
+    proofreadingProviderForm->addRow(m_proofreadingEndpointWarning);
+    textCheckingLayout->addWidget(m_proofreadingProviderGroup);
+
+    m_proofreadingIssuesGroup = new QGroupBox(tr("Issues"), textCheckingPage);
+    m_proofreadingIssuesGroup->setObjectName(QStringLiteral("proofreadingIssuesGroup"));
+    auto *proofreadingIssuesLayout = new QVBoxLayout(m_proofreadingIssuesGroup);
+    proofreadingIssuesLayout->addWidget(new QLabel(tr("Categories:"), m_proofreadingIssuesGroup));
+    auto *proofreadingCategories = new QHBoxLayout;
+    m_proofreadingSpelling = new QCheckBox(tr("Spelling"), m_proofreadingIssuesGroup);
+    m_proofreadingSpelling->setObjectName(QStringLiteral("proofreadingSpelling"));
+    m_proofreadingGrammar = new QCheckBox(tr("Grammar"), m_proofreadingIssuesGroup);
+    m_proofreadingGrammar->setObjectName(QStringLiteral("proofreadingGrammar"));
+    m_proofreadingPunctuation = new QCheckBox(tr("Punctuation"), m_proofreadingIssuesGroup);
+    m_proofreadingPunctuation->setObjectName(QStringLiteral("proofreadingPunctuation"));
+    m_proofreadingStyle = new QCheckBox(tr("Style"), m_proofreadingIssuesGroup);
+    m_proofreadingStyle->setObjectName(QStringLiteral("proofreadingStyle"));
+    for (QCheckBox *box : {m_proofreadingSpelling, m_proofreadingGrammar,
+                           m_proofreadingPunctuation, m_proofreadingStyle}) {
+        box->setChecked(true);
+        proofreadingCategories->addWidget(box);
+    }
+    proofreadingCategories->addStretch();
+    proofreadingIssuesLayout->addLayout(proofreadingCategories);
+    textCheckingLayout->addWidget(m_proofreadingIssuesGroup);
+
+    m_proofreadingOptionsGroup = new QGroupBox(tr("Options"), textCheckingPage);
+    m_proofreadingOptionsGroup->setObjectName(QStringLiteral("proofreadingOptionsGroup"));
+    auto *proofreadingOptionsLayout = new QVBoxLayout(m_proofreadingOptionsGroup);
+    m_proofreadingCheckBeforeTranslation =
+        new QCheckBox(tr("Check before translation"), m_proofreadingOptionsGroup);
+    m_proofreadingCheckBeforeTranslation->setObjectName(
+        QStringLiteral("proofreadingCheckBeforeTranslation"));
+    m_proofreadingAutoReplace =
+        new QCheckBox(tr("Apply corrections automatically"), m_proofreadingOptionsGroup);
+    m_proofreadingAutoReplace->setObjectName(QStringLiteral("proofreadingAutoReplace"));
+    auto *autoReplaceWarning = new QLabel(
+        tr("Corrections are applied without asking. Every change stays one undo step."),
+        m_proofreadingOptionsGroup);
+    autoReplaceWarning->setWordWrap(true);
+    proofreadingOptionsLayout->addWidget(m_proofreadingCheckBeforeTranslation);
+    proofreadingOptionsLayout->addWidget(m_proofreadingAutoReplace);
+    proofreadingOptionsLayout->addWidget(autoReplaceWarning);
+    textCheckingLayout->addWidget(m_proofreadingOptionsGroup);
+
+    m_proofreadingOnlineGroup = new QGroupBox(tr("Online checking"), textCheckingPage);
+    m_proofreadingOnlineGroup->setObjectName(QStringLiteral("proofreadingOnlineGroup"));
+    auto *proofreadingOnlineLayout = new QVBoxLayout(m_proofreadingOnlineGroup);
+    m_proofreadingAllowOnline =
+        new QCheckBox(tr("Allow online text checking"), m_proofreadingOnlineGroup);
+    m_proofreadingAllowOnline->setObjectName(QStringLiteral("proofreadingAllowOnline"));
+    m_proofreadingOnlineWarning = new QLabel(
+        tr("The checked text is sent to the provider. Text checking works only while this is "
+           "on; a self-hosted server still needs it."),
+        m_proofreadingOnlineGroup);
+    m_proofreadingOnlineWarning->setObjectName(QStringLiteral("proofreadingOnlineWarning"));
+    m_proofreadingOnlineWarning->setWordWrap(true);
+    proofreadingOnlineLayout->addWidget(m_proofreadingAllowOnline);
+    proofreadingOnlineLayout->addWidget(m_proofreadingOnlineWarning);
+    textCheckingLayout->addWidget(m_proofreadingOnlineGroup);
+    textCheckingLayout->addStretch();
+    m_tabs->addTab(textCheckingPage, tr("Text checking"));
+
+    connect(m_proofreadingEnabled, &QCheckBox::toggled, this,
+            &SettingsDialog::updateProofreadingControls);
+    connect(m_proofreadingAllowOnline, &QCheckBox::toggled, this,
+            &SettingsDialog::updateProofreadingControls);
+    connect(m_proofreadingProvider, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &SettingsDialog::updateProofreadingLanguage);
+    connect(m_proofreadingProvider, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &SettingsDialog::updateProofreadingControls);
+    connect(m_proofreadingEndpoint, &QLineEdit::textChanged, this,
+            &SettingsDialog::updateProofreadingControls);
+
     // Network.
     auto *networkPage = new QWidget(m_tabs);
     auto *networkLayout = new QVBoxLayout(networkPage);
@@ -603,6 +727,33 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_loadLlmModels->setEnabled(true);
     updateGoogleControls();
 
+    m_proofreadingEnabled->setChecked(settings.proofreading.enabled);
+    const int proofreadingProvider =
+        m_proofreadingProvider->findData(settings.proofreading.provider);
+    m_proofreadingProvider->setCurrentIndex(
+        proofreadingProvider >= 0 ? proofreadingProvider
+                                  : (m_proofreadingProvider->count() > 0 ? 0 : -1));
+    updateProofreadingLanguage();
+    if (!m_proofreadingLanguage->setCurrentCode(settings.proofreading.language)
+        && !m_proofreadingLanguage->setCurrentCode(Languages::autoCode())
+        && m_proofreadingLanguage->count() > 0) {
+        m_proofreadingLanguage->setCurrentIndex(0);
+    }
+    m_proofreadingEndpoint->setText(settings.proofreading.endpoint);
+    m_proofreadingSpelling->setChecked(
+        settings.proofreading.categories.contains(QStringLiteral("spelling")));
+    m_proofreadingGrammar->setChecked(
+        settings.proofreading.categories.contains(QStringLiteral("grammar")));
+    m_proofreadingPunctuation->setChecked(
+        settings.proofreading.categories.contains(QStringLiteral("punctuation")));
+    m_proofreadingStyle->setChecked(
+        settings.proofreading.categories.contains(QStringLiteral("style")));
+    m_proofreadingCheckBeforeTranslation->setChecked(
+        settings.proofreading.checkBeforeTranslation);
+    m_proofreadingAutoReplace->setChecked(settings.proofreading.autoReplace);
+    m_proofreadingAllowOnline->setChecked(settings.proofreading.allowOnlineServices);
+    updateProofreadingControls();
+
     const int proxyMode = m_proxyMode->findData(settings.network.proxyMode);
     m_proxyMode->setCurrentIndex(proxyMode >= 0 ? proxyMode : 1);
     const int proxyType = m_proxyType->findData(settings.network.proxyType);
@@ -654,6 +805,28 @@ AppSettings SettingsDialog::settings() const
     result.llm.baseUrl = m_llmBaseUrl->text().trimmed();
     result.llm.apiKey = m_llmApiKey->text().trimmed();
     result.llm.model = m_llmModel->currentText().trimmed();
+    result.proofreading.enabled = m_proofreadingEnabled->isChecked();
+    result.proofreading.provider = m_proofreadingProvider->currentData().toString();
+    result.proofreading.language = m_proofreadingLanguage->currentCode();
+    result.proofreading.endpoint =
+        normalizedProofreadingEndpoint(m_proofreadingEndpoint->text());
+    QStringList categories;
+    const QHash<QString, QCheckBox *> categoryBoxes = {
+        {QStringLiteral("spelling"), m_proofreadingSpelling},
+        {QStringLiteral("grammar"), m_proofreadingGrammar},
+        {QStringLiteral("punctuation"), m_proofreadingPunctuation},
+        {QStringLiteral("style"), m_proofreadingStyle},
+    };
+    for (const QString &id : proofreadingCategoryIds()) {
+        const QCheckBox *box = categoryBoxes.value(id);
+        if (box && box->isChecked())
+            categories << id;
+    }
+    result.proofreading.categories = categories;
+    result.proofreading.checkBeforeTranslation =
+        m_proofreadingCheckBeforeTranslation->isChecked();
+    result.proofreading.autoReplace = m_proofreadingAutoReplace->isChecked();
+    result.proofreading.allowOnlineServices = m_proofreadingAllowOnline->isChecked();
     result.network.proxyMode = m_proxyMode->currentData().toString();
     result.network.proxyType = m_proxyType->currentData().toString();
     result.network.proxyHost = m_proxyHost->text().trimmed();
@@ -755,6 +928,47 @@ void SettingsDialog::updateFallbackControls()
     m_fallbackService->setEnabled(m_allowFreeServices->isChecked());
 }
 
+void SettingsDialog::updateProofreadingControls()
+{
+    const bool enabled = m_proofreadingEnabled->isChecked();
+    const bool hasProvider = !m_proofreadingProviders.isEmpty();
+    // The mode switch disables the whole page except itself. The online switch
+    // is not a disabling gate: the settings stay editable while it is off.
+    m_proofreadingProviderGroup->setEnabled(enabled);
+    m_proofreadingIssuesGroup->setEnabled(enabled);
+    m_proofreadingOptionsGroup->setEnabled(enabled);
+    m_proofreadingOnlineGroup->setEnabled(enabled);
+    m_proofreadingProvider->setEnabled(enabled && hasProvider);
+    m_proofreadingEndpoint->setEnabled(enabled && hasProvider);
+
+    const QString endpoint = m_proofreadingEndpoint->text().trimmed();
+    m_proofreadingEndpointWarning->setVisible(!endpoint.isEmpty()
+                                             && !isValidProofreadingEndpoint(endpoint));
+    m_proofreadingOnlineWarning->setVisible(!m_proofreadingAllowOnline->isChecked());
+}
+
+void SettingsDialog::updateProofreadingLanguage()
+{
+    const int index = m_proofreadingProvider->currentIndex();
+    const ProofreadingProvider provider =
+        index >= 0 && index < m_proofreadingProviders.size()
+            ? m_proofreadingProviders.at(index)
+            : ProofreadingProvider{};
+    const QString previous = m_proofreadingLanguage->currentCode();
+    const QSignalBlocker blocker(m_proofreadingLanguage);
+    m_proofreadingLanguage->setLanguages(provider.languages, provider.supportsAutoLanguage);
+    if (!previous.isEmpty() && m_proofreadingLanguage->findData(previous) >= 0) {
+        m_proofreadingLanguage->setCurrentCode(previous);
+        return;
+    }
+    if (provider.supportsAutoLanguage
+        && m_proofreadingLanguage->setCurrentCode(Languages::autoCode())) {
+        return;
+    }
+    if (m_proofreadingLanguage->count() > 0)
+        m_proofreadingLanguage->setCurrentIndex(0);
+}
+
 void SettingsDialog::updateProxyControls()
 {
     const bool manual = m_proxyMode->currentData().toString() == QStringLiteral("manual");
@@ -827,6 +1041,17 @@ bool SettingsDialog::validate(QString *error) const
         if (error)
             *error = tr("Enter the proxy host and port, or choose another proxy mode.");
         return false;
+    }
+
+    if (m_proofreadingEnabled->isChecked()) {
+        const QString endpoint = m_proofreadingEndpoint->text().trimmed();
+        if (!endpoint.isEmpty() && !isValidProofreadingEndpoint(endpoint)) {
+            if (error) {
+                *error = tr("Enter a valid http(s) LanguageTool URL, or leave the field empty "
+                            "for the public endpoint.");
+            }
+            return false;
+        }
     }
     return true;
 }
