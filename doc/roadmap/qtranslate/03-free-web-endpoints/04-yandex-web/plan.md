@@ -1,77 +1,90 @@
 ---
-kind: task
-status: todo
+kind: stage
+status: in-progress
+base: fdd3bfd
 depends: [01-free-web-infrastructure]
 ---
 
-# Yandex web service
+# Yandex web
 
-## Task
+## Goal
 
-Add the unofficial Yandex web endpoint as an opt-in service. It is important for the Russian
+Add the unofficial Yandex web endpoint as an opt-in free service. It is important for the Russian
 audience because it covers ru/uk/tr and several CIS languages better than the other free services,
-but it is a scraped browser endpoint with no SLA and must stay a fallback.
+but it is a scraped browser endpoint with no SLA and must stay a fallback. The original node was a
+single task; it is split here into three children because the service and parser, the settings UI
+and translations, and the documentation each have their own acceptance.
 
-Use `doc/free-endpoints.md` §2 for the protocol, §8 for the rules, and §9 for the priority. The
-service is `yandex-web` and implements `TranslationService` with `requiresOptIn() == true`. It sends
-`POST https://api.browser.yandex.com/instaserp/translate` with
-`application/x-www-form-urlencoded` and the fields `text`, `brandID=int`, `statLang=<target>`,
-`targetLang=auto`, `locale=<target>`, `clid=2270494`, `disable=serp`, `use_llm_srv=0`. The endpoint
-expects a browser User-Agent (Chrome/YaBrowser); set it on this request only, overriding the common
-`AppInfo::userAgent()` from `NetworkManager::makeRequest()`, and document that this is protocol
-emulation, not a claim that the app is a browser. The response is a JSON array; the first element
-contains `text` and the detected language. A new pure parser extracts them, tolerates extra fields,
-and returns `BadResponse` on an unexpected shape.
+## What to do, what is touched
 
-The service uses `QueuedWebService` with a 750 ms pause and sends long text in 5000-character chunks
-sequentially inside one reply, restoring edge whitespace. The source language may be `auto`; map the
-internal codes to the Yandex form and declare only the codes with a known mapping; an unmapped
-language returns `UnsupportedLanguage` before any request. Errors: 429/403 and a rate-limit body
-become `RateLimited`; 5xx becomes `Network`; an HTML page or a blocked response becomes
-`ServiceUnavailable` without raw HTML; a timeout and `abort()` stop the request. The form body
-contains the text, so the error/log messages must not include the body, the URL query, or the text,
-and the browser User-Agent must not be logged as if it were a secret (it is not one, but keep the log
-short).
+- `01-yandex-web-service` (task, detailed): the pure `YandexWebParser`, `YandexWebService` with the
+  `POST` form protocol, the browser User-Agent for this request only, the `yandex-web` language
+  branch in `languages.cpp`, registration in `AppController`, fixtures and the new
+  `tst_yandexwebparser`/`tst_yandexwebservice`. No UI, translations or docs.
+- `02-yandex-web-settings` (task): the `Yandex` group in `SettingsDialog` with the unofficial
+  warning and the opt-in hint (no keys or URLs), `tst_settingsdialog`, and the 14 `.ts` files. No
+  service behaviour change.
+- `03-yandex-web-docs` (task): `doc/architecture.md`, `doc/free-endpoints.md` and the `AGENTS.md`
+  test counts/status. No code.
 
-The settings entry is a Yandex group with the free/unofficial warning and the opt-in hint; there are
-no keys or per-service URLs. Tests use fixtures and a local `QTcpServer`; a live smoke is manual
-because the endpoint may block an IP. The doc's note that QTranslate uses `engine=yandex` through
-Mozhi on failure is not this task: the fallback chain is `07-fallback-chain`, and Mozhi's engine
-selection already provides the proxy path.
+Decisions carried through all children:
+
+- The service is `yandex-web` and implements `TranslationService` with `requiresOptIn() == true`; it
+  stays off by default and is hidden/refused while `translation/allowFreeServices` is off.
+- `POST https://api.browser.yandex.com/instaserp/translate` with
+  `application/x-www-form-urlencoded` and the fields `text`, `brandID=int`, `statLang=<target>`,
+  `targetLang=auto`, `locale=<target>`, `clid=2270494`, `disable=serp`, `use_llm_srv=0`.
+- The endpoint expects a browser User-Agent (Chrome/YaBrowser). It is set on this request only,
+  after `NetworkManager::makeRequest()`, and documented as protocol emulation, not a claim that the
+  app is a browser; the common `AppInfo::userAgent()` for other services is unchanged.
+- The response is a JSON array; the first element contains `text` and the detected language in
+  `from`. Extra fields are tolerated; an unexpected shape is `BadResponse`.
+- The source may be `auto`. Internal codes are mapped to the Yandex form, only the codes with a
+  known mapping are declared, and an unmapped code returns `UnsupportedLanguage` before the request.
+  The protocol has no source-language field: every request sends `targetLang=auto`; the target is
+  sent as `statLang` and `locale`; the detected `from` is mapped back to the internal code.
+- 5000 UTF-16 code units per chunk via `TextChunker::split`; chunks are sent sequentially inside one
+  `QueuedWebService` slot with the 750 ms pause, and edge whitespace is restored.
+- Errors: a bare 429/403 and a rate-limit body → `RateLimited`; 5xx without a recognised body →
+  `Network`;
+  an HTML page, a captcha page or a blocked response → `ServiceUnavailable` without raw HTML; 413 →
+  `TooLong`; other non-2xx → `BadResponse`; timeout/`abort()` → `Timeout`/`Cancelled`.
+- No captcha solver, cookie harvesting or bypass of a block. The text, the body and the URL are
+  never logged; the browser User-Agent is not logged as if it were a secret.
+- Tests use fixtures and a local `QTcpServer`; a live smoke is manual because the endpoint may block
+  an IP. `README.md`, `README.ru.md`, `doc/handoff.md`, the root plan and `07-fallback-chain` are not
+  edited here; the final provider/fallback pass belongs to `07-fallback-chain`/the lead.
 
 ## Done when
 
-- `YandexWebService` and `YandexWebParser` exist under `src/services/`, are listed in
-  `CMakeLists.txt`, and return the internal `yandex-web` id with `requiresOptIn() == true`; the
-  service is not active by default.
-- `tst_yandexwebparser` covers a normal array response with `text` and a detected language, an empty
-  array, a missing/string-instead-of-array body, an HTML stub, and malformed JSON; each case produces
-  the documented error and a message without the text.
-- `tst_yandexwebservice` with a local `QTcpServer` verifies the POST path, the
-  `application/x-www-form-urlencoded` content type, every documented field including `brandID`,
-  `clid`, `disable`, and `use_llm_srv`, the browser User-Agent on this request, URL encoding of
-  spaces and non-ASCII text, and that other services' requests still use `AppInfo::userAgent()`.
-- A supported pair is sent with the mapped Yandex codes; `auto` is sent as the documented `targetLang`
-  form; an unmapped language returns `UnsupportedLanguage` before any request; the detected language
-  is mapped back to the internal code.
-- Long text is split into 5000-character chunks at paragraph/sentence boundaries and sent
-  sequentially with the 750 ms pause (`setRateLimitMs(0)` in tests); the result restores edge
-  whitespace and matches the concatenation of the chunk translations.
-- HTTP 429/403 and a rate-limit body return `RateLimited`; 5xx returns `Network`; an HTML/blocked
-  response returns `ServiceUnavailable` without raw HTML; a timeout and `abort()` finish with
-  `Timeout`/`Cancelled` and stop the request.
-- Requests to the host are serialized through `QueuedWebService`; a second translation waits for the
-  active one and for the pause; cancelling a queued request does not send it.
-- The settings dialog has a Yandex group with the free/unofficial warning; the opt-in gate hides or
-  refuses the service as described in `01-free-web-infrastructure`; `tst_settingsdialog` covers the
-  group.
-- `doc/architecture.md` §4.5/§4.9 and `doc/free-endpoints.md` §2/§8/§9 are updated; both READMEs list
-  Yandex web as an unofficial fallback; the manual live smoke is recorded as passed or as not
-  performed with the reason (the endpoint may return a captcha/403).
-- Debug and Release build without warnings; the full suite passes with the new tests; Windows is
-  recorded as not performed when MSVC is unavailable.
+- `01-yandex-web-service` is done: `YandexWebParser` and `YandexWebService` exist and are registered
+  behind the gate; the POST form fields, the browser User-Agent on this request only, the language
+  mapping, `auto`, 5000-unit chunks, the 750 ms pause, the classified errors and the message hygiene
+  are covered by `tst_yandexwebparser`, `tst_yandexwebservice` and `tst_languages`; Linux is 35 tests
+  and Windows would be 30.
+- `02-yandex-web-settings` is done: the Services page has a gate-aware `Yandex` group with the
+  unofficial warning and the opt-in hint, no key or URL field; `tst_settingsdialog` covers it; all 14
+  `.ts` files are complete and `tst_translations` passes.
+- `03-yandex-web-docs` is done: `doc/architecture.md`
+  §3.1/§3.2/§4.5/§4.7.5/§4.8/§4.9/§8/§4.14/§9.2, `doc/free-endpoints.md` §2/§8/§9 and `AGENTS.md`
+  describe the implemented service and the 30/35 counts; all relative links resolve.
+- The overall Yandex criteria hold: a supported target is sent as the mapped Yandex code; `auto` is
+  accepted and `targetLang=auto` is sent as documented; an unmapped language is refused before any
+  request; the detected language is mapped back; long text is split and paced; a bare 429/403, a
+  rate-limit body and HTML/blocked responses are clear and stop the request; official Google/DeepL
+  remain primary and the service is not enabled by default.
+- The manual live smoke is recorded as passed or as not performed with the reason (the endpoint may
+  return a captcha/403); Debug and Release build without warnings and the full suite passes; Windows
+  Debug/Release and its 30 tests are recorded as not performed (no MSVC).
 
-## Risks
+## Depends on
+
+`01-free-web-infrastructure` (the opt-in gate and `QueuedWebService`). The three children are
+sequential in the order above: `02-yandex-web-settings` depends on `01-yandex-web-service` for the
+service id and the gate; `03-yandex-web-docs` depends on both for the final behaviour and counts.
+`07-fallback-chain` depends on this node.
+
+## Risks and what is needed from the user
 
 - The endpoint is unofficial and browser-oriented. A browser User-Agent is required today, but the
   fields, the clid, or the response shape may change without notice; the parser must fail with a
@@ -80,8 +93,16 @@ selection already provides the proxy path.
 - The terms may restrict automated use. Keep the service opt-in, mark it unofficial, and do not make
   it the only translation method; the user must enable it explicitly.
 - The endpoint may block a datacenter or a country IP. The automated gate is the local-server test;
-  a live smoke is manual and its failure is a recorded result, not a code change.
-- The browser User-Agent is set per request; do not change `NetworkManager::makeRequest()` for all
-  services, because the free Google endpoint and the official APIs rely on the app User-Agent.
-- The doc gives no Yandex-specific chunk limit. The 5000-character chunk is a conservative
-  assumption; keep it in a named constant and record any measured limit from a live smoke.
+  a live smoke is manual and its failure is a recorded result, not a code change. The user may run a
+  short ru/uk/tr smoke when convenient; otherwise it is recorded as not performed.
+- The browser User-Agent is set per request; do not change `NetworkManager::makeRequest()` or
+  `AppInfo::userAgent()`, because the free Google endpoint and the official APIs rely on the app
+  User-Agent.
+- The doc gives no Yandex-specific chunk limit, and the 750 ms pause comes from
+  `doc/free-endpoints.md` §8. The 5000 UTF-16-unit chunk and the 750 ms pause stay named constants
+  and documented assumptions; record any measured limit from a live smoke.
+- The protocol has no source-language field; the request always sends `targetLang=auto`, and an
+  explicit source is validated while the endpoint detects the source itself. If a live smoke shows a
+  source field or different semantics, record it; do not guess silently.
+- Windows Debug/Release and its 30 tests are unavailable on this Linux machine; record them as not
+  performed, not as passed.
