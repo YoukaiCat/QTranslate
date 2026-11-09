@@ -102,6 +102,11 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
   are unofficial no-key endpoints. All are optional and gated by **Settings → Services → Allow free
   web services**; the unofficial ones may be rate-limited, change or stop working. Google and DeepL
   remain the primary providers.
+- **Fallback service** — one optional free web service that retries a failed request once
+  (**Settings → Services → Fallback service**). It is off by default, needs the free web services
+  gate, and is used only on a retryable failure (auth, quota, rate limit, network or timeout); it
+  never loops and the original error is shown when the fallback also fails. The text is sent to the
+  fallback service as well.
 - **OpenAI-compatible provider** — the default server is [OpenRouter](https://openrouter.ai)
   (`https://openrouter.ai/api/v1`). OpenRouter **requires a key**; it offers free models such as
   `openrouter/free` and paid models. Paste the key, keep or change the model, and press

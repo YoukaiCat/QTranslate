@@ -58,6 +58,13 @@ documentation is English. The migration to the tree roadmap and the English base
   `tst_yandexwebparser`, `tst_yandexwebservice`, `tst_bingwebparser`, `tst_bingwebservice`,
   `tst_reversoparser`, and `tst_reversoservice` are the new shared tests). Windows keeps 34 tests
   and was not run here (no MSVC).
+- Fallback: `translation/fallbackService` (off by default, one configured opt-in service) retries a
+  failed primary request once on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`,
+  `Network` or `Timeout`; success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and
+  `BadResponse` never fall back, there is no second hop, and a failed fallback returns the primary
+  error. The fallback result keeps its own `serviceId` and the primary cache key; changing the
+  fallback or turning the gate off clears the cache. The known cache-generation race remains (a
+  running fallback can cache its result after the clear; it also covers the mode/language setters).
 - Packaging: `packaging/linux/package.sh` builds the trixie `tar.gz`, `.deb`, AppImage, and
   `SHA256SUMS-linux.txt` in `qtranslate-trixie`; the `.deb` uses `dpkg-shlibdeps` (including
   `libsecret-1-0`/`libqt6dbus6` only when linked). `--target astra` builds
@@ -87,7 +94,8 @@ documentation is English. The migration to the tree roadmap and the English base
 - Release 0.12.0 is deferred by user decision on 2026-11-08. When it happens, the version bump, the
   README download links, and `doc/releases/0.12.0.md` are needed; the old 0.11.1 GitHub release is
   deleted then (user decision). The roadmap is in stage 3: the opt-in gate, the shared queue,
-  MyMemory, Mozhi, Yandex web, Bing web and Reverso are done; the Reverso stage acceptance is next.
+  MyMemory, Mozhi, Yandex web, Bing web and Reverso are done, and the fallback chain is implemented
+  (manager, settings/UI and docs); the fallback stage acceptance is next.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
