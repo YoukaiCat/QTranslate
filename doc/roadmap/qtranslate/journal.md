@@ -2,26 +2,25 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/07-fallback-chain/01-fallback-manager` — `in-progress`, detailed;
-the coordinator is running. The planner split `07-fallback-chain` into a stage with three children:
-`01-fallback-manager` (detailed, in progress), `02-fallback-settings-and-ui` and `03-fallback-docs`
-(docs, lead). The stage is `in-progress`, `base: 8d0efd7`. Stage `06-reverso` is closed `done` over
-`d2cdf3c..237579b` (`b50945a`, `04aab67`, `124c050`, `394063b`; lead pass `4913bf0`, fix
-`237579b`). Work is on `main` (matches the root `branch:`); the working tree has only the planner's
-map and this journal, nothing is pushed. Linux is 39/39, Windows 34 (derived, not run); the `.ts`
-count is 313 in every file and will move to 316 after the settings child. Stage
-`03-free-web-endpoints` is `in-progress`: `01-free-web-infrastructure`, `02-mymemory`, `03-mozhi`,
-`04-yandex-web`, `05-bing-web` and `06-reverso` are `done`; `07-fallback-chain` is in progress. Real
-deferred problem: an active reply can store a result fetched from the old instance/engine after
-`clearCache()` (cache-generation counter in `TranslationManager` plus a test; also covers
-`google.mode`, `deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a
-later shared-UI decision (Reverso has the same issue: it rejects `auto` with a clear message);
-Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations. Decisions: one configured
-fallback step, not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web`
-stays outside the gate; the Bing POST is urlencoded, not multipart; Reverso has six languages and no
-`auto`. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version
-bump, tag, push, or release). Next: run the manager child, then the settings/UI child, then the
-lead's docs child and the stage acceptance.
+Current node: `03-free-web-endpoints/07-fallback-chain/02-fallback-settings-and-ui` — `todo`, not
+formally detailed; the planner is about to detail it. `01-fallback-manager` is done as `ea1fdeb`; the
+stage `07-fallback-chain` is `in-progress`, `base: 8d0efd7`, with three children: `01-fallback-manager`
+(done), `02-fallback-settings-and-ui` (next) and `03-fallback-docs` (lead). Stage `06-reverso` is
+closed `done` over `d2cdf3c..237579b`. Work is on `main` (matches the root `branch:`); the working
+tree has the split stage plan and the two new child plans, nothing is pushed. Linux is 39/39, Windows
+34 (derived, not run); the `.ts` count is 313 in every file and will move to 316 after the settings
+child. Stage `03-free-web-endpoints` is `in-progress`: `01-free-web-infrastructure`, `02-mymemory`,
+`03-mozhi`, `04-yandex-web`, `05-bing-web` and `06-reverso` are `done`; `07-fallback-chain` is in
+progress. Real deferred problem: an active reply can store a result fetched from the old
+instance/engine after `clearCache()` (cache-generation counter in `TranslationManager` plus a test;
+also covers `google.mode`, `deepl.mode`, `deepl.englishVariant`; the fallback-in-flight case is the
+same class). MyMemory's Auto-detect rough edge remains a later shared-UI decision (Reverso has the
+same issue: it rejects `auto` with a clear message); Yandex's `zh-Hant`→`zh` and the absent `pt-PT`
+are recorded limitations. Decisions: one configured fallback step, not a literal multi-step chain;
+Bing and Reverso stay in the stage; DeepL `free-web` stays outside the gate; the Bing POST is
+urlencoded, not multipart; Reverso has six languages and no `auto`. Stage `02-linux` is `done`; the
+user deferred the 0.12.0 release on 2026-11-08 (no version bump, tag, push, or release). Next: detail
+the settings/UI child, run it, then the lead's docs child and the stage acceptance.
 
 ## Journal
 
@@ -135,3 +134,4 @@ lead's docs child and the stage acceptance.
 - 2026-11-09 — Lead final pass for Reverso. `README.md`/`README.ru.md` list Reverso as the fourth unofficial no-key endpoint (with the six-language limitation), `doc/handoff.md` marks Reverso implemented and records 34 Windows / 39 Linux with the two new shared tests, and the root plan says 34/39 and lists Reverso. No code, test, UI or `.ts` change. Next: the Reverso stage acceptance over `d2cdf3c..HEAD`; no push.
 - 2026-11-09 — Stage `03-free-web-endpoints/06-reverso` accepted and closed `done` over `d2cdf3c..237579b`; all four children are done (`b50945a`, `04aab67`, `124c050`, `394063b`; lead pass `4913bf0`). The acceptance repeated Linux Debug/Release 39/39 with no warnings and checked the parser, the six-language branch and 36 directions, the JSON body and string `"0"` values, the browser UA on this request only, 600 ms/5000 UTF-16, the error classification, message/log hygiene, the gate, the settings group, the 313 `.ts` messages, the docs/README counts and the links. One real defect was found and fixed in `237579b`: the shared `QNetworkAccessManager` cookie jar was not disabled, so a Reverso `Set-Cookie` could be replayed on later chunks; both cookie attributes are now `Manual`, and `tst_reversoservice::cookieIsolation` checks no jar read and no jar write. The acceptance also added the missing `error` field to the `free-endpoints.md` §4 response summary and cookie notes to `architecture.md`/`handoff.md`. Known gaps: the translation-count branch is defensive and unreachable from the wire; the `m_service`/`m_network` guards have no dedicated test; the gate scenario relies on the shared `TranslationManager` tests; the Services page was not checked visually by hand. Windows 34 and a live smoke were not performed. No real problems were left unfixed because of cost. Next: detail `07-fallback-chain`; no push.
 - 2026-11-09 — Planner split `07-fallback-chain` into a stage with three children: `01-fallback-manager` (detailed), `02-fallback-settings-and-ui` and `03-fallback-docs` (lead). The original task was too large for one acceptance (manager policy and trigger matrix, settings key/UI and 14 `.ts`, docs). Decisions: one manager-level hop, not code inside each service; fallback only on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`, `Network`, `Timeout`, including the pre-request `Auth` path; no fallback on success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` or `BadResponse`; the fallback must be a registered opt-in service, not the reply's primary, and never used while the gate is off; the fallback result keeps its own `serviceId`, is cached under the normal key, and the cache is cleared on a fallback or gate change; no smart secondary-language retry; the dialog gets a gate-aware **Fallback service** combo after the free-services group, `None` plus registered opt-in services; `AppController` builds the list; tests extend the existing targets (no new target; 39 Linux / 34 Windows); `.ts` 313 → 316; READMEs/`doc/handoff.md`/root plan stay lead-owned. The stage is `in-progress`, `base: 8d0efd7`; the manager child is `in-progress`; coordinator next; no push.
+- 2026-11-09 — Task `03-free-web-endpoints/07-fallback-chain/01-fallback-manager` done as `ea1fdeb`. Added the `fallbackService()`/`setFallbackService()` API, the `fallbackFor()` resolver at failure time, the `setFreeServicesAllowed()` move to `.cpp` with cache clearing on gate-off, and the one-hop `Reply` policy (`startWithError()` for pre-request `Auth`, `onPrimaryError()`, `onFallbackFinished()`, `m_fallbackStarted`): retry only on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`, `Network`, `Timeout`; no fallback on success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled`, `BadResponse`; no primary-as-fallback, no loop, no smart retry; the fallback result keeps its own `serviceId` and caches under the primary key; logs only ids and fixed error names. 20 new cases in `tst_translationmanager` (49/49). Verification: Linux Debug/Release 39/39, zero warnings; reviewer ran the full suite 4 times and valgrind with no invalid accesses or definite leaks. The reviewer's only remark was rejected: the cache generation race is the known `clearCache()` issue, not a local patch; recorded in the Outcome and the journal. Windows 34 and a live smoke were not performed. Next: detail `02-fallback-settings-and-ui`; no push.
