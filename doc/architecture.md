@@ -1326,6 +1326,8 @@ public:
     void setMaxLength(int length);                         // 20,000 by default; from settings — old plan stage 5
     bool freeServicesAllowed() const;                      // translation/allowFreeServices
     void setFreeServicesAllowed(bool allowed);             // gated services are refused while false
+    QString fallbackService() const;                       // translation/fallbackService
+    void setFallbackService(const QString &id);            // trimmed, lowercased; clears the cache
 
     // channel — the request "channel": Popup, MainWindow, or InPlace.
     // A new request in the same channel cancels the previous incomplete one.
@@ -1338,9 +1340,9 @@ signals:
 ```
 
 The manager keeps only a `QPointer` to the current reply of each channel: the caller owns the reply.
-`translate()` first checks the cache, then wraps the service reply in a `Reply` (caching and
-retry to the additional language); the manager's interface does not change. A cancelled reply
-arrives at the caller with `Cancelled`, and the UI does not show it.
+`translate()` first checks the cache, then wraps the service reply in a `Reply` (caching, the
+retry to the additional language and the one-hop fallback); the manager's interface does not change.
+A cancelled reply arrives at the caller with `Cancelled`, and the UI does not show it.
 
 Responsibilities:
 
@@ -1356,9 +1358,10 @@ Responsibilities:
 4. **Checks before the network.** Empty text (`EmptyText`), exceeding `maxLength` (`TooLong`),
    a service whose `requiresOptIn()` is true while `freeServicesAllowed()` is false
    (`ServiceUnavailable`, with a message pointing to Settings → Services), an unconfigured service
-   (`Auth`) — the error is returned immediately, without a request (via
-   `TranslationReply::createFinished`, that is, asynchronously). `AppController` keeps
-   `setFreeServicesAllowed()` in sync with `translation/allowFreeServices` and filters gated
+   (`Auth`) — no request is made. `EmptyText`, `TooLong` and the gate refusal are finished
+   asynchronously through `TranslationReply::createFinished`; the unconfigured case goes through the
+   managed `Reply` (`startWithError()`), so the fallback below can still apply. `AppController`
+   keeps `setFreeServicesAllowed()` in sync with `translation/allowFreeServices` and filters gated
    services from the pickers.
 
 MyMemory is the first real service with `requiresOptIn() == true` (§4.7.3); the gate logic above is
@@ -1385,6 +1388,22 @@ Reverso is the fifth real service with `requiresOptIn() == true` (§4.7.7); the 
 unchanged. `AppController` registers it after Bing, hides it from the pickers while the gate is off,
 and if `translation/service=reverso` is configured with the gate off, keeps Google active and logs
 that the configured service needs free web services to be enabled.
+
+The fallback is a `TranslationManager` policy, not a service feature: one configured opt-in service
+(`translation/fallbackService`, empty = no fallback) is tried once when the primary reply fails with a
+retryable error. `fallbackFor()` resolves the id at failure time, so a gate or fallback change made
+while the primary is in flight is honoured; it returns no fallback for an empty id, a gate that is
+off, an unregistered id, the reply's own service or a service without `requiresOptIn()`. The
+retryable triggers are `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`, `Network` and
+`Timeout`; success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and `BadResponse` never
+fall back. The pre-request `Auth` path (an unconfigured primary) goes through the same managed
+`Reply`, so "DeepL without a key → free service" works. A successful fallback keeps its own
+`serviceId` in the result and is cached under the primary's cache key; a failed fallback logs the
+error kind and returns the primary error. A reply retries at most once (no second hop, no loop), and
+the fallback never gets the smart secondary-language retry. `setFallbackService()` clears the cache
+on a change, and `setFreeServicesAllowed(false)` clears it as well; a running fallback can still
+cache its result after the clear (the known cache-generation defect in the roadmap journal). The log
+names the service and the error kind only — never the text, the URL, the body or the key.
 
 ### 4.10. Network and proxy — `NetworkManager`
 
@@ -1530,6 +1549,7 @@ File keys:
 | `translation/maxLength` | int | `20000` |
 | `translation/autoTranslateDelayMs` | int | `700` (0 — off) |
 | `translation/allowFreeServices` | bool | `false`; enables services whose `requiresOptIn()` is true |
+| `translation/fallbackService` | string | empty; `mymemory`, `mozhi`, `yandex-web`, `bing-web` or `reverso`; needs `translation/allowFreeServices` |
 | `google/mode` | `free` \| `cloud` | `free` |
 | `google/apiKey` | secret | empty |
 | `deepl/mode` | `api` \| `free-web` | `api`; the old `translation/service=deepl-web` migrates to `deepl` + `free-web` |
@@ -1554,6 +1574,13 @@ File keys:
 The `[mozhi]` group was added without a version bump: `settingsVersion` stays `1`, an old file
 without the group loads the defaults and is not rewritten, and an invalid instance or engine is
 replaced by the default with a fixed warning that does not echo the typed value.
+
+`translation/fallbackService` was added the same way: `settingsVersion` stays `1`, and the value is
+trimmed and lowercased. Empty means no fallback; an unknown or non-opt-in id is replaced by empty
+with a fixed warning that does not echo the typed value. The settings dialog's **Fallback service**
+combo lists the registered opt-in services and is disabled while the gate is off, while the
+remembered value is kept. `AppController` applies the key at startup and on a change and passes the
+registered opt-in services to the dialog.
 
 ### 4.12. Autostart — `Autostart`
 
@@ -2031,11 +2058,11 @@ are linked into separate test targets):
 | `tst_selectiongrabber_linux` | X11 selection capture, clipboard restore, Wayland clipboard read, timeouts (12 cases) |
 | `tst_windowactivation_linux` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus`, `_NET_WM_STATE_FULLSCREEN`, `_NET_WM_PID`, XTest paste, Wayland 0/false (13 cases) |
 | `tst_cli` | CLI parser, mutual exclusion, two-process forwarding, legacy wire (20 cases, Linux) |
-| `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption, the `[mozhi]` defaults, normalization and canonical round trip |
-| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate, the Mozhi group (instance, engine, effective value, warning and gate), the Yandex hint and its gate, the Bing group and its gate, the Reverso group and its gate (offscreen) |
+| `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption, the `[mozhi]` defaults, the fallback id normalization, and canonical round trip |
+| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate, the Mozhi group (instance, engine, effective value, warning and gate), the Yandex hint and its gate, the Bing group and its gate, the Reverso group and its gate, the fallback group and its gate (offscreen) |
 | `tst_secretprotector` | Windows: DPAPI round-trip, empty and corrupted data. Linux: libsecret token round-trip, `0600` fallback, capability probe, migration (7+1 in trixie, 8/8 on Astra) |
 | `tst_autostart` | Windows: `Run` command format. Linux: desktop entry quoting, `--minimized`, repair, removal (6 cases) |
-| `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language — on a fake service; the real MyMemory service refused while the gate is off |
+| `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language, the one-hop fallback policy (triggers, non-triggers, pre-request `Auth`, gate, no second hop, cache) — on a fake service; the real MyMemory service refused while the gate is off |
 | `tst_uilanguages` | Supported UI languages, normalization of `system`/regional tags, `.qm` resources |
 | `tst_translations` | Completeness of all `.ts` files, preservation of `%1`/`%2`, emoji and edge whitespace |
 

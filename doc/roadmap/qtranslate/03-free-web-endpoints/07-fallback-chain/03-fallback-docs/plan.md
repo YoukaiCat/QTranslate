@@ -1,6 +1,7 @@
 ---
 kind: task
-status: todo
+status: done
+detailed: true
 depends: [01-fallback-manager, 02-fallback-settings-and-ui]
 ---
 
@@ -73,3 +74,32 @@ and the handoff/root-plan update are the lead's final pass, not this task.
   it is a `TranslationManager` policy.
 - The READMEs, `doc/handoff.md` and the root plan are outside this task even though the stage's
   Done-when mentions them; the lead's final pass owns them. Do not start a release or push.
+
+## Outcome
+
+Done by the lead in this session; no code, test, UI, `.ts`, `AGENTS.md`, README, `doc/handoff.md`,
+root-plan or parent-stage file was touched.
+
+- `doc/architecture.md` §4.9: added `fallbackService()`/`setFallbackService()` to the class snippet,
+  described the `Reply` wrapper as carrying caching, the smart retry and the one-hop fallback, and
+  corrected the pre-network checks: `EmptyText`, `TooLong` and the gate refusal finish through
+  `createFinished()`, while an unconfigured primary goes through the managed `Reply`
+  (`startWithError()`). A new paragraph after the Reverso paragraph covers the policy: the key
+  (empty = no fallback), `fallbackFor()` resolving at failure time, the six retryable triggers, the
+  six non-triggers, the pre-request `Auth` path, the fallback's own `serviceId`, the primary cache
+  key, the primary error on a failed fallback, the one-hop/no-loop rule, the absent smart retry on
+  the fallback, both cache clears, the running-fallback cache caveat, and the log/message hygiene.
+- `doc/architecture.md` §4.11: added the `translation/fallbackService` key row (empty default; the
+  five opt-in ids; needs the gate) and a paragraph on the normalization, the fixed warning, the
+  `settingsVersion` 1, the dialog combo and the `AppController` wiring.
+- `doc/architecture.md` §8: the `tst_settings`, `tst_settingsdialog` and `tst_translationmanager`
+  rows now mention the fallback normalization, the fallback group and its gate, and the one-hop
+  policy matrix.
+- `doc/free-endpoints.md` §8 item 6: the fallback sentence is now the implemented policy, with the
+  trigger and non-trigger lists, the primary error, the gate, the cache rule and a pointer to
+  `doc/architecture.md` §4.9/§4.11; §9 records one configured hop and why it is not an arbitrary
+  chain.
+- Verification: `git diff --check` is clean; no Cyrillic was added to the English documents; all
+  relative links in the edited files resolve; `git diff --name-only` lists only the two documents
+  plus this task's plan and the journal. No live smoke was needed or run; Windows and Linux builds
+  were not repeated because the change is documentation-only.

@@ -285,7 +285,14 @@ remains unofficial.
    and Reverso (5000 UTF-16 code units); the rest — according to the service limits.
 5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,
    without a retry storm.
-6. Fallback: the official API → free web → Mozhi/another service; do not show raw HTML.
+6. Fallback: implemented as one configured opt-in hop in `TranslationManager` — a
+   `translation/fallbackService` service (`mymemory`, `mozhi`, `yandex-web`, `bing-web` or
+   `reverso`) is tried once when the primary fails with `Auth`, `QuotaExceeded`, `RateLimited`,
+   `ServiceUnavailable`, `Network` or `Timeout`; success, `EmptyText`, `TooLong`,
+   `UnsupportedLanguage`, `Cancelled` and `BadResponse` never fall back. A failed fallback returns
+   the primary error; the fallback is not retried and there is no second hop. The fallback needs
+   `translation/allowFreeServices`, and a change clears the cache. Do not show raw HTML. See
+   [`architecture.md`](architecture.md) §4.9 and §4.11.
 7. Privacy: the text goes to a third-party service; do not write text, keys, or cookies to the log.
 8. Tests: response fixtures and a local `QTcpServer`; real endpoints — manual smoke only, because
    they are live and unstable.
@@ -300,6 +307,11 @@ remains unofficial.
 5. **Bing web** — implemented: fragile auth and HTML, but the fourth opt-in free service.
 6. **Reverso** — implemented: niche, fewer languages, no automatic detection, but a clear gated
    fallback among its six languages.
+
+The fallback itself is implemented as one configured hop after the five services, not as an
+arbitrary chain: Google and DeepL free modes are modes of the same service, so they are not separate
+fallback links; Mozhi proxies to engines, so choosing Mozhi as the fallback already covers a
+different engine. The user picks one opt-in service; the primary stays the primary.
 
 ## 10. What not to do
 
