@@ -9,8 +9,9 @@ documentation is English. The migration to the tree roadmap and the English base
 ## Git
 
 - The GitHub repository was recreated on 2026-11-06; the new repository contains only the clean
-  local history and no pre-recreation commits, tags, or releases. Its only release is 0.11.1
-  (tag `v0.11.1`). The old repository's history and activity are gone.
+  local history and no pre-recreation commits, tags, or releases. Its releases are 0.11.1 (tag
+  `v0.11.1`) and 0.12.0 (tag `v0.12.0`, prepared on 2026-11-09; the tag CI publishes the assets).
+  The old repository's history and activity are gone.
 - The local history was rewritten on 2026-11-06 to replace a wrong author/committer address; all
   local commits use the GitHub noreply identity. The rewritten history was pushed to the new
   repository; no other push was made.
@@ -41,9 +42,8 @@ documentation is English. The migration to the tree roadmap and the English base
   keyring was unavailable during load. The final gate ran Astra Debug/Release 28/28 and trixie
   Debug/Release 28/28 with no warnings; the X11 matrix on the real `:0` session passed
   (Ctrl+Q/Ctrl+Shift+Q/Ctrl+W, tray, settings, autostart, CLI with and without an instance,
-  single-instance forwarding, clipboard restore). The stage criterion "published by CI on a tag" was
-  not performed: the user deferred the 0.12.0 release on 2026-11-08, and the stage was closed with
-  this recorded as not performed.
+  single-instance forwarding, clipboard restore). The stage criterion "published by CI on a tag" is
+  satisfied by release 0.12.0 on 2026-11-09: the tag CI builds and publishes the Linux artifacts.
 - X11 is the full target: `XGrabKey` hotkeys (with the Astra trusted-client step), XTest selection
   capture and paste, `_NET_ACTIVE_WINDOW`, XDG autostart, and per-user paths. Wayland is limited:
   the `GlobalShortcuts` portal where available, CLI commands, manual copying, clipboard-based
@@ -92,13 +92,15 @@ documentation is English. The migration to the tree roadmap and the English base
   configured sequence before an asynchronous portal bind completes or after a desktop reassignment.
   The `secretprotector.h` comment "keeps `l:` tokens unconditionally" is inaccurate for a
   no-libsecret build.
-- Release 0.12.0 is deferred by user decision on 2026-11-08. When it happens, the version bump, the
-  README download links, and `doc/releases/0.12.0.md` are needed; the old 0.11.1 GitHub release is
-  deleted then (user decision). The roadmap is past stage 3: the opt-in gate, the shared queue,
-  MyMemory, Mozhi, Yandex web, Bing web and Reverso are done, the fallback chain is implemented
-  (manager, settings/UI and docs), and stage 3 is accepted `done`. Stage 4
-  (`04-local-offline-translation`) stays `blocked` by the user's 2026-11-05 decision; the next stage
-  is `05-proofreading`.
+- Release 0.12.0 is published from `main` on 2026-11-09 by user decision; the version bump, the
+  README download links, `doc/releases/0.12.0.md` and this handoff are in the release commit. The
+  tag CI is the build gate; Windows Debug/Release and its 34 tests are not performed locally (no
+  MSVC). The old 0.11.1 GitHub release is deleted after 0.12.0 is published (user decision). The
+  roadmap is past stage 3: the opt-in gate, the shared queue, MyMemory, Mozhi, Yandex web, Bing web
+  and Reverso are done, the fallback chain is implemented (manager, settings/UI and docs), and stage
+  3 is accepted `done`. Stage 4 (`04-local-offline-translation`) stays `blocked` by the user's
+  2026-11-05 decision; the next stage is `05-proofreading`, currently `blocked` on three user
+  decisions recorded in its plan.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
@@ -157,6 +159,15 @@ documentation is English. The migration to the tree roadmap and the English base
     the tag CI built setup 11 176 182 bytes, ZIP 13 797 473 bytes and the unlisted
     `SHA256SUMS.txt`.
   - CI run of the tag: https://github.com/youkaicat/QTranslate/actions/runs/42303477455
+- `v0.12.0` — prepared on 2026-11-09 from `main`; the tag CI publishes the Windows installer and
+  ZIP plus the Linux `tar.gz`, `.deb` and AppImage and both checksum files.
+  - Linux support (X11 full, Wayland limited), free web providers (MyMemory, Mozhi, Yandex web,
+    Bing web, Reverso), the opt-in gate and the one-hop fallback service, the fullscreen hotkey
+    pause from 0.11.1, the cache-generation fix, and the English documentation baseline.
+  - Local Linux Debug/Release 39/39 with no warnings; `--version` prints `QTranslate 0.12.0`.
+    Windows Debug/Release and its 34 tests were not performed (no MSVC); the tag CI is the build
+    gate.
+  - Release notes: [`releases/0.12.0.md`](releases/0.12.0.md).
 
 ## Localization (old stage 12, completed)
 
@@ -370,14 +381,22 @@ the commit the user personally tested; it is three commits after `v0.11.0` (`a64
 User decision (2026-11-08): leave 0.11.1 exactly as published; do not re-tag or re-release it.
 Releases are tag-driven. When 0.12.0 is published, delete the old 0.11.1 GitHub release.
 
-## Next release
+## Release 0.12.0 (2026-11-09)
 
-**0.12.0 is deferred by user decision on 2026-11-08**; the Linux stage is done and stage 3 is in
-progress. When it is approved, it comes from `main` with the version and scope agreed again. It
-follows the same release flow: version bump, `doc/releases/0.12.0.md`, README links, local checks
-where possible, tag CI as the build gate, and an explicit user approval before the push. The 0.11.1
-branch is deleted; do not recreate it. When 0.12.0 is published, delete the old 0.11.1 GitHub
-release.
+The user asked for the release in the previous session and confirmed it on 2026-11-09 after the
+journal's earlier 2026-11-08 deferral. 0.12.0 comes from `main`; the release commit bumps the
+version in `CMakeLists.txt` and `resources/qtranslate.rc`, adds `doc/releases/0.12.0.md` and updates
+both READMEs, this handoff and the roadmap journal.
+
+1. Local Linux Debug/Release: 39/39 with no warnings under `xvfb-run -a`; `--version` prints
+   `QTranslate 0.12.0`.
+2. Windows Debug/Release, `package.ps1` and the installer were not performed (no MSVC); the tag CI
+   is the build gate. No local artifacts are uploaded manually.
+3. `main` and the annotated tag `v0.12.0` are pushed; the CI `linux` job builds the trixie `tar.gz`,
+   `.deb` and AppImage, the `windows` job builds the installer and ZIP, and the `release` job
+   publishes all of them with `SHA256SUMS.txt`/`SHA256SUMS-linux.txt` (unlisted).
+4. When the release is published, delete the old 0.11.1 GitHub release (user decision).
+5. The next milestone is stage 5 (`05-proofreading`), currently blocked on three user decisions.
 
 ## User rules
 

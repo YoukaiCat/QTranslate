@@ -6,9 +6,8 @@ Lightweight desktop translator. It lives in the system tray, translates the text
 selected in any application with a global hotkey, and can replace the selection with the
 translation directly in the active input field.
 
-> **Status:** 0.11.0 released. The Windows installer and the portable archive are available.
-> See the [0.11.0 release notes](doc/releases/0.11.0.md) for the changes.
-> Linux support is implemented on `main`; the Linux packages ship with 0.12.0.
+> **Status:** 0.12.0 released. The Windows installer, the portable archive, and the Linux packages
+> are available. See the [0.12.0 release notes](doc/releases/0.12.0.md) for the changes.
 
 **English** | [Русский](README.ru.md)
 
@@ -48,18 +47,21 @@ translation directly in the active input field.
 
 The latest build is on the [Releases](https://github.com/youkaicat/QTranslate/releases/latest) page:
 
-- **[`qtranslate-0.11.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.11.0/qtranslate-0.11.0-win64-setup.exe)**. Installs QTranslate for the current user
+- **[`qtranslate-0.12.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-win64-setup.exe)**. Installs QTranslate for the current user
   without administrator rights; by default it creates a Start menu shortcut and enables autostart,
   with an optional desktop shortcut. It also adds an uninstaller. Uninstalling keeps the settings
   in `%APPDATA%\qtranslate`.
-- **[`qtranslate-0.11.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.11.0/qtranslate-0.11.0-win64.zip)**. Extract it and run `bin\qtranslate.exe`;
+- **[`qtranslate-0.12.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-win64.zip)**. Extract it and run `bin\qtranslate.exe`;
   no installation or administrator rights are needed. The archive is self-contained: Qt and the
   MSVC runtime are included.
 The installer is not code-signed yet, so Windows SmartScreen may show a warning.
 
-The Linux packages are built for Debian 13 (trixie) and are published with the next release (0.12.0):
-`qtranslate-<version>-linux-x86_64.tar.gz`, `qtranslate_<version>_amd64.deb`, and
-`qtranslate-<version>-x86_64.AppImage` (use `--appimage-extract-and-run` when FUSE is unavailable).
+The Linux packages are built for Debian 13 (trixie):
+**[`qtranslate-0.12.0-linux-x86_64.tar.gz`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-linux-x86_64.tar.gz)**,
+**[`qtranslate_0.12.0_amd64.deb`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate_0.12.0_amd64.deb)**,
+and
+**[`qtranslate-0.12.0-x86_64.AppImage`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-x86_64.AppImage)**
+(use `--appimage-extract-and-run` when FUSE is unavailable).
 They require glibc 2.38 or newer and do not run on Astra Linux 1.8.7. Astra Linux is supported through
 a separate native build, `qtranslate-<version>-linux-x86_64-astra.tar.gz` and
 `qtranslate_<version>+astra1_amd64.deb`; those are local verification artifacts and are not published
