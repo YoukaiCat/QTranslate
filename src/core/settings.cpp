@@ -205,6 +205,60 @@ void normalize(AppSettings &settings)
         settings.mozhi.engine = normalizedMozhiEngine(settings.mozhi.engine);
     }
 
+    // The proofreading values come from a configuration file, so the warnings
+    // are fixed and never echo the typed value.
+    const QString provider = settings.proofreading.provider.trimmed().toLower();
+    if (!proofreadingProviderIds().contains(provider)) {
+        qCWarning(lcSettings) << "Proofreading provider is not supported; using the default";
+        settings.proofreading.provider = defaults.proofreading.provider;
+    } else {
+        settings.proofreading.provider = provider;
+    }
+
+    const QString language = settings.proofreading.language.trimmed();
+    if (language != Languages::autoCode() && !Languages::isKnown(language)) {
+        qCWarning(lcSettings) << "Proofreading language is not known; using auto";
+        settings.proofreading.language = defaults.proofreading.language;
+    } else {
+        settings.proofreading.language = language;
+    }
+
+    const QString endpoint = settings.proofreading.endpoint.trimmed();
+    if (endpoint.isEmpty()) {
+        settings.proofreading.endpoint.clear();
+    } else if (!isValidProofreadingEndpoint(endpoint)) {
+        qCWarning(lcSettings)
+            << "Proofreading endpoint is not an absolute http(s) URL; using the provider default";
+        settings.proofreading.endpoint.clear();
+    } else {
+        settings.proofreading.endpoint = normalizedProofreadingEndpoint(endpoint);
+    }
+
+    // An empty list means all categories, so a hand-edited `categories=` cannot
+    // silently disable checking. Unknown ids are dropped and the known ones are
+    // stored in the canonical order.
+    const QStringList knownCategories = proofreadingCategoryIds();
+    QStringList categories;
+    for (const QString &item : settings.proofreading.categories) {
+        for (const QString &part : item.split(QLatin1Char(','))) {
+            const QString id = part.trimmed().toLower();
+            if (knownCategories.contains(id) && !categories.contains(id))
+                categories << id;
+        }
+    }
+    if (categories.isEmpty()) {
+        qCWarning(lcSettings) << "Proofreading categories are empty or unknown; using all";
+        categories = knownCategories;
+    } else {
+        QStringList ordered;
+        for (const QString &id : knownCategories) {
+            if (categories.contains(id))
+                ordered << id;
+        }
+        categories = ordered;
+    }
+    settings.proofreading.categories = categories;
+
     settings.network.proxyMode =
         choice(settings.network.proxyMode, defaults.network.proxyMode,
                {"none", "system", "manual"});
@@ -235,6 +289,10 @@ AppSettings::AppSettings()
     translation.secondaryLang = translation.primaryLang == QStringLiteral("en")
         ? QStringLiteral("ru")
         : QStringLiteral("en");
+
+    // A member initializer cannot call a helper, so the explicit four are set
+    // here; a fresh AppSettings and a loaded file then agree.
+    proofreading.categories = proofreadingCategoryIds();
 }
 
 QStringList mozhiEngineIds()
@@ -253,6 +311,21 @@ QStringList fallbackServiceIds()
         QStringLiteral("mymemory"),   QStringLiteral("mozhi"),
         QStringLiteral("yandex-web"), QStringLiteral("bing-web"),
         QStringLiteral("reverso"),
+    };
+}
+
+QStringList proofreadingProviderIds()
+{
+    return {QStringLiteral("languagetool")};
+}
+
+QStringList proofreadingCategoryIds()
+{
+    return {
+        QStringLiteral("spelling"),
+        QStringLiteral("grammar"),
+        QStringLiteral("punctuation"),
+        QStringLiteral("style"),
     };
 }
 
@@ -287,6 +360,29 @@ QString normalizedMozhiEngine(const QString &engine)
     if (mozhiEngineIds().contains(id))
         return id;
     return MozhiSettings{}.engine;
+}
+
+bool isValidProofreadingEndpoint(const QString &endpoint)
+{
+    const QString text = endpoint.trimmed();
+    if (text.isEmpty())
+        return true;
+    // Not fromUserInput(): a bare host or malformed text must not be guessed
+    // into an http URL and silently sent somewhere the user did not confirm.
+    const QUrl url(text, QUrl::StrictMode);
+    return url.isValid()
+        && (url.scheme() == QLatin1String("http")
+            || url.scheme() == QLatin1String("https"))
+        && !url.host().isEmpty() && url.userInfo().isEmpty() && !url.hasQuery()
+        && !url.hasFragment();
+}
+
+QString normalizedProofreadingEndpoint(const QString &endpoint)
+{
+    const QString text = endpoint.trimmed();
+    if (text.isEmpty() || !isValidProofreadingEndpoint(text))
+        return {};
+    return QUrl(text, QUrl::StrictMode).toString(QUrl::FullyEncoded);
 }
 
 SettingsStore::SettingsStore(QObject *parent)
@@ -435,6 +531,31 @@ void SettingsStore::load()
         settings.value(QStringLiteral("model"), loaded.llm.model).toString();
     settings.endGroup();
 
+    settings.beginGroup(QStringLiteral("proofreading"));
+    loaded.proofreading.enabled =
+        settings.value(QStringLiteral("enabled"), loaded.proofreading.enabled).toBool();
+    loaded.proofreading.provider =
+        settings.value(QStringLiteral("provider"), loaded.proofreading.provider).toString();
+    loaded.proofreading.language =
+        settings.value(QStringLiteral("language"), loaded.proofreading.language).toString();
+    loaded.proofreading.endpoint =
+        settings.value(QStringLiteral("endpoint"), loaded.proofreading.endpoint).toString();
+    loaded.proofreading.apiKey = readSecret(settings, QStringLiteral("apiKey"), m_codec);
+    loaded.proofreading.categories =
+        settings.value(QStringLiteral("categories"), loaded.proofreading.categories)
+            .toStringList();
+    loaded.proofreading.checkBeforeTranslation =
+        settings.value(QStringLiteral("checkBeforeTranslation"),
+                       loaded.proofreading.checkBeforeTranslation)
+            .toBool();
+    loaded.proofreading.autoReplace =
+        settings.value(QStringLiteral("autoReplace"), loaded.proofreading.autoReplace).toBool();
+    loaded.proofreading.allowOnlineServices =
+        settings.value(QStringLiteral("allowOnlineServices"),
+                       loaded.proofreading.allowOnlineServices)
+            .toBool();
+    settings.endGroup();
+
     settings.beginGroup(QStringLiteral("network"));
     loaded.network.proxyMode =
         settings.value(QStringLiteral("proxyMode"), loaded.network.proxyMode).toString();
@@ -562,6 +683,21 @@ void SettingsStore::save(const AppSettings &settings)
     writeSecret(out, QStringLiteral("apiKey"), normalized.llm.apiKey,
                 old.llm.apiKey, m_codec);
     out.setValue(QStringLiteral("model"), normalized.llm.model);
+    out.endGroup();
+
+    out.beginGroup(QStringLiteral("proofreading"));
+    out.setValue(QStringLiteral("enabled"), normalized.proofreading.enabled);
+    out.setValue(QStringLiteral("provider"), normalized.proofreading.provider);
+    out.setValue(QStringLiteral("language"), normalized.proofreading.language);
+    out.setValue(QStringLiteral("endpoint"), normalized.proofreading.endpoint);
+    writeSecret(out, QStringLiteral("apiKey"), normalized.proofreading.apiKey,
+                old.proofreading.apiKey, m_codec);
+    out.setValue(QStringLiteral("categories"), normalized.proofreading.categories);
+    out.setValue(QStringLiteral("checkBeforeTranslation"),
+                 normalized.proofreading.checkBeforeTranslation);
+    out.setValue(QStringLiteral("autoReplace"), normalized.proofreading.autoReplace);
+    out.setValue(QStringLiteral("allowOnlineServices"),
+                 normalized.proofreading.allowOnlineServices);
     out.endGroup();
 
     out.beginGroup(QStringLiteral("network"));

@@ -67,6 +67,20 @@ struct LlmSettings
     QString model = QStringLiteral("openrouter/free");
 };
 
+struct ProofreadingSettings
+{
+    bool enabled = false;
+    QString provider = QStringLiteral("languagetool"); // the only id of this stage
+    QString language = QStringLiteral("auto");
+    QString endpoint; // empty: the provider default
+    QString apiKey;
+    // proofreadingCategoryIds(); initialised in AppSettings' constructor.
+    QStringList categories;
+    bool checkBeforeTranslation = false;
+    bool autoReplace = false;
+    bool allowOnlineServices = false;
+};
+
 struct NetworkSettings
 {
     QString proxyMode = QStringLiteral("system"); // none | system | manual
@@ -104,6 +118,7 @@ struct AppSettings
     DeepLSettings deepl;
     MozhiSettings mozhi;
     LlmSettings llm;
+    ProofreadingSettings proofreading;
     NetworkSettings network;
     PopupSettings popup;
     MainWindowSettings mainWindow;
@@ -120,9 +135,18 @@ QStringList mozhiEngineIds();
 // services registered with requiresOptIn(); the manager still ignores an
 // unknown id at request time.
 QStringList fallbackServiceIds();
+// The settings-layer guard for proofreading/provider: only ids that a
+// registered service can answer are listed. proofreadingCategoryIds() is the
+// canonical category order.
+QStringList proofreadingProviderIds();
+QStringList proofreadingCategoryIds();
 bool isValidMozhiInstance(const QString &instance);
 QString normalizedMozhiInstance(const QString &instance);
 QString normalizedMozhiEngine(const QString &engine);
+// An empty endpoint is valid: the provider default applies. Otherwise an
+// absolute http(s) URL with a host, without user info, a query or a fragment.
+bool isValidProofreadingEndpoint(const QString &endpoint);
+QString normalizedProofreadingEndpoint(const QString &endpoint);
 
 // Injected by the application so that core/settings stays free of WinAPI.
 // Without a codec secrets are not stored at all.

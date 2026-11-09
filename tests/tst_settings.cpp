@@ -117,6 +117,22 @@ private slots:
         QCOMPARE(settings.llm.baseUrl, QStringLiteral("https://openrouter.ai/api/v1"));
         QVERIFY(settings.llm.apiKey.isEmpty());
         QCOMPARE(settings.llm.model, QStringLiteral("openrouter/free"));
+
+        QVERIFY(!settings.proofreading.enabled);
+        QCOMPARE(settings.proofreading.provider, QStringLiteral("languagetool"));
+        QCOMPARE(proofreadingProviderIds(),
+                 QStringList({QStringLiteral("languagetool")}));
+        QCOMPARE(settings.proofreading.language, Languages::autoCode());
+        QVERIFY(settings.proofreading.endpoint.isEmpty());
+        QVERIFY(settings.proofreading.apiKey.isEmpty());
+        QCOMPARE(settings.proofreading.categories, proofreadingCategoryIds());
+        QCOMPARE(settings.proofreading.categories,
+                 QStringList({QStringLiteral("spelling"), QStringLiteral("grammar"),
+                              QStringLiteral("punctuation"), QStringLiteral("style")}));
+        QVERIFY(!settings.proofreading.checkBeforeTranslation);
+        QVERIFY(!settings.proofreading.autoReplace);
+        QVERIFY(!settings.proofreading.allowOnlineServices);
+
         QCOMPARE(settings.network.proxyMode, QStringLiteral("system"));
         QCOMPARE(settings.network.timeoutMs, 10000);
         QCOMPARE(settings.popup.width, 460);
@@ -331,6 +347,240 @@ private slots:
         QVERIFY(!ini.contains("deepl-secret"));
         QVERIFY(!ini.contains("llm-secret"));
         QVERIFY(!ini.contains("proxy-secret"));
+    }
+
+    void proofreadingEndpointIsNormalized_data()
+    {
+        QTest::addColumn<QString>("input");
+        QTest::addColumn<QString>("expected");
+        QTest::addColumn<bool>("valid");
+
+        const QString empty;
+        const QString defaultCheckUrl = QStringLiteral("https://api.languagetool.org/v2/check");
+        QTest::newRow("empty") << QString() << empty << true;
+        QTest::newRow("whitespace") << QStringLiteral("   ") << empty << true;
+        QTest::newRow("default check url") << defaultCheckUrl << defaultCheckUrl << true;
+        QTest::newRow("self-hosted")
+            << QStringLiteral("http://127.0.0.1:8081/v2/check")
+            << QStringLiteral("http://127.0.0.1:8081/v2/check") << true;
+        QTest::newRow("surrounding whitespace")
+            << QStringLiteral("  https://host/v2/check  ")
+            << QStringLiteral("https://host/v2/check") << true;
+        QTest::newRow("bare host") << QStringLiteral("api.languagetool.org/v2/check")
+                                   << empty << false;
+        QTest::newRow("ftp") << QStringLiteral("ftp://host/v2/check") << empty << false;
+        QTest::newRow("no host") << QStringLiteral("https://") << empty << false;
+        QTest::newRow("bad port") << QStringLiteral("https://host:bad/v2/check") << empty
+                                  << false;
+        QTest::newRow("user and password") << QStringLiteral("https://user:pass@host/v2/check")
+                                           << empty << false;
+        QTest::newRow("user") << QStringLiteral("https://user@host/v2/check") << empty
+                              << false;
+        QTest::newRow("query") << QStringLiteral("https://host/v2/check?language=en")
+                               << empty << false;
+        QTest::newRow("fragment") << QStringLiteral("https://host/v2/check#fragment")
+                                  << empty << false;
+    }
+
+    void proofreadingEndpointIsNormalized()
+    {
+        QFETCH(QString, input);
+        QFETCH(QString, expected);
+        QFETCH(bool, valid);
+
+        QCOMPARE(isValidProofreadingEndpoint(input), valid);
+        QCOMPARE(normalizedProofreadingEndpoint(input), expected);
+    }
+
+    void proofreadingRoundTrip()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        SettingsStore store(path, fakeCodec());
+        AppSettings settings = store.current();
+        settings.proofreading.enabled = true;
+        settings.proofreading.provider = QStringLiteral("languagetool");
+        settings.proofreading.language = QStringLiteral("ru");
+        settings.proofreading.endpoint = QStringLiteral("https://lt.example.invalid/v2/check");
+        settings.proofreading.apiKey = QStringLiteral("proofreading-secret");
+        settings.proofreading.categories =
+            QStringList({QStringLiteral("style"), QStringLiteral("grammar")});
+        settings.proofreading.checkBeforeTranslation = true;
+        settings.proofreading.autoReplace = true;
+        settings.proofreading.allowOnlineServices = true;
+        store.save(settings);
+
+        SettingsStore loaded(path, fakeCodec());
+        loaded.load();
+        const AppSettings &result = loaded.current();
+        QCOMPARE(result.proofreading.enabled, true);
+        QCOMPARE(result.proofreading.provider, QStringLiteral("languagetool"));
+        QCOMPARE(result.proofreading.language, QStringLiteral("ru"));
+        QCOMPARE(result.proofreading.endpoint,
+                 QStringLiteral("https://lt.example.invalid/v2/check"));
+        QCOMPARE(result.proofreading.apiKey, QStringLiteral("proofreading-secret"));
+        QCOMPARE(result.proofreading.categories,
+                 QStringList({QStringLiteral("grammar"), QStringLiteral("style")}));
+        QVERIFY(result.proofreading.checkBeforeTranslation);
+        QVERIFY(result.proofreading.autoReplace);
+        QVERIFY(result.proofreading.allowOnlineServices);
+        QCOMPARE(result.settingsVersion, 1);
+
+        // The INI itself holds the group and a protected key, never the secret.
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            QVERIFY(raw.childGroups().contains(QStringLiteral("proofreading")));
+            QCOMPARE(raw.value(QStringLiteral("proofreading/provider")).toString(),
+                     QStringLiteral("languagetool"));
+            QVERIFY(!raw.value(QStringLiteral("proofreading/apiKey")).toString().isEmpty());
+        }
+        const QByteArray ini = readFile(path);
+        QVERIFY(ini.contains("[proofreading]"));
+        QVERIFY(!ini.contains("proofreading-secret"));
+    }
+
+    void proofreadingValuesAreNormalized()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("proofreading/provider"),
+                         QStringLiteral("  LanguageTool "));
+            raw.setValue(QStringLiteral("proofreading/language"), QStringLiteral("xx"));
+            raw.setValue(
+                QStringLiteral("proofreading/endpoint"),
+                QStringLiteral("https://user:secret@example.invalid/v2/check?key=secret"));
+            raw.setValue(QStringLiteral("proofreading/categories"),
+                         QStringLiteral(" style, SPELLING ,unknown,grammar"));
+            raw.sync();
+        }
+
+        SettingsStore store(path, fakeCodec());
+        QTest::ignoreMessage(QtWarningMsg,
+                             "Proofreading language is not known; using auto");
+        QTest::ignoreMessage(
+            QtWarningMsg,
+            "Proofreading endpoint is not an absolute http(s) URL; using the provider default");
+        store.load();
+        const AppSettings &result = store.current();
+        QCOMPARE(result.settingsVersion, 1);
+        QCOMPARE(result.proofreading.provider, QStringLiteral("languagetool"));
+        QCOMPARE(result.proofreading.language, Languages::autoCode());
+        QVERIFY(result.proofreading.endpoint.isEmpty());
+        QCOMPARE(result.proofreading.categories,
+                 QStringList({QStringLiteral("spelling"), QStringLiteral("grammar"),
+                              QStringLiteral("style")}));
+    }
+
+    void proofreadingProviderIsNormalized()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("proofreading/provider"),
+                         QStringLiteral(" unknown-provider "));
+            raw.sync();
+        }
+
+        SettingsStore store(path, fakeCodec());
+        const QString warning =
+            QStringLiteral("Proofreading provider is not supported; using the default");
+        QTest::ignoreMessage(QtWarningMsg, qPrintable(warning));
+        store.load();
+        QCOMPARE(store.current().proofreading.provider, QStringLiteral("languagetool"));
+        QCOMPARE(store.current().settingsVersion, 1);
+    }
+
+    void proofreadingCategoriesFallBackToAll()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        for (const QString &value :
+             {QStringLiteral("unknown,unknown-2"), QString()}) {
+            {
+                QSettings raw(path, QSettings::IniFormat);
+                raw.setValue(QStringLiteral("settingsVersion"), 1);
+                raw.setValue(QStringLiteral("proofreading/categories"), value);
+                raw.sync();
+            }
+
+            SettingsStore store(path, fakeCodec());
+            const QString warning =
+                QStringLiteral("Proofreading categories are empty or unknown; using all");
+            QTest::ignoreMessage(QtWarningMsg, qPrintable(warning));
+            store.load();
+            QCOMPARE(store.current().settingsVersion, 1);
+            QCOMPARE(store.current().proofreading.categories, proofreadingCategoryIds());
+            QCOMPARE(proofreadingCategoryIds(),
+                     QStringList({QStringLiteral("spelling"), QStringLiteral("grammar"),
+                                  QStringLiteral("punctuation"), QStringLiteral("style")}));
+        }
+    }
+
+    void proofreadingGroupIsOptional()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("app/startMinimized"), false);
+            raw.sync();
+        }
+        const QByteArray before = readFile(path);
+        QVERIFY(!before.isEmpty());
+        QVERIFY(!before.contains("[proofreading]"));
+
+        SettingsStore store(path, fakeCodec());
+        store.load();
+        QCOMPARE(store.current().settingsVersion, 1);
+        QCOMPARE(store.current().general.startMinimized, false);
+        QCOMPARE(store.current().proofreading.provider, QStringLiteral("languagetool"));
+        QCOMPARE(store.current().proofreading.categories, proofreadingCategoryIds());
+        // Loading an old file must not rewrite it.
+        QCOMPARE(readFile(path), before);
+    }
+
+    void proofreadingChangesDoNotTouchTranslation()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        SettingsStore store(path, fakeCodec());
+        AppSettings settings = store.current();
+        settings.translation.service = QStringLiteral("deepl");
+        settings.translation.allowFreeServices = true;
+        settings.translation.fallbackService = QStringLiteral("mozhi");
+        settings.translation.maxLength = 5000;
+        store.save(settings);
+
+        settings = store.current();
+        settings.proofreading.enabled = true;
+        settings.proofreading.provider = QStringLiteral("languagetool");
+        settings.proofreading.allowOnlineServices = true;
+        store.save(settings);
+
+        SettingsStore loaded(path, fakeCodec());
+        loaded.load();
+        QCOMPARE(loaded.current().translation.service, QStringLiteral("deepl"));
+        QVERIFY(loaded.current().translation.allowFreeServices);
+        QCOMPARE(loaded.current().translation.fallbackService, QStringLiteral("mozhi"));
+        QCOMPARE(loaded.current().translation.maxLength, 5000);
+        QVERIFY(loaded.current().proofreading.enabled);
+        QVERIFY(loaded.current().proofreading.allowOnlineServices);
     }
 
     void migratesLegacyDeepLWebService()

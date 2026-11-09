@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -314,3 +314,65 @@ and no provider is registered yet, so the transient state is harmless).
   add a provider fallback.
 - **Windows is not built here.** Record the Windows count and build as not performed, never as
   passed.
+
+## Outcome
+
+Done. The provider-independent proofreading layer lives in `qtranslate_core`, has no provider, no
+network and no UI code, and is proven with a local fake service. LanguageTool is the only provider id
+of this stage; Yandex Speller and Hunspell/Nuspell are not present anywhere.
+
+- Files: new `src/core/proofreadingtypes.h`, `src/core/proofreadingservice.{h,cpp}`,
+  `src/core/proofreadingmanager.{h,cpp}` and `tests/tst_proofreadingmanager.cpp`; modified
+  `src/core/textchunker.{h,cpp}`, `src/core/settings.{h,cpp}`, `CMakeLists.txt`,
+  `tests/tst_settings.cpp`, `tests/tst_textchunker.cpp` and `tests/CMakeLists.txt`. No `.ts`, UI,
+  `doc/`, README, `AGENTS.md`, `doc/handoff.md`, root-plan or later-child file changed;
+  `grep -c '<message' i18n/qtranslate_ru_RU.ts` stayed 316.
+- Types: `ProofreadingIssue`/`ProofreadingResult`/`ProofreadingRequest` as `proofreading.md` §4, with
+  `serviceId`, `error` and `errorMessage` reusing `TranslationError`; `offset`/`length` documented as
+  UTF-16 code units and `categories` as "empty = all four"; both value types are metatypes.
+- Reply: `ProofreadingReply` is statement-for-statement the same as `TranslationReply` — one
+  `finished()`, never from inside `check()`, `abort()` finishes `Cancelled` and then calls
+  `abortImpl()`, a repeated `finish()` is ignored, `createFinished()` uses `Qt::QueuedConnection`.
+- Manager: `Channel::MainWindow`/`InPlace`, registry mirroring `TranslationManager` (first registered
+  is active, ownership taken, unknown id ignored with a warning), `onlineServicesAllowed()` gate, the
+  pre-network refusals in the planned order (`EmptyText`, no provider, `Auth`, the gate's
+  `ServiceUnavailable`, `UnsupportedLanguage`), the per-channel `QPointer` cancellation, `cancel()`
+  and `cancelAll()`. A service that returns no reply at all yields `BadResponse` instead of a null
+  pointer. Logging uses `qtranslate.proofreading` and carries only the provider id, the channel, the
+  language/categories, the error kind and the elapsed time; success and `Cancelled` log at debug
+  level, real errors at warning level.
+- `TextChunker::splitWithOffsets()` is a thin loop over the unchanged `split()` with a running
+  UTF-16 offset, so the parts join back to the input and `offset + text.size()` is the next offset.
+- Settings: `ProofreadingSettings` sits after `llm`, so the INI order is `[proofreading]` before
+  `[network]`; the secret goes through `readSecret`/`writeSecret` with the old value, like
+  `llm.apiKey`. `proofreadingCategoryIds()`/`proofreadingProviderIds()` are the single source of the
+  id strings (`{"languagetool"}`), and `isValidProofreadingEndpoint()`/
+  `normalizedProofreadingEndpoint()` are the single endpoint rule: an empty value is valid and means
+  the provider default, otherwise an absolute `http(s)` URL with a host and without user info, query
+  or fragment; a full check URL is stored as-is, a trailing `/` is not stripped. `normalize()` resets
+  an unsupported provider, an unknown language, a bad endpoint and an empty/unknown category list with
+  fixed warnings that never echo the value; categories are also split on `,` and stored in canonical
+  order, so a hand-edited INI value cannot disable checking. `kCurrentVersion` stays `1` and an old
+  file without the group loads the defaults without being rewritten.
+- Tests: `tst_proofreadingmanager` covers the registry, every pre-network refusal with zero provider
+  calls and an asynchronous `finished()`, pass-through of the result and request, channel
+  cancellation including the untouched `InPlace` request, `cancel()` on an empty channel,
+  `cancelAll()`, a caller-deleted reply, and log hygiene with `TOPSECRET`. `tst_textchunker` adds the
+  six `splitWithOffsets()` cases and `tst_settings` the defaults, the full round trip, the raw
+  `[proofreading]` group, normalization fallbacks, the optional group, the version and the
+  independence from `translation.*`.
+- Verification (Linux only): Release and Debug configured and built with `-Wall -Wextra`, zero
+  warnings; `xvfb-run -a ctest --test-dir build/linux-release --output-on-failure` is 40/40 and
+  `ctest -N` shows 40 tests (39 + `tst_proofreadingmanager`). Windows would be 35 (34 + 1) and is
+  **not performed** — no MSVC on this machine.
+
+Notes for the later children:
+
+- Stage 6 appends `llm` to `proofreadingProviderIds()` together with its service; do not pre-seed
+  ids that no registered service can answer.
+- The manager passes `categories` through unchanged, so the service applies the "empty = all" rule
+  once — the LanguageTool service of `03-languagetool-service` must do it.
+- The user-visible gate string is `Enable online text checking in Settings → Text checking.`; the
+  "Text checking" tab and the 14 `.ts` files arrive with `04-text-checking-tab`.
+- `doc/architecture.md` §4.11 and `doc/proofreading.md` §5 still lack the `proofreading/*` keys and
+  `proofreading/allowOnlineServices`; the documentation update is deliberately outside this task.

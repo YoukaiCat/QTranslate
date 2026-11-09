@@ -42,6 +42,9 @@ qt_add_library(qtranslate_core STATIC
     src/core/hotkeysequence.cpp             src/core/hotkeysequence.h
     src/core/languages.cpp                  src/core/languages.h
     src/core/popupplacement.cpp             src/core/popupplacement.h
+    src/core/proofreadingmanager.cpp        src/core/proofreadingmanager.h
+    src/core/proofreadingservice.cpp        src/core/proofreadingservice.h
+    src/core/proofreadingtypes.h
     src/core/settings.cpp                   src/core/settings.h
     src/core/textchunker.cpp                src/core/textchunker.h
     src/core/translationmanager.cpp         src/core/translationmanager.h

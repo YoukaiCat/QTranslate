@@ -114,6 +114,17 @@ QStringList split(const QString &text, int maxLength)
     return parts;
 }
 
+QVector<Part> splitWithOffsets(const QString &text, int maxLength)
+{
+    QVector<Part> parts;
+    int offset = 0;
+    for (const QString &part : split(text, maxLength)) {
+        parts.append(Part{part, offset});
+        offset += int(part.size());
+    }
+    return parts;
+}
+
 QStringList splitUtf8(const QString &text, int maxBytes)
 {
     QStringList parts;

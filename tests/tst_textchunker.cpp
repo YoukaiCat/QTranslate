@@ -35,6 +35,29 @@ void verifyUtf8Invariants(const QString &text, const QStringList &parts, int max
     }
 }
 
+// The same for the offset-preserving split: joining the parts gives the text
+// back, every offset is exact and no part is longer than the limit.
+void verifyOffsetInvariants(const QString &text, const QVector<TextChunker::Part> &parts,
+                            int maxLength)
+{
+    QString joined;
+    int expectedOffset = 0;
+    for (const TextChunker::Part &part : parts) {
+        QVERIFY(!part.text.isEmpty());
+        QCOMPARE(part.offset, expectedOffset);
+        QVERIFY2(part.text.size() <= maxLength, qPrintable(QString::number(part.text.size())));
+        QVERIFY2(!part.text.front().isLowSurrogate(), "surrogate pair split");
+        QVERIFY2(!part.text.back().isHighSurrogate(), "surrogate pair split");
+        joined += part.text;
+        expectedOffset += int(part.text.size());
+    }
+    QCOMPARE(joined, text);
+    if (!parts.isEmpty()) {
+        QCOMPARE(parts.last().offset + int(parts.last().text.size()),
+                 int(text.size()));
+    }
+}
+
 } // namespace
 
 class TestTextChunker : public QObject
@@ -177,6 +200,61 @@ private slots:
         // Natural boundaries keep parts reasonably long.
         for (qsizetype i = 0; i + 1 < parts.size(); ++i)
             QVERIFY(parts.at(i).size() > 2500);
+    }
+
+    void splitWithOffsetsEmptyText()
+    {
+        QVERIFY(TextChunker::splitWithOffsets(QString(), 10).isEmpty());
+    }
+
+    void splitWithOffsetsExactLimit()
+    {
+        const QString text = QString(10, u'x');
+        const QVector<TextChunker::Part> parts = TextChunker::splitWithOffsets(text, 10);
+        QCOMPARE(parts.size(), 1);
+        QCOMPARE(parts.first().text, text);
+        QCOMPARE(parts.first().offset, 0);
+    }
+
+    void splitWithOffsetsThreeParts()
+    {
+        const QString text = QStringLiteral("alpha beta gamma delta epsilon zeta eta theta");
+        const QVector<TextChunker::Part> parts = TextChunker::splitWithOffsets(text, 20);
+        verifyOffsetInvariants(text, parts, 20);
+        QCOMPARE(parts.size(), 3);
+        for (qsizetype i = 0; i + 1 < parts.size(); ++i) {
+            QCOMPARE(parts.at(i).offset + int(parts.at(i).text.size()),
+                     parts.at(i + 1).offset);
+        }
+        QCOMPARE(parts.last().offset + int(parts.last().text.size()), int(text.size()));
+    }
+
+    void splitWithOffsetsSurrogatePairs()
+    {
+        // U+1F600 is a surrogate pair; with an odd limit a naive cut would split one.
+        QString text;
+        for (int i = 0; i < 20; ++i)
+            text += QStringLiteral("😀");
+        for (int maxLength : {3, 5, 7})
+            verifyOffsetInvariants(text, TextChunker::splitWithOffsets(text, maxLength),
+                                   maxLength);
+    }
+
+    void splitWithOffsetsCrLf()
+    {
+        const QString text = QStringLiteral("abcdefghi\r\njklmnopqr");
+        const QVector<TextChunker::Part> parts = TextChunker::splitWithOffsets(text, 10);
+        verifyOffsetInvariants(text, parts, 10);
+        QCOMPARE(parts.first().text, QStringLiteral("abcdefghi"));
+        QCOMPARE(parts.at(1).offset, 9);
+        QVERIFY(parts.at(1).text.startsWith(QStringLiteral("\r\n")));
+    }
+
+    void splitWithOffsetsTinyLimit()
+    {
+        // A limit below one code point is raised to two UTF-16 units.
+        const QString text = QStringLiteral("abc 😀 def");
+        verifyOffsetInvariants(text, TextChunker::splitWithOffsets(text, 1), 2);
     }
 
     void utf8EmptyText()
