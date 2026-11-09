@@ -4,86 +4,86 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="167"/>
-        <location filename="../src/app/appcontroller.cpp" line="717"/>
+        <location filename="../src/app/appcontroller.cpp" line="174"/>
+        <location filename="../src/app/appcontroller.cpp" line="726"/>
         <source>Autostart</source>
         <translation>ऑटो स्टार्ट</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="168"/>
-        <location filename="../src/app/appcontroller.cpp" line="718"/>
+        <location filename="../src/app/appcontroller.cpp" line="175"/>
+        <location filename="../src/app/appcontroller.cpp" line="727"/>
         <source>Could not update the autostart entry.</source>
         <translation>ऑटोस्टार्ट प्रविष्टि को अद्यतन नहीं किया जा सका.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="338"/>
+        <location filename="../src/app/appcontroller.cpp" line="347"/>
         <source>Hotkey unavailable</source>
         <translation>हॉटकी अनुपलब्ध</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="339"/>
+        <location filename="../src/app/appcontroller.cpp" line="348"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 पहले से ही किसी अन्य प्रोग्राम द्वारा उपयोग किया जा रहा है। उस प्रोग्राम को बंद करें या सेटिंग्स में कोई अन्य संयोजन चुनें।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="400"/>
+        <location filename="../src/app/appcontroller.cpp" line="409"/>
         <source>%1 — %2</source>
         <translation>%1 - %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="768"/>
+        <location filename="../src/app/appcontroller.cpp" line="779"/>
         <source>DeepL is not available.</source>
         <translation>DeepL उपलब्ध नहीं है.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="783"/>
+        <location filename="../src/app/appcontroller.cpp" line="794"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI-संगत प्रदाता उपलब्ध नहीं है।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="827"/>
+        <location filename="../src/app/appcontroller.cpp" line="838"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>सिस्टम कीरिंग उपलब्ध न होने के कारण रहस्य केवल आपके उपयोगकर्ता द्वारा पढ़ी जा सकने वाली फ़ाइल में बिना एन्क्रिप्शन के संग्रहीत किए जाते हैं।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="979"/>
+        <location filename="../src/app/appcontroller.cpp" line="1026"/>
         <source>Nothing is selected.</source>
         <translation>कुछ भी चयनित नहीं है।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1021"/>
+        <location filename="../src/app/appcontroller.cpp" line="1068"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>सक्रिय विंडो बदल गई; अनुवाद को क्लिपबोर्ड पर कॉपी किया गया था.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1102"/>
+        <location filename="../src/app/appcontroller.cpp" line="1149"/>
         <source>System tray unavailable</source>
         <translation>सिस्टम ट्रे उपलब्ध नहीं है</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1103"/>
+        <location filename="../src/app/appcontroller.cpp" line="1150"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>सिस्टम ट्रे उपलब्ध नहीं है, इसलिए ऐप बैकग्राउंड में नहीं रह सकता। विंडो बंद करने से ऐप बंद हो जाता है।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1012"/>
-        <location filename="../src/app/appcontroller.cpp" line="1060"/>
+        <location filename="../src/app/appcontroller.cpp" line="1059"/>
+        <location filename="../src/app/appcontroller.cpp" line="1107"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>स्वचालित रूप से पेस्ट नहीं किया जा सका; अनुवाद क्लिपबोर्ड पर है.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="145"/>
+        <location filename="../src/app/appcontroller.cpp" line="152"/>
         <source>Limited Wayland support</source>
         <translation>सीमित Wayland समर्थन</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="147"/>
+        <location filename="../src/app/appcontroller.cpp" line="154"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>वैश्विक हॉटकी के लिए GlobalShortcuts पोर्टल आवश्यक है। यदि यह डेस्कटॉप इसे प्रदान नहीं करता है, तो चयनित टेक्स्ट को Ctrl+C से कॉपी करें और CLI कमांड या डेस्कटॉप शॉर्टकट का उपयोग करें; इन-प्लेस बदलाव पेस्ट करने के बजाय अनुवाद को क्लिपबोर्ड पर कॉपी करता है।</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1084"/>
-        <location filename="../src/app/appcontroller.cpp" line="1087"/>
+        <location filename="../src/app/appcontroller.cpp" line="1131"/>
+        <location filename="../src/app/appcontroller.cpp" line="1134"/>
         <source>Translate and replace</source>
         <translation>अनुवाद करें और बदलें</translation>
     </message>
@@ -695,91 +695,148 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="42"/>
-        <location filename="../src/ui/mainwindow.cpp" line="231"/>
+        <location filename="../src/ui/mainwindow.cpp" line="52"/>
+        <location filename="../src/ui/mainwindow.cpp" line="305"/>
         <source>Source language</source>
         <translation>स्रोत भाषा</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="47"/>
-        <location filename="../src/ui/mainwindow.cpp" line="233"/>
+        <location filename="../src/ui/mainwindow.cpp" line="57"/>
+        <location filename="../src/ui/mainwindow.cpp" line="307"/>
         <source>Swap languages</source>
         <translation>भाषाएँ बदलें</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="51"/>
-        <location filename="../src/ui/mainwindow.cpp" line="235"/>
+        <location filename="../src/ui/mainwindow.cpp" line="61"/>
+        <location filename="../src/ui/mainwindow.cpp" line="309"/>
         <source>Target language</source>
         <translation>लक्ष्य भाषा</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="55"/>
-        <location filename="../src/ui/mainwindow.cpp" line="238"/>
+        <location filename="../src/ui/mainwindow.cpp" line="65"/>
+        <location filename="../src/ui/mainwindow.cpp" line="312"/>
         <source>Translation service</source>
         <translation>अनुवादन सेवा</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="63"/>
-        <location filename="../src/ui/mainwindow.cpp" line="237"/>
+        <location filename="../src/ui/mainwindow.cpp" line="73"/>
+        <location filename="../src/ui/mainwindow.cpp" line="311"/>
         <source>Service:</source>
         <translation>सेवा:</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="73"/>
-        <location filename="../src/ui/mainwindow.cpp" line="239"/>
+        <location filename="../src/ui/mainwindow.cpp" line="83"/>
+        <location filename="../src/ui/mainwindow.cpp" line="313"/>
         <source>Source text</source>
         <translation>स्रोत इबारत</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="74"/>
-        <location filename="../src/ui/mainwindow.cpp" line="240"/>
+        <location filename="../src/ui/mainwindow.cpp" line="84"/>
+        <location filename="../src/ui/mainwindow.cpp" line="314"/>
         <source>Enter text to translate</source>
         <translation>अनुवाद करने के लिए पाठ दर्ज करें</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="77"/>
-        <location filename="../src/ui/mainwindow.cpp" line="79"/>
-        <location filename="../src/ui/mainwindow.cpp" line="241"/>
-        <location filename="../src/ui/mainwindow.cpp" line="242"/>
+        <location filename="../src/ui/mainwindow.cpp" line="87"/>
+        <location filename="../src/ui/mainwindow.cpp" line="89"/>
+        <location filename="../src/ui/mainwindow.cpp" line="315"/>
+        <location filename="../src/ui/mainwindow.cpp" line="316"/>
         <source>Translation</source>
         <translation>अनुवाद</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="87"/>
-        <location filename="../src/ui/mainwindow.cpp" line="243"/>
+        <location filename="../src/ui/mainwindow.cpp" line="107"/>
+        <location filename="../src/ui/mainwindow.cpp" line="319"/>
+        <source>Check</source>
+        <translation>जाँचें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="109"/>
+        <location filename="../src/ui/mainwindow.cpp" line="320"/>
+        <source>Check the source text</source>
+        <translation>स्रोत पाठ की जाँच करें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="111"/>
+        <location filename="../src/ui/mainwindow.cpp" line="317"/>
         <source>Translate</source>
         <translation>अनुवाद</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="89"/>
-        <location filename="../src/ui/mainwindow.cpp" line="244"/>
+        <location filename="../src/ui/mainwindow.cpp" line="113"/>
+        <location filename="../src/ui/mainwindow.cpp" line="318"/>
         <source>Ctrl+Enter</source>
         <translation>Ctrl+Enter</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="90"/>
-        <location filename="../src/ui/mainwindow.cpp" line="245"/>
+        <location filename="../src/ui/mainwindow.cpp" line="114"/>
+        <location filename="../src/ui/mainwindow.cpp" line="321"/>
         <source>Copy</source>
         <translation>प्रतिलिपि</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="92"/>
-        <location filename="../src/ui/mainwindow.cpp" line="246"/>
+        <location filename="../src/ui/mainwindow.cpp" line="116"/>
+        <location filename="../src/ui/mainwindow.cpp" line="322"/>
         <source>Copy the translation to the clipboard</source>
         <translation>अनुवाद को क्लिपबोर्ड पर कॉपी करें</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="187"/>
+        <location filename="../src/ui/mainwindow.cpp" line="256"/>
         <source>Translating…</source>
         <translation>अनुवाद हो रहा है…</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="206"/>
+        <location filename="../src/ui/mainwindow.cpp" line="275"/>
         <source>Detected language: %1</source>
         <translation>पहचानी गई भाषा: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="316"/>
+        <location filename="../src/ui/mainwindow.cpp" line="388"/>
+        <source>Nothing to check</source>
+        <translation>जाँचने के लिए कुछ नहीं</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="524"/>
+        <source>Corrections applied</source>
+        <translation>सुधार लागू किए गए</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="531"/>
+        <source>Preview of corrections</source>
+        <translation>सुधारों का पूर्वावलोकन</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="534"/>
+        <source>Corrected text:</source>
+        <translation>सुधरा हुआ पाठ:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="559"/>
+        <source>Check before translation</source>
+        <translation>अनुवाद से पहले जाँचें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="562"/>
+        <source>%1 issues found in the source text.</source>
+        <translation>स्रोत पाठ में %1 समस्याएँ मिलीं।</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="565"/>
+        <source>Apply corrections and translate</source>
+        <translation>सुधार लागू करें और अनुवाद करें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="568"/>
+        <source>Translate anyway</source>
+        <translation>फिर भी अनुवाद करें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="639"/>
+        <source>Corrected text copied to the clipboard</source>
+        <translation>सुधरा हुआ पाठ क्लिपबोर्ड पर कॉपी किया गया</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="669"/>
         <source>Translation copied to the clipboard</source>
         <translation>अनुवाद क्लिपबोर्ड पर कॉपी किया गया</translation>
     </message>
@@ -986,6 +1043,64 @@
     </message>
 </context>
 <context>
+    <name>ProofreadingErrorText</name>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="14"/>
+        <source>Network error</source>
+        <translation>नेटवर्क त्रुटि</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="16"/>
+        <source>The text checking service did not respond in time</source>
+        <translation>पाठ जाँच सेवा ने समय पर प्रतिक्रिया नहीं दी</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="19"/>
+        <source>The text checking service rejected the request</source>
+        <translation>पाठ जाँच सेवा ने अनुरोध अस्वीकार किया</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="22"/>
+        <source>The text checking quota is exceeded; try again later</source>
+        <translation>पाठ जाँच कोटा पार हो गया है; बाद में पुनः प्रयास करें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="25"/>
+        <source>Too many requests; try again later or use a self-hosted server</source>
+        <translation>बहुत सारे अनुरोध; बाद में पुनः प्रयास करें या स्वयं-होस्टेड सर्वर का उपयोग करें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="28"/>
+        <source>The text checking service is unavailable</source>
+        <translation>पाठ जाँच सेवा उपलब्ध नहीं है</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="31"/>
+        <source>The text is too long to check</source>
+        <translation>पाठ जाँचने के लिए बहुत लंबा है</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="33"/>
+        <source>The language is not supported by the text checking service</source>
+        <translation>यह भाषा पाठ जाँच सेवा द्वारा समर्थित नहीं है</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="36"/>
+        <source>The text checking service returned an unexpected response</source>
+        <translation>पाठ जाँच सेवा ने अप्रत्याशित प्रतिक्रिया दी</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="39"/>
+        <source>Text checking cancelled</source>
+        <translation>पाठ जाँच रद्द की गई</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="41"/>
+        <source>There is no text to check</source>
+        <translation>जाँचने के लिए कोई पाठ नहीं है</translation>
+    </message>
+</context>
+<context>
     <name>ProofreadingManager</name>
     <message>
         <location filename="../src/core/proofreadingmanager.cpp" line="150"/>
@@ -1001,6 +1116,54 @@
         <location filename="../src/core/proofreadingmanager.cpp" line="160"/>
         <source>Enable online text checking in Settings → Text checking.</source>
         <translation>सेटिंग्स → पाठ जाँच में ऑनलाइन पाठ जाँच सक्षम करें।</translation>
+    </message>
+</context>
+<context>
+    <name>ProofreadingPanel</name>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="117"/>
+        <source>Rule: %1</source>
+        <translation>नियम: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="161"/>
+        <source>Issues</source>
+        <translation>समस्याएँ</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="162"/>
+        <source>Replace</source>
+        <translation>बदलें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="163"/>
+        <source>Ignore</source>
+        <translation>अनदेखा करें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="164"/>
+        <source>Replace all</source>
+        <translation>सभी बदलें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="165"/>
+        <source>Copy corrected text</source>
+        <translation>सुधरा हुआ पाठ कॉपी करें</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="179"/>
+        <source>Checking…</source>
+        <translation>जाँच हो रही है...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="183"/>
+        <source>No issues found.</source>
+        <translation>कोई समस्या नहीं मिली।</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="202"/>
+        <source>No suggestions</source>
+        <translation>कोई सुझाव नहीं</translation>
     </message>
 </context>
 <context>

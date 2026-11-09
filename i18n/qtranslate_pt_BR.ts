@@ -4,86 +4,86 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="167"/>
-        <location filename="../src/app/appcontroller.cpp" line="717"/>
+        <location filename="../src/app/appcontroller.cpp" line="174"/>
+        <location filename="../src/app/appcontroller.cpp" line="726"/>
         <source>Autostart</source>
         <translation>Início automático</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="168"/>
-        <location filename="../src/app/appcontroller.cpp" line="718"/>
+        <location filename="../src/app/appcontroller.cpp" line="175"/>
+        <location filename="../src/app/appcontroller.cpp" line="727"/>
         <source>Could not update the autostart entry.</source>
         <translation>Não foi possível atualizar a entrada de inicialização automática.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="338"/>
+        <location filename="../src/app/appcontroller.cpp" line="347"/>
         <source>Hotkey unavailable</source>
         <translation>Tecla de atalho indisponível</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="339"/>
+        <location filename="../src/app/appcontroller.cpp" line="348"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 já está sendo usado por outro programa. Feche esse programa ou escolha outra combinação nas configurações.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="400"/>
+        <location filename="../src/app/appcontroller.cpp" line="409"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="768"/>
+        <location filename="../src/app/appcontroller.cpp" line="779"/>
         <source>DeepL is not available.</source>
         <translation>DeepL não está disponível.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="783"/>
+        <location filename="../src/app/appcontroller.cpp" line="794"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>O provedor compatível com OpenAI não está disponível.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="827"/>
+        <location filename="../src/app/appcontroller.cpp" line="838"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>Os segredos são armazenados sem criptografia em um arquivo legível apenas pelo seu usuário porque o chaveiro do sistema não está disponível.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="979"/>
+        <location filename="../src/app/appcontroller.cpp" line="1026"/>
         <source>Nothing is selected.</source>
         <translation>Nada está selecionado.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1021"/>
+        <location filename="../src/app/appcontroller.cpp" line="1068"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>A janela ativa mudou; a tradução foi copiada para a área de transferência.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1102"/>
+        <location filename="../src/app/appcontroller.cpp" line="1149"/>
         <source>System tray unavailable</source>
         <translation>Bandeja do sistema indisponível</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1103"/>
+        <location filename="../src/app/appcontroller.cpp" line="1150"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>A bandeja do sistema não está disponível, portanto o aplicativo não pode permanecer em segundo plano. Fechar a janela encerra o aplicativo.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1012"/>
-        <location filename="../src/app/appcontroller.cpp" line="1060"/>
+        <location filename="../src/app/appcontroller.cpp" line="1059"/>
+        <location filename="../src/app/appcontroller.cpp" line="1107"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>Não foi possível colar automaticamente; a tradução está na área de transferência.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="145"/>
+        <location filename="../src/app/appcontroller.cpp" line="152"/>
         <source>Limited Wayland support</source>
         <translation>Suporte limitado ao Wayland</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="147"/>
+        <location filename="../src/app/appcontroller.cpp" line="154"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>Os atalhos globais de teclado exigem o portal GlobalShortcuts. Se este desktop não o fornecer, copie o texto selecionado com Ctrl+C e use os comandos da CLI ou um atalho da área de trabalho; a substituição no local copia a tradução para a área de transferência em vez de colá-la.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1084"/>
-        <location filename="../src/app/appcontroller.cpp" line="1087"/>
+        <location filename="../src/app/appcontroller.cpp" line="1131"/>
+        <location filename="../src/app/appcontroller.cpp" line="1134"/>
         <source>Translate and replace</source>
         <translation>Traduzir e substituir</translation>
     </message>
@@ -695,91 +695,148 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="42"/>
-        <location filename="../src/ui/mainwindow.cpp" line="231"/>
+        <location filename="../src/ui/mainwindow.cpp" line="52"/>
+        <location filename="../src/ui/mainwindow.cpp" line="305"/>
         <source>Source language</source>
         <translation>Idioma de origem</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="47"/>
-        <location filename="../src/ui/mainwindow.cpp" line="233"/>
+        <location filename="../src/ui/mainwindow.cpp" line="57"/>
+        <location filename="../src/ui/mainwindow.cpp" line="307"/>
         <source>Swap languages</source>
         <translation>Inverter idiomas</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="51"/>
-        <location filename="../src/ui/mainwindow.cpp" line="235"/>
+        <location filename="../src/ui/mainwindow.cpp" line="61"/>
+        <location filename="../src/ui/mainwindow.cpp" line="309"/>
         <source>Target language</source>
         <translation>Idioma de destino</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="55"/>
-        <location filename="../src/ui/mainwindow.cpp" line="238"/>
+        <location filename="../src/ui/mainwindow.cpp" line="65"/>
+        <location filename="../src/ui/mainwindow.cpp" line="312"/>
         <source>Translation service</source>
         <translation>Serviço de tradução</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="63"/>
-        <location filename="../src/ui/mainwindow.cpp" line="237"/>
+        <location filename="../src/ui/mainwindow.cpp" line="73"/>
+        <location filename="../src/ui/mainwindow.cpp" line="311"/>
         <source>Service:</source>
         <translation>Serviço:</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="73"/>
-        <location filename="../src/ui/mainwindow.cpp" line="239"/>
+        <location filename="../src/ui/mainwindow.cpp" line="83"/>
+        <location filename="../src/ui/mainwindow.cpp" line="313"/>
         <source>Source text</source>
         <translation>Texto fonte</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="74"/>
-        <location filename="../src/ui/mainwindow.cpp" line="240"/>
+        <location filename="../src/ui/mainwindow.cpp" line="84"/>
+        <location filename="../src/ui/mainwindow.cpp" line="314"/>
         <source>Enter text to translate</source>
         <translation>Digite o texto para traduzir</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="77"/>
-        <location filename="../src/ui/mainwindow.cpp" line="79"/>
-        <location filename="../src/ui/mainwindow.cpp" line="241"/>
-        <location filename="../src/ui/mainwindow.cpp" line="242"/>
+        <location filename="../src/ui/mainwindow.cpp" line="87"/>
+        <location filename="../src/ui/mainwindow.cpp" line="89"/>
+        <location filename="../src/ui/mainwindow.cpp" line="315"/>
+        <location filename="../src/ui/mainwindow.cpp" line="316"/>
         <source>Translation</source>
         <translation>Tradução</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="87"/>
-        <location filename="../src/ui/mainwindow.cpp" line="243"/>
+        <location filename="../src/ui/mainwindow.cpp" line="107"/>
+        <location filename="../src/ui/mainwindow.cpp" line="319"/>
+        <source>Check</source>
+        <translation>Verificar</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="109"/>
+        <location filename="../src/ui/mainwindow.cpp" line="320"/>
+        <source>Check the source text</source>
+        <translation>Verificar o texto de origem</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="111"/>
+        <location filename="../src/ui/mainwindow.cpp" line="317"/>
         <source>Translate</source>
         <translation>Traduzir</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="89"/>
-        <location filename="../src/ui/mainwindow.cpp" line="244"/>
+        <location filename="../src/ui/mainwindow.cpp" line="113"/>
+        <location filename="../src/ui/mainwindow.cpp" line="318"/>
         <source>Ctrl+Enter</source>
         <translation>Ctrl+Enter</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="90"/>
-        <location filename="../src/ui/mainwindow.cpp" line="245"/>
+        <location filename="../src/ui/mainwindow.cpp" line="114"/>
+        <location filename="../src/ui/mainwindow.cpp" line="321"/>
         <source>Copy</source>
         <translation>Copiar</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="92"/>
-        <location filename="../src/ui/mainwindow.cpp" line="246"/>
+        <location filename="../src/ui/mainwindow.cpp" line="116"/>
+        <location filename="../src/ui/mainwindow.cpp" line="322"/>
         <source>Copy the translation to the clipboard</source>
         <translation>Copiar a tradução para a área de transferência</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="187"/>
+        <location filename="../src/ui/mainwindow.cpp" line="256"/>
         <source>Translating…</source>
         <translation>Traduzindo…</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="206"/>
+        <location filename="../src/ui/mainwindow.cpp" line="275"/>
         <source>Detected language: %1</source>
         <translation>Idioma detectado: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="316"/>
+        <location filename="../src/ui/mainwindow.cpp" line="388"/>
+        <source>Nothing to check</source>
+        <translation>Nada para verificar</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="524"/>
+        <source>Corrections applied</source>
+        <translation>Correções aplicadas</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="531"/>
+        <source>Preview of corrections</source>
+        <translation>Pré-visualização das correções</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="534"/>
+        <source>Corrected text:</source>
+        <translation>Texto corrigido:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="559"/>
+        <source>Check before translation</source>
+        <translation>Verificar antes de traduzir</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="562"/>
+        <source>%1 issues found in the source text.</source>
+        <translation>%1 problemas encontrados no texto de origem.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="565"/>
+        <source>Apply corrections and translate</source>
+        <translation>Aplicar correções e traduzir</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="568"/>
+        <source>Translate anyway</source>
+        <translation>Traduzir mesmo assim</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="639"/>
+        <source>Corrected text copied to the clipboard</source>
+        <translation>Texto corrigido copiado para a área de transferência</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="669"/>
         <source>Translation copied to the clipboard</source>
         <translation>Tradução copiada para a área de transferência</translation>
     </message>
@@ -986,6 +1043,64 @@
     </message>
 </context>
 <context>
+    <name>ProofreadingErrorText</name>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="14"/>
+        <source>Network error</source>
+        <translation>Erro de rede</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="16"/>
+        <source>The text checking service did not respond in time</source>
+        <translation>O serviço de verificação de texto não respondeu a tempo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="19"/>
+        <source>The text checking service rejected the request</source>
+        <translation>O serviço de verificação de texto rejeitou a solicitação</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="22"/>
+        <source>The text checking quota is exceeded; try again later</source>
+        <translation>A cota de verificação de texto foi excedida; tente novamente mais tarde</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="25"/>
+        <source>Too many requests; try again later or use a self-hosted server</source>
+        <translation>Muitas solicitações; tente novamente mais tarde ou use um servidor próprio</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="28"/>
+        <source>The text checking service is unavailable</source>
+        <translation>O serviço de verificação de texto não está disponível</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="31"/>
+        <source>The text is too long to check</source>
+        <translation>O texto é muito longo para verificar</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="33"/>
+        <source>The language is not supported by the text checking service</source>
+        <translation>O idioma não é suportado pelo serviço de verificação de texto</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="36"/>
+        <source>The text checking service returned an unexpected response</source>
+        <translation>O serviço de verificação de texto retornou uma resposta inesperada</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="39"/>
+        <source>Text checking cancelled</source>
+        <translation>Verificação de texto cancelada</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="41"/>
+        <source>There is no text to check</source>
+        <translation>Não há texto para verificar</translation>
+    </message>
+</context>
+<context>
     <name>ProofreadingManager</name>
     <message>
         <location filename="../src/core/proofreadingmanager.cpp" line="150"/>
@@ -1001,6 +1116,54 @@
         <location filename="../src/core/proofreadingmanager.cpp" line="160"/>
         <source>Enable online text checking in Settings → Text checking.</source>
         <translation>Ative a verificação de texto online em Configurações → Verificação de texto.</translation>
+    </message>
+</context>
+<context>
+    <name>ProofreadingPanel</name>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="117"/>
+        <source>Rule: %1</source>
+        <translation>Regra: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="161"/>
+        <source>Issues</source>
+        <translation>Problemas</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="162"/>
+        <source>Replace</source>
+        <translation>Substituir</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="163"/>
+        <source>Ignore</source>
+        <translation>Ignorar</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="164"/>
+        <source>Replace all</source>
+        <translation>Substituir tudo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="165"/>
+        <source>Copy corrected text</source>
+        <translation>Copiar o texto corrigido</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="179"/>
+        <source>Checking…</source>
+        <translation>Verificando…</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="183"/>
+        <source>No issues found.</source>
+        <translation>Nenhum problema encontrado.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="202"/>
+        <source>No suggestions</source>
+        <translation>Nenhuma sugestão</translation>
     </message>
 </context>
 <context>

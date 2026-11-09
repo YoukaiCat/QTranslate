@@ -4,86 +4,86 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="167"/>
-        <location filename="../src/app/appcontroller.cpp" line="717"/>
+        <location filename="../src/app/appcontroller.cpp" line="174"/>
+        <location filename="../src/app/appcontroller.cpp" line="726"/>
         <source>Autostart</source>
         <translation>자동 시작</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="168"/>
-        <location filename="../src/app/appcontroller.cpp" line="718"/>
+        <location filename="../src/app/appcontroller.cpp" line="175"/>
+        <location filename="../src/app/appcontroller.cpp" line="727"/>
         <source>Could not update the autostart entry.</source>
         <translation>자동 시작 항목을 업데이트할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="338"/>
+        <location filename="../src/app/appcontroller.cpp" line="347"/>
         <source>Hotkey unavailable</source>
         <translation>단축키를 사용할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="339"/>
+        <location filename="../src/app/appcontroller.cpp" line="348"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1는 이미 다른 프로그램에서 사용 중입니다. 해당 프로그램을 닫거나 설정에서 다른 조합을 선택하세요.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="400"/>
+        <location filename="../src/app/appcontroller.cpp" line="409"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="768"/>
+        <location filename="../src/app/appcontroller.cpp" line="779"/>
         <source>DeepL is not available.</source>
         <translation>DeepL를 사용할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="783"/>
+        <location filename="../src/app/appcontroller.cpp" line="794"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI 호환 공급자를 사용할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="827"/>
+        <location filename="../src/app/appcontroller.cpp" line="838"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>시스템 키링을 사용할 수 없으므로 비밀은 사용자만 읽을 수 있는 파일에 암호화되지 않은 채로 저장됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="979"/>
+        <location filename="../src/app/appcontroller.cpp" line="1026"/>
         <source>Nothing is selected.</source>
         <translation>선택된 내용이 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1021"/>
+        <location filename="../src/app/appcontroller.cpp" line="1068"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>활성 창이 변경되었습니다. 번역이 클립보드에 복사되었습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1102"/>
+        <location filename="../src/app/appcontroller.cpp" line="1149"/>
         <source>System tray unavailable</source>
         <translation>시스템 트레이를 사용할 수 없음</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1103"/>
+        <location filename="../src/app/appcontroller.cpp" line="1150"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>시스템 트레이를 사용할 수 없으므로 응용 프로그램이 백그라운드에 남을 수 없습니다. 창을 닫으면 응용 프로그램이 종료됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1012"/>
-        <location filename="../src/app/appcontroller.cpp" line="1060"/>
+        <location filename="../src/app/appcontroller.cpp" line="1059"/>
+        <location filename="../src/app/appcontroller.cpp" line="1107"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>자동으로 붙여넣을 수 없습니다. 번역은 클립보드에 있습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="145"/>
+        <location filename="../src/app/appcontroller.cpp" line="152"/>
         <source>Limited Wayland support</source>
         <translation>제한적인 Wayland 지원</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="147"/>
+        <location filename="../src/app/appcontroller.cpp" line="154"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>전역 단축키에는 GlobalShortcuts 포털이 필요합니다. 이 데스크톱에서 포털을 제공하지 않으면 Ctrl+C로 선택한 텍스트를 복사하고 CLI 명령이나 데스크톱 바로 가기를 사용하세요. 제자리 바꾸기는 붙여넣는 대신 번역을 클립보드에 복사합니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1084"/>
-        <location filename="../src/app/appcontroller.cpp" line="1087"/>
+        <location filename="../src/app/appcontroller.cpp" line="1131"/>
+        <location filename="../src/app/appcontroller.cpp" line="1134"/>
         <source>Translate and replace</source>
         <translation>번역 및 교체</translation>
     </message>
@@ -695,91 +695,148 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="42"/>
-        <location filename="../src/ui/mainwindow.cpp" line="231"/>
+        <location filename="../src/ui/mainwindow.cpp" line="52"/>
+        <location filename="../src/ui/mainwindow.cpp" line="305"/>
         <source>Source language</source>
         <translation>소스 언어</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="47"/>
-        <location filename="../src/ui/mainwindow.cpp" line="233"/>
+        <location filename="../src/ui/mainwindow.cpp" line="57"/>
+        <location filename="../src/ui/mainwindow.cpp" line="307"/>
         <source>Swap languages</source>
         <translation>언어 바꾸기</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="51"/>
-        <location filename="../src/ui/mainwindow.cpp" line="235"/>
+        <location filename="../src/ui/mainwindow.cpp" line="61"/>
+        <location filename="../src/ui/mainwindow.cpp" line="309"/>
         <source>Target language</source>
         <translation>대상 언어</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="55"/>
-        <location filename="../src/ui/mainwindow.cpp" line="238"/>
+        <location filename="../src/ui/mainwindow.cpp" line="65"/>
+        <location filename="../src/ui/mainwindow.cpp" line="312"/>
         <source>Translation service</source>
         <translation>번역 서비스</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="63"/>
-        <location filename="../src/ui/mainwindow.cpp" line="237"/>
+        <location filename="../src/ui/mainwindow.cpp" line="73"/>
+        <location filename="../src/ui/mainwindow.cpp" line="311"/>
         <source>Service:</source>
         <translation>서비스:</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="73"/>
-        <location filename="../src/ui/mainwindow.cpp" line="239"/>
+        <location filename="../src/ui/mainwindow.cpp" line="83"/>
+        <location filename="../src/ui/mainwindow.cpp" line="313"/>
         <source>Source text</source>
         <translation>소스 텍스트</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="74"/>
-        <location filename="../src/ui/mainwindow.cpp" line="240"/>
+        <location filename="../src/ui/mainwindow.cpp" line="84"/>
+        <location filename="../src/ui/mainwindow.cpp" line="314"/>
         <source>Enter text to translate</source>
         <translation>번역할 텍스트를 입력하세요</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="77"/>
-        <location filename="../src/ui/mainwindow.cpp" line="79"/>
-        <location filename="../src/ui/mainwindow.cpp" line="241"/>
-        <location filename="../src/ui/mainwindow.cpp" line="242"/>
+        <location filename="../src/ui/mainwindow.cpp" line="87"/>
+        <location filename="../src/ui/mainwindow.cpp" line="89"/>
+        <location filename="../src/ui/mainwindow.cpp" line="315"/>
+        <location filename="../src/ui/mainwindow.cpp" line="316"/>
         <source>Translation</source>
         <translation>번역</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="87"/>
-        <location filename="../src/ui/mainwindow.cpp" line="243"/>
+        <location filename="../src/ui/mainwindow.cpp" line="107"/>
+        <location filename="../src/ui/mainwindow.cpp" line="319"/>
+        <source>Check</source>
+        <translation>검사</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="109"/>
+        <location filename="../src/ui/mainwindow.cpp" line="320"/>
+        <source>Check the source text</source>
+        <translation>원본 텍스트 검사</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="111"/>
+        <location filename="../src/ui/mainwindow.cpp" line="317"/>
         <source>Translate</source>
         <translation>번역하다</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="89"/>
-        <location filename="../src/ui/mainwindow.cpp" line="244"/>
+        <location filename="../src/ui/mainwindow.cpp" line="113"/>
+        <location filename="../src/ui/mainwindow.cpp" line="318"/>
         <source>Ctrl+Enter</source>
         <translation>Ctrl+Enter</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="90"/>
-        <location filename="../src/ui/mainwindow.cpp" line="245"/>
+        <location filename="../src/ui/mainwindow.cpp" line="114"/>
+        <location filename="../src/ui/mainwindow.cpp" line="321"/>
         <source>Copy</source>
         <translation>복사</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="92"/>
-        <location filename="../src/ui/mainwindow.cpp" line="246"/>
+        <location filename="../src/ui/mainwindow.cpp" line="116"/>
+        <location filename="../src/ui/mainwindow.cpp" line="322"/>
         <source>Copy the translation to the clipboard</source>
         <translation>번역을 클립보드에 복사</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="187"/>
+        <location filename="../src/ui/mainwindow.cpp" line="256"/>
         <source>Translating…</source>
         <translation>번역 중…</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="206"/>
+        <location filename="../src/ui/mainwindow.cpp" line="275"/>
         <source>Detected language: %1</source>
         <translation>감지된 언어: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="316"/>
+        <location filename="../src/ui/mainwindow.cpp" line="388"/>
+        <source>Nothing to check</source>
+        <translation>검사할 내용이 없습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="524"/>
+        <source>Corrections applied</source>
+        <translation>수정 사항을 적용했습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="531"/>
+        <source>Preview of corrections</source>
+        <translation>수정 사항 미리보기</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="534"/>
+        <source>Corrected text:</source>
+        <translation>수정된 텍스트:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="559"/>
+        <source>Check before translation</source>
+        <translation>번역 전 검사</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="562"/>
+        <source>%1 issues found in the source text.</source>
+        <translation>원본 텍스트에서 문제 %1개를 찾았습니다.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="565"/>
+        <source>Apply corrections and translate</source>
+        <translation>수정 사항을 적용하고 번역</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="568"/>
+        <source>Translate anyway</source>
+        <translation>그래도 번역</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="639"/>
+        <source>Corrected text copied to the clipboard</source>
+        <translation>수정된 텍스트를 클립보드에 복사했습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/mainwindow.cpp" line="669"/>
         <source>Translation copied to the clipboard</source>
         <translation>번역이 클립보드에 복사되었습니다</translation>
     </message>
@@ -986,6 +1043,64 @@
     </message>
 </context>
 <context>
+    <name>ProofreadingErrorText</name>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="14"/>
+        <source>Network error</source>
+        <translation>네트워크 오류</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="16"/>
+        <source>The text checking service did not respond in time</source>
+        <translation>텍스트 검사 서비스가 제때에 응답하지 않았습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="19"/>
+        <source>The text checking service rejected the request</source>
+        <translation>텍스트 검사 서비스가 요청을 거부했습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="22"/>
+        <source>The text checking quota is exceeded; try again later</source>
+        <translation>텍스트 검사 할당량이 초과되었습니다. 나중에 다시 시도하세요</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="25"/>
+        <source>Too many requests; try again later or use a self-hosted server</source>
+        <translation>요청이 너무 많습니다. 나중에 다시 시도하거나 자체 호스팅 서버를 사용하세요</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="28"/>
+        <source>The text checking service is unavailable</source>
+        <translation>텍스트 검사 서비스를 사용할 수 없습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="31"/>
+        <source>The text is too long to check</source>
+        <translation>텍스트가 너무 길어 검사할 수 없습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="33"/>
+        <source>The language is not supported by the text checking service</source>
+        <translation>이 언어는 텍스트 검사 서비스에서 지원하지 않습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="36"/>
+        <source>The text checking service returned an unexpected response</source>
+        <translation>텍스트 검사 서비스가 예상치 못한 응답을 반환했습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="39"/>
+        <source>Text checking cancelled</source>
+        <translation>텍스트 검사가 취소되었습니다</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingerrortext.cpp" line="41"/>
+        <source>There is no text to check</source>
+        <translation>검사할 텍스트가 없습니다</translation>
+    </message>
+</context>
+<context>
     <name>ProofreadingManager</name>
     <message>
         <location filename="../src/core/proofreadingmanager.cpp" line="150"/>
@@ -1001,6 +1116,54 @@
         <location filename="../src/core/proofreadingmanager.cpp" line="160"/>
         <source>Enable online text checking in Settings → Text checking.</source>
         <translation>설정 → 텍스트 검사에서 온라인 텍스트 검사를 활성화하세요.</translation>
+    </message>
+</context>
+<context>
+    <name>ProofreadingPanel</name>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="117"/>
+        <source>Rule: %1</source>
+        <translation>규칙: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="161"/>
+        <source>Issues</source>
+        <translation>문제</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="162"/>
+        <source>Replace</source>
+        <translation>바꾸기</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="163"/>
+        <source>Ignore</source>
+        <translation>무시</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="164"/>
+        <source>Replace all</source>
+        <translation>모두 바꾸기</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="165"/>
+        <source>Copy corrected text</source>
+        <translation>수정된 텍스트 복사</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="179"/>
+        <source>Checking…</source>
+        <translation>확인 중…</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="183"/>
+        <source>No issues found.</source>
+        <translation>문제를 찾지 못했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/proofreadingpanel.cpp" line="202"/>
+        <source>No suggestions</source>
+        <translation>제안 없음</translation>
     </message>
 </context>
 <context>

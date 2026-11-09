@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [03-languagetool-service, 04-text-checking-tab]
 ---
@@ -548,3 +548,92 @@ the settings that switch the mode and the confirmation on.
   button stays visible and the manager's `Enable online text checking in Settings → Text checking.`
   appears in the panel — the stage wants that state visible, not a silently missing button.
 - **Windows is not built here.** Record the count and the build as not performed, never as passed.
+
+## Outcome
+
+Done. The main window can check the source text with LanguageTool, show the issues, and apply or
+ignore corrections while staying free of any manager, service or network knowledge.
+
+- Files: new `src/core/proofreadingtext.{h,cpp}`, `src/ui/proofreadingpanel.{h,cpp}`,
+  `src/ui/proofreadingerrortext.{h,cpp}` and `tests/tst_proofreadingpanel.cpp`; modified
+  `src/ui/mainwindow.{h,cpp}`, `src/app/appcontroller.{h,cpp}`, `CMakeLists.txt`,
+  `tests/CMakeLists.txt` and the 14 `i18n/*.ts`. No service, manager, settings, `doc/`, README,
+  `AGENTS.md`, `doc/handoff.md`, root-plan or later-child change.
+- Core: `ProofreadingText::isApplicable()` and `corrected()` apply the first replacement of every
+  applicable issue from the end of the text to the beginning; out-of-range, empty and overlapping
+  issues are skipped deterministically, a range may not split a surrogate pair at either end (not
+  only the zero-length case), and the original text is returned when nothing applies.
+- Panel: `ProofreadingPanel` shows the message plus `Rule: %1`, the replacement combo (a disabled
+  `No suggestions` placeholder for an issue without replacements), the states checking / no issues /
+  error (red) and Replace / Ignore / Replace all / Copy corrected text; it emits exactly
+  `issueSelected`, `replacementChosen`, `ignored`, `replaceAllRequested` and
+  `copyCorrectedRequested`, receives the error text through `ProofreadingErrorText::forResult()`,
+  never edits a document and holds no manager, service or settings.
+  `changeEvent(LanguageChange)` rebuilds the row texts and keeps the selected suggestion.
+- Error table: `ProofreadingErrorText` covers all twelve `TranslationError` values (`None` → an
+  empty string, `switch` without `default`), uses checking wording with no "translation",
+  "translate" or "API key" (`Auth` is `The text checking service rejected the request`) and appends
+  a non-empty `result.errorMessage` as `"%1 (%2)"`; `TranslationErrorText` is untouched.
+- Main window: a Check button and a third splitter pane, visible only while the mode is on and a
+  provider is registered; `checkRequested`/`checkCancelled` are the only contract. A check goes
+  through `AppController` on `Channel::MainWindow` with `settings.proofreading.language` and
+  `.categories`; the result is shown only for the current reply and not `Cancelled`. Every edit, a
+  translation, the Ctrl+W/popup transfer, a new check and closing the window clear the list and the
+  highlights and cancel the open request (`m_applyingEdit` protects our own edits). Issues are
+  underlined through `QTextEdit::ExtraSelection`; the count equals the listed rows; a row click
+  selects the fragment.
+- Actions: Replace applies the chosen replacement of one issue in one edit block and requests a
+  fresh check; Replace all previews the corrected text and applies all first replacements in one
+  edit block without re-checking; Ignore drops the row and its highlight only; Copy corrected text
+  puts the corrected text on the clipboard without touching the document. `autoReplace` applies
+  the corrections right after a successful check in one edit block, clears the stale list and does
+  not re-check.
+- Check before translation: the Translate button, Ctrl+Enter and Ctrl+W check first; the
+  automatic-translation timer does not. No issues or a failed check translate immediately; issues
+  open a modal choice: "Apply corrections and translate" (one edit block, then a translation of the
+  corrected text), "Translate anyway" or dismissal (no change). The path emits
+  `translateRequested` directly and cannot loop.
+- Review: six findings accepted and fixed. (1) The auto-translate timer could cancel an explicit
+  check and fired on our own edits; Check now stops it, programmatic edits do not start it, and the
+  direct translate stops it, with a test using a non-zero delay. (2) The panel did not rebuild the
+  `Rule:` rows and reset the selected replacement on a language change; both are now preserved.
+  (3) An empty/whitespace text after a replacement left the stale list; the empty `startCheck()`
+  branch now clears the panel and the highlights. (4) `Nothing to check` stuck in the status bar
+  after the next check; it is now cleared. (5) The clear paths under `QSignalBlocker` were
+  untested; `translationAndDisableClearPanel` covers `showTranslationStarted()`, `translateText()`,
+  `showTranslation()` and `setProofreadingAvailable(false)`. (6) The fixes for the empty branch and
+  the status were initially untested; `checkButtonVisibility` asserts the cleared status and
+  `emptyReplacementEmptiesTextAndPanel` covers the empty branch. No rejected findings and no open
+  issues.
+- Tests: `tests/tst_proofreadingpanel.cpp` is platform-neutral, `QT_QPA_PLATFORM=offscreen`, links
+  `mainwindow`, `proofreadingpanel`, `proofreadingerrortext`, `languagecombobox` and
+  `translationerrortext`; 19 named cases (+ init/cleanup = 21 passed) cover the four button flows,
+  the highlight count, replacement and single undo, Replace all accepted/cancelled, Ignore, Copy,
+  the states, autoReplace off/on, both check-before-translation branches, the auto-translate bypass
+  and timer interaction, editing/close/translation cancellation, the empty-replacement clearing and
+  the core helper rules. Modal dialogs are driven with `QTimer::singleShot(0)` +
+  `activeModalWidget()`; 10 repeated ctest runs are green.
+- Verification (Linux only): Debug and Release build with `-Wall -Wextra` and zero warnings;
+  `xvfb-run -a ctest --test-dir build/linux-{release,debug} --output-on-failure` is 43/43 in both;
+  `ctest -N` shows 43 tests (42 + `tst_proofreadingpanel`), so Windows would be 38 (37 + 1) and is
+  **not performed** — no MSVC on this machine.
+- `.ts`: `update_translations` added exactly **31** messages per file (9 `ProofreadingPanel`, 11
+  `MainWindow`, 11 `ProofreadingErrorText`), so `grep -c '<message'` is **372** in all 14 files,
+  0 unfinished, 0 empty, 0 vanished; `lrelease` reports 372 finished per file, the Windows-only
+  `HotkeyManager` message survives, and no existing translation changed. The review fixes shifted a
+  few `<location>` line numbers of `MainWindow`/`ProofreadingPanel`; they are informational and
+  refresh at the next `lupdate`, while the messages and translations are complete.
+- Decisions not obvious from the code: `startCheck()` does not reset `m_pendingTranslationCheck`
+  itself (the manual Check button clears it before the call, `requestTranslation()` sets it and
+  then calls `startCheck()`), so the check-before-translation flag survives to the result; the
+  confirmation enum is ordered `Dismissed, ApplyCorrections, TranslateAnyway` so `QDialog::Rejected`
+  maps to `Dismissed`; the dialogs stay `exec()`-based; programmatic corrections never start the
+  automatic translation; `swapLanguages()` calls `requestTranslation(false)` and bypasses the
+  check-before-translation question.
+
+Notes for the later children:
+
+- `07-external-selection-proofreading` reuses `ProofreadingText::corrected()` and the
+  `Channel::InPlace`/panel pattern; it owns the external confirmation window.
+- Stage 6 appends `llm` to `proofreadingProviderIds()` together with its service; the main window
+  needs no change because `updateProofreadingUi()` follows `activeService()` and the settings.

@@ -16,6 +16,7 @@ class MainWindow;
 class NetworkManager;
 class PopupWindow;
 class ProofreadingManager;
+class ProofreadingReply;
 class QMimeData;
 class QTimer;
 class SelectionGrabber;
@@ -74,6 +75,8 @@ private:
     void showSettings();
     PopupWindow *ensurePopup();
     void translateInMainWindow(const TranslationRequest &request);
+    void checkInMainWindow(const QString &text);
+    void updateProofreadingUi();
     void translateSelectionInMainWindow();
     void translateSelectionInPopup();
     void translateSelectionInPlace();
@@ -115,6 +118,7 @@ private:
     LanguageToolService *m_languageTool = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for
     QPointer<TranslationReply> m_popupReply;      // the request the popup waits for
+    QPointer<ProofreadingReply> m_mainWindowCheck; // the check the main window waits for
     QPointer<TranslationReply> m_inPlaceReply;    // the request for replacing a selection
     quintptr m_inPlaceTarget = 0;                 // window that had the selection
     std::unique_ptr<QMimeData> m_pasteSnapshot;   // clipboard to restore after pasting

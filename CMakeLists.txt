@@ -44,6 +44,7 @@ qt_add_library(qtranslate_core STATIC
     src/core/popupplacement.cpp             src/core/popupplacement.h
     src/core/proofreadingmanager.cpp        src/core/proofreadingmanager.h
     src/core/proofreadingservice.cpp        src/core/proofreadingservice.h
+    src/core/proofreadingtext.cpp           src/core/proofreadingtext.h
     src/core/proofreadingtypes.h
     src/core/settings.cpp                   src/core/settings.h
     src/core/textchunker.cpp                src/core/textchunker.h
@@ -101,6 +102,8 @@ qt_add_executable(qtranslate
     src/ui/languagecombobox.cpp     src/ui/languagecombobox.h
     src/ui/mainwindow.cpp           src/ui/mainwindow.h
     src/ui/popupwindow.cpp          src/ui/popupwindow.h
+    src/ui/proofreadingerrortext.cpp src/ui/proofreadingerrortext.h
+    src/ui/proofreadingpanel.cpp    src/ui/proofreadingpanel.h
     src/ui/settingsdialog.cpp       src/ui/settingsdialog.h
     src/ui/translationerrortext.cpp src/ui/translationerrortext.h
     src/ui/trayicon.cpp             src/ui/trayicon.h

@@ -126,6 +126,13 @@ void AppController::start()
             &AppController::translateInMainWindow);
     connect(m_mainWindow.get(), &MainWindow::serviceChanged, this,
             &AppController::selectService);
+    connect(m_mainWindow.get(), &MainWindow::checkRequested, this,
+            &AppController::checkInMainWindow);
+    connect(m_mainWindow.get(), &MainWindow::checkCancelled, this, [this] {
+        if (m_proofreading)
+            m_proofreading->cancel(ProofreadingManager::Channel::MainWindow);
+    });
+    updateProofreadingUi();
 
     if (m_trayAvailable) {
         m_tray = new TrayIcon(icon, this);
@@ -284,6 +291,8 @@ void AppController::createProofreading()
     // An unknown id is ignored by the manager with its fixed warning; the
     // settings normalise it to "languagetool".
     m_proofreading->setActiveService(settings.proofreading.provider);
+    connect(m_proofreading, &ProofreadingManager::activeServiceChanged, this,
+            [this](const QString &) { updateProofreadingUi(); });
 }
 
 void AppController::createHotkeys()
@@ -722,6 +731,8 @@ void AppController::applySettings(const AppSettings &oldSettings,
 
     if (oldSettings.general.uiLanguage != newSettings.general.uiLanguage)
         applyUiLanguage(newSettings.general.uiLanguage);
+
+    updateProofreadingUi();
 }
 
 void AppController::showSettings()
@@ -850,6 +861,42 @@ void AppController::translateInMainWindow(const TranslationRequest &request)
             m_mainWindow->showResult(reply->result());
         reply->deleteLater();
     });
+}
+
+void AppController::checkInMainWindow(const QString &text)
+{
+    if (!m_proofreading)
+        return;
+    const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
+    const ProofreadingRequest request{text, settings.proofreading.language,
+                                     settings.proofreading.categories};
+
+    // Cancels the previous main-window check; its finished() arrives right
+    // here with Cancelled and is ignored below.
+    ProofreadingReply *reply =
+        m_proofreading->check(request, ProofreadingManager::Channel::MainWindow);
+    reply->setParent(this); // freed with the controller if still pending at exit
+    m_mainWindowCheck = reply;
+
+    // The window shows "Checking…" itself before it emits checkRequested().
+    connect(reply, &ProofreadingReply::finished, this, [this, reply] {
+        if (reply == m_mainWindowCheck
+            && reply->result().error != TranslationError::Cancelled) {
+            m_mainWindow->showProofreadingResult(reply->result());
+        }
+        reply->deleteLater();
+    });
+}
+
+void AppController::updateProofreadingUi()
+{
+    if (!m_mainWindow)
+        return;
+    const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
+    const bool available = m_proofreading && m_proofreading->activeService() != nullptr;
+    m_mainWindow->setProofreadingAvailable(available && settings.proofreading.enabled);
+    m_mainWindow->setProofreadingOptions(settings.proofreading.checkBeforeTranslation,
+                                         settings.proofreading.autoReplace);
 }
 
 void AppController::translateSelectionInMainWindow()
