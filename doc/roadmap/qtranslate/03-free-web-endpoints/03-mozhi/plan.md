@@ -19,7 +19,7 @@ storage and the UI/documentation each have their own acceptance.
 
 - `01-mozhi-service` (task, detailed): the pure `MozhiParser`, `MozhiService`, the `mozhi` language
   branch in `languages.cpp`, registration in `AppController`, fixtures and the new
-  `tst_mozhiparser`/`tst_mozhiservice`. No `[mozhi]` settings keys, UI, translations or docs.
+  `tst_mozhiparser`/`tst_mozhiwebservice`. No `[mozhi]` settings keys, UI, translations or docs.
 - `02-mozhi-settings` (task): `MozhiSettings` in `AppSettings`, the `[mozhi] instance` and
   `[mozhi] engine` keys in `SettingsStore` with normalization, `MozhiService::applySettings` and the
   cache reset on a change; `tst_settings` and a settings-path case in `tst_mozhiwebservice`. No new

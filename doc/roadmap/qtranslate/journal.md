@@ -2,22 +2,20 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/03-mozhi/03-mozhi-ui-and-docs` — `todo`, not detailed; the
-planner is next. The settings task is `done` (`2cda61a`): `MozhiSettings`, the `[mozhi]
-instance`/`engine` keys and normalization, `applySettings` and the cache reset are in; Linux is
-33/33, Windows 28 is not run. The UI/docs task adds the Settings group, the two strings in the 14
-`.ts`, the architecture/free-endpoints docs and the 33/28 counts; then the Mozhi stage is accepted.
-Real deferred problem: an active reply can re-store a result in the cache after the instance/engine
-changes, because the cache key has no generation and `clearCache()` does not invalidate the active
-reply; a cache generation counter in `TranslationManager` plus a test is the follow-up. The MyMemory
-stage is `done` (`371ab1e..082dac4`); its Auto-detect rough edge remains a later shared-UI decision.
-The infrastructure stage is `done` (`fee1bcf..fb531fa`). Decisions: one configured fallback step,
-not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web` stays outside
-the gate. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version
-bump, tag, push, or release; the CI publication is not performed). The working tree is clean after
-the settings commit; branch `main` matches the root `branch:` and is ahead of `origin/main`; nothing
-is pushed. Next: the UI/docs planner, then its coordinator, then the Mozhi stage acceptance. In a new
-session: `/new`, choose the `lead` agent, and enter `@continue`.
+Current node: `03-free-web-endpoints/03-mozhi/03-mozhi-ui-and-docs` — `in-progress`, detailed; the
+coordinator is next. The settings task is `done` (`2cda61a`); this task adds the Mozhi group in
+Settings, six new strings in the 14 `.ts` (301 → 307), the architecture/free-endpoints docs and the
+33/28 counts; then the Mozhi stage is accepted. Real deferred problem: an active reply can re-store
+a result in the cache after the instance/engine changes (a cache generation counter in
+`TranslationManager` is the follow-up). The MyMemory stage is `done` (`371ab1e..082dac4`); its
+Auto-detect rough edge remains a later shared-UI decision. The infrastructure stage is `done`
+(`fee1bcf..fb531fa`). Decisions: one configured fallback step, not a literal multi-step chain; Bing
+and Reverso stay in the stage; DeepL `free-web` stays outside the gate. Stage `02-linux` is `done`;
+the user deferred the 0.12.0 release on 2026-11-08 (no version bump, tag, push, or release; the CI
+publication is not performed). The working tree is clean after the UI/docs-plan commit; branch `main`
+matches the root `branch:` and is ahead of `origin/main`; nothing is pushed. Next: the UI/docs
+coordinator, then the Mozhi stage acceptance. In a new session: `/new`, choose the `lead` agent, and
+enter `@continue`.
 
 ## Journal
 
@@ -103,3 +101,4 @@ session: `/new`, choose the `lead` agent, and enter `@continue`.
 - 2026-11-09 — Task `03-free-web-endpoints/03-mozhi/01-mozhi-service` done as `7e88d9c`. Added `MozhiParser` (`Response`, `parseResponse`, `parseErrorBody`, `errorForHttpStatus`, body-first classification with fixed messages) and `MozhiService` (`QueuedWebService`, `requiresOptIn`, 500 ms, 5000 UTF-16 via `TextChunker::split`, `GET <instance>/api/translate`, `auto`, Google codes, prefix instance, `SameOriginRedirectPolicy`, `+` → `%2B`, edge whitespace, sequential chunks, timeout/abort, no text/URL/body in logs), the `mozhi` language branch, `AppController` registration after MyMemory, 16 fixtures, `tst_mozhiparser` and `tst_mozhiwebservice` (local `QTcpServer`). The reviewer added `failedChunkFailsTheWholeReply`; no rejected remarks. Verification: Astra/trixie Debug/Release 33/33, no warnings, `tst_mozhiwebservice` 10 repeats per configuration. Windows 28 and the live smoke were not performed. Next: detail `02-mozhi-settings`.
 - 2026-11-09 — Planner detailed `02-mozhi-settings` (7 steps, `detailed: true`). Decisions: `MozhiSettings` keeps the instance/engine as strings (`QUrl` only at the service boundary); `applySettings` re-normalizes as `OpenAiCompatibleService` does; validation is strict `http(s)` with a non-empty host, no user info, query, or fragment; trailing slashes are removed and a path prefix is kept; an empty/malformed instance or unknown engine falls back to the default with a fixed warning; `kCurrentVersion` stays 1; `AppController` clears the cache only when the effective instance/engine changes and does not abort the active request; the settings are tested in `tst_settings` and `tst_mozhiwebservice`, and the cache reset itself is code-reviewed because there is no `AppController` test target. Status `in-progress`; coordinator next.
 - 2026-11-09 — Task `03-free-web-endpoints/03-mozhi/02-mozhi-settings` done as `2cda61a`. Added `MozhiSettings` with the `[mozhi] instance`/`engine` keys and four normalization helpers in `src/core/settings.*`; `MozhiService::applySettings()` re-normalizes and delegates the defaults; `AppController` clears the cache only when the effective instance/engine changes and does not abort the active request; `kCurrentVersion` stays 1. Tests: `tst_settings` defaults/normalization/round trip/corrupt values/optional group; `tst_mozhiwebservice` settings path through a local server and no-abort. Verification: Astra/trixie Debug/Release 33/33, no warnings. The coordinator documented a real deferred problem: a reply that is active while the instance/engine changes can store its result in the cache after `clearCache()`, because the cache key has no generation; fixing it needs a generation counter in `TranslationManager` and a test and is a follow-up, not this task. Windows 28 and the live smoke were not performed. Next: detail `03-mozhi-ui-and-docs`.
+- 2026-11-09 — Planner detailed `03-mozhi-ui-and-docs` (detailed; ~19 files, 14 of them `.ts`). Decisions: group order `freeWeb` → `MyMemory` → `Mozhi`, effective-value label with `Qt::PlainText`, validation through the settings helpers, six strings (301 → 307), engine names are product names and do not enter `.ts`, `tst_settingsdialog` grows to 24, the docs update `architecture.md` §3.1/§3.2/§4.5/§4.7.4/§4.8/§4.9/§4.11/§8/§4.14 and §9.2, `free-endpoints.md` §5/§8/§9 and `AGENTS.md` 28/33; no new test target; the parent stage's `tst_mozhiservice` typo was corrected by the lead. The task stays one node because the `.ts` edit is mechanical and the stage already has three children. Status `in-progress`; coordinator next.
