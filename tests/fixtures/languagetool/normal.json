@@ -1,0 +1,110 @@
+{
+  "software": {
+    "name": "LanguageTool",
+    "version": "6.5",
+    "premium": false,
+    "status": ""
+  },
+  "warnings": {
+    "incompleteResults": false
+  },
+  "language": {
+    "name": "English (US)",
+    "code": "en-US",
+    "detectedLanguage": {
+      "name": "English (US)",
+      "code": "en-US",
+      "confidence": 0.99
+    }
+  },
+  "matches": [
+    {
+      "message": "Possible spelling mistake found.",
+      "shortMessage": "Spelling",
+      "replacements": [
+        { "value": "The" },
+        { "value": "Ten" },
+        { "value": "Te" }
+      ],
+      "offset": 18,
+      "length": 3,
+      "context": {
+        "text": "SECRET context text: Teh eror is very unique.",
+        "offset": 5,
+        "length": 3
+      },
+      "sentence": "SECRET sentence.",
+      "type": { "typeName": "Other" },
+      "rule": {
+        "id": "MORFOLOGIK_RULE_EN_US",
+        "description": "Possible spelling mistake",
+        "issueType": "misspelling",
+        "category": { "id": "TYPOS", "name": "Possible Typo" }
+      }
+    },
+    {
+      "message": "Did you mean 'is'?",
+      "shortMessage": "Grammar",
+      "replacements": [
+        { "value": "This is" }
+      ],
+      "offset": 0,
+      "length": 8,
+      "context": {
+        "text": "SECRET context text: This are a test.",
+        "offset": 5,
+        "length": 8
+      },
+      "sentence": "SECRET sentence.",
+      "type": { "typeName": "Other" },
+      "rule": {
+        "id": "THIS_ARE",
+        "description": "Did you mean 'is'?",
+        "issueType": "grammar",
+        "category": { "id": "GRAMMAR", "name": "Grammar" }
+      }
+    },
+    {
+      "message": "Two consecutive spaces.",
+      "shortMessage": "Whitespace",
+      "replacements": [
+        { "value": " " }
+      ],
+      "offset": 16,
+      "length": 2,
+      "context": {
+        "text": "SECRET context text: This are a test.",
+        "offset": 5,
+        "length": 2
+      },
+      "sentence": "SECRET sentence.",
+      "type": { "typeName": "Other" },
+      "rule": {
+        "id": "CONSECUTIVE_SPACES",
+        "description": "Two consecutive spaces",
+        "issueType": "whitespace",
+        "category": { "id": "TYPOGRAPHY", "name": "Typography" }
+      }
+    },
+    {
+      "message": "'very unique' is redundant.",
+      "shortMessage": "Redundancy",
+      "replacements": [],
+      "offset": 30,
+      "length": 11,
+      "context": {
+        "text": "SECRET context text: This are a test.",
+        "offset": 5,
+        "length": 11
+      },
+      "sentence": "SECRET sentence.",
+      "type": { "typeName": "Other" },
+      "rule": {
+        "id": "VERY_UNIQUE",
+        "description": "Redundant expression",
+        "issueType": "style",
+        "category": { "id": "REDUNDANCY", "name": "Redundancy" }
+      }
+    }
+  ]
+}

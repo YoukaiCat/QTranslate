@@ -1,0 +1,23 @@
+{
+  "matches": [
+    {
+      "message": "Did you mean 'is'?",
+      "replacements": [
+        { "value": "This is" }
+      ],
+      "offset": 10,
+      "length": 10,
+      "context": {
+        "text": "SECRET context text.",
+        "offset": 0,
+        "length": 10
+      },
+      "sentence": "SECRET sentence.",
+      "rule": {
+        "id": "THIS_ARE",
+        "issueType": "grammar",
+        "category": { "id": "GRAMMAR", "name": "Grammar" }
+      }
+    }
+  ]
+}

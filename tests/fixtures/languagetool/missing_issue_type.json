@@ -1,0 +1,23 @@
+{
+  "matches": [
+    {
+      "message": "Possible spelling mistake found.",
+      "replacements": [
+        { "value": "The" }
+      ],
+      "offset": 0,
+      "length": 3,
+      "context": {
+        "text": "SECRET context text: Teh test.",
+        "offset": 0,
+        "length": 3
+      },
+      "sentence": "SECRET sentence.",
+      "rule": {
+        "id": "MORFOLOGIK_RULE_EN_US",
+        "description": "Possible spelling mistake",
+        "category": { "id": "TYPOS", "name": "Possible Typo" }
+      }
+    }
+  ]
+}

@@ -154,6 +154,7 @@ constexpr Synonym kSynonyms[] = {
 constexpr QLatin1String kGoogle("google");
 constexpr QLatin1String kDeepL("deepl");
 constexpr QLatin1String kDeepLWeb("deepl-web");
+constexpr QLatin1String kLanguageTool("languagetool");
 constexpr QLatin1String kLlm("llm");
 constexpr QLatin1String kMyMemory("mymemory");
 constexpr QLatin1String kMozhi("mozhi");
@@ -174,6 +175,42 @@ constexpr CodeOverride kMyMemoryOverrides[] = {
     {"zh-Hant", "zh-TW"},
     {"nb", "no"},
     {"fil", "tl"},
+};
+
+// The longCode values of https://api.languagetool.org/v2/languages as of
+// 2026-11-09. The regional variant is the deliberate default, so a rule set is
+// deterministic for a language that LanguageTool offers in several regions.
+constexpr CodeOverride kLanguageToolCodes[] = {
+    {"ar", "ar"},
+    {"be", "be-BY"},
+    {"ca", "ca-ES"},
+    {"da", "da-DK"},
+    {"de", "de-DE"},
+    {"el", "el-GR"},
+    {"en", "en-US"},
+    {"eo", "eo"},
+    {"es", "es-ES"},
+    {"fa", "fa-IR"},
+    {"fil", "tl-PH"},
+    {"fr", "fr-FR"},
+    {"ga", "ga-IE"},
+    {"gl", "gl-ES"},
+    {"it", "it-IT"},
+    {"ja", "ja-JP"},
+    {"km", "km-KH"},
+    {"nb", "nb"},
+    {"nl", "nl-NL"},
+    {"pl", "pl-PL"},
+    {"pt-BR", "pt-BR"},
+    {"pt-PT", "pt-PT"},
+    {"ro", "ro-RO"},
+    {"ru", "ru-RU"},
+    {"sk", "sk-SK"},
+    {"sl", "sl-SI"},
+    {"sv", "sv-SE"},
+    {"ta", "ta-IN"},
+    {"uk", "uk-UA"},
+    {"zh-Hans", "zh-CN"},
 };
 
 // The observed Yandex web catalogue (doc/free-endpoints.md, §2). Yandex has one
@@ -296,6 +333,17 @@ const char *reversoCodeOf(const LanguageInfo &info)
     return nullptr;
 }
 
+// LanguageTool takes the long codes of its catalogue and declares exactly the
+// languages in kLanguageToolCodes; anything absent is not offered.
+const char *languageToolCodeOf(const LanguageInfo &info)
+{
+    for (const CodeOverride &codeOverride : kLanguageToolCodes) {
+        if (QLatin1String(info.code) == QLatin1String(codeOverride.code))
+            return codeOverride.serviceCode;
+    }
+    return nullptr;
+}
+
 const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
                           Languages::Direction d)
 {
@@ -306,6 +354,8 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
     // LLMs accept the internal codes; the catalogue is the same as Google's.
     if (serviceId == kLlm)
         return info.google ? info.code : nullptr;
+    if (serviceId == kLanguageTool)
+        return languageToolCodeOf(info);
     if (serviceId == kMyMemory)
         return mymemoryCodeOf(info);
     if (serviceId == kMozhi)

@@ -1,0 +1,31 @@
+{
+  "software": {
+    "name": "LanguageTool",
+    "version": "6.5"
+  },
+  "language": {
+    "name": "English (US)",
+    "code": "en-US"
+  },
+  "matches": [
+    {
+      "message": "Did you mean 'is'?",
+      "replacements": [
+        { "value": "This is" }
+      ],
+      "offset": 3,
+      "length": 8,
+      "context": {
+        "text": "SECRET context text: 😀 This are a test.",
+        "offset": 2,
+        "length": 8
+      },
+      "sentence": "SECRET sentence.",
+      "rule": {
+        "id": "THIS_ARE",
+        "issueType": "grammar",
+        "category": { "id": "GRAMMAR", "name": "Grammar" }
+      }
+    }
+  ]
+}

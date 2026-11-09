@@ -1,0 +1,13 @@
+{
+  "software": {
+    "name": "LanguageTool",
+    "version": "6.5"
+  },
+  "warnings": {
+    "incompleteResults": false
+  },
+  "language": {
+    "name": "English (US)",
+    "code": "en-US"
+  }
+}

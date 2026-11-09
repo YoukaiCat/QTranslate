@@ -1,0 +1,21 @@
+{
+  "matches": [
+    {
+      "shortMessage": "",
+      "replacements": [],
+      "offset": 0,
+      "length": 3,
+      "context": {
+        "text": "SECRET context text.",
+        "offset": 0,
+        "length": 3
+      },
+      "sentence": "SECRET sentence.",
+      "rule": {
+        "id": "SOME_RULE",
+        "issueType": "grammar",
+        "category": { "id": "GRAMMAR", "name": "Grammar" }
+      }
+    }
+  ]
+}

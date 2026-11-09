@@ -12,6 +12,7 @@ const QString google = QStringLiteral("google");
 const QString deepl = QStringLiteral("deepl");
 const QString deeplWeb = QStringLiteral("deepl-web");
 const QString llm = QStringLiteral("llm");
+const QString languageTool = QStringLiteral("languagetool");
 const QString mozhi = QStringLiteral("mozhi");
 const QString mymemory = QStringLiteral("mymemory");
 const QString yandexWeb = QStringLiteral("yandex-web");
@@ -156,6 +157,48 @@ private slots:
         QTest::newRow("reverso uk") << reverso << "uk" << Direction::Target << "";
         QTest::newRow("reverso pl") << reverso << "pl" << Direction::Target << "";
         QTest::newRow("reverso unknown code") << reverso << "xx" << Direction::Target << "";
+        QTest::newRow("languagetool en") << languageTool << "en" << Direction::Target << "en-US";
+        QTest::newRow("languagetool de") << languageTool << "de" << Direction::Target << "de-DE";
+        QTest::newRow("languagetool fr") << languageTool << "fr" << Direction::Target << "fr-FR";
+        QTest::newRow("languagetool es") << languageTool << "es" << Direction::Target << "es-ES";
+        QTest::newRow("languagetool it") << languageTool << "it" << Direction::Target << "it-IT";
+        QTest::newRow("languagetool nl") << languageTool << "nl" << Direction::Target << "nl-NL";
+        QTest::newRow("languagetool sv") << languageTool << "sv" << Direction::Target << "sv-SE";
+        QTest::newRow("languagetool fa") << languageTool << "fa" << Direction::Target << "fa-IR";
+        QTest::newRow("languagetool ru") << languageTool << "ru" << Direction::Target << "ru-RU";
+        QTest::newRow("languagetool uk") << languageTool << "uk" << Direction::Target << "uk-UA";
+        QTest::newRow("languagetool pl") << languageTool << "pl" << Direction::Target << "pl-PL";
+        QTest::newRow("languagetool pt-BR") << languageTool << "pt-BR" << Direction::Target
+                                           << "pt-BR";
+        QTest::newRow("languagetool pt-PT") << languageTool << "pt-PT" << Direction::Target
+                                           << "pt-PT";
+        QTest::newRow("languagetool zh-Hans") << languageTool << "zh-Hans" << Direction::Target
+                                             << "zh-CN";
+        QTest::newRow("languagetool ja") << languageTool << "ja" << Direction::Target << "ja-JP";
+        QTest::newRow("languagetool ar") << languageTool << "ar" << Direction::Target << "ar";
+        QTest::newRow("languagetool fil") << languageTool << "fil" << Direction::Target << "tl-PH";
+        QTest::newRow("languagetool nb") << languageTool << "nb" << Direction::Target << "nb";
+        QTest::newRow("languagetool be") << languageTool << "be" << Direction::Target << "be-BY";
+        QTest::newRow("languagetool ca") << languageTool << "ca" << Direction::Target << "ca-ES";
+        QTest::newRow("languagetool da") << languageTool << "da" << Direction::Target << "da-DK";
+        QTest::newRow("languagetool el") << languageTool << "el" << Direction::Target << "el-GR";
+        QTest::newRow("languagetool eo") << languageTool << "eo" << Direction::Target << "eo";
+        QTest::newRow("languagetool ga") << languageTool << "ga" << Direction::Target << "ga-IE";
+        QTest::newRow("languagetool gl") << languageTool << "gl" << Direction::Target << "gl-ES";
+        QTest::newRow("languagetool km") << languageTool << "km" << Direction::Target << "km-KH";
+        QTest::newRow("languagetool ro") << languageTool << "ro" << Direction::Target << "ro-RO";
+        QTest::newRow("languagetool sk") << languageTool << "sk" << Direction::Target << "sk-SK";
+        QTest::newRow("languagetool sl") << languageTool << "sl" << Direction::Target << "sl-SI";
+        QTest::newRow("languagetool ta") << languageTool << "ta" << Direction::Target << "ta-IN";
+        QTest::newRow("languagetool zh-Hant") << languageTool << "zh-Hant" << Direction::Target
+                                             << "";
+        QTest::newRow("languagetool hi") << languageTool << "hi" << Direction::Target << "";
+        QTest::newRow("languagetool ko") << languageTool << "ko" << Direction::Target << "";
+        QTest::newRow("languagetool tr") << languageTool << "tr" << Direction::Target << "";
+        QTest::newRow("languagetool vi") << languageTool << "vi" << Direction::Target << "";
+        QTest::newRow("languagetool unknown code") << languageTool << "xx" << Direction::Target
+                                                  << "";
+        QTest::newRow("languagetool auto") << languageTool << "auto" << Direction::Source << "";
         QTest::newRow("unknown code") << google << "xx" << Direction::Target << "";
         QTest::newRow("auto is not a language") << google << "auto" << Direction::Source << "";
         QTest::newRow("unknown service") << "yandex" << "en" << Direction::Target << "";
@@ -248,6 +291,23 @@ private slots:
         QTest::newRow("reverso ru target") << reverso << "ru" << Direction::Target << "ru";
         QTest::newRow("reverso unknown") << reverso << "xx" << Direction::Source << "";
         QTest::newRow("reverso pt") << reverso << "pt" << Direction::Source << "";
+        QTest::newRow("languagetool ru-RU") << languageTool << "ru-RU" << Direction::Source
+                                            << "ru";
+        QTest::newRow("languagetool mixed case") << languageTool << "En-Us" << Direction::Target
+                                                 << "en";
+        QTest::newRow("languagetool zh-CN") << languageTool << "zh-CN" << Direction::Source
+                                            << "zh-Hans";
+        QTest::newRow("languagetool tl-PH") << languageTool << "tl-PH" << Direction::Target
+                                            << "fil";
+        QTest::newRow("languagetool en-US") << languageTool << "en-US" << Direction::Source
+                                            << "en";
+        QTest::newRow("languagetool de-DE") << languageTool << "de-DE" << Direction::Source
+                                            << "de";
+        QTest::newRow("languagetool pt-PT") << languageTool << "pt-PT" << Direction::Target
+                                            << "pt-PT";
+        QTest::newRow("languagetool auto") << languageTool << "auto" << Direction::Source << "";
+        QTest::newRow("languagetool unknown") << languageTool << "xx-YY" << Direction::Source
+                                              << "";
         QTest::newRow("unknown") << google << "xx-unknown" << Direction::Source << "";
         QTest::newRow("empty") << google << "" << Direction::Source << "";
         QTest::newRow("google code for deepl") << deepl << "iw" << Direction::Source << "";
@@ -266,8 +326,8 @@ private slots:
     {
         // Every supported language maps to a service code and back to itself,
         // except where several internal codes share a service code (DeepL "PT", "ZH").
-        for (const QString &service : {google, deepl, deeplWeb, llm, mozhi, mymemory, yandexWeb,
-                                       bingWeb, reverso}) {
+        for (const QString &service : {google, deepl, deeplWeb, llm, languageTool, mozhi, mymemory,
+                                       yandexWeb, bingWeb, reverso}) {
             for (Direction direction : {Direction::Source, Direction::Target}) {
                 for (const QString &code : Languages::supported(service, direction)) {
                     const QString serviceCode = Languages::toServiceCode(service, code, direction);
@@ -357,6 +417,38 @@ private slots:
              {Languages::autoCode(), QStringLiteral("pt-BR"), QStringLiteral("zh-Hans"),
               QStringLiteral("uk"), QStringLiteral("pl")}) {
             QVERIFY2(!reversoSources.contains(code), qPrintable(code));
+        }
+        const QStringList languageToolSources =
+            Languages::supported(languageTool, Direction::Source);
+        QCOMPARE(Languages::supported(languageTool, Direction::Target), languageToolSources);
+        QCOMPARE(languageToolSources.size(), 30);
+        const QStringList languageToolExpected = {
+            QStringLiteral("ar"),      QStringLiteral("be"),      QStringLiteral("ca"),
+            QStringLiteral("da"),      QStringLiteral("de"),      QStringLiteral("el"),
+            QStringLiteral("en"),      QStringLiteral("eo"),      QStringLiteral("es"),
+            QStringLiteral("fa"),      QStringLiteral("fil"),     QStringLiteral("fr"),
+            QStringLiteral("ga"),      QStringLiteral("gl"),      QStringLiteral("it"),
+            QStringLiteral("ja"),      QStringLiteral("km"),      QStringLiteral("nb"),
+            QStringLiteral("nl"),      QStringLiteral("pl"),      QStringLiteral("pt-BR"),
+            QStringLiteral("pt-PT"),   QStringLiteral("ro"),      QStringLiteral("ru"),
+            QStringLiteral("sk"),      QStringLiteral("sl"),      QStringLiteral("sv"),
+            QStringLiteral("ta"),      QStringLiteral("uk"),      QStringLiteral("zh-Hans"),
+        };
+        QCOMPARE(QSet<QString>(languageToolSources.begin(), languageToolSources.end()),
+                 QSet<QString>(languageToolExpected.begin(), languageToolExpected.end()));
+        for (const QString &code :
+             {QStringLiteral("ru"), QStringLiteral("uk"), QStringLiteral("en"),
+              QStringLiteral("de"), QStringLiteral("fr"), QStringLiteral("es"),
+              QStringLiteral("pl"), QStringLiteral("pt-BR"), QStringLiteral("pt-PT"),
+              QStringLiteral("zh-Hans"), QStringLiteral("ja"), QStringLiteral("ar"),
+              QStringLiteral("fil"), QStringLiteral("nb")}) {
+            QVERIFY2(languageToolSources.contains(code), qPrintable(code));
+        }
+        for (const QString &code :
+             {Languages::autoCode(), QStringLiteral("zh-Hant"), QStringLiteral("hi"),
+              QStringLiteral("ko"), QStringLiteral("tr"), QStringLiteral("vi"),
+              QStringLiteral("sr"), QStringLiteral("cs"), QStringLiteral("hu")}) {
+            QVERIFY2(!languageToolSources.contains(code), qPrintable(code));
         }
         QVERIFY(Languages::supported(QStringLiteral("yandex"), Direction::Target).isEmpty());
     }

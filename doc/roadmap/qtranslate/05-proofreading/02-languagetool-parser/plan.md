@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-proofreading-core]
 ---
@@ -287,3 +287,53 @@ those internal codes are absent from its catalogue rather than mapped to an appr
   (401/403 → `Auth`) is kept here. If the service later distinguishes a block, it changes the
   service, not the parser's status table.
 - **Windows is not built here.** Record the count and the build as not performed, never as passed.
+
+## Outcome
+
+Done. `LanguageToolParser` turns a saved `/v2/check` body into `ProofreadingIssue` values with no
+network, no logging and no UI, and `Languages` knows the `languagetool` service id.
+
+- Files: new `src/services/languagetoolparser.{h,cpp}`, `tests/tst_languagetoolparser.cpp` and
+  `tests/fixtures/languagetool/` (16 fixtures); modified `src/core/languages.cpp`, `CMakeLists.txt`,
+  `tests/tst_languages.cpp` and `tests/CMakeLists.txt`. No settings, service, UI, `.ts`,
+  documentation, README or `doc/handoff.md` change; `grep -c '<message' i18n/qtranslate_ru_RU.ts`
+  stayed 316.
+- Parser: `categoryFor()` checks `rule.category.id` first, then `rule.issueType`, trims and compares
+  case-insensitively, and returns only `spelling`/`grammar`/`punctuation`/`style`; `parseResponse()`
+  validates every match (`offset`/`length` must be whole JSON numbers with `offset >= 0`,
+  `length > 0` and `offset + length <= textLength`, computed in `qint64`), keeps server order,
+  ordered `replacements`, `message` with the `shortMessage` fallback, `rule.id` and
+  `severity == 0`, and never reads `context.offset`. Every error message is one of the five fixed
+  literals and `serviceId` is set on success and on every error; `errorForHttpStatus()` is the
+  planned status table. A local `wholeNumber()` helper does the integral-and-fits-`int` check in one
+  place.
+- `Languages`: `kLanguageTool`, the 30-pair `kLanguageToolCodes` table (sorted, one pair per line,
+  with the `longCode` source and the deliberate regional-variant comment), `languageToolCodeOf()` and
+  the `serviceCodeOf()` branch; no header, catalogue, `closest()` or other-service change.
+- Tests: `tst_languagetoolparser` is platform-neutral and registered after `tst_languages`. It has
+  data-driven rows for both mapping tables (including the category-wins `CASING` case, trim and
+  case), the success fixtures (`normal`, `empty_matches`, `context_offset_differs`,
+  `missing_issue_type`, `unknown_issue_type`), the UTF-16 emoji case with
+  `text.mid(offset, length)` and the live evidence in a comment, all error fixtures through
+  `verifyFixedMessage()`/`verifyError()` (no `SECRET`, no `<`, no `://`, `serviceId` still set), and
+  the `errorForHttpStatus` rows. `tst_languages` has the `languagetool` constant, the `roundTrip()`
+  loop, the exact `longCode` rows for all 30 languages and the empty results for `zh-Hant`, `hi`,
+  `ko`, `tr`, `vi`, an unknown code and `auto`, plus the `supportedLists` assertions.
+- Review: no must-fix findings. Two test-only improvements were accepted and applied: the emoji test
+  passes `int(text.size())` so MSVC `/W4` sees no `qsizetype` → `int` narrowing, and the 12
+  `toServiceCode` rows that were covered only by `roundTrip()`/`supportedLists` now assert their
+  exact value as well, so a typo in any of the 30 pairs fails the test.
+- Verification (Linux only): Debug and Release build with `-Wall -Wextra` and zero warnings;
+  `xvfb-run -a ctest --test-dir build/linux-release --output-on-failure` is 41/41 and `ctest -N`
+  shows 41 tests (40 + `tst_languagetoolparser`). Windows would be 36 (35 + 1) and is **not
+  performed** — no MSVC on this machine.
+
+Notes for the later children:
+
+- `03-languagetool-service` owns the HTTP call, the endpoint, the chunking, the category filter
+  ("empty = all", applied once), the chunk-offset shift and the `HTTP %1` wording; it must pass the
+  UTF-16 chunk length as `textLength` and call `errorForHttpStatus()` for non-2xx.
+- The mapping tables live only in `languagetoolparser.cpp`; if a live response shows a misfiled
+  category id, change the table and `tst_languagetoolparser` together, not the service or the UI.
+- `Languages::supported("languagetool", …)` is the source for the provider's language list; `auto`
+  is deliberately absent and handled by the service as the request language.

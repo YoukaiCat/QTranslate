@@ -1,0 +1,25 @@
+{
+  "matches": [
+    {
+      "message": "The sentence does not start with a capital letter.",
+      "replacements": [
+        { "value": "This" }
+      ],
+      "offset": 0,
+      "length": 4,
+      "context": {
+        "text": "SECRET context text: this is a test.",
+        "offset": 0,
+        "length": 4
+      },
+      "sentence": "SECRET sentence.",
+      "type": { "typeName": "Other" },
+      "rule": {
+        "id": "UPPERCASE_SENTENCE_START",
+        "description": "Capitalization",
+        "issueType": "typographical",
+        "category": { "id": "CASING", "name": "Capitalization" }
+      }
+    }
+  ]
+}
