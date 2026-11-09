@@ -1,6 +1,7 @@
 ---
 kind: task
-status: todo
+status: in-progress
+detailed: true
 depends: [01-proofreading-popup-window]
 ---
 
