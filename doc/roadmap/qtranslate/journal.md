@@ -2,20 +2,21 @@
 
 ## Where we left off
 
-Current node: `03-free-web-endpoints/05-bing-web` — `todo`, not detailed; the planner is next in a
-new session. The Yandex stage is `done` (accepted over `fdd3bfd..7b2e574`; service `34dd4a6`,
-settings `a1e0051`, docs `7b2e574`). Linux is 35/35, Windows 30 (not run). The top-level stage 3
-continues with Bing, Reverso, and the fallback chain. Real deferred problem: an active reply can
-store a result fetched from the old instance/engine after `clearCache()` (cache-generation counter
-in `TranslationManager` plus a test; also covers `google.mode`, `deepl.mode`,
-`deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a later shared-UI decision.
-Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations. Decisions: one configured
-fallback step, not a literal multi-step chain; Bing and Reverso stay in the stage; DeepL `free-web`
-stays outside the gate. Stage `02-linux` is `done`; the user deferred the 0.12.0 release on
-2026-11-08 (no version bump, tag, push, or release; the CI publication is not performed). The
-working tree is clean after the Yandex-acceptance commit; branch `main` matches the root `branch:`
-and is ahead of `origin/main`; nothing is pushed. **Context stop at ~360k.** In a new session:
-`/new`, choose the `lead` agent, and enter `@continue`.
+Current node: `03-free-web-endpoints/05-bing-web/01-bing-web-parser` — `in-progress`, detailed; the
+coordinator is next. `05-bing-web` is now a stage (`in-progress`, `base: 53b43a5`) with four
+children: parser (detailed), service, settings and docs. Work is on `main` (matches the root
+`branch:`); the split is committed locally and nothing is pushed. Stage `03-free-web-endpoints` is
+`in-progress`: `01-free-web-infrastructure`, `02-mymemory`, `03-mozhi` and `04-yandex-web` are
+`done`; `06-reverso` and `07-fallback-chain` are `todo`. Linux is 35/35, Windows 30 (derived, not
+run); the parser adds `tst_bingwebparser`, so Linux becomes 36 and Windows would be 31. Real
+deferred problem: an active reply can store a result fetched from the old instance/engine after
+`clearCache()` (cache-generation counter in `TranslationManager` plus a test; also covers
+`google.mode`, `deepl.mode`, `deepl.englishVariant`). MyMemory's Auto-detect rough edge remains a
+later shared-UI decision; Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded limitations.
+Decisions: one configured fallback step, not a literal multi-step chain; Bing and Reverso stay in
+the stage; DeepL `free-web` stays outside the gate; the Bing POST is urlencoded, not multipart.
+Stage `02-linux` is `done`; the user deferred the 0.12.0 release on 2026-11-08 (no version bump,
+tag, push, or release). Next: the coordinator for `01-bing-web-parser`.
 
 ## Journal
 
@@ -109,3 +110,4 @@ and is ahead of `origin/main`; nothing is pushed. **Context stop at ~360k.** In 
 - 2026-11-09 — Task `03-free-web-endpoints/04-yandex-web/02-yandex-web-settings` done as `a1e0051`. Added the `Yandex` group after Mozhi with one `yandexHint` string (unofficial, gate, rate limits/blocks, several requests, third party), gate-aware enabling, no key/URL/`AppSettings` field, `tst_settingsdialog::yandexGroup` (25 passed), and two new messages in all 14 `.ts` (307 → 309). Verification: Astra Debug/Release 35/35, no warnings; a fresh trixie Release also 35/35; no reviewer blockers. Windows 30 was not performed. Next: detail `03-yandex-web-docs`.
 - 2026-11-09 — Task `03-free-web-endpoints/04-yandex-web/03-yandex-web-docs` done by the lead (documentation-only, no coordinator). Updated `doc/architecture.md` §3.1/§3.2/§4.5/new §4.7.5/§4.8/§4.9/§8/§4.14/§9.2, `doc/free-endpoints.md` status/§2/§8/§9, and `AGENTS.md` 30/35; `ctest -N` reports 35, the historical §9.2/§11.9 sentences stay unchanged. No live smoke; Windows 30 is derived, not run. Next: the Yandex stage acceptance over `fdd3bfd..HEAD`.
 - 2026-11-09 — Stage `03-free-web-endpoints/04-yandex-web` accepted and closed `done` over `fdd3bfd..7b2e574`; all three children are done (`34dd4a6`, `a1e0051`, `7b2e574`). The acceptance repeated Astra/trixie Debug/Release 35/35 with no warnings, checked the service/settings/docs integration and the gate/INI path, and found no code defects; no fixes were needed. The lead fixed two documentation wording issues (a bare JSON object in §4.7.5, the 750 ms default in the §8 row) and the stale lead-owned lines (READMEs/root plan 30/35, handoff state and counts, stage outcome). Real deferred problem: the cache-generation race (unchanged). Known limitations: `zh-Hant`→`zh`, `pt-PT` absent, 750 ms/5000 UTF-16 assumptions. Windows 30 and the live smoke were not performed. Context reached the threshold after this node; the next node is `05-bing-web` (`todo`, needs planner detail in a new session). No push.
+- 2026-11-09 — Planner split `05-bing-web` into a stage with four children: `01-bing-web-parser` (detailed), `02-bing-web-service`, `03-bing-web-settings` and `04-bing-web-docs`. The combined node was about 30 files with three independent acceptances, so it did not fit one task; the parser is separate because Bing's page markers are the fragile layer. The parser covers `BingWebParser`, the `bing-web` language branch (the observed whitelist, `pt-BR`→`pt`, `pt-PT`→`pt-PT`, `sr`→`sr-Cyrl`, `nb`→`nb`, `zh-Hans`/`zh-Hant`, and the `sr-Latn`→`sr` synonym), fixtures and `tst_bingwebparser`; `02` adds `BingWebService` with the two-step handshake, token cache, one-time 401 refresh, explicit `MUID` cookie and `tst_bingwebservice`; `03` the gate-aware Bing group and 14 `.ts` (309 → 311); `04` the docs and the `AGENTS.md` counts. Counts: 35/30 now, 36/31 after the parser, 37/32 after the service. Protocol correction from a live check on 2026-11-09: the POST body is `application/x-www-form-urlencoded`, not multipart; urlencoded returned a translation while multipart with the same fields returned `{"statusCode":205,"errorMessage":""}`. `MUID` comes from the GET's `Set-Cookie` (the page `muid` is the fallback), both requests use manual cookie attributes, and the POST sends an explicit `Cookie: MUID=...`; the token is cached for the page lifetime (3600000 ms default) and a 401 (HTTP or body `statusCode`) refreshes exactly once, a second 401 is `RateLimited`, and a 403 is a block with no refresh. `auto` is sent as `auto-detect`; 1000 ms and 5000 UTF-16 are named assumptions. The planner verified the live page markers and response shape; the READMEs, `doc/handoff.md`, the root plan and `07-fallback-chain` stay lead-owned. No user question. The parser is `in-progress`; coordinator next. No push.
