@@ -1,6 +1,6 @@
 # Handoff: work state
 
-Date: 2026-11-09. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
+Date: 2026-11-10. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
 
 The active roadmap is [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md); the old plan is
 archived at [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); the active
@@ -50,14 +50,14 @@ documentation is English. The migration to the tree roadmap and the English base
   in-place feedback, and explicit warnings; no `ydotool`/`wtype`. A real portal-capable desktop was
   not available; the portal is covered by a mock DBus (20/20) and Weston headless confirms the
   fallback.
-- Tests: 39 on Linux (31 shared plus `tst_hotkeymanager_x11` 16/16,
+- Tests: 45 on Linux (36 shared plus `tst_hotkeymanager_x11` 16/16,
   `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
   `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
-  `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 20/20; `tst_queuedwebservice`,
-  `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_mozhiparser`, `tst_mozhiwebservice`,
-  `tst_yandexwebparser`, `tst_yandexwebservice`, `tst_bingwebparser`, `tst_bingwebservice`,
-  `tst_reversoparser`, and `tst_reversoservice` are the new shared tests). Windows keeps 34 tests
-  and was not run here (no MSVC).
+  `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 30/30,
+  `tst_proofreading_selection_x11` 6/6; the shared proofreading tests are
+  `tst_proofreadingmanager`, `tst_languagetoolparser`, `tst_languagetoolservice`,
+  `tst_proofreadingpanel` and `tst_proofreadingpopup`). Windows keeps 39 tests (36 shared plus 3
+  Windows-only) and was not run here (no MSVC). The 14 `.ts` files have 383 messages each.
 - Fallback: `translation/fallbackService` (off by default, one configured opt-in service) retries a
   failed primary request once on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`,
   `Network` or `Timeout`; success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and
@@ -94,13 +94,12 @@ documentation is English. The migration to the tree roadmap and the English base
   no-libsecret build.
 - Release 0.12.0 is published from `main` on 2026-11-09 by user decision; the version bump, the
   README download links, `doc/releases/0.12.0.md` and this handoff are in the release commit. The
-  tag CI is the build gate; Windows Debug/Release and its 34 tests are not performed locally (no
-  MSVC). The old 0.11.1 GitHub release is deleted after 0.12.0 is published (user decision). The
-  roadmap is past stage 3: the opt-in gate, the shared queue, MyMemory, Mozhi, Yandex web, Bing web
-  and Reverso are done, the fallback chain is implemented (manager, settings/UI and docs), and stage
-  3 is accepted `done`. Stage 4 (`04-local-offline-translation`) stays `blocked` by the user's
-  2026-11-05 decision; the next stage is `05-proofreading`, currently `blocked` on three user
-  decisions recorded in its plan.
+  tag CI is the build gate; Windows Debug/Release and its 39 tests are not performed locally (no
+  MSVC). The old 0.11.1 GitHub release stays until the user checks the current code on Windows. The
+  roadmap is past stages 3 and 5: the opt-in gate, the shared queue, MyMemory, Mozhi, Yandex web,
+  Bing web and Reverso are done, the fallback chain is implemented, and stage 5 proofreading
+  (LanguageTool only, no credentials) is accepted. Stage 4 (`04-local-offline-translation`) stays
+  `blocked` by the user's 2026-11-05 decision; the next stage is `06-llm-actions`.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 
@@ -231,7 +230,7 @@ documentation is English. The migration to the tree roadmap and the English base
   endpoint silently returns an uppercase base code without translation, so the normalization is
   mandatory. `DE`, `PT-BR`, `EN-US`, `zh-Hans` were verified with live requests.
 - `tst_deeplwebparser`, `tst_deeplwebservice` and `tst_deeplservice` (`free-web` mode); Debug and
-  Release: 23/23 tests at that time (the suite is 34 Windows / 39 Linux now).
+  Release: 23/23 tests at that time (the suite is 39 Windows / 45 Linux now).
 - Live smoke through the built `DeepLWebService`: `Hello, world` → `Hallo, Welt`,
   `detected_source_language=en`, no errors.
 - **Bing web is implemented:** `src/services/bingwebparser.*` and `bingwebservice.*`; the token page
@@ -275,17 +274,36 @@ documentation is English. The migration to the tree roadmap and the English base
 - Next step: a PoC with Python Argos (en↔ru, en↔de, pivot ru→de), measuring quality/speed/RAM; if
   acceptable — a native CTranslate2 runner.
 
-## Proofreading (roadmap stage 5 (old stage 15), planned)
+## Proofreading (roadmap stage 5 (old stage 15), implemented)
 
-- [`proofreading.md`](proofreading.md): a separate mode for spelling, grammar and punctuation
-  checking; the code is not implemented.
-- A separate **Text checking** settings tab and independent `proofreading/*` keys; checking must not be
-  part of `TranslationService`.
-- Providers: LanguageTool (cloud/self-hosted, grammar/punctuation), Hunspell/Nuspell (spelling),
-  Yandex Speller (spelling ru/uk/en), LLM — optionally through a diff.
-- `ProofreadingIssue` with UTF-16 `offset`/`length`, `replacements`, `ruleId`, `category`, `severity`;
-  replacement in the main window with undo, in an external application — with confirmation.
-- `checkBeforeTranslation` and `autoReplace` default to `false`; the checked text is not logged.
+- [`proofreading.md`](proofreading.md): implemented in stage 5 over `eb91f6b..263091f`, with the
+  acceptance fix `0ca1ad2`. The first version ships **LanguageTool only** (user decision of
+  2026-11-09); Hunspell/Nuspell, Yandex Speller and the LLM checker are deferred. The premium
+  LanguageTool credentials are out of scope: the public API rejects them and can echo a submitted
+  key, so the application sends no `apiKey`/`username`.
+- The provider-independent layer is `core/proofreadingtypes`, `proofreadingservice` (a
+  `ProofreadingReply` with the `TranslationReply` semantics), `proofreadingmanager` (channels
+  `MainWindow`/`InPlace`, registry, pre-network refusals) and `proofreadingtext` (applying issue
+  replacements). `LanguageToolService` uses `RequestQueue`, posts `text`, `language` and
+  `enabledOnly=false` to the public or self-hosted `v2/check`, chunks at 20 000 UTF-16 units with
+  offset shifts, filters categories client-side, supports `auto`, and maps 401/403→`Auth`,
+  413→`TooLong`, 429→`RateLimited`, 5xx→`Network`.
+- A separate **Text checking** tab and independent `[proofreading]` keys; `allowOnlineServices` is
+  the privacy gate (off by default) and covers every remote endpoint. `checkBeforeTranslation`,
+  `autoReplace` and the proofreading hotkey are off/empty by default.
+- The main window has **Check**, issue highlighting, Replace/Ignore, Replace all with a preview,
+  Copy corrected text, one-undo-step replacements, and check-before-translation confirmation.
+  `ProofreadingPopupWindow` is a non-activating external-selection confirmation with
+  Replace selection/Copy/Cancel; the flow uses `Channel::InPlace`, a foreground watchdog, clipboard
+  fallback and the shared paste path. The fifth `HotkeyAction::ProofreadSelection` is empty by
+  default; the same scenario is `--proofread-selection`.
+- Verification: Linux Debug/Release 45/45 with no warnings, `.ts` 383, Windows 39 not performed
+  (no MSVC). Known gaps: a click on the non-activating popup under a real window manager is
+  unverified and falls back to the clipboard on a focus change; the grabber waits a fixed 400 ms
+  for the clipboard; the `QSKIP` for a missing `DISPLAY` is unreachable because `QTEST_MAIN` creates
+  the xcb application first; a paste-shortcut failure reuses the shared "translation" wording;
+  disabling the online gate during a running long check does not abort the remaining chunks; the
+  all-categories-unchecked case is normalized back to all four.
 
 ## LLM actions (roadmap stage 6 (old stage 16), partially implemented)
 
@@ -382,7 +400,8 @@ the commit the user personally tested; it is three commits after `v0.11.0` (`a64
 5. Release: https://github.com/YoukaiCat/QTranslate/releases/tag/v0.11.1
 
 User decision (2026-11-08): leave 0.11.1 exactly as published; do not re-tag or re-release it.
-Releases are tag-driven. When 0.12.0 is published, delete the old 0.11.1 GitHub release.
+Releases are tag-driven. 0.12.0 is published; the old 0.11.1 GitHub release stays until the user
+checks the current code on Windows.
 
 ## Release 0.12.0 (2026-11-09)
 
@@ -399,8 +418,10 @@ both READMEs, this handoff and the roadmap journal.
    `tar.gz`, `.deb` and AppImage, the `windows` job built the installer and ZIP, and the `release`
    job published all of them with `SHA256SUMS.txt`/`SHA256SUMS-linux.txt` (unlisted). The tag run
    and the `main` run both succeeded; every asset digest matches its checksum file.
-4. When the release is published, delete the old 0.11.1 GitHub release (user decision).
-5. The next milestone is stage 5 (`05-proofreading`), currently blocked on three user decisions.
+4. The old 0.11.1 GitHub release stays published until the user checks the current code on Windows
+   (user decision of 2026-11-09, superseding the earlier timing).
+5. The next milestone is stage 6 (`06-llm-actions`); stage 5 (`05-proofreading`) is accepted and its
+   documentation is updated.
 
 ## User rules
 

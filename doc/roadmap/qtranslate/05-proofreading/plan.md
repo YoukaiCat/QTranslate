@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: eb91f6b
 ---
 
@@ -56,3 +56,54 @@ Proofreading APIs have limits; text may be private; automatic replacement is ris
 - Automatic replacement stays off, `proofreading/checkBeforeTranslation` stays off, and every replacement in another application needs explicit confirmation; single and bulk replacement in the main window are always one undo step.
 - The public LanguageTool API has limits (about 20 requests/min, 75 000 characters/min, 20 000 characters per request) and no availability guarantee; for regular use the self-hosted URL is the answer. Rule false positives and language-dependent punctuation are the user-visible risk: the UI always shows the message and the suggested replacements instead of applying them silently.
 - The external-selection scenario (`07`) is part of the stage; its fifth hotkey touches the frozen `HotkeyManager` API across Windows, X11 and the Wayland portal and comes last.
+
+## Outcome
+
+Done. Six active children (`01`-`05`, `07`) were delivered; `06-spelling-providers` is `dropped`
+with its design kept. The first version uses **LanguageTool only**, through the public API or a
+self-hosted endpoint and **without credentials**, with the separate `proofreading/allowOnlineServices`
+gate off by default.
+
+Delivered:
+
+- `01-proofreading-core` (`8faaaf3`, corrected in `28eb684`): value types with UTF-16 offsets,
+  `ProofreadingReply`/`ProofreadingService`, `ProofreadingManager` with `MainWindow`/`InPlace`
+  channels and the gate, `TextChunker::splitWithOffsets()`, and the `[proofreading]` settings group.
+- `02-languagetool-parser` (`e6bd593`): the `matches[]` parser, the category mapping, the 30-code
+  language branch, and the fixed status/error table.
+- `03-languagetool-service` (`ae38658`): `LanguageToolService` on the extracted `RequestQueue`, the
+  public and self-hosted endpoints, per-host pauses, `auto`, 20 000-UTF-16 chunking with offset
+  shifts, client-side category filtering, the error matrix, and `AppController` registration.
+- `04-text-checking-tab` (`adc8b09`): the separate **Text checking** tab with the provider, language,
+  endpoint, categories, replacement/check-before-translation switches and the online gate; no key
+  fields.
+- `05-main-window-check-and-replace` (`6cd5284`): the Check button, issue panel and highlighting,
+  Replace/Ignore/Replace all with preview, one-undo-step replacements, copy, check-before-translation,
+  and stale-request cancellation.
+- `07-external-selection-proofreading` (`acbe3c1`, `c62c716`, `ab80c38`, `590ea5f`, acceptance fix
+  `0ca1ad2`): the non-activating confirmation popup, the `--proofread-selection`/`InPlace` flow with
+  the foreground watchdog and clipboard fallback, the real X11 replacement test, and the optional
+  fifth hotkey `proofreading/hotkey` (empty by default).
+
+Acceptance over `eb91f6b..263091f` found no further code defect. Verification: Linux Debug/Release
+45/45 with no warnings under `xvfb-run -a`, `tst_translations` 4/4, the 14 `.ts` files at 383
+messages with no unfinished/vanished/empty; Windows 39 is not performed (no MSVC). The stage
+documentation is updated in `AGENTS.md`, both READMEs, `doc/architecture.md`, `doc/handoff.md`,
+`doc/proofreading.md`, and the root plan.
+
+Deferred and known problems:
+
+- Hunspell/Nuspell, Yandex Speller and the LLM checker are out of this stage (`06` dropped; stage 6
+  owns the LLM action); premium LanguageTool `username`/`apiKey` is deferred.
+- A click on the non-activating popup under a real window manager is unverified; on a focus change
+  the flow safely falls back to the clipboard.
+- Disabling `proofreading/allowOnlineServices` while a long multi-chunk check is already running does
+  not abort the remaining chunks; it needs a manager/UI cancellation path.
+- The grabber waits a fixed 400 ms for the clipboard; on a heavily loaded machine a real selection
+  can be missed. The 500 ms clipboard-restore race is older and unchanged.
+- The `QSKIP` for a missing `DISPLAY` is unreachable because `QTEST_MAIN` creates the xcb
+  application first; a shared pre-`QApplication` main would fix all X11 tests.
+- A failed `sendPasteShortcut()` reuses the shared "translation" wording; the corrected text is
+  already on the clipboard.
+- Unchecking all four categories is normalized back to all four by design; the UI does not explain
+  this yet.

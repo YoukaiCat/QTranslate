@@ -1,8 +1,8 @@
 # Spelling, grammar, and punctuation checking
 
-Date: 2026-11-05. Status: **roadmap stage 5 (old stage 15), in progress; code not implemented yet**. The
-first version ships **LanguageTool only** (user decision of 2026-11-09); Yandex Speller and
-Hunspell/Nuspell are deferred and kept here as the longer-term design.
+Date: 2026-11-05. Status: **implemented in roadmap stage 5 (old stage 15)**. The first version ships
+**LanguageTool only** (user decision of 2026-11-09); Yandex Speller and Hunspell/Nuspell are deferred
+and kept here as the longer-term design.
 
 ## 1. Goal
 
@@ -86,10 +86,13 @@ public:
     virtual QString id() const = 0;
     virtual QString displayName() const = 0;
     virtual bool isConfigured() const = 0;
-    virtual void check(const ProofreadingRequest &request,
-                       std::function<void(ProofreadingResult)> callback) = 0;
+    virtual ProofreadingReply *check(const ProofreadingRequest &request) = 0;
 };
 ```
+
+The implementation returns a caller-owned `ProofreadingReply` with the same semantics as
+`TranslationReply` (`finished()` outside `check()`, `abort()` → `Cancelled`), and `ProofreadingManager`
+owns the registry and the `MainWindow`/`InPlace` channels.
 
 Details:
 
@@ -97,7 +100,8 @@ Details:
 - Split long text by sentences/paragraphs, merge offsets taking separators into account;
 - Cancel a stale request on a new click;
 - Do not block the UI; network — through the existing `NetworkManager` with proxy and timeout;
-- API keys — through DPAPI, as with DeepL/Google;
+- No credentials: the public LanguageTool API and a self-hosted URL work without a key; the premium
+  `username`/`apiKey` mode is deferred;
 - Do not write the checked text to the log.
 
 For text replacement:
@@ -141,12 +145,17 @@ affect the selected translation service.
 ## 7. Tests
 
 - The LanguageTool parser on fixtures: several errors, replacements, offset/length, UTF-16 and
-  surrogate pairs, an empty response, 429/403/5xx;
-- Merging offsets when splitting long text;
+  surrogate pairs, an empty response, 429/403/5xx (`tst_languagetoolparser`);
+- The service against a local server and the offset merge when splitting long text
+  (`tst_languagetoolservice`);
+- The manager, registry, channels and gate (`tst_proofreadingmanager`);
 - Hunspell/Nuspell: dictionary, case, punctuation around the word; *(deferred)*
 - Yandex Speller: success, empty response, limit; *(deferred)*
-- Settings: saving/loading, the online gate, a separate tab;
-- UI (offscreen): the list, replacing one/all, undo, request cancellation;
+- Settings: saving/loading, the online gate, a separate tab (`tst_settings`,
+  `tst_settingsdialog`);
+- UI (offscreen): the list, replacing one/all, undo, request cancellation
+  (`tst_proofreadingpanel`, `tst_proofreadingpopup`);
+- X11: real grabber + popup + paste (`tst_proofreading_selection_x11`);
 - Manual smoke: LanguageTool cloud/self-hosted, replacement in Notepad/a browser.
 
 ## 8. Risks
@@ -172,13 +181,13 @@ The first version implements LanguageTool and the online gate; the Hunspell/Nusp
 Speller items below are the long-term design and are not part of stage 5 (user decision of
 2026-11-09). The stage criteria live in [`roadmap/qtranslate/05-proofreading/plan.md`](roadmap/qtranslate/05-proofreading/plan.md).
 
-- [ ] There is a separate "Text checking" tab and independent settings.
-- [ ] Checking finds errors and shows them in a list/with highlighting.
-- [ ] It is possible to replace one error, all errors, and the text with the corrected one.
-- [ ] Replacement in the main window is undone by undo; for an external application there is
+- [x] There is a separate "Text checking" tab and independent settings.
+- [x] Checking finds errors and shows them in a list/with highlighting.
+- [x] It is possible to replace one error, all errors, and the text with the corrected one.
+- [x] Replacement in the main window is undone by undo; for an external application there is
   confirmation.
-- [ ] LanguageTool works through the cloud and a self-hosted URL, without credentials in the first
+- [x] LanguageTool works through the cloud and a self-hosted URL, without credentials in the first
   version; premium `username`/`apiKey` support is deferred.
 - [ ] Hunspell/Nuspell and Yandex Speller work at least for spelling. *(deferred)*
-- [ ] Network/limit/key errors are shown clearly and the application does not hang.
-- [ ] Tests and documentation are updated.
+- [x] Network/limit errors are shown clearly and the application does not hang.
+- [x] Tests and documentation are updated.

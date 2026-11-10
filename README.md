@@ -17,6 +17,12 @@ translation directly in the active input field.
 - **Ctrl+Shift+Q** translates the selected text and replaces the selection in the active input
   field, which is convenient for replying in chats.
 - **Ctrl+W** opens the main window with the selection translated.
+- **Text checking** is a separate mode with the **Text checking** settings tab: LanguageTool finds
+  spelling, grammar and punctuation issues, the main window highlights them and can replace one
+  issue, all issues or copy the corrected text, and every replacement is one undo step. Online
+  checking is opt-in; the public LanguageTool API and a self-hosted URL work without a key. The
+  selection check in another application uses an optional fifth hotkey (empty by default) or
+  `--proofread-selection` and replaces the selection only after confirmation.
 - Google Translate (free endpoint or Cloud API) and DeepL (API key or unofficial free web mode),
   plus OpenRouter or another OpenAI-compatible provider. OpenRouter offers free models such as
   `openrouter/free`; any compatible endpoint works, including local Ollama, LM Studio or
@@ -71,21 +77,25 @@ by CI. See [Linux](#linux-0120) for build and packaging steps.
 
 ```
 qtranslate [--minimized] [--verbose]
-qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--translate-inplace
+qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--translate-inplace|--proofread-selection
 ```
 
 - `Ctrl+Q` — translate the selection in a popup next to the cursor.
 - `Ctrl+Shift+Q` — translate the selection and replace it in the active input field.
 - `Ctrl+W` — open the main window with the selection translated.
 - `Ctrl+Enter` — translate in the main window.
+- **Check** in the main window runs LanguageTool over the source text; **Settings → Text checking**
+  chooses the language, categories, a self-hosted URL and the online gate. The optional
+  **Check the selection in another application** hotkey (empty by default) checks the selected text
+  and replaces it only after confirmation.
 - Settings, service selection, **Show window** and **Quit** are available from the tray menu.
   Hotkeys, languages, proxy, autostart and API keys are configured in **Settings**.
 - Global hotkeys are released automatically while a fullscreen application is in the foreground,
   so games receive Ctrl+Q/Ctrl+W. This can be disabled in **Settings → Hotkeys**; **Tray → Pause
   hotkeys** disables them manually.
-- `--translate-popup`, `--translate-main`, and `--translate-inplace` run the three scenarios in an
-  already running instance (or start one). They are mutually exclusive and are the portable trigger
-  for Wayland and desktop shortcuts; see [Linux](#linux-0120).
+- `--translate-popup`, `--translate-main`, `--translate-inplace` and `--proofread-selection` run the
+  four scenarios in an already running instance (or start one). They are mutually exclusive and are
+  the portable trigger for Wayland and desktop shortcuts; see [Linux](#linux-0120).
 - `--minimized` starts hidden in the tray; `--verbose` writes a detailed log. On Windows the log is
   `%LOCALAPPDATA%\qtranslate\qtranslate.log`; on Linux it is
   `$XDG_STATE_HOME/qtranslate/qtranslate.log` (`~/.local/state/...` when unset).
@@ -170,10 +180,10 @@ these artifacts; the tag must match the version in `CMakeLists.txt`.
 
 ### Linux (0.12.0)
 
-QTranslate builds, links, and passes 39 tests (31 shared plus 8 Linux platform tests) in Debug and
+QTranslate builds, links, and passes 45 tests (36 shared plus 9 Linux platform tests) in Debug and
 Release with `-Wall -Wextra` and no warnings on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7
 (Qt 6.10.2). X11 is the full target: global hotkeys, selection capture, in-place replacement,
-autostart, the three CLI commands, and tray integration are implemented. Wayland is limited: the
+autostart, the four CLI commands, and tray integration are implemented. Wayland is limited: the
 `GlobalShortcuts` portal when the desktop provides it, manual copying, the CLI commands, and explicit
 warnings; there is no synthetic-input fallback. GNOME needs an AppIndicator extension for the tray
 icon.
@@ -260,6 +270,11 @@ security policy's approval. To revoke it, run
 - OpenRouter and other OpenAI-compatible providers need an API key and an available model. Quality,
   speed and cost depend on the chosen model; free models have strict rate limits. The text is sent
   to the selected provider.
+- LanguageTool checking needs the online gate; the public API limits requests to about 20 per
+  minute and 20 000 characters per request, and self-hosted LanguageTool is more reliable for long
+  or frequent checks. The checked text goes to the LanguageTool server. Replacing a selection in
+  another application needs confirmation, undo depends on that application, and a changed foreground
+  window falls back to copying the corrected text to the clipboard.
 - The intermediate `Ctrl+C` used to grab a selection may appear in the Windows clipboard history
   (`Win+V`); the original clipboard contents are restored. This is Windows-specific.
 - The installer is not code-signed yet.
