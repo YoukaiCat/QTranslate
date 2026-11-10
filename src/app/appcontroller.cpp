@@ -927,6 +927,11 @@ void AppController::translateSelectionInMainWindow()
         return;
     }
 
+    // A new selection action supersedes the external proofreading
+    // confirmation: its captured selection is stale, and its Replace handler
+    // must not race with the grab below over the shared clipboard.
+    closeProofreadingPopup();
+
     // The window is shown only after the selection has been copied: showing it
     // earlier would move the focus and Ctrl+C would go to our own window.
     m_grabber->grab([this](const QString &text) {
@@ -971,6 +976,11 @@ void AppController::translateSelectionInPopup()
         qCDebug(lcApp) << "Ctrl+Q ignored: a selection grab is already in progress";
         return;
     }
+
+    // A new selection action supersedes the external proofreading
+    // confirmation: its captured selection is stale, and its Replace handler
+    // must not race with the grab below over the shared clipboard.
+    closeProofreadingPopup();
 
     // The anchor must be the cursor position at the moment of the hotkey:
     // the user may move the mouse while the selection is being copied.
@@ -1028,6 +1038,11 @@ void AppController::translateSelectionInPlace()
         qCDebug(lcApp) << "Ctrl+Shift+Q ignored: a selection grab is already in progress";
         return;
     }
+
+    // A new selection action supersedes the external proofreading
+    // confirmation: its captured selection is stale, and its Replace handler
+    // must not race with the grab and paste below over the shared clipboard.
+    closeProofreadingPopup();
 
     // A new invocation replaces an unfinished answer from the previous one.
     m_translations->cancel(TranslationManager::Channel::InPlace);
@@ -1110,6 +1125,12 @@ void AppController::proofreadSelectionInPlace()
 
     // A new invocation replaces the previous check and its confirmation.
     closeProofreadingPopup();
+
+    // A new proofreading invocation supersedes an unfinished translate-and-replace
+    // answer: both captured the same selection, and whichever pasted last would
+    // overwrite the other. The proofreading action is the newer request.
+    m_translations->cancel(TranslationManager::Channel::InPlace);
+    m_inPlaceReply = nullptr;
 
     // The window is captured before the grab: it is the window the user is
     // typing in and it must still be foreground when the confirmation
