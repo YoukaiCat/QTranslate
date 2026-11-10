@@ -553,6 +553,8 @@ void SettingsStore::load()
         settings.value(QStringLiteral("allowOnlineServices"),
                        loaded.proofreading.allowOnlineServices)
             .toBool();
+    loaded.proofreading.hotkey =
+        readKeySequence(settings, QStringLiteral("hotkey"), loaded.proofreading.hotkey);
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("network"));
@@ -695,6 +697,8 @@ void SettingsStore::save(const AppSettings &settings)
     out.setValue(QStringLiteral("autoReplace"), normalized.proofreading.autoReplace);
     out.setValue(QStringLiteral("allowOnlineServices"),
                  normalized.proofreading.allowOnlineServices);
+    out.setValue(QStringLiteral("hotkey"),
+                 normalized.proofreading.hotkey.toString(QKeySequence::PortableText));
     out.endGroup();
 
     out.beginGroup(QStringLiteral("network"));

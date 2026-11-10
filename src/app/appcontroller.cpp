@@ -338,6 +338,9 @@ void AppController::createHotkeys()
         case HotkeyAction::ShowMainWindow:
             showMainWindow();
             break;
+        case HotkeyAction::ProofreadSelection:
+            proofreadSelectionInPlace();
+            break;
         }
     });
 
@@ -366,6 +369,7 @@ void AppController::createHotkeys()
     registerHotkey(HotkeyAction::TranslateAndReplace, settings.hotkeys.replaceSelection);
     registerHotkey(HotkeyAction::TranslateToMainWindow, settings.hotkeys.mainWindow);
     registerHotkey(HotkeyAction::ShowMainWindow, settings.hotkeys.showMainWindow);
+    registerHotkey(HotkeyAction::ProofreadSelection, settings.proofreading.hotkey);
     updateTrayToolTip();
 
     m_fullscreenTimer = new QTimer(this);
@@ -404,7 +408,8 @@ void AppController::updateTrayToolTip()
     QStringList keys;
     for (const HotkeyAction action :
          {HotkeyAction::TranslateToPopup, HotkeyAction::TranslateAndReplace,
-          HotkeyAction::TranslateToMainWindow, HotkeyAction::ShowMainWindow}) {
+          HotkeyAction::TranslateToMainWindow, HotkeyAction::ShowMainWindow,
+          HotkeyAction::ProofreadSelection}) {
         const QKeySequence sequence = m_hotkeys->hotkey(action);
         if (!sequence.isEmpty())
             keys << sequence.toString(QKeySequence::NativeText);
@@ -597,6 +602,8 @@ void AppController::applySettings(const AppSettings &oldSettings,
                  newSettings.hotkeys.mainWindow);
     updateHotkey(HotkeyAction::ShowMainWindow, oldSettings.hotkeys.showMainWindow,
                  newSettings.hotkeys.showMainWindow);
+    updateHotkey(HotkeyAction::ProofreadSelection, oldSettings.proofreading.hotkey,
+                 newSettings.proofreading.hotkey);
     if (oldSettings.hotkeys.pauseInFullscreen != newSettings.hotkeys.pauseInFullscreen) {
         m_pauseInFullscreen = newSettings.hotkeys.pauseInFullscreen;
         updateFullscreenState();

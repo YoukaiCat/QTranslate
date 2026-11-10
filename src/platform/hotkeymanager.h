@@ -17,6 +17,7 @@ enum class HotkeyAction {
     TranslateAndReplace,
     TranslateToMainWindow,
     ShowMainWindow,
+    ProofreadSelection,
 };
 
 Q_DECLARE_METATYPE(HotkeyAction)

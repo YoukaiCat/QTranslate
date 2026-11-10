@@ -120,9 +120,13 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_mainWindowHotkey->setObjectName(QStringLiteral("mainWindowHotkey"));
     m_showMainWindowHotkey = new QKeySequenceEdit(hotkeysPage);
     m_showMainWindowHotkey->setObjectName(QStringLiteral("showMainWindowHotkey"));
+    m_proofreadingHotkey = new QKeySequenceEdit(hotkeysPage);
+    m_proofreadingHotkey->setObjectName(QStringLiteral("proofreadingHotkey"));
     hotkeysForm->addRow(tr("Translate in a popup:"), m_popupHotkey);
     hotkeysForm->addRow(tr("Replace the selected text with the translation:"),
                         m_replaceSelectionHotkey);
+    hotkeysForm->addRow(tr("Check the selection in another application:"),
+                        m_proofreadingHotkey);
     hotkeysForm->addRow(tr("Translate in the main window:"), m_mainWindowHotkey);
     hotkeysForm->addRow(tr("Show the main window:"), m_showMainWindowHotkey);
     m_pauseInFullscreen =
@@ -680,6 +684,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_replaceSelectionHotkey->setKeySequence(settings.hotkeys.replaceSelection);
     m_mainWindowHotkey->setKeySequence(settings.hotkeys.mainWindow);
     m_showMainWindowHotkey->setKeySequence(settings.hotkeys.showMainWindow);
+    m_proofreadingHotkey->setKeySequence(settings.proofreading.hotkey);
     m_pauseInFullscreen->setChecked(settings.hotkeys.pauseInFullscreen);
 
     if (!m_sourceLanguage->setCurrentCode(settings.translation.sourceLang))
@@ -786,6 +791,7 @@ AppSettings SettingsDialog::settings() const
     result.hotkeys.replaceSelection = m_replaceSelectionHotkey->keySequence();
     result.hotkeys.mainWindow = m_mainWindowHotkey->keySequence();
     result.hotkeys.showMainWindow = m_showMainWindowHotkey->keySequence();
+    result.proofreading.hotkey = m_proofreadingHotkey->keySequence();
     result.hotkeys.pauseInFullscreen = m_pauseInFullscreen->isChecked();
     result.translation.sourceLang = m_sourceLanguage->currentCode();
     result.translation.primaryLang = m_primaryLanguage->currentCode();
@@ -993,6 +999,7 @@ bool SettingsDialog::validate(QString *error) const
          tr("Replace the selected text with the translation")},
         {m_mainWindowHotkey->keySequence(), tr("Translate in the main window")},
         {m_showMainWindowHotkey->keySequence(), tr("Show the main window")},
+        {m_proofreadingHotkey->keySequence(), QString()},
     };
 
     for (const auto &hotkey : hotkeys) {
@@ -1079,7 +1086,7 @@ bool SettingsDialog::anyHotkeyEditFocused() const
         return false;
     for (const QKeySequenceEdit *edit :
          {m_popupHotkey, m_replaceSelectionHotkey, m_mainWindowHotkey,
-          m_showMainWindowHotkey}) {
+          m_showMainWindowHotkey, m_proofreadingHotkey}) {
         if (edit == focus || edit->isAncestorOf(focus))
             return true;
     }

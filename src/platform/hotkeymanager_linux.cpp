@@ -65,6 +65,10 @@ struct ShortcutInfo
     QString description;
 };
 
+// The last HotkeyAction value: every action is enumerated by int(action) in the
+// table and in the portal loops below.
+constexpr HotkeyAction kLastAction = HotkeyAction::ProofreadSelection;
+
 const ShortcutInfo &shortcutInfo(HotkeyAction action)
 {
     static const ShortcutInfo shortcuts[] = {
@@ -75,13 +79,15 @@ const ShortcutInfo &shortcutInfo(HotkeyAction action)
         {QStringLiteral("translate-main-window"),
          QStringLiteral("Translate selected text in the main window")},
         {QStringLiteral("show-main-window"), QStringLiteral("Show the main window")},
+        {QStringLiteral("proofread-selection"),
+         QStringLiteral("Check the selected text and replace it")},
     };
     return shortcuts[int(action)];
 }
 
 bool actionForShortcutId(const QString &id, HotkeyAction *action)
 {
-    for (int i = 0; i <= int(HotkeyAction::ShowMainWindow); ++i) {
+    for (int i = 0; i <= int(kLastAction); ++i) {
         if (shortcutInfo(HotkeyAction(i)).id == id) {
             *action = HotkeyAction(i);
             return true;
@@ -1119,7 +1125,7 @@ void HotkeyManager::WaylandState::bindPending()
     QStringList invalidReasons;
     QList<QPair<HotkeyAction, QKeySequence>> invalid;
 
-    for (int i = 0; i <= int(HotkeyAction::ShowMainWindow); ++i) {
+    for (int i = 0; i <= int(kLastAction); ++i) {
         const HotkeyAction action = HotkeyAction(i);
         auto it = m_manager->m_registrations.find(int(action));
         if (it == m_manager->m_registrations.end() || it->sequence.isEmpty()
@@ -1394,7 +1400,7 @@ void HotkeyManager::WaylandState::onShortcutsChanged(
     // A previously registered ID that the desktop dropped stays in the
     // registration with its stored sequence but is no longer active.
     QList<QPair<HotkeyAction, QKeySequence>> removed;
-    for (int i = 0; i <= int(HotkeyAction::ShowMainWindow); ++i) {
+    for (int i = 0; i <= int(kLastAction); ++i) {
         const HotkeyAction action = HotkeyAction(i);
         const auto it = m_manager->m_registrations.constFind(int(action));
         if (it == m_manager->m_registrations.cend() || !it->registered)

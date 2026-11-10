@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [02-selection-check-and-replace]
 ---
@@ -94,3 +94,67 @@ unchanged. An empty `proofreading/hotkey` registers nothing.
   `ShowMainWindow` use.
 - The Wayland tests hard-code 4 in several places; a missed count is the likely failure.
 - Windows is not built here; record it as not performed.
+
+## Outcome
+
+Done. The fifth hotkey action is registered by all three backends and dispatches to the same
+`AppController::proofreadSelectionInPlace()` flow as `--proofread-selection`.
+
+- Files: `src/platform/hotkeymanager.{h}`, `src/platform/hotkeymanager_linux.cpp`,
+  `src/core/settings.{h,cpp}`, `src/ui/settingsdialog.{h,cpp}`, `src/app/appcontroller.cpp`,
+  `tests/tst_hotkeymanager_x11.cpp`, `tests/tst_hotkeymanager_wayland.cpp`, `tests/tst_settings.cpp`,
+  `tests/tst_settingsdialog.cpp` and the 14 `i18n/*.ts`. No change to the Windows backend, the stub,
+  `CMakeLists.txt`, `tests/CMakeLists.txt`, README, `AGENTS.md` or other `doc/` files.
+- API: `ProofreadSelection` is appended after `ShowMainWindow`; nothing is renumbered and no method
+  changed. The Windows backend needed no logic edit (`idForAction()` is `1 + int(action)` and
+  `m_actionsById` is generic); `tests/tst_hotkeymanager.cpp` is untouched and stays compilable.
+- Linux backend: `shortcutInfo()` gained `proofread-selection` / "Check the selected text and
+  replace it" (not translated, stage rule), and the three `ShowMainWindow`-bounded loops
+  (`actionForShortcutId`, `bindPending`, `onShortcutsChanged`) now use one
+  `constexpr HotkeyAction kLastAction = HotkeyAction::ProofreadSelection`. The asynchronous
+  `BindShortcuts` and `registrationFailed` semantics are unchanged.
+- Settings: `ProofreadingSettings::hotkey` is empty by default, read through `readKeySequence()` and
+  written as PortableText under `[proofreading]`. `[hotkeys]` and `translation.*` are untouched;
+  `normalizeSettings` needed no change.
+- Dialog: the fifth `QKeySequenceEdit` (`proofreadingHotkey`) sits between the replace-selection and
+  main-window rows with the label "Check the selection in another application:"; load, save, the
+  one-combination/validity and duplicate checks and `anyHotkeyEditFocused()` include it. The unused
+  `name` field of `validate()`'s local table receives an empty string for the new row, so the change
+  adds exactly one translatable message instead of a second, never-shown one.
+- Controller: registered only when non-empty in `createHotkeys()` and through the existing
+  `updateHotkey()` lambda in `applySettings()`; added to `updateTrayToolTip()` where the existing
+  empty-sequence check already hides it on Wayland after a desktop assignment; the
+  `registrationFailed` handler and the `allowOnlineServices` gate are untouched.
+- Empty setting: an empty `proofreading/hotkey` registers nothing because the `registerHotkey()`
+  lambda skips empty sequences; covered by the empty default in `tst_settings` and the existing
+  controller code. No `AppController` test was added, as the plan required.
+- Tests: X11 `registersAllActions()` has the fifth action (`Ctrl+Alt+Shift+F11`) and
+  `unregisterAllReleasesEverything()` registers the new action too (`Ctrl+Alt+Shift+F12`, because
+  that test already used F10 and F11; the plan's "four enumerated" wording was stale). The Wayland
+  mock has the fifth `ActionCase` (`proofread-selection`, `CTRL+ALT+SHIFT+F11`) and every
+  hard-coded count is 5; `shortcutsChangedReportsRemoval` expects four returned shortcuts after
+  `show-main-window` is dropped, and `DropShowMainWindow` still removes exactly one entry.
+  `tst_settings` covers the empty default, the `[proofreading]` round trip, the raw
+  `proofreading/hotkey` value, a malformed value (`Ctrl+Bogus??`) falling back to empty and the
+  untouched `translation.*` values. `tst_settingsdialog` covers the row, the settings-to-widget
+  load, the round trip, a duplicate with an existing action and with the new row, the accepted
+  empty value and both proofreading modes. `tst_hotkeysequence` is pure key mapping and needs no
+  case.
+- Translations: `update_translations` measured **383** `<message>` in each of the 14 files (382
+  before; exactly one new label, translated in all 14). No `unfinished`, `vanished` or lost
+  translation; the rest of the `.ts` diff is recomputed `<location>` lines.
+- Verification: Linux Debug and Release build with `-Wall -Wextra` and zero warnings; the full
+  `xvfb-run -a ctest` is **45/45** in both configurations (no new target). `tst_hotkeymanager_x11`
+  16 passed / 0 skipped, `tst_hotkeymanager_wayland` 20/20, `tst_settings` 65/65,
+  `tst_settingsdialog` 31/31, `tst_translations` 4/4. `git diff --check` is clean.
+- Astra trusted-client step: after rebuilding the X11 test binary it skipped with the keylogger
+  policy until `sudo /usr/bin/fly-set-execid.sh` was run (the `trusted.d` entries already existed);
+  16/16 passed afterwards. Recorded because the step is easy to miss.
+- Review: two minor test-coverage remarks accepted and fixed (the dialog now proves that a saved
+  `proofreading/hotkey` reaches the widget, and a dedicated case checks that the row stays enabled
+  with `proofreading/enabled` off). Nothing was rejected.
+- Not performed: Windows build and its 39 tests (no MSVC; the backend and its test are unchanged and
+  action-generic) and a real portal-capable Wayland desktop (the mock is the automated gate).
+- Found while working, not edited here: `doc/architecture.md` §4.3 still shows four `HotkeyAction`
+  values and the four rows of the action table, and `AGENTS.md` still says 34 Windows / 39 Linux
+  tests. Both were stale before this task and belong to a documentation pass.

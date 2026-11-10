@@ -131,6 +131,7 @@ private slots:
         QVERIFY(!settings.proofreading.checkBeforeTranslation);
         QVERIFY(!settings.proofreading.autoReplace);
         QVERIFY(!settings.proofreading.allowOnlineServices);
+        QVERIFY(settings.proofreading.hotkey.isEmpty());
 
         QCOMPARE(settings.network.proxyMode, QStringLiteral("system"));
         QCOMPARE(settings.network.timeoutMs, 10000);
@@ -408,6 +409,8 @@ private slots:
         settings.proofreading.checkBeforeTranslation = true;
         settings.proofreading.autoReplace = true;
         settings.proofreading.allowOnlineServices = true;
+        settings.proofreading.hotkey =
+            QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11"));
         store.save(settings);
 
         SettingsStore loaded(path, fakeCodec());
@@ -423,6 +426,8 @@ private slots:
         QVERIFY(result.proofreading.checkBeforeTranslation);
         QVERIFY(result.proofreading.autoReplace);
         QVERIFY(result.proofreading.allowOnlineServices);
+        QCOMPARE(result.proofreading.hotkey,
+                 QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11")));
         QCOMPARE(result.settingsVersion, 1);
 
         // The INI holds the group itself and no apiKey.
@@ -431,6 +436,8 @@ private slots:
             QVERIFY(raw.childGroups().contains(QStringLiteral("proofreading")));
             QCOMPARE(raw.value(QStringLiteral("proofreading/provider")).toString(),
                      QStringLiteral("languagetool"));
+            QCOMPARE(raw.value(QStringLiteral("proofreading/hotkey")).toString(),
+                     QStringLiteral("Ctrl+Alt+Shift+F11"));
         }
         const QByteArray ini = readFile(path);
         QVERIFY(ini.contains("[proofreading]"));
@@ -453,6 +460,8 @@ private slots:
                 QStringLiteral("https://user:secret@example.invalid/v2/check?key=secret"));
             raw.setValue(QStringLiteral("proofreading/categories"),
                          QStringLiteral(" style, SPELLING ,unknown,grammar"));
+            raw.setValue(QStringLiteral("proofreading/hotkey"),
+                         QStringLiteral("Ctrl+Bogus??"));
             raw.sync();
         }
 
@@ -471,6 +480,7 @@ private slots:
         QCOMPARE(result.proofreading.categories,
                  QStringList({QStringLiteral("spelling"), QStringLiteral("grammar"),
                               QStringLiteral("style")}));
+        QVERIFY(result.proofreading.hotkey.isEmpty());
     }
 
     void proofreadingProviderIsNormalized()
@@ -566,6 +576,8 @@ private slots:
         settings.proofreading.enabled = true;
         settings.proofreading.provider = QStringLiteral("languagetool");
         settings.proofreading.allowOnlineServices = true;
+        settings.proofreading.hotkey =
+            QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11"));
         store.save(settings);
 
         SettingsStore loaded(path, fakeCodec());
@@ -576,6 +588,8 @@ private slots:
         QCOMPARE(loaded.current().translation.maxLength, 5000);
         QVERIFY(loaded.current().proofreading.enabled);
         QVERIFY(loaded.current().proofreading.allowOnlineServices);
+        QCOMPARE(loaded.current().proofreading.hotkey,
+                 QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11")));
     }
 
     void migratesLegacyDeepLWebService()

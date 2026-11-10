@@ -78,6 +78,8 @@ struct ProofreadingSettings
     bool checkBeforeTranslation = false;
     bool autoReplace = false;
     bool allowOnlineServices = false;
+    // Empty by default: the action is disabled until the user assigns it.
+    QKeySequence hotkey;
 };
 
 struct NetworkSettings

@@ -158,6 +158,8 @@ void TestHotkeyManagerX11::registersAllActions()
         {HotkeyAction::TranslateToMainWindow, QKeySequence(Qt::CTRL | Qt::Key_W)},
         {HotkeyAction::ShowMainWindow,
          QKeySequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F10)},
+        {HotkeyAction::ProofreadSelection,
+         QKeySequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F11)},
     };
 
     for (const auto &testCase : cases) {
@@ -402,19 +404,23 @@ void TestHotkeyManagerX11::unregisterAllReleasesEverything()
 {
     const QKeySequence firstSequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F10);
     const QKeySequence secondSequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F11);
+    const QKeySequence thirdSequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F12);
 
     HotkeyManager manager;
     QVERIFY(manager.registerHotkey(HotkeyAction::TranslateToPopup, firstSequence));
     QVERIFY(manager.registerHotkey(HotkeyAction::TranslateToMainWindow, secondSequence));
+    QVERIFY(manager.registerHotkey(HotkeyAction::ProofreadSelection, thirdSequence));
 
     manager.unregisterAll();
     QVERIFY(manager.hotkey(HotkeyAction::TranslateToPopup).isEmpty());
     QVERIFY(manager.hotkey(HotkeyAction::TranslateToMainWindow).isEmpty());
+    QVERIFY(manager.hotkey(HotkeyAction::ProofreadSelection).isEmpty());
 
     HotkeyManager other;
     QSignalSpy failures(&other, &HotkeyManager::registrationFailed);
     QVERIFY(other.registerHotkey(HotkeyAction::TranslateToPopup, firstSequence));
     QVERIFY(other.registerHotkey(HotkeyAction::TranslateToMainWindow, secondSequence));
+    QVERIFY(other.registerHotkey(HotkeyAction::ProofreadSelection, thirdSequence));
     QCOMPARE(failures.count(), 0);
 }
 

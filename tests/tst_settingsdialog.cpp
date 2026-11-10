@@ -47,6 +47,7 @@ private slots:
         settings.translation.autoTranslateDelayMs = 0;
         settings.translation.allowFreeServices = true;
         settings.popup.autoCloseOnFocusLoss = false;
+        settings.proofreading.hotkey = QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F9);
 
         SettingsDialog dialog(settings, {QStringLiteral("en"), QStringLiteral("ru")},
                               {QStringLiteral("de"), QStringLiteral("en"),
@@ -65,6 +66,8 @@ private slots:
             dialog.findChild<QKeySequenceEdit *>(QStringLiteral("replaceSelectionHotkey"));
         auto *mainHotkey =
             dialog.findChild<QKeySequenceEdit *>(QStringLiteral("mainWindowHotkey"));
+        auto *proofreadingHotkey =
+            dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"));
         auto *source =
             dialog.findChild<LanguageComboBox *>(QStringLiteral("sourceLanguage"));
         auto *primary =
@@ -87,6 +90,7 @@ private slots:
         QVERIFY(popupHotkey);
         QVERIFY(replaceHotkey);
         QVERIFY(mainHotkey);
+        QVERIFY(proofreadingHotkey);
         QVERIFY(source);
         QVERIFY(primary);
         QVERIFY(secondary);
@@ -104,6 +108,8 @@ private slots:
         QCOMPARE(replaceHotkey->keySequence(),
                  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Q));
         QCOMPARE(mainHotkey->keySequence(), QKeySequence(Qt::CTRL | Qt::Key_W));
+        QCOMPARE(proofreadingHotkey->keySequence(),
+                 QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F9));
         QCOMPARE(source->currentCode(), QStringLiteral("en"));
         QCOMPARE(primary->currentCode(), QStringLiteral("de"));
         QCOMPARE(secondary->currentCode(), QStringLiteral("fr"));
@@ -139,6 +145,8 @@ private slots:
             ->setKeySequence(QKeySequence(QStringLiteral("Ctrl+Alt+R")));
         dialog.findChild<QKeySequenceEdit *>(QStringLiteral("mainWindowHotkey"))
             ->setKeySequence(QKeySequence());
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"))
+            ->setKeySequence(QKeySequence(QStringLiteral("Ctrl+Alt+P")));
         dialog.findChild<LanguageComboBox *>(QStringLiteral("sourceLanguage"))
             ->setCurrentCode(QStringLiteral("en"));
         dialog.findChild<LanguageComboBox *>(QStringLiteral("primaryLanguage"))
@@ -160,6 +168,7 @@ private slots:
         QCOMPARE(result.hotkeys.replaceSelection,
                  QKeySequence(QStringLiteral("Ctrl+Alt+R")));
         QVERIFY(result.hotkeys.mainWindow.isEmpty());
+        QCOMPARE(result.proofreading.hotkey, QKeySequence(QStringLiteral("Ctrl+Alt+P")));
         QCOMPARE(result.translation.sourceLang, QStringLiteral("en"));
         QCOMPARE(result.translation.primaryLang, QStringLiteral("fr"));
         QCOMPARE(result.translation.secondaryLang, QStringLiteral("de"));
@@ -183,7 +192,15 @@ private slots:
 
         QString error;
         QVERIFY(!dialog.validate(&error));
-        QVERIFY(!error.isEmpty());
+        QVERIFY(error.contains(QStringLiteral("assigned more than once")));
+
+        // The proofreading row is checked against the four existing actions too.
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("replaceSelectionHotkey"))
+            ->setKeySequence(QKeySequence());
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"))
+            ->setKeySequence(duplicate);
+        QVERIFY(!dialog.validate(&error));
+        QVERIFY(error.contains(QStringLiteral("assigned more than once")));
     }
 
     void rejectsMultiChordHotkey()
@@ -215,7 +232,8 @@ private slots:
         SettingsDialog dialog(AppSettings{}, {QStringLiteral("en"), QStringLiteral("ru")},
                               {QStringLiteral("en"), QStringLiteral("ru")}, true);
         for (const char *name : {"popupHotkey", "replaceSelectionHotkey",
-                                 "mainWindowHotkey", "showMainWindowHotkey"}) {
+                                 "mainWindowHotkey", "showMainWindowHotkey",
+                                 "proofreadingHotkey"}) {
             dialog.findChild<QKeySequenceEdit *>(QString::fromLatin1(name))
                 ->setKeySequence(QKeySequence());
         }
@@ -939,8 +957,10 @@ private slots:
         auto *punctuation =
             dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingPunctuation"));
         auto *style = dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingStyle"));
+        auto *hotkey =
+            dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"));
         QVERIFY(tabs && enabled && provider && language && endpoint && hint && spelling
-                && grammar && punctuation && style);
+                && grammar && punctuation && style && hotkey);
 
         QCOMPARE(tabs->count(), 6);
         QCOMPARE(tabs->tabText(3), QStringLiteral("Services"));
@@ -966,6 +986,9 @@ private slots:
         QVERIFY(grammar->isChecked());
         QVERIFY(!punctuation->isChecked());
         QVERIFY(style->isChecked());
+        // With the proofreading mode enabled the row stays editable; the
+        // disabled mode is covered by proofreadingHotkeyIsIndependentOfMode().
+        QVERIFY(hotkey->isEnabled());
 
         const AppSettings result = dialog.settings();
         QVERIFY(result.proofreading.enabled);
@@ -990,6 +1013,24 @@ private slots:
         QCOMPARE(language->count(), 4);
         QCOMPARE(language->itemData(0).toString(), Languages::autoCode());
         QCOMPARE(language->currentCode(), Languages::autoCode());
+    }
+
+    void proofreadingHotkeyIsIndependentOfMode()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("en"), QStringLiteral("ru")}, true);
+        auto *enabled =
+            dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingEnabled"));
+        auto *hotkey =
+            dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"));
+        QVERIFY(enabled && hotkey);
+        QVERIFY(!enabled->isChecked());
+
+        // An explicit invocation is not gated by proofreading/enabled, so its
+        // hotkey row must stay editable in both modes.
+        QVERIFY(hotkey->isEnabled());
+        enabled->setChecked(true);
+        QVERIFY(hotkey->isEnabled());
     }
 
     void proofreadingGateAndEndpoint()
