@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 62e5cea
 depends: [05-main-window-check-and-replace]
 ---
@@ -103,3 +103,35 @@ Boundaries recorded by the split:
   longer foreground.
 - The X11/Wayland test counts and the trusted-client step on Astra change; the Windows build and a
   real portal desktop are recorded as not performed.
+
+## Outcome
+
+Done. The third scenario of `doc/proofreading.md` §2 is implemented as four tasks:
+
+- `01-proofreading-popup-window` (`acbe3c1`): a non-activating `ProofreadingPopupWindow` reusing
+  `ProofreadingPanel` in external mode, with the issue list, the corrected preview from
+  `ProofreadingText::corrected()`, the undo caveat, and Replace selection / Copy / Cancel.
+- `02-selection-check-and-replace` (`c62c716`): `--proofread-selection`, the `proofread-selection`
+  wire line, and `AppController::proofreadSelectionInPlace()` with the pre-grab target, the popup
+  shown after the grab, the `InPlace` check, a 400 ms foreground guard, whole-selection replacement
+  after confirmation, clipboard fallback with fixed messages, and cancellation on focus loss, a new
+  request, quit, or disabling the mode.
+- `03-x11-replacement-integration` (`ab80c38`): the Linux-only `tst_proofreading_selection_x11` with
+  a real editor, `SelectionGrabber`, popup, and `sendPasteShortcut()` under Xvfb.
+- `04-proofreading-hotkey` (`590ea5f`): the fifth `HotkeyAction::ProofreadSelection`, the empty-by-
+  default `proofreading/hotkey` in `[proofreading]`, the Hotkeys row, and the Windows/X11/Wayland
+  backend table driven by `kLastAction`.
+
+Acceptance over `62e5cea..590ea5f` found one integration defect, fixed in `0ca1ad2`: a new selection
+action now closes an open proofreading popup before grabbing, and a proofreading request cancels a
+running in-place translation, so the two flows cannot race over the clipboard or paste a stale
+confirmation.
+
+Verification: Linux Debug/Release 45/45 with no warnings, `tst_translations` 4/4, `.ts` 383 messages
+(no unfinished/vanished/empty); Windows 39 is not performed (no MSVC); a real portal-capable Wayland
+desktop is a manual gap, the mock covers 20/20. Known limitations recorded: a click on the
+non-activating popup under a real window manager is unverified and may degrade to the clipboard
+fallback; the production grabber still uses a fixed 400 ms clipboard wait; the `QSKIP` for a missing
+`DISPLAY` is unreachable because `QTEST_MAIN` creates the xcb application first; a paste-shortcut
+failure reuses the shared "translation" wording; project documentation is updated by the lead for
+the parent stage.
