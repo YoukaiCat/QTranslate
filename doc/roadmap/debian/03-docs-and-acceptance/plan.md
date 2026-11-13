@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: b9a6f75
 depends: [01-native-debian-package, 02-release-integration]
 ---
@@ -77,3 +77,31 @@ Stages 1 and 2.
 - **Windows.** The Windows build and the 39 tests are not performed here (no MSVC); record them as
   not performed, never as passed.
 - **No push.** The roadmap work leaves commits and pushes to the lead and the user.
+
+## Outcome
+
+Accepted on 2026-11-14. Two tasks: `01-docs-native-package` closed by the lead as `c7e5808`
+(documentation only), `02-final-acceptance` closed by the coordinator as `8bbef5b` (the outcome
+itself, no source change).
+
+- `README.md`, `README.ru.md`, `AGENTS.md`, `doc/architecture.md`, `doc/handoff.md` and
+  `debian/README.Debian` document the native source package, the exact
+  `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot -us -uc`
+  command without a trailing dot, the `nocheck`/`nodoc`/`parallel` options, the `verify-deb.sh`
+  gate, the native `.deb` in CI and the Astra trusted-client fallback. `+astra1` is no longer a
+  current artifact name; `doc/handoff.md` keeps only the two sentences that record the removal.
+- The parent-directory outputs are documented as the `.deb`, `.dsc`, `.tar.xz`, `dbgsym`,
+  `.buildinfo` and `.changes`, with `dbgsym` not published. `doc/architecture.md` lists `debian/`
+  in the root layout and the `doc/roadmap/` subtree and `0.12.0.md` under `releases/`.
+  `doc/roadmap/README.md` describes the native package (its status flips to `done` when the root
+  closes).
+- The final acceptance re-ran the exact command from a `git archive HEAD` copy: rc 0, the `.deb`,
+  `.dsc` and `.tar.xz` in the parent (plus the unpublished `dbgsym`/`.buildinfo`/`.changes`);
+  package contents and `Depends` as designed; `dpkg -i`/`-L`/`desktop-file-validate`/
+  `xvfb-run -a qtranslate --version` (`QTranslate 0.12.0`)/`dpkg -r` pass; `verify-deb.sh` 15/15
+  and `--self-test` 4/4; Release builds without warnings and passes 45/45 under `xvfb-run -a`;
+  `dpkg-source -S` excludes a `build/` sentinel and `-x` extracts the `.dsc`.
+- The CI and release invariants hold (the trixie job is cited from stage 2); the documentation
+  link, `+astra1` and manual-`.deb` gates pass; `git diff dfd6f2e..HEAD -- src tests
+  CMakeLists.txt` is empty and the `qtranslate` map has only its journal note. Windows is not
+  performed (no MSVC). No push, tag or release was made.

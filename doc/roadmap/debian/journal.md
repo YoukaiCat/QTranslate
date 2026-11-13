@@ -2,17 +2,12 @@
 
 ## Where we left off
 
-Current node: stages 01 and 02 are `done`; stage `03-docs-and-acceptance` is `in-progress`
-(`base: b9a6f75`). Its task [01-docs-native-package](03-docs-and-acceptance/01-docs-native-package/plan.md)
-is `done` by the lead (`c7e5808`): `README.md`, `README.ru.md`, `AGENTS.md`,
-`doc/architecture.md`, `doc/handoff.md` and `debian/README.Debian` now describe the native package
-and no longer name `+astra1` as a current artifact. Task
-[02-final-acceptance](03-docs-and-acceptance/02-final-acceptance/plan.md) is `in-progress`; the
-coordinator is running the final acceptance over `dfd6f2e..HEAD` against the root `## Done when`.
-After it: root `## Outcome` and `status: done`, the `debian` line in `doc/roadmap/README.md`
-flipped to `done`, and the closing journal entry. Branch `main`, HEAD `c7e5808` plus the map
-commit. The existing `qtranslate` map keeps its nodes and stays `in-progress` at `06-llm-actions`;
-only a journal note was added there. The Astra flow builds the `.deb` with `dpkg-buildpackage` from a
+The map is closed: all three stages and all tasks are `done`, the root is `done`, the root
+`## Outcome` and the closing journal entry are in the closing map commit, and
+`doc/roadmap/README.md` lists `debian` as `done`. The accepted tree is `dfd6f2e..8bbef5b`; the
+closing commit carries this journal and the root outcome. There is no active work on this map. The
+`qtranslate` map is untouched and remains `in-progress` at `06-llm-actions`; only a journal note
+was added there, so the next session continues that map. Nothing was pushed. Branch `main`. The Astra flow builds the `.deb` with `dpkg-buildpackage` from a
 clean copy and publishes `qtranslate_0.12.0_amd64.deb`; `+astra1` is gone from the script; the
 docs that still name it are stage 3. The existing `qtranslate` map keeps its nodes and stays
 `in-progress` at `06-llm-actions`; only a journal note was added there.
@@ -129,3 +124,16 @@ docs that still name it are stage 3. The existing `qtranslate` map keeps its nod
   pre-existing notes, and the tarball is not byte-reproducible while the `.deb` is. Deferred to
   stage 3: `README.md`, `README.ru.md`, `doc/architecture.md`, `doc/handoff.md` and `AGENTS.md`
   still name `+astra1` and the manual `.deb` staging.
+
+- 2026-11-14 — Stage `03-docs-and-acceptance` closed and the map accepted. The lead committed the
+  documentation (`c7e5808`: READMEs, `AGENTS.md`, architecture, handoff, `debian/README.Debian`;
+  the command without a trailing dot, the six parent-directory artifacts, `dbgsym` unpublished,
+  the Astra trusted-client fallback, no current `+astra1`). The coordinator's final acceptance
+  (`8bbef5b`) re-ran the exact command from a `git archive` copy, the package contents and
+  `Depends`, install/remove, `verify-deb.sh` 15/15 and self-test 4/4, Release 45/45 without
+  warnings, the source-package sentinel and extraction, the CI/release invariants and the
+  documentation gates; it found no defect and added no source change. Windows was recorded as not
+  performed (no MSVC). The root `## Outcome` records the three stages, the user's decisions
+  (drop `+astra1`, do not publish `dbgsym`), the all-rights-reserved copyright and the deferred
+  items (two lintian info tags, no code signing, non-reproducible portable tarball, nine
+  pre-existing shellcheck notes, old local 0.11.0 artifacts). No push, tag or release.
