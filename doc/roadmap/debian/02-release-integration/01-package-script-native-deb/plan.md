@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 ---
 
@@ -212,3 +212,52 @@ Risks and easy mistakes:
   the tarball name, the AppImage name and the `SHA256SUMS-linux.txt` / `SHA256SUMS-linux-astra.txt`
   names are unchanged; the `.deb` name is `qtranslate_<version>_amd64.deb` on both targets.
 - Besides this plan, only `packaging/linux/package.sh` is changed.
+
+## Outcome
+
+`packaging/linux/package.sh` produces the native `.deb` with `dpkg-buildpackage`; the manual
+staging, the `DEBIAN/control` here-document, `dpkg-shlibdeps`, `du -sk` and `dpkg-deb --build` are
+gone, and the script no longer asserts that the `.deb` and the tarball ship the same binary.
+
+- Changed file: `packaging/linux/package.sh` only. `debian/`, `packaging/linux/verify-deb.sh`, the
+  CI files, `src/`, `tests/`, `CMakeLists.txt`, `README*` and `doc/` are untouched, and the version
+  stays `0.12.0` (`debian/changelog` unchanged).
+- `build_deb()` copies the tree (minus `./.git`, `./build`, `./build-*`, `./out`, `./.claude` and
+  `$output_dir` when it lies inside the repository) into `$stage/deb-src`, runs
+  `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck ${DEB_BUILD_OPTIONS-}" dpkg-buildpackage -b -us -uc`
+  there (no `-r`, no `-d`), copies `qtranslate_<version>_amd64.deb` from `$stage` into
+  `$output_dir`, reads `Depends` and `Installed-Size` with `dpkg-deb -f`, keeps the three-field
+  self-check, and removes `$stage/deb-src` again. `dpkg-deb` and `desktop-file-validate` stay in
+  `check_tools()`; `dpkg-shlibdeps` and `du` are dropped, `dpkg-buildpackage`,
+  `dpkg-parsechangelog` and `nproc` are added. `check_repo_root()` exports `repo_root=$(pwd -P)`.
+- `resolve_version()` takes the package version from `dpkg-parsechangelog -SVersion` and refuses a
+  `--version` that disagrees, naming both values; `+astra1` and the astra branch of `deb_version`
+  are gone, so both targets publish `qtranslate_0.12.0_amd64.deb`. The help text says the two sets
+  need different output directories, describes the native build and `nocheck`, and lists the
+  dbgsym, `.changes` and `.buildinfo` as staging leftovers, not artifacts.
+- Astra 1.8.7 run (`build/linux-release`, `--output-dir /tmp/opencode/astra-final`): exit 0; the
+  output directory has exactly `qtranslate-0.12.0-linux-x86_64-astra.tar.gz`,
+  `qtranslate_0.12.0_amd64.deb` and `SHA256SUMS-linux-astra.txt` (plus the hidden staging). The
+  staging holds `qtranslate_0.12.0_amd64.deb`, `qtranslate-dbgsym_0.12.0_amd64.deb`,
+  `qtranslate_0.12.0_amd64.changes`, `qtranslate_0.12.0_amd64.buildinfo`, the install tree and the
+  bundle; `deb-src` is removed. No AppImage, no `+astra1`, no dbgsym among the artifacts.
+- `verify-deb.sh` on that `.deb`: `15 checks, 15 passed, 0 failed, 0 skipped`; `sha256sum -c
+  SHA256SUMS-linux-astra.txt` passes; `dpkg-deb -f` gives `Package: qtranslate`,
+  `Version: 0.12.0`, `Architecture: amd64`, `Installed-Size: 1645` and a `Depends` from `libc6 (>=
+  2.34)` through `libqt6core6t64 (>= 6.10.2)`, `libsecret-1-0` and `libxtst6`. A second run into
+  the same output directory succeeds and reproduces the same `.deb` sha256 (`b77652d4…c4fc7`).
+  A run with `--output-dir` at the repository root and a run with `--version 9.9.9` both exit 1
+  without leaving artifacts.
+- `bash -n` passes. `shellcheck` is not clean: 9 findings, all present at HEAD (8×SC2016 and 1×SC2001),
+  so the plan's "shellcheck reports nothing" does not hold for this file; the task adds none. They
+  are left in place: `disable` directives would hide future findings. Full CTest run of the build
+  directory: 45/45 passed.
+- Review: the repository-root guard for `--output-dir` was added on top of the plan. It was first
+  placed in `build_deb()`, so `--output-dir .` wrote the tarball and the staging into the repository
+  root before dying; the reviewer's remark was accepted and the guard moved to `prepare_stage()`,
+  before anything is created or removed.
+- Not exercised here: `--target trixie` on Astra (`check_host` refuses it; the CI job and the trixie
+  container are task `02-ci-native-deb`), and the `+astra1` updates in `README.md`,
+  `README.ru.md`, `doc/architecture.md` and `doc/handoff.md` (stage `03-docs-and-acceptance`).
+- Pre-existing behaviour, unchanged: the portable tarball is not byte-reproducible between runs
+  (gzip stores the rebuilt install tree's mtimes); the `.deb` is.

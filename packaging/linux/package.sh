@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # Build the Linux release artifacts: the portable archive with a bundled Qt
-# runtime, the Debian 13 package, and the AppImage.
+# runtime, the native Debian package, and the AppImage.
 #
 # The archive has one top-level directory named like the artifact and contains
 # the CMake install tree plus the Qt libraries, plugins, and translations that
-# the application loads at runtime. The .deb is staged from the same install
-# tree without the bundle. The AppImage is built from that same install tree by
-# the pinned linuxdeploy, linuxdeploy-plugin-qt, and appimagetool AppImages;
-# those tools are downloaded into build/linux-tools/appimage and verified by
-# SHA256. This script owns the Linux bundle layout; CMake only installs the
-# binary, the desktop file, and the icon.
+# the application loads at runtime. The .deb is not staged from that tree: it is
+# the native source-package build, produced by dpkg-buildpackage in a clean copy
+# of the repository under <output-dir>/.qtranslate-staging. The AppImage is
+# built from the install tree by the pinned linuxdeploy,
+# linuxdeploy-plugin-qt, and appimagetool AppImages; those tools are downloaded
+# into build/linux-tools/appimage and verified by SHA256. This script owns the
+# Linux bundle layout; CMake only installs the binary, the desktop file, and the
+# icon.
 set -euo pipefail
 umask 022
 
@@ -42,7 +44,7 @@ wayland_bundled=0
 artifact=
 artifact_size=
 artifact_sha=
-deb_root=
+repo_root=
 deb_artifact=
 deb_size=
 deb_sha=
@@ -68,18 +70,20 @@ usage() {
 Usage: packaging/linux/package.sh [options]
 
 Build the portable Linux archive qtranslate-<version>-linux-x86_64.tar.gz,
-the Debian package qtranslate_<version>_amd64.deb, and the AppImage
+the native Debian package qtranslate_<version>_amd64.deb, and the AppImage
 qtranslate-<version>-x86_64.AppImage for the trixie target. The astra target
-builds Astra Linux 1.8.7 artifacts with distinct names and no AppImage.
+builds Astra Linux 1.8.7 artifacts with a distinct archive name and no
+AppImage.
 
 Options:
   --build-dir DIR    CMake Release build directory (default: build/linux-release)
   --output-dir DIR   artifact directory (default: build/artifacts-linux)
   --target TARGET    packaging target: trixie (default) or astra; the astra
-                     target requires an Astra Linux 1.8.7 host, skips the
-                     AppImage, and appends +astra1 to the Debian version
+                     target requires an Astra Linux 1.8.7 host and skips the
+                     AppImage
   --version X.Y.Z    version used in the artifact name (default: project
-                     version from CMakeLists.txt)
+                     version from CMakeLists.txt); it must match
+                     debian/changelog, which supplies the .deb version
   --skip-appimage    do not build the AppImage; use this only for an explicit
                      local offline run, CI must build the AppImage
   --help             print this help and exit
@@ -89,10 +93,18 @@ qtranslate-trixie image built from packaging/linux/trixie.Dockerfile. Other
 hosts are refused with the docker command to use and, on Astra, the --target
 astra hint. The astra target must run on Astra Linux 1.8.7 itself.
 
+The .deb is built natively: the script copies the source tree into
+<output-dir>/.qtranslate-staging/deb-src and runs dpkg-buildpackage there with
+DEB_BUILD_OPTIONS="parallel=<nproc> nocheck". The .deb is therefore a Release
+build without the test targets; the test gate is the Release CTest run of the
+build directory. The clean copy is removed again after the build.
+qtranslate-dbgsym, the .changes and the .buildinfo that dpkg-buildpackage
+writes stay in <output-dir>/.qtranslate-staging and are not release artifacts.
+
 Required tools: cmake, qtpaths6, patchelf, tar, sha256sum,
-desktop-file-validate, readelf, ldd, dpkg-deb, dpkg-shlibdeps, du, and the
-usual coreutils/findutils tools. curl is required unless --skip-appimage is
-used; the astra target never builds the AppImage.
+desktop-file-validate, readelf, ldd, dpkg-deb, dpkg-buildpackage,
+dpkg-parsechangelog, and the usual coreutils/findutils tools. curl is required
+unless --skip-appimage is used; the astra target never builds the AppImage.
 
 Artifacts (trixie):
   <output-dir>/qtranslate-<version>-linux-x86_64.tar.gz
@@ -102,15 +114,15 @@ Artifacts (trixie):
 
 Artifacts (astra):
   <output-dir>/qtranslate-<version>-linux-x86_64-astra.tar.gz
-  <output-dir>/qtranslate_<version>+astra1_amd64.deb
+  <output-dir>/qtranslate_<version>_amd64.deb
   <output-dir>/SHA256SUMS-linux-astra.txt
 
-The astra names and the SHA256SUMS-linux-astra.txt file are distinct from the
-trixie ones, so both sets can live in the same output directory. The AppImage
-tools (linuxdeploy, linuxdeploy-plugin-qt, appimagetool, and the type2
-runtime) are downloaded into build/linux-tools/appimage and verified against
-pinned SHA256 values. The script owns the staging directory
-<output-dir>/.qtranslate-staging.
+The .deb file name is the same for both targets, so build the trixie and the
+astra sets into different output directories; SHA256SUMS-linux-astra.txt still
+separates the Astra set. The AppImage tools (linuxdeploy,
+linuxdeploy-plugin-qt, appimagetool, and the type2 runtime) are downloaded into
+build/linux-tools/appimage and verified against pinned SHA256 values. The
+script owns the staging directory <output-dir>/.qtranslate-staging.
 EOF
 }
 
@@ -177,6 +189,8 @@ parse_args() {
 check_repo_root() {
     [[ -f CMakeLists.txt && -d src ]] \
         || die "run this script from the repository root (CMakeLists.txt and src/ are required)"
+    # The absolute root feeds the native .deb copy and its output-dir exclusion.
+    repo_root=$(pwd -P)
 }
 
 check_host() {
@@ -249,8 +263,9 @@ check_tools() {
         readelf:binutils
         ldd:libc-bin
         dpkg-deb:dpkg
-        dpkg-shlibdeps:dpkg-dev
-        du:coreutils
+        dpkg-buildpackage:dpkg-dev
+        dpkg-parsechangelog:dpkg-dev
+        nproc:coreutils
         chmod:coreutils
         sed:sed
         grep:grep
@@ -298,14 +313,20 @@ resolve_version() {
             || die "cannot read the project version from CMakeLists.txt; pass --version X.Y.Z"
     fi
 
-    # The Debian revision marker belongs to the .deb only: the application
-    # version and AppInfo::version() stay X.Y.Z.
+    # The .deb version comes from the source package; --version only names the
+    # archive and the AppImage and must agree with debian/changelog. The
+    # application version and AppInfo::version() stay X.Y.Z as well.
+    local changelog_version
+    changelog_version=$(dpkg-parsechangelog -SVersion) \
+        || die "cannot read the package version from debian/changelog with dpkg-parsechangelog"
+    [[ $changelog_version == "$version" ]] \
+        || die "debian/changelog is $changelog_version but the artifact version is $version; update debian/changelog or pass --version $changelog_version"
+    deb_version=$version
+
     if [[ $target == astra ]]; then
-        deb_version="$version+astra1"
         bundle_name="qtranslate-$version-linux-x86_64-astra"
         checksums_file=SHA256SUMS-linux-astra.txt
     else
-        deb_version=$version
         bundle_name="qtranslate-$version-linux-x86_64"
         checksums_file=SHA256SUMS-linux.txt
     fi
@@ -445,8 +466,19 @@ download_appimage_tools() {
 }
 
 prepare_stage() {
+    local output_real repo_real
+
     [[ -n $output_dir && $output_dir != / ]] \
         || die "refusing to use '$output_dir' as the output directory"
+    # Checked before anything is created or removed: at the repository root the
+    # staging tree and the tarball would land in the working tree before
+    # build_deb refused the output directory.
+    output_real=$(realpath -m "$output_dir")
+    repo_real=$(realpath -m "$repo_root")
+    if [[ $output_real == "$repo_real" ]]; then
+        die "refusing to build with --output-dir at the repository root; the native copy would recurse into its own staging directory"
+    fi
+
     stage="$output_dir/.qtranslate-staging"
     mkdir -p "$output_dir"
     # The staging directory is the only entry of the output directory this
@@ -474,8 +506,8 @@ install_tree() {
 
     desktop-file-validate "$install_root/share/applications/qtranslate.desktop"
 
-    # The install tree stays bundle-free for the .deb stage; the portable root
-    # is a separate copy that receives the Qt runtime below.
+    # The install tree stays bundle-free for the AppImage; the portable root is
+    # a separate copy that receives the Qt runtime below.
     bundle_root="$stage/$bundle_name"
     cp -a "$install_root/." "$bundle_root/"
 }
@@ -731,8 +763,9 @@ pack_tarball() {
     tar -C "$stage" --owner=0 --group=0 --numeric-owner -czf "$artifact" \
         "$bundle_name"
 
-    # The archive is packed before build_deb, so the .deb staging directories
-    # must never appear at the top level: only the bundle root may be there.
+    # The archive is packed before build_deb: the native build only then copies
+    # the tree into a subdirectory of $stage, so the top level still holds
+    # nothing but the bundle root.
     listing=$(tar -tzf "$artifact")
     top_level=$(sed 's|/.*||' <<<"$listing" | sort -u)
     [[ $top_level == "$bundle_name" ]] \
@@ -745,193 +778,81 @@ pack_tarball() {
 }
 
 build_deb() {
-    local control_file="$stage/dpkg/debian/control"
-    local binary install_sha staged_sha shlibs_output size_output contents ctrl_entries
+    local deb_src="$stage/deb-src"
+    local output_real repo_real output_rel
+    local native_deb
+    local -a exclude_output=()
 
-    # The package root comes from the bundle-free install tree: the archive copy
-    # carries Qt, plugins, translations, and qt.conf and must not leak here.
-    deb_root="$stage/deb"
-    binary="$deb_root/usr/bin/qtranslate"
-    mkdir -p "$deb_root/usr"
-    cp -a "$install_root/." "$deb_root/usr/"
+    # The .deb is the native source-package build, not a staging of the CMake
+    # install tree. dpkg-buildpackage runs in a clean copy so debian/rules
+    # writes (build/debian, debian/qtranslate) stay out of the working tree, and
+    # it writes its output to $stage, the parent of the copy: the .deb, the
+    # qtranslate-dbgsym package, the .changes and the .buildinfo.
+    printf 'Building the Debian package with dpkg-buildpackage in %s\n' "$deb_src"
+    mkdir -p "$deb_src"
 
-    [[ -x $binary ]] \
-        || die "the .deb staging is missing an executable usr/bin/qtranslate"
-    [[ -f $deb_root/usr/share/applications/qtranslate.desktop ]] \
-        || die "the .deb staging is missing usr/share/applications/qtranslate.desktop"
-    [[ -f $deb_root/usr/share/icons/hicolor/256x256/apps/qtranslate.png ]] \
-        || die "the .deb staging is missing usr/share/icons/hicolor/256x256/apps/qtranslate.png"
-    [[ $(stat -c %a "$binary") == 755 ]] \
-        || die "usr/bin/qtranslate has mode $(stat -c %a "$binary") instead of 755"
-    [[ $(stat -c %a "$deb_root/usr/share/applications/qtranslate.desktop") == 644 ]] \
-        || die "usr/share/applications/qtranslate.desktop is not mode 644"
-    [[ $(stat -c %a "$deb_root/usr/share/icons/hicolor/256x256/apps/qtranslate.png") == 644 ]] \
-        || die "usr/share/icons/hicolor/256x256/apps/qtranslate.png is not mode 644"
-    if [[ -e $deb_root/usr/bin/qt.conf ]]; then
-        die "the .deb staging contains usr/bin/qt.conf; stage the install tree, not the bundle"
-    fi
-    if [[ -e $deb_root/usr/share/qt6 ]]; then
-        die "the .deb staging contains usr/share/qt6; stage the install tree, not the bundle"
-    fi
-    local dir
-    for dir in lib plugins translations; do
-        if [[ -e $deb_root/usr/$dir ]]; then
-            die "the .deb staging contains usr/$dir; stage the install tree, not the bundle"
-        fi
-    done
-
-    printf 'Debian package files:\n'
-    find "$deb_root/usr" -type f -printf '%m %P\n' | sort -k2 | sed 's/^/  /'
-
-    # DEBIAN/ must exist before dpkg-shlibdeps runs so the tool treats the root
-    # as a package directory; with dpkg 1.22 it then stays quiet.
-    mkdir -p "$deb_root/DEBIAN"
-
-    # dpkg-shlibdeps needs a source stanza in debian/control. It lives in the
-    # staging directory, outside $deb_root, and is never packaged or committed.
-    mkdir -p "$(dirname "$control_file")"
-    cat > "$control_file" <<'EOF'
-Source: qtranslate
-Section: utils
-Priority: optional
-Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>
-
-Package: qtranslate
-Architecture: any
-Description: QTranslate - fast desktop translator
-EOF
-
-    # The staging directory is relative to the repository root, but
-    # dpkg-shlibdeps runs from $stage/dpkg, so resolve the binary first.
-    install_sha=$(sha256sum "$install_root/bin/qtranslate")
-    install_sha=${install_sha%% *}
-    staged_sha=$(sha256sum "$binary")
-    staged_sha=${staged_sha%% *}
-    [[ $install_sha == "$staged_sha" ]] \
-        || die "the .deb staging changed bin/qtranslate; both artifacts must ship the same binary"
-
-    binary=$(realpath "$binary")
-    shlibs_output=$( cd "$stage/dpkg" && dpkg-shlibdeps -O -e"$binary" ) \
-        || die "dpkg-shlibdeps failed; the image may lack a runtime package whose shlibs file is needed"
-    deb_depends=$(printf '%s\n' "$shlibs_output" | sed -n 's/^shlibs:Depends=//p')
-    [[ -n $deb_depends ]] || die "dpkg-shlibdeps did not report shlibs:Depends"
-
-    grep -qF 'libc6 (>= 2.34)' <<<"$deb_depends" \
-        || die "Depends lacks libc6 (>= 2.34): $deb_depends"
-    grep -qF 'libqt6core6t64' <<<"$deb_depends" \
-        || die "Depends lacks libqt6core6t64: $deb_depends"
-    grep -qF 'libqt6dbus6' <<<"$deb_depends" \
-        || die "Depends lacks libqt6dbus6: $deb_depends"
-    grep -qF 'libxtst6' <<<"$deb_depends" \
-        || die "Depends lacks libxtst6: $deb_depends"
-
-    # libsecret is an optional build dependency. Detect it once: the
-    # libsecret-1-0 entry and the Astra libglib2.0-0 entry (glib is libsecret's
-    # dependency) must follow the NEEDED library, never a hand-written list.
-    local links_libsecret=0
-    if readelf -d "$deb_root/usr/bin/qtranslate" | grep -qF 'libsecret-1.so.0'; then
-        links_libsecret=1
+    output_real=$(realpath -m "$output_dir")
+    repo_real=$(realpath -m "$repo_root")
+    if [[ $output_real == "$repo_real"/* ]]; then
+        # --output-dir may point anywhere inside the tree, so exclude it as
+        # well; otherwise the copy reads the staging directory it is written
+        # into. The other names mirror debian/source/options.
+        output_rel=${output_real#"$repo_real"/}
+        exclude_output=(--exclude="./$output_rel")
     fi
 
-    if [[ $target == astra ]]; then
-        # Astra 1.8 predates the t64 transition and ships libxtst6 2:1.2.3.
-        # The package names must come from dpkg-shlibdeps, never a hand edit.
-        if (( links_libsecret )); then
-            grep -qE 'libglib2.0-0 \(' <<<"$deb_depends" \
-                || die "the Astra Depends lacks libglib2.0-0: $deb_depends"
-        fi
-        grep -qF 'libqt6core6t64' <<<"$deb_depends" \
-            || die "the Astra Depends lacks libqt6core6t64: $deb_depends"
-        if grep -qF 'libglib2.0-0t64' <<<"$deb_depends"; then
-            die "the Astra Depends contains libglib2.0-0t64: $deb_depends"
-        fi
-        if grep -qE 'libxtst6 \(>=' <<<"$deb_depends"; then
-            die "the Astra Depends constrains libxtst6: $deb_depends"
-        fi
-    fi
+    tar -C "$repo_root" -cf - \
+        --exclude=./.git \
+        --exclude=./build \
+        --exclude='./build-*' \
+        --exclude=./out \
+        --exclude=./.claude \
+        "${exclude_output[@]}" \
+        . | tar -C "$deb_src" -xf - \
+        || die "cannot copy the source tree into $deb_src"
 
-    if (( links_libsecret )); then
-        grep -qF 'libsecret-1-0' <<<"$deb_depends" \
-            || die "the binary links libsecret-1.so.0 but Depends lacks libsecret-1-0"
-    elif grep -qF 'libsecret-1-0' <<<"$deb_depends"; then
-        die "Depends contains libsecret-1-0 but the binary does not link libsecret-1.so.0"
-    fi
+    # -b skips the source .tar.xz/.dsc and -us -uc skip signing. No -r is
+    # needed: debian/control has Rules-Requires-Root: no, so the build needs
+    # neither root nor fakeroot. nocheck matches debian/rules: the .deb is a
+    # Release build without the test targets, the test gate is the CTest run of
+    # the build directory.
+    ( cd "$deb_src" \
+        && DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck ${DEB_BUILD_OPTIONS-}" \
+            dpkg-buildpackage -b -us -uc ) \
+        || die "dpkg-buildpackage failed; the copy in '$deb_src' is left in place for inspection"
 
-    # Installed-Size is the unpacked size in KiB and excludes DEBIAN/.
-    size_output=$(du -sk "$deb_root/usr")
-    deb_installed_size=${size_output%%[[:space:]]*}
-    [[ $deb_installed_size =~ ^[1-9][0-9]*$ ]] \
-        || die "cannot compute a positive Installed-Size from du -sk: '$size_output'"
-
-    cat > "$deb_root/DEBIAN/control" <<EOF
-Package: qtranslate
-Version: $deb_version
-Architecture: amd64
-Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>
-Installed-Size: $deb_installed_size
-Depends: $deb_depends
-Section: utils
-Priority: optional
-Homepage: https://github.com/youkaicat/QTranslate
-Description: QTranslate - fast desktop translator
- QTranslate translates text selected in other applications with a global
- hotkey. It supports Google Translate, DeepL, and OpenAI-compatible
- providers, and keeps its settings per user.
-EOF
-    chmod 0644 "$deb_root/DEBIAN/control"
+    native_deb="$stage/qtranslate_${deb_version}_amd64.deb"
+    [[ -f $native_deb ]] \
+        || die "dpkg-buildpackage did not produce $native_deb"
 
     deb_artifact="$output_dir/qtranslate_${deb_version}_amd64.deb"
-    dpkg-deb --build --root-owner-group "$deb_root" "$deb_artifact"
+    cp "$native_deb" "$deb_artifact" \
+        || die "cannot copy $native_deb to $deb_artifact"
     deb_size=$(stat -c %s "$deb_artifact")
+    deb_depends=$(dpkg-deb -f "$deb_artifact" Depends)
+    deb_installed_size=$(dpkg-deb -f "$deb_artifact" Installed-Size)
 
-    staged_sha=$(sha256sum "$deb_root/usr/bin/qtranslate")
-    staged_sha=${staged_sha%% *}
-    [[ $install_sha == "$staged_sha" ]] \
-        || die "dpkg-deb modified usr/bin/qtranslate; the package must keep the Release binary unstripped"
-
-    # Self-check the metadata that users and apt see.
-    [[ $(dpkg-deb --field "$deb_artifact" Package) == qtranslate ]] \
+    # Short self-check only: verify-deb.sh owns the content, the Depends
+    # comparison and the control field checks.
+    [[ $(dpkg-deb -f "$deb_artifact" Package) == qtranslate ]] \
         || die "the .deb Package field is not qtranslate"
-    [[ $(dpkg-deb --field "$deb_artifact" Version) == "$deb_version" ]] \
-        || die "the .deb Version field does not match $deb_version"
-    [[ $(dpkg-deb --field "$deb_artifact" Architecture) == amd64 ]] \
+    [[ $(dpkg-deb -f "$deb_artifact" Version) == "$deb_version" ]] \
+        || die "the .deb Version field is not $deb_version"
+    [[ $(dpkg-deb -f "$deb_artifact" Architecture) == amd64 ]] \
         || die "the .deb Architecture field is not amd64"
-    [[ $(dpkg-deb --field "$deb_artifact" Maintainer) \
-        == 'Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>' ]] \
-        || die "the .deb Maintainer field is not the project identity"
-    [[ $(dpkg-deb --field "$deb_artifact" Installed-Size) == "$deb_installed_size" ]] \
-        || die "the .deb Installed-Size field does not match du -sk"
-    [[ $(dpkg-deb --field "$deb_artifact" Depends) == "$deb_depends" ]] \
-        || die "the .deb Depends field does not match dpkg-shlibdeps"
-    [[ $(dpkg-deb --field "$deb_artifact" Section) == utils ]] \
-        || die "the .deb Section field is not utils"
-    [[ $(dpkg-deb --field "$deb_artifact" Priority) == optional ]] \
-        || die "the .deb Priority field is not optional"
-    [[ $(dpkg-deb --field "$deb_artifact" Homepage) == https://github.com/youkaicat/QTranslate ]] \
-        || die "the .deb Homepage field is not the project URL"
-    [[ $(dpkg-deb --field "$deb_artifact" Description | sed -n '1p') \
-        == 'QTranslate - fast desktop translator' ]] \
-        || die "the .deb Description synopsis is not the expected text"
 
-    contents=$(dpkg-deb --contents "$deb_artifact")
-    [[ $(grep -c '^-' <<<"$contents" || true) == 3 ]] \
-        || die "the .deb contains a different number of regular files than 3"
-    grep -q ' \./usr/bin/qtranslate$' <<<"$contents" \
-        || die "the .deb does not contain ./usr/bin/qtranslate"
-    grep -q ' \./usr/share/applications/qtranslate.desktop$' <<<"$contents" \
-        || die "the .deb does not contain ./usr/share/applications/qtranslate.desktop"
-    grep -q ' \./usr/share/icons/hicolor/256x256/apps/qtranslate.png$' <<<"$contents" \
-        || die "the .deb does not contain ./usr/share/icons/hicolor/256x256/apps/qtranslate.png"
-    if grep -qE ' \./(usr/(lib|plugins|translations|share/qt6)(/|$)|usr/bin/qt\.conf$)' <<<"$contents"; then
-        die "the .deb contains bundle entries"
-    fi
+    # The dbgsym package and the build metadata are build outputs, never
+    # artifacts: they stay in $stage, which the next prepare_stage removes.
+    [[ ! -e $output_dir/qtranslate-dbgsym_${deb_version}_amd64.deb ]] \
+        || die "the output directory contains qtranslate-dbgsym_${deb_version}_amd64.deb; the dbgsym package is not a release artifact"
+    [[ ! -e $output_dir/qtranslate_${deb_version}_amd64.changes ]] \
+        || die "the output directory contains qtranslate_${deb_version}_amd64.changes; it is not a release artifact"
+    [[ ! -e $output_dir/qtranslate_${deb_version}_amd64.buildinfo ]] \
+        || die "the output directory contains qtranslate_${deb_version}_amd64.buildinfo; it is not a release artifact"
 
-    # No postinst/prerm or other maintainer scripts. tar lists the control
-    # archive's root directory entry as ./, so only that entry may accompany
-    # ./control.
-    ctrl_entries=$(dpkg-deb --ctrl-tarfile "$deb_artifact" | tar -t | grep -vx './' || true)
-    [[ $ctrl_entries == ./control ]] \
-        || die "the .deb control archive contains '$ctrl_entries' instead of only ./control"
+    rm -rf "$deb_src"
+    printf 'Native build outputs kept in %s (not artifacts):\n' "$stage"
+    find "$stage" -maxdepth 1 -type f -printf '  %f\n' | sort
 }
 
 build_appimage() {
@@ -1129,6 +1050,14 @@ write_checksums() {
 
 print_summary() {
     local plugins=() wayland_text=no appimage_summary
+
+    # Both values come from the built .deb; an empty one means the package is
+    # unusable even though dpkg-buildpackage succeeded.
+    [[ -n $deb_depends ]] \
+        || die "the .deb has an empty Depends field; dpkg-buildpackage should have expanded shlibs:Depends"
+    [[ -n $deb_installed_size ]] \
+        || die "the .deb has an empty Installed-Size field"
+
     mapfile -t plugins < <(find "$bundle_root/plugins" -type f -name '*.so' | sort)
     if (( wayland_bundled )); then
         wayland_text=yes
