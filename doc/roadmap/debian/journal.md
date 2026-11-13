@@ -2,15 +2,17 @@
 
 ## Where we left off
 
-Current node: stages 01 and 02 are `done`; the last node is stage
-`03-docs-and-acceptance` (still `todo`, no children). Stage 02 was accepted on 2026-11-14 over
-`2e560e7..HEAD` with no defect: `package.sh` builds the native `.deb` in a clean copy, the trixie
-CI job installs `debhelper`/`fakeroot`/`pkg-config`, runs the gate after `package.sh` and keeps
-`qtranslate-linux-x64`, `debian/control` no longer lists `build-essential`, and `lintian` is
-clean. Deferred to stage 3: the READMEs, `doc/architecture.md`, `doc/handoff.md` and `AGENTS.md`
-still name `+astra1` and the manual `.deb`. Branch `main`, HEAD `479264f`. The existing
-`qtranslate` map keeps its nodes and stays `in-progress` at `06-llm-actions`; only a journal note
-was added there. The Astra flow builds the `.deb` with `dpkg-buildpackage` from a
+Current node: stages 01 and 02 are `done`; stage `03-docs-and-acceptance` is `in-progress`
+(`base: b9a6f75`). Its task [01-docs-native-package](03-docs-and-acceptance/01-docs-native-package/plan.md)
+is `done` by the lead (`c7e5808`): `README.md`, `README.ru.md`, `AGENTS.md`,
+`doc/architecture.md`, `doc/handoff.md` and `debian/README.Debian` now describe the native package
+and no longer name `+astra1` as a current artifact. Task
+[02-final-acceptance](03-docs-and-acceptance/02-final-acceptance/plan.md) is `in-progress`; the
+coordinator is running the final acceptance over `dfd6f2e..HEAD` against the root `## Done when`.
+After it: root `## Outcome` and `status: done`, the `debian` line in `doc/roadmap/README.md`
+flipped to `done`, and the closing journal entry. Branch `main`, HEAD `c7e5808` plus the map
+commit. The existing `qtranslate` map keeps its nodes and stays `in-progress` at `06-llm-actions`;
+only a journal note was added there. The Astra flow builds the `.deb` with `dpkg-buildpackage` from a
 clean copy and publishes `qtranslate_0.12.0_amd64.deb`; `+astra1` is gone from the script; the
 docs that still name it are stage 3. The existing `qtranslate` map keeps its nodes and stays
 `in-progress` at `06-llm-actions`; only a journal note was added there.

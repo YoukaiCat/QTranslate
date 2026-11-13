@@ -1,6 +1,7 @@
 ---
 kind: stage
-status: todo
+status: in-progress
+base: b9a6f75
 depends: [01-native-debian-package, 02-release-integration]
 ---
 
@@ -34,6 +35,19 @@ build logs alone.
 - Acceptance: the root `## Done when` traceability, the full `git diff`, the Linux 45/45 tests,
   the native `.deb` install/remove, the CI YAML invariants, the documentation links, and the
   `qtranslate` map untouched. Record Windows as not performed (no MSVC). No push.
+
+## Children
+
+1. [01-docs-native-package](01-docs-native-package/plan.md) — task, detailed. Review and finish the
+   documentation edits the lead already made in the working tree (`README.md`, `README.ru.md`,
+   `AGENTS.md`, `doc/architecture.md`, `doc/handoff.md`, `debian/README.Debian`) and the link,
+   EN/RU, `+astra1` and manual-`.deb` gates. Documentation only; the lead commits it as its own
+   commit.
+2. [02-final-acceptance](02-final-acceptance/plan.md) — task, `depends: [01-docs-native-package]`.
+   The coordinator's final acceptance of the root and stage `## Done when` on the final tree: clean
+   build, package contents and `Depends`, install/remove, the gate, 45/45 tests, the source
+   package, the CI/release invariants, the documentation gates and the scope checks. Windows is
+   recorded as not performed; no push, tag or release.
 
 ## Done when
 
