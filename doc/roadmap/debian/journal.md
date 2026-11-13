@@ -2,14 +2,16 @@
 
 ## Where we left off
 
-Current node: stage `01-native-debian-package` is `in-progress`; its first task
-[`01-debian-skeleton-and-build`](01-native-debian-package/01-debian-skeleton-and-build/plan.md) is
-`in-progress`; the coordinator is running. The lead's corrections before the run: the
-`Build-Depends` list adds `desktop-file-utils` and `pkg-config`; `debian/rules` adds
-`override_dh_icons:` to keep the no-maintainer-script parity; the coordinator commits the `debian/`
-files and the task `plan.md`; the lead commits the map root, stage, and journal. No push. Branch
-`main`, base `dfd6f2e`. The existing `qtranslate` map keeps its nodes and stays `in-progress` at
-`06-llm-actions`; only a journal note was added there.
+Current node: stage `01-native-debian-package` is `done` (accepted on 2026-11-14 over
+`dfd6f2e..HEAD`; see its `## Outcome`). The next node is stage `02-release-integration`: it is
+`todo` and has no children, so the next step is a planner in "break down" mode. Scope confirmed by
+the user: `packaging/linux/package.sh` stops staging the manual `.deb`, the CI Linux job builds the
+native package with `dpkg-buildpackage` and runs `packaging/linux/verify-deb.sh`, and the portable
+`tar.gz`, AppImage, `SHA256SUMS-linux.txt` and artifact names stay. Open decisions for that stage:
+the `+astra1` native version, whether to publish `qtranslate-dbgsym`, and the
+`lintian E: build-depends-on-build-essential` tag. Branch `main`, HEAD `ee2e971`. The existing
+`qtranslate` map keeps its nodes and stays `in-progress` at `06-llm-actions`; only a journal note
+was added there.
 
 ## Journal
 
@@ -55,3 +57,32 @@ files and the task `plan.md`; the lead commits the map root, stage, and journal.
   planner's "no commit" wording is superseded: the coordinator commits the task's `debian/` files
   and `plan.md`, and the lead commits the map root, stage, and journal; no push. The first
   coordinator was started for `01-debian-skeleton-and-build`.
+
+- 2026-11-13 — Task `02-package-content-and-dependencies` done (`5c08c21`):
+  `packaging/linux/verify-deb.sh` is a 15-check gate whose expectations come from the host
+  (`dpkg-shlibdeps` with the real `Build-Depends`, `dpkg --print-architecture`,
+  `dpkg-parsechangelog`, `readelf -d`) plus a `--self-test` mode. Astra: 15/15, self-test 4/4.
+  `debian:trixie` (image 13.7, debhelper 13.24.2, Qt 6.8.2, dpkg 1.22.22): build 23 s, gate 15/15,
+  `libglib2.0-0t64`, `libxtst6 (>= 2:1.2.5)`, root install roundtrip; self-test 3 passed + 1 SKIP.
+  Decisions worth keeping: the `Depends` comparison is exact and a cross-host package fails with a
+  hint instead of being normalised; `apt-get -s build-dep .` is a non-fatal, labelled simulation;
+  the install roundtrip skips a package that is already installed or held, and refuses a `.deb`
+  whose `Package` is not `qtranslate` (the sibling `dbgsym`). Known limitation recorded in the
+  outcome: `hardcoded-dep` cannot be constructed in trixie because trixie itself requires
+  `libxtst6 (>= 2:1.2.5)`, so that case is an explicit `SELFTEST SKIP` there, not a silent pass.
+  Lead's notes: the plan's step 10 wording about "neither Astra nor trixie" is inaccurate and the
+  outcome corrects it; no node is affected, since stage 2 consumes the script as-is.
+
+- 2026-11-14 — Task `03-source-package-and-hygiene` done (`ee2e971`) and stage
+  `01-native-debian-package` accepted. Task 03 added the bare `tar-ignore` line, updated
+  `debian/README.Debian` (dbgsym/`.buildinfo`/`.changes`, source-package section) and left
+  `debian/.gitignore` and `debian/rules` unchanged after measuring the residue. The lead's
+  correction to the planner was confirmed: valued `tar-ignore` lines replace dpkg-source's default
+  `-I` list (the tarball had 2627 `.git/` entries); the bare line restores it, and the default list
+  also excludes both `.gitignore` files and `.gitattributes`. The acceptance run built the package
+  from a clean `git archive`, ran the 15-check gate and its self-test, the install roundtrip, the
+  source package (`-S`, `-x`, `-b`, `-tc`, clean, second build), the `nocheck`/`nodoc` behaviour
+  (45/45 tests without `nocheck`), and Release/Debug 45/45; it found no defect and added no commit.
+  Stage outcome records the deferred items: `package.sh`/CI integration, `+astra1`, `dbgsym`
+  publication and `lintian E: build-depends-on-build-essential`. Next: stage
+  `02-release-integration`, planner in "break down" mode.
