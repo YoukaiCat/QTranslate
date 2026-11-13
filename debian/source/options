@@ -1,0 +1,4 @@
+tar-ignore = build
+tar-ignore = build-*
+tar-ignore = out
+tar-ignore = .claude

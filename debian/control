@@ -1,0 +1,21 @@
+Source: qtranslate
+Section: utils
+Priority: optional
+Maintainer: Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>
+Standards-Version: 4.6.2
+Homepage: https://github.com/youkaicat/QTranslate
+Rules-Requires-Root: no
+Build-Depends: debhelper-compat (= 13), build-essential, cmake (>= 3.19),
+ ninja-build, qt6-base-dev (>= 6.5), qt6-tools-dev, qt6-tools-dev-tools,
+ libx11-dev, libxtst-dev, libsecret-1-dev, pkg-config, desktop-file-utils,
+ dbus, xvfb, xauth
+
+Package: qtranslate
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Section: utils
+Priority: optional
+Description: fast desktop translator
+ QTranslate translates text selected in other applications with a global
+ hotkey. It supports Google Translate, DeepL, and OpenAI-compatible
+ providers, and keeps its settings per user.

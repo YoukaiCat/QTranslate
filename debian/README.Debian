@@ -1,0 +1,37 @@
+QTranslate for Debian
+=====================
+
+Build from the source tree with the command the user uses:
+
+  DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot -us -uc
+
+There is no trailing ".": dpkg-buildpackage 1.21.22 on Astra Linux 1.8.7
+rejects a "." argument ("unknown option or argument ."), and "." is not an
+argument of dpkg-buildpackage.
+
+The artifacts land in the parent directory:
+
+  qtranslate_0.12.0_amd64.deb
+  qtranslate_0.12.0.dsc
+  qtranslate_0.12.0.tar.xz
+
+DEB_BUILD_OPTIONS:
+
+  nocheck        skip the test suite.  The copyright and changelog are
+                 installed either way.
+  nodoc          skip README.Debian.  The copyright and changelog are still
+                 installed.
+  parallel=N     pass N to the CMake/Ninja build.
+
+Without nocheck, debian/rules runs the suite under xvfb-run.  On Astra Linux
+1.8.7 the passive-grab X11 tests (tst_hotkeymanager_x11 and
+tst_hotkey_selection_x11) need a trusted-client entry for their
+build/debian/tests/... paths:
+
+  /etc/X11/trusted.d/qtranslate
+    /path/to/qtranslate/build/debian/tests/tst_hotkeymanager_x11(KBD_R)
+    /path/to/qtranslate/build/debian/tests/tst_hotkey_selection_x11(KBD_R)
+
+  sudo /usr/bin/fly-set-execid.sh
+
+The nocheck build does not need this entry.

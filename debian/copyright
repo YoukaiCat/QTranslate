@@ -1,0 +1,10 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: QTranslate
+Source: https://github.com/youkaicat/QTranslate
+
+Files: *
+Copyright: 2026 Vladislav Mileshkin
+License: All-Rights-Reserved
+ All rights reserved. No license is granted by the copyright holder.
+Comment: The upstream project has no license file and no license grant. This
+ file records that absence; it does not grant any rights.
