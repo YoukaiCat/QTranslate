@@ -1,0 +1,65 @@
+---
+kind: stage
+status: todo
+depends: [01-native-debian-package, 02-release-integration]
+---
+
+# Documentation and acceptance
+
+## Goal
+
+Document the native Debian package and accept the feature end to end. The documentation must show
+the exact `dpkg-buildpackage` command without a trailing `.`, the `debian/` layout, the
+`nocheck`/`nodoc`/`parallel` behavior, the test and Astra trusted-client step, and the native
+`.deb` in CI and the release. The acceptance checks the root `## Done when` with evidence, not with
+build logs alone.
+
+## What to do, what is touched
+
+- `README.md` and `README.ru.md`: replace the manual `packaging/linux/package.sh` `.deb`
+  instructions for end users with the native `debian/` build instructions, the exact command
+  without `.`, the artifacts in the parent directory, `nocheck`/`nodoc`/`parallel`, and the
+  native `.deb` release artifact; keep the portable `tar.gz`/AppImage/Astra instructions and the
+  two READMEs in sync.
+- `doc/architecture.md`: update the packaging and release sections (the file/layout lists, §3.1,
+  §3.4, §9 and the packaging notes): the native source package, `debian/`, `dpkg-buildpackage`,
+  the native `.deb` in CI, the artifact names, and the Astra `+astra1` decision.
+- `doc/handoff.md`: the current state, the native packaging, the next release, the known
+  limitations (all-rights-reserved copyright, `+astra1`, the Astra trusted-client step, the tests
+  not performed on Windows).
+- `AGENTS.md`: the Linux build/package command (`dpkg-buildpackage`), the `debian/` tree, the CI
+  and release flow, and the test counts. Do not add a Jira key.
+- `doc/roadmap/README.md`: the `debian` map status and the one-line description; the `qtranslate`
+  line stays unchanged.
+- Acceptance: the root `## Done when` traceability, the full `git diff`, the Linux 45/45 tests,
+  the native `.deb` install/remove, the CI YAML invariants, the documentation links, and the
+  `qtranslate` map untouched. Record Windows as not performed (no MSVC). No push.
+
+## Done when
+
+- The READMEs, `doc/architecture.md`, `doc/handoff.md`, `AGENTS.md`, and `doc/roadmap/README.md`
+  describe the native package; the command is exactly
+  `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot -us -uc`
+  (no trailing `.`); the `debian/` layout, `nocheck`/`nodoc`/`parallel`, and the Astra
+  trusted-client step are documented; all relative links resolve.
+- No document still says `packaging/linux/package.sh` builds the `.deb` manually; the `tar.gz`,
+  AppImage, `SHA256SUMS-linux.txt`, Astra names, and `qtranslate-linux-x64` upload are correct.
+- The acceptance runs the Linux tests (45/45) and the native `.deb` install/remove, checks the
+  CI/release YAML, and records the Windows result as not performed; the root `## Done when` has
+  evidence; no application code changes; no commit or push.
+- The `qtranslate` map stays `in-progress` at `06-llm-actions` and its nodes are unchanged.
+
+## Depends on
+
+Stages 1 and 2.
+
+## Risks and what is needed from the user
+
+- **Copyright.** The project has no license file; the documentation and `debian/copyright` say
+  all rights reserved. The user may choose a project license later; the acceptance does not
+  require a license and does not add one.
+- **`+astra1` and release approval.** The native Astra package name/version is the stage-2
+  decision; pushing, tagging, and publishing are the user's decisions.
+- **Windows.** The Windows build and the 39 tests are not performed here (no MSVC); record them as
+  not performed, never as passed.
+- **No push.** The roadmap work leaves commits and pushes to the lead and the user.
