@@ -2,14 +2,16 @@
 
 ## Where we left off
 
-Current node: stage `01-native-debian-package` is `done` (accepted on 2026-11-14 over
-`dfd6f2e..HEAD`; see its `## Outcome`). The next node is stage `02-release-integration`: it is
-`todo` and has no children, so the next step is a planner in "break down" mode. Scope confirmed by
-the user: `packaging/linux/package.sh` stops staging the manual `.deb`, the CI Linux job builds the
-native package with `dpkg-buildpackage` and runs `packaging/linux/verify-deb.sh`, and the portable
-`tar.gz`, AppImage, `SHA256SUMS-linux.txt` and artifact names stay. Open decisions for that stage:
-the `+astra1` native version, whether to publish `qtranslate-dbgsym`, and the
-`lintian E: build-depends-on-build-essential` tag. Branch `main`, HEAD `ee2e971`. The existing
+Current node: stage `02-release-integration` is `in-progress` (`base: 2e560e7`) and split into
+three tasks. Task [01-package-script-native-deb](02-release-integration/01-package-script-native-deb/plan.md)
+is `in-progress`, `detailed: true`; the coordinator is running. The planner's decisions: the script
+calls `dpkg-buildpackage` itself (one `Package` step in CI), the `.deb` is built in a clean copy
+under `<output-dir>/.qtranslate-staging`, the build uses
+`DEB_BUILD_OPTIONS="parallel=N nocheck"` so the 45 tests are not run twice, and `--version` must
+equal `debian/changelog`. Open items after it: `02-ci-native-deb` (trixie CI, `verify-deb.sh`,
+`trixie-packages.txt` gains `debhelper`/`fakeroot`/`pkg-config`) and `03-control-build-essential`
+(drop `build-essential`, clear `lintian E:`). User decisions: **drop `+astra1`**, do not publish
+`qtranslate-dbgsym`. The docs that still name `+astra1` are stage 3. Branch `main`. The existing
 `qtranslate` map keeps its nodes and stays `in-progress` at `06-llm-actions`; only a journal note
 was added there.
 
@@ -86,3 +88,29 @@ was added there.
   Stage outcome records the deferred items: `package.sh`/CI integration, `+astra1`, `dbgsym`
   publication and `lintian E: build-depends-on-build-essential`. Next: stage
   `02-release-integration`, planner in "break down" mode.
+
+- 2026-11-14 — Vendor decisions for stage `02-release-integration` (user). **Drop `+astra1`:** the
+  Astra and trixie `.deb` are both `0.12.0`; the user's reasoning is that `+astra1` denotes a
+  patched or backported build on top of an "original" package, and QTranslate is the original in
+  both cases. The artifact name changes to `qtranslate_0.12.0_amd64.deb` for the Astra target too;
+  `SHA256SUMS-linux-astra.txt` still distinguishes the Astra set. **Do not publish `dbgsym`:** the
+  debug-symbol package is a normal `dpkg-buildpackage` output but stays out of
+  `build/artifacts-linux` and the checksums. Facts confirmed while answering the user: the GitHub
+  Linux job runs in a `debian:trixie` container on `ubuntu-latest` (no Astra/ALSE image exists
+  there), so CI builds only the trixie `.deb`; the Astra `.deb` is built locally by
+  `package.sh --target astra`, which refuses to run off Astra. The two packages differ only by the
+  host they were built on: trixie is glibc 2.41, Qt 6.8.2, `libglib2.0-0t64`,
+  `libxtst6 (>= 2:1.2.5)`; Astra 1.8.7 is glibc 2.36, Qt 6.10.2, `libglib2.0-0`, plain `libxtst6`.
+
+- 2026-11-14 — Stage `02-release-integration` split into three tasks. Decisions: `package.sh` keeps
+  being the single entry point and calls `dpkg-buildpackage` itself (the CI job keeps one `Package`
+  step); the `.deb` is built in a clean copy at `<output-dir>/.qtranslate-staging/deb-src`, so the
+  working tree and the repository parent stay clean and the unpublished `dbgsym`/`.changes`/
+  `.buildinfo` never reach the artifacts; the package build uses
+  `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck"` because the test gate remains the `xvfb-run -a
+  ctest` step; `--version` must agree with `debian/changelog`, otherwise the `.deb` name and the
+  tarball name could diverge. `dpkg-buildpackage` has no output-dir option on 1.21.22, which is why
+  the copy exists. The stage text now points documentation updates to stage 3; the acceptance
+  criterion was reworded accordingly (no scope change). `pkg-config` is missing from
+  `trixie-packages.txt` although it is in `Build-Depends`; task 02 adds it with `debhelper` and
+  `fakeroot`.
