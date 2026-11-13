@@ -2,18 +2,18 @@
 
 ## Where we left off
 
-Current node: stage `02-release-integration` is `in-progress` (`base: 2e560e7`) and split into
-three tasks. Task [01-package-script-native-deb](02-release-integration/01-package-script-native-deb/plan.md)
-is `in-progress`, `detailed: true`; the coordinator is running. The planner's decisions: the script
-calls `dpkg-buildpackage` itself (one `Package` step in CI), the `.deb` is built in a clean copy
-under `<output-dir>/.qtranslate-staging`, the build uses
-`DEB_BUILD_OPTIONS="parallel=N nocheck"` so the 45 tests are not run twice, and `--version` must
-equal `debian/changelog`. Open items after it: `02-ci-native-deb` (trixie CI, `verify-deb.sh`,
-`trixie-packages.txt` gains `debhelper`/`fakeroot`/`pkg-config`) and `03-control-build-essential`
-(drop `build-essential`, clear `lintian E:`). User decisions: **drop `+astra1`**, do not publish
-`qtranslate-dbgsym`. The docs that still name `+astra1` are stage 3. Branch `main`. The existing
+Current node: stages 01 and 02 are `done`; the last node is stage
+`03-docs-and-acceptance` (still `todo`, no children). Stage 02 was accepted on 2026-11-14 over
+`2e560e7..HEAD` with no defect: `package.sh` builds the native `.deb` in a clean copy, the trixie
+CI job installs `debhelper`/`fakeroot`/`pkg-config`, runs the gate after `package.sh` and keeps
+`qtranslate-linux-x64`, `debian/control` no longer lists `build-essential`, and `lintian` is
+clean. Deferred to stage 3: the READMEs, `doc/architecture.md`, `doc/handoff.md` and `AGENTS.md`
+still name `+astra1` and the manual `.deb`. Branch `main`, HEAD `479264f`. The existing
 `qtranslate` map keeps its nodes and stays `in-progress` at `06-llm-actions`; only a journal note
-was added there.
+was added there. The Astra flow builds the `.deb` with `dpkg-buildpackage` from a
+clean copy and publishes `qtranslate_0.12.0_amd64.deb`; `+astra1` is gone from the script; the
+docs that still name it are stage 3. The existing `qtranslate` map keeps its nodes and stays
+`in-progress` at `06-llm-actions`; only a journal note was added there.
 
 ## Journal
 
@@ -114,3 +114,16 @@ was added there.
   criterion was reworded accordingly (no scope change). `pkg-config` is missing from
   `trixie-packages.txt` although it is in `Build-Depends`; task 02 adds it with `debhelper` and
   `fakeroot`.
+
+- 2026-11-14 — Stage `02-release-integration` closed (`0794258`, `010d882`, `479264f`; no
+  acceptance commit). `package.sh` now calls `dpkg-buildpackage` in a clean copy under the staging
+  directory and publishes only `qtranslate_0.12.0_amd64.deb`; the Astra set is the tar.gz, the
+  `.deb` and `SHA256SUMS-linux-astra.txt`, and the `.deb` sha256 equals the stage-1 build. The
+  trixie CI job installs `debhelper`/`fakeroot`/`pkg-config`, runs the gate after `package.sh`, and
+  keeps `qtranslate-linux-x64`; `include-hidden-files: false` keeps the staging out of the upload.
+  `build-essential` left `Build-Depends` and `lintian` is empty. More facts: the local full CI job
+  takes ~3 minutes, the `.deb` build is a second Release compile (accepted), `apt-get -s build-dep
+  .` works in trixie without `deb-src` (the gate stays at 15 checks), `shellcheck` has the same nine
+  pre-existing notes, and the tarball is not byte-reproducible while the `.deb` is. Deferred to
+  stage 3: `README.md`, `README.ru.md`, `doc/architecture.md`, `doc/handoff.md` and `AGENTS.md`
+  still name `+astra1` and the manual `.deb` staging.

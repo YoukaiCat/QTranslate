@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 2e560e7
 depends: [01-native-debian-package]
 ---
@@ -32,10 +32,10 @@ built on Astra, and the `+astra1` / `debian/changelog` version question is settl
   `package.sh` for the tar.gz/AppImage, collects the native `.deb`, and uploads
   `qtranslate-linux-x64`; the release job keeps `needs: [windows, linux]`, downloads both
   artifacts, and publishes on a `v*` tag.
-- `packaging/linux/trixie-packages.txt`: add `debhelper` and `fakeroot` (and keep `dpkg-dev`);
-  the list stays the single package list for `trixie.Dockerfile` and CI. `apt-get build-dep .`
-  needs `deb-src` entries; if they are not added, the CI installs the `Build-Depends` from the
-  package list and records the choice.
+- `packaging/linux/trixie-packages.txt`: add `debhelper`, `fakeroot` and `pkg-config` (and keep
+  `dpkg-dev`); the list stays the single package list for `trixie.Dockerfile` and CI.
+  `apt-get build-dep .` needs `deb-src` entries; if they are not added, the CI installs the
+  `Build-Depends` from the package list and records the choice.
 - Native Astra build: `package.sh --target astra` runs `dpkg-buildpackage` on Astra and produces
   the native Astra `.deb` with the version `debian/changelog` carries. The user settled the
   version: **drop `+astra1`** — both the Astra and the trixie `.deb` are `0.12.0`, and
@@ -78,9 +78,10 @@ directories; the script's usage text says so.
 
 ## Done when
 
-- `packaging/linux/package.sh` has no `build_deb()`, `deb_root`, manual `DEBIAN/control`,
-  `dpkg-shlibdeps`, or `dpkg-deb --build` path; the `.deb` in `build/artifacts-linux` is the
-  `dpkg-buildpackage` output.
+- `packaging/linux/package.sh` has no manual `.deb` staging in `build_deb()`: no `deb_root`, no
+  `DEBIAN/control` here-document, no `dpkg-shlibdeps`, no `dpkg-deb --build`; the `.deb` in
+  `build/artifacts-linux` is the `dpkg-buildpackage` output (the function keeps its name and now
+  runs the native build in a clean copy).
 - The Linux CI job builds the native `.deb` in `debian:trixie`, runs the stage-1
   `verify-deb.sh`, runs the tests under `xvfb-run`, runs `package.sh` for the tar.gz/AppImage, and
   uploads `qtranslate-linux-x64`; the release job publishes the same artifact set; the YAML
@@ -117,3 +118,54 @@ Stage 1 (`01-native-debian-package`), especially `01-debian-skeleton-and-build` 
   the `--target astra` branch or the AppImage tool pins.
 - **Release approval.** Pushing, tagging, and publishing are the user's decisions; this stage
   prepares the change and runs local/container gates only.
+
+## Outcome
+
+Accepted on 2026-11-14 over `2e560e7..HEAD` (`0794258`, `010d882`, `479264f`); the acceptance run
+found no defect and added no commit. The native `.deb` is now the release artifact on both
+targets.
+
+- `packaging/linux/package.sh` no longer stages the `.deb` by hand: `build_deb()` copies the tree
+  to `<output-dir>/.qtranslate-staging/deb-src` and runs
+  `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck" dpkg-buildpackage -b -us -uc` there, then copies
+  only `qtranslate_<version>_amd64.deb` into the output directory. `dbgsym`, `.changes` and
+  `.buildinfo` stay in the staging directory. `--version` must equal `debian/changelog`; the
+  Astra target no longer appends `+astra1`. The tar.gz, AppImage, `--target`, `--skip-appimage`
+  and checksums behaviour is unchanged, and the two `.deb` sets must use different output
+  directories because the file name is now identical.
+- Astra run: `qtranslate-0.12.0-linux-x86_64-astra.tar.gz`,
+  `qtranslate_0.12.0_amd64.deb`, `SHA256SUMS-linux-astra.txt`; `verify-deb.sh` 15/15,
+  `sha256sum -c` passes, `Version: 0.12.0`, and the `.deb` sha256 is identical to the stage-1
+  build. The output directory has no AppImage, no `dbgsym`, no `.changes`, no `.buildinfo`.
+- Linux CI job (reproduced locally in `debian:trixie` from the YAML `run:` blocks, 2 min 56 s):
+  installs the package list with `debhelper`/`fakeroot`/`pkg-config`, builds `build/ci`, runs
+  `timeout 300 xvfb-run -a ctest` (45/45, 23.5 s), runs `package.sh`, runs
+  `verify-deb.sh build/artifacts-linux/qtranslate_*_amd64.deb` (15/15), and uploads the same
+  `qtranslate-linux-x64` path. The top level holds the tar.gz, the `.deb`, the AppImage and
+  `SHA256SUMS-linux.txt` (three entries, all verified); the hidden staging directory is excluded
+  by `include-hidden-files: false`.
+- `debian/control` drops `build-essential` from `Build-Depends`; `dpkg-checkbuilddeps` is silent on
+  Astra and in `debian:trixie`, and `lintian` on the rebuilt `.dsc` is empty (only two
+  `installable-field-mirrors-source` info tags with `-I`, recorded, not fixed).
+- The release and Windows jobs are byte-identical; the Linux job gained the verify step and
+  `include-hidden-files: false` only. No GitHub run, push, tag or release was performed.
+
+What the work found:
+
+- `dpkg-buildpackage` 1.21.22 has no output-directory option, so the clean copy under the staging
+  directory is what keeps the working tree and the repository parent clean; it also keeps the
+  unpublished `dbgsym`/`.changes`/`.buildinfo` out of the artifact directory by construction.
+- The CI job compiles Release twice (the CMake install tree and the package build); reusing
+  `build/ci` is not possible because `debian/rules` builds in `build/debian` with the system Qt.
+  The whole job still takes about three minutes on 24 cores, which is accepted.
+- `apt-get -s build-dep .` works in trixie without `deb-src`, so the gate keeps 15 checks; the
+  check remains a dry run and is recorded as such.
+- `shellcheck` reports the same nine pre-existing notes (8×SC2016, 1×SC2001) before and after the
+  change; none is new.
+- The portable tarball is not byte-reproducible (gzip stores mtime); the `.deb` is, with the same
+  sha256 as the stage-1 build. This was pre-existing, not changed here.
+
+Deferred to stage 3: the README (both languages), `doc/architecture.md`, `doc/handoff.md` and
+`AGENTS.md` still name `+astra1` and the manual `.deb` staging; the stage `03-docs-and-acceptance`
+lists those files. The old `qtranslate_0.11.0*.deb` files in the local `build/artifacts-linux`
+were left in place; they do not reach CI.
