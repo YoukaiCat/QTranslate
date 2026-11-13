@@ -10,6 +10,7 @@ ca-certificates
 build-essential
 cmake
 ninja-build
+pkg-config
 
 # Qt 6.8.2 for the build and the bundled runtime.
 qt6-base-dev
@@ -32,8 +33,11 @@ dbus
 xvfb
 xauth
 
-# Packaging gates and tools: desktop-file-validate, dpkg-shlibdeps,
-# patchelf for the bundle RPATH.
+# Packaging: dpkg-buildpackage and the debhelper dh sequence build the native
+# .deb, fakeroot is the documented -rfakeroot command, desktop-file-validate
+# and dpkg-shlibdeps are the verify-deb.sh gate, patchelf is the bundle RPATH.
+debhelper
+fakeroot
 desktop-file-utils
 dpkg-dev
 patchelf

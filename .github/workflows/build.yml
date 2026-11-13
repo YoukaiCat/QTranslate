@@ -116,12 +116,16 @@ jobs:
       - name: Package
         run: ./packaging/linux/package.sh --build-dir build/ci --output-dir build/artifacts-linux
 
+      - name: Verify the native package
+        run: ./packaging/linux/verify-deb.sh build/artifacts-linux/qtranslate_*_amd64.deb
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
           name: qtranslate-linux-x64
           path: build/artifacts-linux/*
           if-no-files-found: error
+          include-hidden-files: false
           retention-days: 14
 
   release:
