@@ -1,6 +1,6 @@
 ---
 kind: task
-status: in-progress
+status: done
 detailed: true
 depends: [01-docs-native-package]
 ---
@@ -280,3 +280,113 @@ coordinator.
   a defect fix is one minimal extra commit, and the lead records it in the journal.
 - **Windows.** There is no MSVC on this host; never write that the Windows build or the 39 tests
   were verified, and never copy a "passed" from the Linux results.
+
+## Outcome
+
+Accepted on 2026-11-14 on the final tree: `main` at `3a1c2c3`, clean worktree, no tag. The
+acceptance run found no defect and added no commit. Every build ran on a `git archive HEAD` copy in
+`/tmp/opencode/accept-03` (`src`, `build-tests`) and `/tmp/opencode/accept-03-source`; the working
+tree and its `build/` (4.4 GB) were not touched, and the stale `0.11.0` files in
+`build/artifacts-linux` were not used.
+
+Facts: HEAD `3a1c2c3eb171fdd6fd4f0a105dd7986de05f80e5`; commits `dfd6f2e..HEAD`: `8185ecc`,
+`f69a617`, `5c08c21`, `ee2e971`, `2e560e7`, `c6739c0`, `0794258`, `010d882`, `479264f`,
+`b9a6f75`, `c7e5808`, `3a1c2c3`; `git status --porcelain` empty before this outcome was written.
+
+### Root `## Done when` (`doc/roadmap/debian/plan.md`)
+
+1. **`debian/` layout and version** — re-run now. `ls debian debian/source` → `control`, `rules`,
+   `changelog`, `copyright`, `README.Debian`, `.gitignore`, `source/format`, `source/options`;
+   `test -x debian/rules` → `rules-executable`; `dpkg-parsechangelog -S Version` → `0.12.0`;
+   `grep 'project(qtranslate VERSION' CMakeLists.txt` → `0.12.0`; `cat debian/source/format` →
+   `3.0 (native)`.
+2. **The exact command builds, installs, runs, removes** — re-run now. From the archive copy,
+   `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot -us -uc`
+   (no `.`) exits 0 and writes to the parent `qtranslate_0.12.0_amd64.deb` (589548 B, sha256
+   `3f8a6b3c86984009d9562ca287e35f5720736bf843311111e5fb12886b137d96`), `qtranslate_0.12.0.dsc`,
+   `qtranslate_0.12.0.tar.xz` (908504 B), plus the unpublished `qtranslate-dbgsym_0.12.0_amd64.deb`
+   (11095140 B), `.buildinfo` and `.changes`. `dpkg -i` installs; `dpkg -L` lists
+   `/usr/bin/qtranslate`, the desktop entry, the icon and `/usr/share/doc/qtranslate`;
+   `desktop-file-validate` exits 0; `xvfb-run -a qtranslate --version` prints `QTranslate 0.12.0`;
+   `dpkg -r` reports `пакет «qtranslate» не установлен` and `/usr/bin/qtranslate` is gone.
+3. **Package contents and `Depends`** — re-run now, trixie names cited from stage 2. `dpkg-deb
+   --contents` shows `usr/bin/qtranslate`, `usr/share/applications/qtranslate.desktop`,
+   `usr/share/icons/hicolor/256x256/apps/qtranslate.png`, `usr/share/doc/qtranslate/copyright` and
+   `changelog.gz`; no `README.Debian` (the build has `nodoc`), no `usr/bin/qt.conf`,
+   `usr/share/qt6`, `usr/lib`, `usr/plugins` or `usr/translations`; the control archive holds only
+   `control` and `md5sums` (no maintainer scripts). `--info`: `Version: 0.12.0`,
+   `Architecture: amd64`, the `debian/control` maintainer. `Depends` is `dh_shlibdeps` output —
+   `libc6 (>= 2.34)`, `libgcc-s1 (>= 3.0)`, `libglib2.0-0 (>= 2.12.0)`, `libqt6core6t64 (>=
+   6.10.2)`, `libqt6dbus6 (>= 6.8.2)`, `libqt6gui6 (>= 6.5)`, `libqt6network6 (>= 6.7.2)`,
+   `libqt6widgets6 (>= 6.5)`, `libsecret-1-0 (>= 0.7)`, `libstdc++6 (>= 5)`, `libx11-6`,
+   `libxtst6` — exactly the twelve `NEEDED` entries of `objdump -p`; `libglib2.0-0`, not
+   `libglib2.0-0t64`; `libsecret-1-0` is present because the binary links `libsecret-1.so.0`.
+4. **Build dependencies, options and tests** — re-run now; the Debian build without `nocheck` is
+   cited from stage 1. `dpkg-checkbuilddeps` is silent (rc 0); `apt-get -s build-dep .` answers rc
+   0 with `0 newly installed` (a dry run; Astra's main repositories have no active `deb-src`
+   entries, recorded by the gate). In the build log `QTRANSLATE_BUILD_TESTS=OFF` is on the
+   configure line, `grep -c 'Test #'` is 0 (rc 1), `dh_installdocs --exclude=README.Debian` runs,
+   and `ninja -j24` proves `parallel=N` reaches Ninja. The 45/45 run inside `debian/rules` without
+   `nocheck` and without the trusted-client entries is the stage-1 measurement; `README.Debian`
+   records it and the `/etc/X11/trusted.d/qtranslate` + `fly-set-execid.sh` fallback.
+5. **Source package** — re-run now for `-S`/`-x`; `-b`/`-tc` cited from stage 1. With a
+   `build/sentinel` on disk, `dpkg-buildpackage -S -us -uc` exits 0 and writes the `.dsc`
+   (`Format: 3.0 (native)`, `Version: 0.12.0`), the `.tar.xz` and `_source.changes`/`.buildinfo`;
+   `tar -tJf` has 0 `build/` entries, 0 `.git/` entries and 0 `sentinel` hits; `dpkg-source -x`
+   extracts and the extracted `debian/source/format` is `3.0 (native)`; `debian/changelog` and
+   `copyright` agree with the package.
+6. **Release integration** — re-run now for the YAML and `package.sh`; the trixie build cited from
+   stage 2. `packaging/linux/package.sh` has no `deb_root`, `DEBIAN/control`, `dpkg-shlibdeps` or
+   `dpkg-deb --build`, and calls `dpkg-buildpackage -b -us -uc` in a clean copy. The Linux job
+   installs the shared list, configures, builds, runs `ctest` under `xvfb-run`, runs `package.sh`,
+   runs `verify-deb.sh`, and uploads `qtranslate-linux-x64` with `include-hidden-files: false`;
+   the `release` job keeps `needs: [windows, linux]` and `refs/tags/v*`. The artifact set
+   (tar.gz, `.deb`, AppImage, `SHA256SUMS-linux.txt`, plus the local Astra set) and the native
+   Astra `.deb` are stage 2's (`0794258`, `010d882`, `479264f`); `+astra1` is dropped and
+   `dbgsym` is not published.
+7. **Documentation and the `qtranslate` map** — re-run now. `astra1` occurs only in
+   `doc/handoff.md:77` and `:135` ("the suffix is gone/was dropped");
+   `build_deb`/`DEBIAN/control`/`dpkg-deb --build` are absent from the six live documents; the
+   exact command appears in all six and no `us -uc .` matches; every relative link resolves (the
+   step-8 loop prints nothing); `#linux-0120` matches `### Linux (0.12.0)` in both READMEs;
+   `doc/roadmap/README.md:4` describes the native package and stays `in-progress`.
+   `git diff --stat dfd6f2e..HEAD -- doc/roadmap/qtranslate` is the one journal line, the map is
+   `in-progress`, and its nodes are unchanged, `06-llm-actions` included.
+8. **Scope and history** — re-run now. `git diff --stat dfd6f2e..HEAD -- src tests
+   CMakeLists.txt` is empty; `b9a6f75..HEAD` touches `AGENTS.md`, `README.md`, `README.ru.md`,
+   `debian/README.Debian`, `doc/architecture.md`, `doc/handoff.md`, the stage-3 stage and task
+   plans and the journal only; `packaging/` and `.github/` are unchanged since `b9a6f75`;
+   `debian/` changed only in `README.Debian`; `debian/copyright` says all rights reserved and no
+   license was added. No push, no tag, no release: `git tag --points-at HEAD` is empty.
+
+### Stage `## Done when` (`doc/roadmap/debian/03-docs-and-acceptance/plan.md`)
+
+1. **The documents describe the native package** — re-run now. The six live documents carry the
+   exact command without a trailing `.`, the `debian/` layout, `nocheck`/`nodoc`/`parallel`, and
+   the Astra trusted-client step, and the link loop is empty. The EN/RU pairs agree:
+   the command 1/1, `qtranslate_<version>_amd64.deb` 3/3, `SHA256SUMS-linux-astra.txt` 1/1,
+   `dbgsym` 2/2. (The stage-1 task predicted 1/1 and 1/1 for the last two counts; the criterion is
+   EN/RU parity, and it holds.)
+2. **No manual `.deb` claim; names and upload correct** — re-run now. No document says
+   `package.sh` stages the `.deb` by hand; the tar.gz, AppImage, `SHA256SUMS-linux.txt`,
+   `-astra.tar.gz` and `qtranslate_<version>_amd64.deb` names and the `qtranslate-linux-x64`
+   upload are consistent.
+3. **Acceptance evidence** — this outcome. 45/45 Linux tests, the native `.deb` install/remove,
+   the CI/release YAML and the documentation gates are recorded above with their commands; no
+   application code changed; the acceptance commit carries only this `plan.md`. Windows is
+   recorded as **not performed** (no MSVC); the 39 Windows tests and the installer are not part of
+   this task and no document claims them.
+4. **The `qtranslate` map** — re-run now. It stays `in-progress`, its `plan.md` is unchanged at
+   `dfd6f2e..HEAD`, its nodes are untouched and `06-llm-actions` is still the next node.
+
+### What the run found
+
+- No defect: the tree needed no source, packaging, documentation or map change. The stage-1/2
+  outcomes still hold on the final tree, and the only commit of this task is this outcome.
+- One plan nit, no change: task step 8 greps `^qtranslate-0.12.0/build/`, but a `git archive` copy
+  extracted into `.../src` produces the tarball prefix `src/`, so that literal grep is vacuous.
+  The sentinel was checked with the real prefix: 0 `build/`, 0 `.git/`, 0 `sentinel` entries.
+- The `doc/handoff.md:118-119` sentence "closed on 2026-11-14; the acceptance evidence is in its
+  `## Outcome`" becomes true with the lead's closing commit, which writes the root `## Outcome`
+  and flips the statuses; the map status flips are the lead's, not findings here.
+- Windows: not performed. No push, no tag, no release was made.
