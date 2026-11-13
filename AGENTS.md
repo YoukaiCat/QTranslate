@@ -29,7 +29,10 @@
   `cmake --build build/linux-release` and
   `xvfb-run -a ctest --test-dir build/linux-release --output-on-failure` (`xauth` is required).
   Packaging uses `packaging/linux/package.sh` on Debian 13 or in `qtranslate-trixie`;
-  `--target astra` builds the native Astra artifacts on Astra Linux.
+  `--target astra` builds the native Astra artifacts on Astra Linux. The repository is a native
+  Debian source package (`debian/`, `3.0 (native)`); `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck
+  nodoc" dpkg-buildpackage -rfakeroot -us -uc` builds the `.deb` directly (no trailing `.`;
+  Astra's `dpkg-buildpackage` 1.21 rejects one).
 - Run one test: `ctest --test-dir build/cli-Release -R tst_settings --output-on-failure`.
   Run everything: `ctest --test-dir build/cli-Release --output-on-failure`.
 - The Windows CI job sets `QT_QPA_PLATFORM=offscreen`; use it for headless GUI tests.
@@ -85,10 +88,11 @@
 - CI uses Qt 6.8.3 LTS because aqtinstall 3.3.0 cannot install Qt 6.12. Do not switch CI to 6.12
   without checking aqt support.
 - CI has a Windows job and a Linux job in `debian:trixie` (root container, the shared
-  `packaging/linux/trixie-packages.txt`, `timeout 300 xvfb-run -a ctest`, `package.sh` without
-  `--skip-appimage`, artifact `qtranslate-linux-x64`). The `release` job needs both jobs and
-  publishes both artifact sets; `SHA256SUMS-linux.txt` must stay distinct from the Windows
-  `SHA256SUMS.txt`.
+  `packaging/linux/trixie-packages.txt`, `timeout 300 xvfb-run -a ctest`, the native `.deb` built
+  by `package.sh` through `dpkg-buildpackage`, `packaging/linux/verify-deb.sh`,
+  `package.sh` without `--skip-appimage`, artifact `qtranslate-linux-x64`). The `release` job needs
+  both jobs and publishes both artifact sets; `SHA256SUMS-linux.txt` must stay distinct from the
+  Windows `SHA256SUMS.txt`.
 - `package.ps1` cleans `build/dist`, validates Qt/MSVC CRT/plugin files, then writes the ZIP,
   installer and `SHA256SUMS.txt`. Inno Setup 6.3+/7 is required.
 

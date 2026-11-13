@@ -70,8 +70,9 @@ and
 (use `--appimage-extract-and-run` when FUSE is unavailable).
 They require glibc 2.38 or newer and do not run on Astra Linux 1.8.7. Astra Linux is supported through
 a separate native build, `qtranslate-<version>-linux-x86_64-astra.tar.gz` and
-`qtranslate_<version>+astra1_amd64.deb`; those are local verification artifacts and are not published
-by CI. See [Linux](#linux-0120) for build and packaging steps.
+`qtranslate_<version>_amd64.deb` (the same file name as the trixie package, but built against Astra's
+Qt 6.10.2 and glibc 2.36); those are local verification artifacts and are not published by CI. See
+[Linux](#linux-0120) for build and packaging steps.
 
 ## Usage
 
@@ -220,10 +221,11 @@ docker run --rm -v "$PWD:/src" -w /src -e HOME=/tmp \
   ./packaging/linux/package.sh --build-dir build/linux-trixie --output-dir build/artifacts-linux'
 ```
 
-The script builds the portable archive, `.deb`, AppImage, and `SHA256SUMS-linux.txt`; pass
-`--skip-appimage` only for an explicit offline run. On Astra Linux build natively with Qt 6.10.2 and
-use `--target astra`, which produces the `-astra.tar.gz`, the `+astra1_amd64.deb`, and
-`SHA256SUMS-linux-astra.txt`:
+The script builds the portable archive, the native `.deb`, the AppImage, and `SHA256SUMS-linux.txt`;
+the `.deb` comes from `dpkg-buildpackage` in a clean copy, not from a hand-staged tree, and
+`--skip-appimage` is only for an explicit offline run. On Astra Linux build natively with Qt 6.10.2
+and use `--target astra`, which produces the `-astra.tar.gz`, the
+`qtranslate_<version>_amd64.deb`, and `SHA256SUMS-linux-astra.txt`:
 
 ```bash
 ./packaging/linux/package.sh --target astra --build-dir build/linux-release --output-dir build/artifacts-linux
@@ -231,6 +233,20 @@ use `--target astra`, which produces the `-astra.tar.gz`, the `+astra1_amd64.deb
 
 The trixie packages require glibc 2.38+ and do not run on Astra Linux 1.8.7; the native Astra build
 exists for that reason.
+
+The repository is also a native Debian source package: `debian/` holds the control files and the `dh`
+rules. To build the `.deb` directly, from the repository root:
+
+```bash
+DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot -us -uc
+```
+
+`dpkg-buildpackage` writes the `.deb`, the `.dsc`, the `.tar.xz`, the `-dbgsym` package, the
+`.buildinfo` and the `.changes` to the parent directory (Astra's `dpkg-buildpackage` 1.21 rejects a
+trailing `.`; the command has none). The debug symbols stay in the `-dbgsym` package and are not
+released. `nocheck` skips the 45 tests, `nodoc` leaves `README.Debian` out of the package, and
+`parallel=N` bounds the build; without `nocheck` the rules run the tests under `xvfb-run -a`. The
+build dependencies are in `debian/control`, and `dpkg-checkbuilddeps` reports what is missing.
 
 #### Astra Linux: global hotkeys
 
@@ -291,7 +307,7 @@ security policy's approval. To revoke it, run
 - Linux secrets use libsecret when it is available and the keyring is running; otherwise a `0600`
   file is used with a warning in settings.
 - The trixie Linux packages require glibc 2.38+ and do not run on Astra Linux 1.8.7. Astra uses the
-  native `-astra.tar.gz`/`+astra1` packages.
+  native `-astra.tar.gz` and `qtranslate_<version>_amd64.deb` packages.
 
 The text being translated is sent to the selected provider: Google, DeepL, OpenRouter or another
 OpenAI-compatible server. A local server such as Ollama keeps the text on your machine. QTranslate

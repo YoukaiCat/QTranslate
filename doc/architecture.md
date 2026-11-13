@@ -58,7 +58,7 @@ implementation: if the code diverges from it, either fix the code or deliberatel
 | Autostart | `Run` registry key | XDG autostart |
 | Secrets | DPAPI | libsecret; a 0600 fallback file |
 | Settings | `%APPDATA%\qtranslate` | `$XDG_CONFIG_HOME/qtranslate` |
-| Packages | installer + portable zip | trixie `tar.gz`, `.deb`, AppImage; native Astra `-astra.tar.gz` and `+astra1` `.deb` |
+| Packages | installer + portable zip | trixie `tar.gz`, native `.deb`, AppImage; native Astra `-astra.tar.gz` and `.deb` |
 
 Windows-specific limitations (elevated windows, Win+V, DPI) do not apply on Linux; instead, Wayland
 limitations appear (§4.14).
@@ -139,12 +139,20 @@ qtranslate/
 ├── CMakeLists.txt
 ├── .github/
 │   └── workflows/build.yml     build, tests, packaging and release
+├── debian/                     native source package (3.0 (native), dh)
+│   ├── control                 source and binary metadata, Build-Depends
+│   ├── rules                   dh sequence, Release, nocheck/nodoc
+│   ├── changelog               package version, the CMake version
+│   ├── copyright               DEP-5, all rights reserved
+│   ├── README.Debian           build command and options for packagers
+│   └── source/                 format and tar-ignore
 ├── packaging/
 │   ├── windows/
 │   │   ├── qtranslate.iss      Inno Setup installer
 │   │   └── package.ps1         dist + zip + setup + SHA256SUMS
 │   └── linux/
-│       ├── package.sh          tar.gz, .deb, AppImage; --target astra
+│       ├── package.sh          tar.gz, native .deb, AppImage; --target astra
+│       ├── verify-deb.sh       content, Depends and install gate for a .deb
 │       ├── qtranslate.desktop  freedesktop desktop entry
 │       ├── trixie.Dockerfile   Debian 13 build/packaging image
 │       └── trixie-packages.txt shared apt package list for the image and CI
@@ -161,9 +169,11 @@ qtranslate/
 │   │   ├── 0.9.0.md            release notes
 │   │   ├── 0.9.1.md
 │   │   ├── 0.10.0.md
-│   │   └── 0.11.0.md
+│   │   ├── 0.11.0.md
+│   │   └── 0.12.0.md
 │   └── roadmap/
 │       ├── README.md           map list
+│       ├── debian/             native Debian packaging, closed 2026-11-14
 │       └── qtranslate/
 │           ├── plan.md         active roadmap
 │           ├── legacy-plan.md  Russian historical archive of the old flat plan
@@ -368,26 +378,37 @@ targets. Currently:
 
 ### 3.4. Packaging, CI and release
 
-The project version is defined once — `project(qtranslate VERSION 0.11.0)`; `AppInfo::version()`, the
-`User-Agent`, the exe version resource, and artifact names are derived from it. The release tag is
-`v0.11.0`; CI compares it with `CMakeLists.txt` and fails on a mismatch.
+The project version is defined once — `project(qtranslate VERSION 0.12.0)`; `AppInfo::version()`, the
+`User-Agent`, the exe version resource, `debian/changelog`, and artifact names are derived from it.
+The release tag is `v0.12.0`; CI compares it with `CMakeLists.txt` and fails on a mismatch.
 
 **Portable archive.** `cmake --install <build> --prefix build/dist` creates a self-contained `bin/`,
 `plugins/`, `translations/` directory with Qt, plugins, and the MSVC CRT. `package.ps1` checks the
 required files and packs the contents of `dist` into `qtranslate-<version>-win64.zip`; the archive
 contains the same `bin/`, `plugins/`, `translations/`, and is started via `bin\qtranslate.exe`.
 
-**Linux packages.** `packaging/linux/package.sh` builds from a trixie Release tree or the
-`qtranslate-trixie` image: `qtranslate-<version>-linux-x86_64.tar.gz` (bundled Qt 6.8.2, plugins,
-Qt translations, `qt.conf`, `patchelf` RPATH), `qtranslate_<version>_amd64.deb` (three installed
-files, no maintainer scripts, `Depends` from `dpkg-shlibdeps`), and
-`qtranslate-<version>-x86_64.AppImage` (pinned `linuxdeploy`, `appimagetool`, and runtime), plus
-`SHA256SUMS-linux.txt`. `--skip-appimage` is for explicit offline runs only; CI always builds the
-AppImage. On Astra Linux `--target astra` produces
-`qtranslate-<version>-linux-x86_64-astra.tar.gz` and `qtranslate_<version>+astra1_amd64.deb` with
-Astra's Qt 6.10.2 and Astra `Depends`, plus `SHA256SUMS-linux-astra.txt`; these are local
-verification artifacts and are not CI-published. Trixie artifacts require glibc 2.38+ and are never
-claimed to run on Astra.
+**Linux packages.** The repository is a native Debian source package: `debian/` carries
+`control`, `rules` (the `dh` sequence), `changelog`, `copyright` (DEP-5, all rights reserved),
+`source/format` (`3.0 (native)`) and `source/options` (default `tar-ignore` list plus `build`,
+`build-*`, `out`, `.claude`). `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc"
+dpkg-buildpackage -rfakeroot -us -uc` from the repository root builds
+`qtranslate_<version>_amd64.deb` and writes the `.deb`, `.dsc` and `.tar.xz` to the parent directory;
+`nocheck` skips the tests, `nodoc` leaves `README.Debian` out, and without `nocheck` the rules run
+the 45 tests under `xvfb-run -a`. The package installs `usr/bin/qtranslate`, the desktop entry, the
+256x256 icon, `copyright` and `changelog.gz`, has no maintainer scripts, and takes `Depends` from
+`dh_shlibdeps`. `packaging/linux/verify-deb.sh` is the content/`Depends`/install gate.
+
+`packaging/linux/package.sh` builds the rest from a trixie Release tree or the `qtranslate-trixie`
+image: `qtranslate-<version>-linux-x86_64.tar.gz` (bundled Qt 6.8.2, plugins, Qt translations,
+`qt.conf`, `patchelf` RPATH) and `qtranslate-<version>-x86_64.AppImage` (pinned `linuxdeploy`,
+`appimagetool`, and runtime), plus `SHA256SUMS-linux.txt`. The `.deb` in the same artifact set comes
+from `dpkg-buildpackage` in a clean copy under the staging directory, not from a hand-staged tree;
+`dbgsym`, `.changes` and `.buildinfo` stay unpublished. `--skip-appimage` is for explicit offline
+runs only; CI always builds the AppImage. On Astra Linux `--target astra` produces
+`qtranslate-<version>-linux-x86_64-astra.tar.gz` and `qtranslate_<version>_amd64.deb` with Astra's
+Qt 6.10.2 and Astra `Depends` (same `.deb` name as trixie, so the two sets need different output
+directories), plus `SHA256SUMS-linux-astra.txt`; these are local verification artifacts and are not
+CI-published. Trixie artifacts require glibc 2.38+ and are never claimed to run on Astra.
 
 **Installer.** `packaging/windows/qtranslate.iss` (Inno Setup 6.3+ / 7) installs the application
 **for the current user**: `PrivilegesRequired=lowest`, the
@@ -421,10 +442,13 @@ Downloads section.
    the artifacts; `upload-artifact` stores `build/artifacts/*` as `qtranslate-windows-x64`.
 2. Linux (`Linux x64 (trixie)` on `ubuntu-latest`, `container: debian:trixie`): `git` and
    `ca-certificates` are installed before checkout, then the shared list from
-   `packaging/linux/trixie-packages.txt`; CMake Release with `-DCMAKE_PREFIX_PATH=/usr`; build;
+   `packaging/linux/trixie-packages.txt` (it includes `debhelper`, `fakeroot` and `pkg-config`);
+   CMake Release with `-DCMAKE_PREFIX_PATH=/usr`; build;
    `timeout 300 xvfb-run -a ctest --test-dir build/ci --output-on-failure`; `package.sh` without
-   `--skip-appimage`; `upload-artifact` stores `build/artifacts-linux/*` as
-   `qtranslate-linux-x64`.
+   `--skip-appimage`, which builds the native `.deb` through `dpkg-buildpackage`;
+   `packaging/linux/verify-deb.sh` on the resulting `.deb`; `upload-artifact` stores
+   `build/artifacts-linux/*` as `qtranslate-linux-x64` with hidden files excluded, so the staging
+   directory and `dbgsym` are not published.
 
 The workflow runs on push to `main`, on pull requests, and manually. On a `v*` tag the release job
 with `contents: write` needs both build jobs, downloads both artifact sets into `artifacts`, and
@@ -1902,11 +1926,12 @@ token is reused through a transient keyring outage, and `f:` tokens migrate to l
 save. Silently storing passwords in plain text is not acceptable.
 
 **Build and packages.** CMake installs `bin/qtranslate`, the freedesktop desktop file, and the
-256x256 hicolor icon; `packaging/linux/package.sh` owns the bundle and builds the trixie
-`tar.gz`/`.deb`/AppImage and `SHA256SUMS-linux.txt` in the `debian:trixie` container (KDE, GNOME, and
-the shell read the `.desktop` file; `Icon=qtranslate` matches the installed icon). `--target astra`
-builds the native Astra `-astra.tar.gz` and `+astra1` `.deb` with Astra's Qt 6.10.2; those are local
-verification artifacts, not CI-published. CI publishes only trixie artifacts. The Windows platform
+256x256 hicolor icon; the top-level `debian/` makes the tree a native source package, and
+`packaging/linux/package.sh` owns the bundle and builds the trixie `tar.gz`, native `.deb`,
+AppImage and `SHA256SUMS-linux.txt` in the `debian:trixie` container (KDE, GNOME, and the shell read
+the `.desktop` file; `Icon=qtranslate` matches the installed icon). `--target astra` builds the
+native Astra `-astra.tar.gz` and `.deb` with Astra's Qt 6.10.2; those are local verification
+artifacts, not CI-published. CI publishes only trixie artifacts. The Windows platform
 tests (`tst_hotkeymanager`, Windows variants of `tst_autostart`/`tst_secretprotector`) have Linux
 analogues; the other 36 tests are shared.
 

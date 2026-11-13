@@ -1,10 +1,12 @@
 # Handoff: work state
 
-Date: 2026-11-10. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
+Date: 2026-11-14. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
 
-The active roadmap is [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md); the old plan is
-archived at [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); the active
-documentation is English. The migration to the tree roadmap and the English baseline is complete.
+The active roadmaps are [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md) (next:
+`06-llm-actions`) and [`roadmap/debian/plan.md`](roadmap/debian/plan.md) (native Debian packaging,
+accepted on 2026-11-14); the old plan is archived at
+[`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); the active documentation
+is English. The migration to the tree roadmap and the English baseline is complete.
 
 ## Git
 
@@ -66,16 +68,21 @@ documentation is English. The migration to the tree roadmap and the English base
   fallback or turning the gate off clears the cache. `clearCache()` also bumps a cache generation
   that each reply captures, so a result arriving after a clear is not stored; the running request
   is not aborted.
-- Packaging: `packaging/linux/package.sh` builds the trixie `tar.gz`, `.deb`, AppImage, and
-  `SHA256SUMS-linux.txt` in `qtranslate-trixie`; the `.deb` uses `dpkg-shlibdeps` (including
-  `libsecret-1-0`/`libqt6dbus6` only when linked). `--target astra` builds
-  `qtranslate-<version>-linux-x86_64-astra.tar.gz`, `qtranslate_<version>+astra1_amd64.deb`, and
-  `SHA256SUMS-linux-astra.txt`. Trixie artifacts require glibc 2.38+ and do not run on Astra 1.8.7;
-  they are never claimed there. Astra artifacts are local verification artifacts, not CI-published.
-  Accepted hashes are in the `07-packaging-and-ci` and `08-verification` outcomes.
-- CI: the `Linux x64 (trixie)` job runs in `debian:trixie` (shared `trixie-packages.txt`, Release,
-  `timeout 300 xvfb-run -a ctest`, `package.sh`, `qtranslate-linux-x64`); the `release` job needs
-  both build jobs and publishes both artifact sets. The actual GitHub run and tag need approval.
+- Packaging: the repository is a native Debian source package (`debian/`, `3.0 (native)`), and
+  `packaging/linux/package.sh` builds the trixie `tar.gz`, native `.deb`, AppImage and
+  `SHA256SUMS-linux.txt` in `qtranslate-trixie`; the `.deb` comes from `dpkg-buildpackage` in a
+  clean copy and its `Depends` from `dh_shlibdeps` (including `libsecret-1-0`/`libqt6dbus6` only
+  when linked), and `packaging/linux/verify-deb.sh` gates it. `--target astra` builds
+  `qtranslate-<version>-linux-x86_64-astra.tar.gz`, `qtranslate_<version>_amd64.deb`, and
+  `SHA256SUMS-linux-astra.txt`; the `+astra1` suffix is gone, so the Astra and trixie `.deb` share
+  the file name and need different output directories. Trixie artifacts require glibc 2.38+ and do
+  not run on Astra 1.8.7; they are never claimed there. Astra artifacts are local verification
+  artifacts, not CI-published. Accepted hashes are in the `07-packaging-and-ci` and
+  `08-verification` outcomes.
+- CI: the `Linux x64 (trixie)` job runs in `debian:trixie` (shared `trixie-packages.txt` with
+  `debhelper`/`fakeroot`/`pkg-config`, Release, `timeout 300 xvfb-run -a ctest`, `package.sh` with
+  the native `.deb`, `verify-deb.sh`, `qtranslate-linux-x64`); the `release` job needs both build
+  jobs and publishes both artifact sets. The actual GitHub run and tag need approval.
 - Paths, autostart, and secrets: `src/core/apppaths.h` uses `XDG_CONFIG_HOME`/`XDG_STATE_HOME`
   (settings `<config>/qtranslate/qtranslate.ini`, log `<state>/qtranslate/qtranslate.log`); autostart
   writes `$XDG_CONFIG_HOME/autostart/qtranslate.desktop`; secrets use libsecret (`l:<uuid>`) or a
@@ -100,6 +107,41 @@ documentation is English. The migration to the tree roadmap and the English base
   Bing web and Reverso are done, the fallback chain is implemented, and stage 5 proofreading
   (LanguageTool only, no credentials) is accepted. Stage 4 (`04-local-offline-translation`) stays
   `blocked` by the user's 2026-11-05 decision; the next stage is `06-llm-actions`.
+
+## Native Debian packaging (2026-11-14)
+
+- The repository is a native Debian source package: top-level `debian/` with `control`, `rules`
+  (`dh`, Release, `nocheck` → `QTRANSLATE_BUILD_TESTS=OFF`), `changelog` (`0.12.0`),
+  `copyright` (DEP-5, all rights reserved — the project has no license file and none was added),
+  `source/format` (`3.0 (native)`), `source/options` (a bare `tar-ignore` line restores
+  dpkg-source's default `-I` list, plus `build`, `build-*`, `out`, `.claude`), `.gitignore` and
+  `README.Debian`. Roadmap: [`roadmap/debian/plan.md`](roadmap/debian/plan.md), closed on
+  2026-11-14; the acceptance evidence is in its `## Outcome`.
+- Build: `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot -us -uc`
+  from the repository root, without a trailing `.` (Astra's `dpkg-buildpackage` 1.21 rejects one).
+  It writes `qtranslate_0.12.0_amd64.deb`, the `.dsc` and the `.tar.xz` to the parent directory;
+  `dbgsym`, `.buildinfo` and `.changes` also appear there and are not published. `nocheck` skips
+  the tests, `nodoc` leaves `README.Debian` out of the package, and without `nocheck` the rules run
+  45/45 tests under `xvfb-run -a` (no trusted-client entries were needed under Xvfb; a real Parsec
+  server may still need them, as `README.Debian` says). The package contains the binary, the
+  desktop entry, the icon, `copyright` and `changelog.gz`, with no maintainer scripts and `Depends`
+  from `dh_shlibdeps` (`libglib2.0-0` on Astra, `libglib2.0-0t64` on trixie).
+- `packaging/linux/verify-deb.sh` is the content/`Depends`/install gate (15 checks and a
+  `--self-test`); it derives the expected `Depends` from the host's `dpkg-shlibdeps` and the
+  tree's `debian/control`, so it works on Astra and trixie. Astra: 15/15, self-test 4/4. Trixie:
+  15/15, self-test 3/4 + one explicit `SELFTEST SKIP` because trixie itself requires
+  `libxtst6 (>= 2:1.2.5)`.
+- `packaging/linux/package.sh` builds the `.deb` through `dpkg-buildpackage` in a clean copy under
+  the staging directory and publishes only the main `.deb`; the `+astra1` suffix was dropped (both
+  targets build `qtranslate_0.12.0_amd64.deb`), and `dbgsym` is not published. The Linux CI job
+  installs `debhelper`/`fakeroot`/`pkg-config`, builds the native `.deb`, runs the gate, keeps the
+  45 tests and uploads the same `qtranslate-linux-x64` set. `build-essential` was removed from
+  `Build-Depends`; `lintian` on the `.dsc` is clean apart from two
+  `installable-field-mirrors-source` info tags.
+- Known gaps: the portable tarball is not byte-reproducible (gzip mtime), while the `.deb` is;
+  `packaging/linux/package.sh` has nine pre-existing `shellcheck` notes; the release `.deb` is not
+  code-signed; old `0.11.0` artifacts remain in the local `build/artifacts-linux` and are not
+  uploads.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 

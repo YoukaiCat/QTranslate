@@ -71,8 +71,9 @@
 (если FUSE недоступен, запускайте с `--appimage-extract-and-run`).
 Им нужен glibc 2.38 или новее, на Astra Linux 1.8.7 они не работают.
 Astra Linux поддерживается отдельной нативной сборкой:
-`qtranslate-<version>-linux-x86_64-astra.tar.gz` и `qtranslate_<version>+astra1_amd64.deb`; это
-локальные проверочные артефакты, CI их не публикует. Сборка и упаковка — в разделе
+`qtranslate-<version>-linux-x86_64-astra.tar.gz` и `qtranslate_<version>_amd64.deb` (то же имя
+файла, что у trixie-пакета, но собрано против Qt 6.10.2 и glibc 2.36 Astra); это локальные
+проверочные артефакты, CI их не публикует. Сборка и упаковка — в разделе
 [«Linux»](#linux-0120).
 
 ## Использование
@@ -222,9 +223,10 @@ docker run --rm -v "$PWD:/src" -w /src -e HOME=/tmp \
   ./packaging/linux/package.sh --build-dir build/linux-trixie --output-dir build/artifacts-linux'
 ```
 
-Скрипт собирает портативный архив, `.deb`, AppImage и `SHA256SUMS-linux.txt`; `--skip-appimage`
-нужен только для явного офлайн-прогона. На Astra Linux собирайте нативно с Qt 6.10.2 и
-`--target astra` — получатся `-astra.tar.gz`, `+astra1_amd64.deb` и
+Скрипт собирает портативный архив, нативный `.deb`, AppImage и `SHA256SUMS-linux.txt`; `.deb`
+собирается `dpkg-buildpackage` в чистой копии, а не из подготовленного вручную дерева, а
+`--skip-appimage` нужен только для явного офлайн-прогона. На Astra Linux собирайте нативно с
+Qt 6.10.2 и `--target astra` — получатся `-astra.tar.gz`, `qtranslate_<version>_amd64.deb` и
 `SHA256SUMS-linux-astra.txt`:
 
 ```bash
@@ -233,6 +235,20 @@ docker run --rm -v "$PWD:/src" -w /src -e HOME=/tmp \
 
 Пакетам trixie нужен glibc 2.38+, на Astra Linux 1.8.7 они не работают; для этого и существует
 нативная сборка Astra.
+
+Репозиторий — ещё и нативный source package Debian: в `debian/` лежат control-файлы и правила
+`dh`. Чтобы собрать `.deb` напрямую, из корня репозитория:
+
+```bash
+DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot -us -uc
+```
+
+`dpkg-buildpackage` кладёт в родительский каталог `.deb`, `.dsc`, `.tar.xz`, пакет `-dbgsym`,
+`.buildinfo` и `.changes` (`dpkg-buildpackage` 1.21 в Astra не принимает завершающую `.` — в
+команде её нет). Отладочные символы остаются в пакете `-dbgsym` и не публикуются. `nocheck`
+пропускает 45 тестов, `nodoc` не кладёт `README.Debian` в пакет, `parallel=N` ограничивает
+сборку; без `nocheck` правила запускают тесты под `xvfb-run -a`. Зависимости сборки — в
+`debian/control`, `dpkg-checkbuilddeps` покажет, чего не хватает.
 
 #### Astra Linux: глобальные горячие клавиши
 
@@ -294,7 +310,7 @@ getfattr -n security.exec_id /usr/bin/qtranslate   # из пакета attr; о�
 - Секреты Linux хранятся в libsecret, если он доступен и связка ключей запущена; иначе — в файле с
   правами `0600` и предупреждением в настройках.
 - Пакетам trixie нужен glibc 2.38+, на Astra Linux 1.8.7 они не работают. Для Astra есть нативные
-  `-astra.tar.gz`/`+astra1` пакеты.
+  `-astra.tar.gz` и `qtranslate_<version>_amd64.deb`.
 
 Переводимый текст отправляется выбранному провайдеру: Google, DeepL, OpenRouter или другому
 OpenAI-совместимому серверу. Локальный сервер, например Ollama, оставляет текст на вашей машине.
