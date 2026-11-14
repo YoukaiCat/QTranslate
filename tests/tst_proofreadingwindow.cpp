@@ -1,8 +1,8 @@
 #include "core/proofreadingtext.h"
 #include "core/proofreadingtypes.h"
 #include "core/translationtypes.h"
-#include "ui/mainwindow.h"
 #include "ui/proofreadingpanel.h"
+#include "ui/proofreadingwindow.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -61,8 +61,8 @@ QStringList replacements(const QString &first, const QString &second = {})
     return values;
 }
 
-// A modal dialog opened by a MainWindow action runs its own event loop, so the
-// click has to come from a timer inside that loop. The flag is asserted after
+// A modal dialog opened by a ProofreadingWindow action runs its own event loop,
+// so the click has to come from a timer inside that loop. The flag is asserted after
 // the action returns: QVERIFY inside the timer would not fail the test.
 struct ModalAction
 {
@@ -111,21 +111,19 @@ ModalActionPtr scheduleModalAction(const QString &buttonObjectName)
 
 } // namespace
 
-class TestProofreadingPanel : public QObject
+class TestProofreadingWindow : public QObject
 {
     Q_OBJECT
 
 private slots:
     void initTestCase()
     {
-        qRegisterMetaType<TranslationRequest>();
-        qRegisterMetaType<TranslationResult>();
         qRegisterMetaType<ProofreadingResult>();
     }
 
     void checkButtonVisibility()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *check = window.findChild<QPushButton *>(QStringLiteral("check"));
         auto *status = window.findChild<QLabel *>(QStringLiteral("status"));
@@ -142,7 +140,7 @@ private slots:
         QVERIFY(!check->isHidden());
         QVERIFY(!panel->isHidden());
 
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
+        QSignalSpy checkSpy(&window, &ProofreadingWindow::checkRequested);
         check->click();
         QCOMPARE(status->text(), QStringLiteral("Nothing to check"));
         QCOMPARE(checkSpy.count(), 0);
@@ -160,7 +158,7 @@ private slots:
 
     void showsIssuesAndHighlights()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -192,7 +190,7 @@ private slots:
 
     void noIssuesState()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -213,7 +211,7 @@ private slots:
 
     void errorStates()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -246,7 +244,7 @@ private slots:
 
     void replacementChoicesAndApply()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -282,7 +280,7 @@ private slots:
         QVERIFY2(list->item(1)->text().contains(QStringLiteral("Rule:")),
                  qPrintable(list->item(1)->text()));
 
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
+        QSignalSpy checkSpy(&window, &ProofreadingWindow::checkRequested);
         replace->click();
 
         QCOMPARE(source->toPlainText(), QStringLiteral("abcdeWWhij"));
@@ -292,7 +290,7 @@ private slots:
 
     void singleUndoAfterReplace()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -318,7 +316,7 @@ private slots:
 
     void emptyReplacementEmptiesTextAndPanel()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -351,7 +349,7 @@ private slots:
 
     void ignoreRemovesRowOnly()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -371,7 +369,7 @@ private slots:
         QVERIFY(ignore);
         list->setCurrentRow(0);
 
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
+        QSignalSpy checkSpy(&window, &ProofreadingWindow::checkRequested);
         ignore->click();
 
         QCOMPARE(list->count(), 1);
@@ -382,7 +380,7 @@ private slots:
 
     void replaceAllAppliesAllAndSkips()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -401,7 +399,7 @@ private slots:
         auto *replaceAll =
             panel->findChild<QPushButton *>(QStringLiteral("proofreadingReplaceAll"));
         QVERIFY(replaceAll);
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
+        QSignalSpy checkSpy(&window, &ProofreadingWindow::checkRequested);
 
         ModalActionPtr action = scheduleModalAction(QStringLiteral("proofreadingPreviewOk"));
         replaceAll->click();
@@ -424,7 +422,7 @@ private slots:
 
     void copyCorrectedText()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -448,83 +446,9 @@ private slots:
         QCOMPARE(source->extraSelections().size(), 2);
     }
 
-    void translationDoesNotStartACheck()
+    void disableClearsPanelAndCancels()
     {
-        MainWindow window;
-        window.setProofreadingAvailable(true);
-        auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
-        auto *translate = window.findChild<QPushButton *>(QStringLiteral("translate"));
-        QVERIFY(source);
-        QVERIFY(translate);
-        source->setPlainText(QStringLiteral("abc"));
-
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
-        QSignalSpy translateSpy(&window, &MainWindow::translateRequested);
-        translate->click();
-        QCOMPARE(translateSpy.count(), 1);
-        QCOMPARE(checkSpy.count(), 0);
-    }
-
-    void autoTranslateBypassesCheck()
-    {
-        MainWindow window;
-        window.setProofreadingAvailable(true);
-        window.setAutoTranslateDelay(10);
-        auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
-        QVERIFY(source);
-
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
-        QSignalSpy translateSpy(&window, &MainWindow::translateRequested);
-        source->setPlainText(QStringLiteral("Some text"));
-
-        QTRY_COMPARE_WITH_TIMEOUT(translateSpy.count(), 1, 5000);
-        QCOMPARE(checkSpy.count(), 0);
-    }
-
-    void autoTranslateDoesNotCancelCheck()
-    {
-        MainWindow window;
-        window.setProofreadingAvailable(true);
-        window.setAutoTranslateDelay(10);
-        auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
-        auto *check = window.findChild<QPushButton *>(QStringLiteral("check"));
-        auto *panel = window.findChild<ProofreadingPanel *>();
-        QVERIFY(source);
-        QVERIFY(check);
-        QVERIFY(panel);
-
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
-        QSignalSpy translateSpy(&window, &MainWindow::translateRequested);
-
-        source->setPlainText(QStringLiteral("Some text"));
-        check->click();
-        QCOMPARE(checkSpy.count(), 1);
-
-        // The typing timer would fire here and cancel the explicit check.
-        QTest::qWait(100);
-        QCOMPARE(checkSpy.count(), 1);
-        QCOMPARE(translateSpy.count(), 0);
-
-        // A replacement must not start the automatic translation either.
-        window.showProofreadingResult(
-            makeResult({makeIssue(0, 4, QStringLiteral("First"),
-                                  replacements(QStringLiteral("This")), QStringLiteral("R1"))}));
-        auto *list = panel->findChild<QListWidget *>(QStringLiteral("proofreadingIssues"));
-        auto *replace = panel->findChild<QPushButton *>(QStringLiteral("proofreadingReplace"));
-        QVERIFY(list);
-        QVERIFY(replace);
-        QCOMPARE(list->count(), 1);
-        list->setCurrentRow(0);
-        replace->click();
-        QCOMPARE(checkSpy.count(), 2);
-
-        QTest::qWait(100);
-        QCOMPARE(translateSpy.count(), 0);
-    }
-
-    void translationAndDisableClearPanel()
-    {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -539,47 +463,22 @@ private slots:
         const ProofreadingResult checked =
             makeResult({makeIssue(0, 4, QStringLiteral("First"),
                                   replacements(QStringLiteral("This")), QStringLiteral("R1"))});
-        QSignalSpy cancelSpy(&window, &MainWindow::checkCancelled);
-        QSignalSpy translateSpy(&window, &MainWindow::translateRequested);
+        QSignalSpy cancelSpy(&window, &ProofreadingWindow::checkCancelled);
 
         window.showProofreadingResult(checked);
         QCOMPARE(list->count(), 1);
         QCOMPARE(source->extraSelections().size(), 1);
-        window.showTranslationStarted();
-        QCOMPARE(list->count(), 0);
-        QCOMPARE(source->extraSelections().size(), 0);
-        QCOMPARE(cancelSpy.count(), 1);
-
-        window.showProofreadingResult(checked);
-        QCOMPARE(list->count(), 1);
-        window.translateText(QStringLiteral("Some text"));
-        QCOMPARE(list->count(), 0);
-        QCOMPARE(source->extraSelections().size(), 0);
-        QCOMPARE(cancelSpy.count(), 2);
-        QCOMPARE(translateSpy.count(), 1);
-
-        window.showProofreadingResult(checked);
-        QCOMPARE(list->count(), 1);
-        window.showTranslation(TranslationRequest{QStringLiteral("Some text"),
-                                                  QStringLiteral("en"), QStringLiteral("ru")},
-                               TranslationResult{});
-        QCOMPARE(list->count(), 0);
-        QCOMPARE(source->extraSelections().size(), 0);
-        QCOMPARE(cancelSpy.count(), 3);
-
-        window.showProofreadingResult(checked);
-        QCOMPARE(list->count(), 1);
         window.setProofreadingAvailable(false);
         QVERIFY(panel->isHidden());
         QVERIFY(check->isHidden());
         QCOMPARE(list->count(), 0);
         QCOMPARE(source->extraSelections().size(), 0);
-        QCOMPARE(cancelSpy.count(), 4);
+        QCOMPARE(cancelSpy.count(), 1);
     }
 
     void editingClearsAndCancels()
     {
-        MainWindow window;
+        ProofreadingWindow window;
         window.setProofreadingAvailable(true);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *panel = window.findChild<ProofreadingPanel *>();
@@ -596,7 +495,7 @@ private slots:
         QCOMPARE(list->count(), 1);
         QCOMPARE(source->extraSelections().size(), 1);
 
-        QSignalSpy cancelSpy(&window, &MainWindow::checkCancelled);
+        QSignalSpy cancelSpy(&window, &ProofreadingWindow::checkCancelled);
         source->insertPlainText(QStringLiteral("x"));
         QCOMPARE(list->count(), 0);
         QCOMPARE(source->extraSelections().size(), 0);
@@ -669,5 +568,5 @@ private slots:
     }
 };
 
-QTEST_MAIN(TestProofreadingPanel)
-#include "tst_proofreadingpanel.moc"
+QTEST_MAIN(TestProofreadingWindow)
+#include "tst_proofreadingwindow.moc"

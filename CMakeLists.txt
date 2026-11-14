@@ -105,6 +105,7 @@ qt_add_executable(qtranslate
     src/ui/proofreadingerrortext.cpp src/ui/proofreadingerrortext.h
     src/ui/proofreadingpanel.cpp    src/ui/proofreadingpanel.h
     src/ui/proofreadingpopupwindow.cpp src/ui/proofreadingpopupwindow.h
+    src/ui/proofreadingwindow.cpp   src/ui/proofreadingwindow.h
     src/ui/settingsdialog.cpp       src/ui/settingsdialog.h
     src/ui/translationerrortext.cpp src/ui/translationerrortext.h
     src/ui/trayicon.cpp             src/ui/trayicon.h

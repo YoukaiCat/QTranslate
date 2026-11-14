@@ -17,6 +17,11 @@ TrayIcon::TrayIcon(const QIcon &icon, QObject *parent)
     connect(showAction, &QAction::triggered, this, &TrayIcon::showWindowRequested);
     m_menu->setDefaultAction(showAction);
 
+    m_checkTextAction = m_menu->addAction(tr("Check text…"));
+    m_checkTextAction->setObjectName(QStringLiteral("checkText"));
+    m_checkTextAction->setVisible(false);
+    connect(m_checkTextAction, &QAction::triggered, this, &TrayIcon::checkTextRequested);
+
     m_serviceMenu = m_menu->addMenu(tr("Service"));
     m_serviceMenu->setObjectName(QStringLiteral("serviceMenu"));
 
@@ -74,6 +79,13 @@ void TrayIcon::setHotkeysPaused(bool paused)
     m_pauseHotkeysAction->setChecked(paused);
 }
 
+void TrayIcon::setCheckTextVisible(bool visible)
+{
+    if (!m_checkTextAction)
+        return;
+    m_checkTextAction->setVisible(visible);
+}
+
 void TrayIcon::setServices(const QList<ServiceEntry> &services, const QString &activeId)
 {
     if (!m_serviceMenu)
@@ -100,6 +112,8 @@ void TrayIcon::retranslate()
 {
     if (m_showAction)
         m_showAction->setText(tr("Show window"));
+    if (m_checkTextAction)
+        m_checkTextAction->setText(tr("Check text…"));
     if (m_pauseHotkeysAction)
         m_pauseHotkeysAction->setText(tr("Pause hotkeys"));
     if (m_serviceMenu)

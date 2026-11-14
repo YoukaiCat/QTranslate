@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 depends: [02-remove-pre-translation-flow]
 ---
@@ -333,3 +333,67 @@ Design decisions:
   in this environment.
 - Nothing is needed from the user: the 2026-11-14 clarification (separate windows and modes, tray
   entry point) is recorded in the stage.
+
+## Outcome
+
+Done. Text checking is a separate non-modal window and mode; the translation window contains no
+checking element.
+
+- New `src/ui/proofreadingwindow.{h,cpp}`: a top-level `QMainWindow` with its own `sourceText`
+  editor, the reused `ProofreadingPanel` (`proofreadingPanel`), the `check` button, the `status`
+  label, the `Text checking` title and the moved checking code (`startCheck()`,
+  `onProofreadingResult()`, `showProofreadingResult()`, `updateHighlights()`, `selectIssue()`,
+  `applyReplacement()`, `ignoreIssue()`, `replaceAll()`, `previewCorrections()`,
+  `applyIssueEdits()`, `copyCorrected()`, `setStatus()`, the `m_applyingEdit` guard, the five panel
+  signals, the `proofreadingPreview*` dialog names and the Ctrl+Return/Ctrl+Enter shortcuts). It
+  emits `checkRequested()`/`checkCancelled()` only and knows nothing about the manager, services,
+  the network or the settings. A user edit and the close event clear the panel and the highlights
+  and cancel the running check; closing hides the window, which stays alive and keeps its text for
+  the next open; `setProofreadingAvailable(false)` does the same cleanup; `showAndActivate()` shows,
+  raises, activates and focuses the editor.
+- `MainWindow` lost the whole checking surface: the panel pane, the Check button,
+  `setProofreadingAvailable()`/`showProofreadingResult()`, the `checkRequested`/`checkCancelled`
+  signals, every checking helper and member, the proofreading includes and the
+  `QTextEdit`/`QColor`/`QDialog`/`QDialogButtonBox`/`QTextCharFormat`/`<algorithm>` includes.
+  Translation, swap, copy, auto-translate, the status bar and hide-to-tray are unchanged.
+- The tray has `Check text…` (object name `checkText`) directly after **Show window**, hidden until
+  checking is enabled and a provider is registered; it is the only entry point. No CLI command, no
+  second hotkey, no new settings.
+- `AppController` owns `m_proofreadingWindow`, creates it lazily in `showProofreadingWindow()`,
+  connects its signals to `checkInProofreadingWindow()` on `ProofreadingManager::Channel::Window`
+  (`m_windowCheck`), calls `updateProofreadingUi()` again after the tray exists, hides the window and
+  cancels its check when `proofreading.enabled` goes off, hides it on quit, and does not reset it on
+  a UI language change. `updateProofreadingUi()` no longer touches `m_mainWindow`.
+- `ProofreadingManager::Channel::MainWindow` is `Channel::Window`; `channelName()` logs `window`.
+- Tests: `tst_proofreadingpanel` is now `tst_proofreadingwindow` and covers the window states, the
+  actions, the single undo step, the edit-cancels-check rule, the close/disable cleanup and the
+  corrected-text rules; the new `tst_mainwindow` proves the translation window has no checking UI
+  and keeps translate/auto-translate/copy; `tst_proofreadingmanager` uses the new channel name.
+  Linux is 46 tests; Windows 40 is derived and not performed.
+- Translations: the 14 `.ts` files are at **372** messages with 0 unfinished, empty or vanished; the
+  seven moved `MainWindow` strings keep their translations in the `ProofreadingWindow` context and
+  the four new strings (`Text checking`, `Text to check`, `Enter text to check`, `Check text…`) are
+  translated in all 14 files.
+- Verification in the `qtranslate-trixie` container: Linux Debug and Release build with zero
+  `warning:` (`-Wall -Wextra`) and pass **46/46** under `xvfb-run -a`, including
+  `tst_proofreadingwindow`, `tst_mainwindow`, `tst_proofreadingmanager`, `tst_proofreadingpopup`,
+  `tst_proofreading_selection_x11` and `tst_translations`. The static gates are clean (`MainWindow`
+  has no proofreading name; `checkInMainWindow`/`m_mainWindowCheck` and
+  `ProofreadingManager::Channel::MainWindow` are gone; `ProofreadingPanel` is not referenced from
+  `mainwindow.*`). `git diff --check` is clean. `ProofreadingPanel` and `ProofreadingPopupWindow`
+  are byte-identical.
+- Not performed: Windows Debug/Release and its 40 tests (no MSVC); the interactive tray pass and a
+  live provider smoke (no tray or display here) — the widget assertions are the automated gate. The
+  `AppController` window lifetime, tray visibility and disable/quit paths remain code-review only
+  because it has no test target.
+- Plan deviations and review notes: the plan's step-9 grep lines were inaccurate — the new window
+  necessarily has `setProofreadingAvailable()`/`showProofreadingResult()`, and
+  `TranslationManager::Channel::MainWindow` is a different enum; the gates used were the
+  proofreading-qualified ones. `ProofreadingWindow::startCheck()` has an availability guard (no
+  reachable path when the feature is off because the tray item and the window are hidden);
+  `setStatus()` dropped the unused `isError` parameter. The manager's private `m_mainWindowReply`
+  name was kept; only the enum and the log name changed. The review found only unused includes
+  (`QSignalBlocker` in `proofreadingwindow.cpp`, `QTextDocument` in `mainwindow.cpp`); rejected as
+  cosmetic, with no failure scenario.
+- Only the task files, the 14 `.ts` files, this plan and the lead's journal change are touched; no
+  push.

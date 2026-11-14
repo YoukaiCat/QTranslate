@@ -2,17 +2,12 @@
 
 #include "core/appinfo.h"
 #include "core/languages.h"
-#include "core/proofreadingtext.h"
 #include "ui/languagecombobox.h"
-#include "ui/proofreadingpanel.h"
 #include "ui/translationerrortext.h"
 
 #include <QClipboard>
 #include <QCloseEvent>
-#include <QColor>
 #include <QComboBox>
-#include <QDialog>
-#include <QDialogButtonBox>
 #include <QGuiApplication>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -22,15 +17,11 @@
 #include <QSignalBlocker>
 #include <QSplitter>
 #include <QStatusBar>
-#include <QTextCharFormat>
 #include <QTextCursor>
 #include <QTextDocument>
-#include <QTextEdit>
 #include <QTimer>
 #include <QToolButton>
 #include <QVBoxLayout>
-
-#include <algorithm>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -87,27 +78,15 @@ void MainWindow::buildUi()
     m_resultEdit->setAccessibleName(tr("Translation"));
     m_resultEdit->setReadOnly(true);
     m_resultEdit->setPlaceholderText(tr("Translation"));
-    m_proofreadingPanel = new ProofreadingPanel(splitter);
-    // A fixed-ish pane next to the two text fields; hidden until the checking
-    // mode is on.
-    m_proofreadingPanel->setMinimumWidth(240);
-    m_proofreadingPanel->setMaximumWidth(320);
-    m_proofreadingPanel->hide();
     splitter->addWidget(m_sourceEdit);
     splitter->addWidget(m_resultEdit);
-    splitter->addWidget(m_proofreadingPanel);
     splitter->setStretchFactor(0, 1);
     splitter->setStretchFactor(1, 1);
-    splitter->setStretchFactor(2, 0);
     splitter->setChildrenCollapsible(false);
     layout->addWidget(splitter, 1);
 
     // Bottom bar: actions.
     auto *bottomBar = new QHBoxLayout;
-    m_checkButton = new QPushButton(tr("Check"), central);
-    m_checkButton->setObjectName(QStringLiteral("check"));
-    m_checkButton->setToolTip(tr("Check the source text"));
-    m_checkButton->hide();
     m_translateButton = new QPushButton(tr("Translate"), central);
     m_translateButton->setObjectName(QStringLiteral("translate"));
     m_translateButton->setToolTip(tr("Ctrl+Enter"));
@@ -116,7 +95,6 @@ void MainWindow::buildUi()
     m_copyButton->setToolTip(tr("Copy the translation to the clipboard"));
     m_copyButton->setEnabled(false);
     bottomBar->addStretch();
-    bottomBar->addWidget(m_checkButton);
     bottomBar->addWidget(m_translateButton);
     bottomBar->addWidget(m_copyButton);
     layout->addLayout(bottomBar);
@@ -132,15 +110,6 @@ void MainWindow::buildUi()
     m_autoTranslateTimer->setSingleShot(true);
     connect(m_autoTranslateTimer, &QTimer::timeout, this, [this] { requestTranslation(); });
     connect(m_sourceEdit, &QPlainTextEdit::textChanged, this, [this] {
-        // Our own edits (Replace, Replace all) must neither start the timer nor
-        // invalidate the list: they are handled explicitly by their caller.
-        if (m_applyingEdit)
-            return;
-        // The stored offsets belong to the old text: drop the list and the
-        // highlights and cancel the open request instead of shifting them.
-        m_proofreadingPanel->clear();
-        updateHighlights();
-        emit checkCancelled();
         if (m_autoTranslateDelayMs <= 0)
             return;
         if (m_sourceEdit->toPlainText().trimmed().isEmpty())
@@ -150,16 +119,6 @@ void MainWindow::buildUi()
     });
 
     connect(m_translateButton, &QPushButton::clicked, this, [this] { requestTranslation(); });
-    connect(m_checkButton, &QPushButton::clicked, this, [this] { startCheck(); });
-    connect(m_proofreadingPanel, &ProofreadingPanel::issueSelected, this,
-            &MainWindow::selectIssue);
-    connect(m_proofreadingPanel, &ProofreadingPanel::replacementChosen, this,
-            &MainWindow::applyReplacement);
-    connect(m_proofreadingPanel, &ProofreadingPanel::ignored, this, &MainWindow::ignoreIssue);
-    connect(m_proofreadingPanel, &ProofreadingPanel::replaceAllRequested, this,
-            [this] { replaceAll(true); });
-    connect(m_proofreadingPanel, &ProofreadingPanel::copyCorrectedRequested, this,
-            &MainWindow::copyCorrected);
     for (const QKeySequence &keys : {QKeySequence(Qt::CTRL | Qt::Key_Return),
                                      QKeySequence(Qt::CTRL | Qt::Key_Enter)}) {
         auto *shortcut = new QShortcut(keys, this);
@@ -222,27 +181,12 @@ void MainWindow::setServices(const QList<ServiceEntry> &services, const QString 
     m_service->setEnabled(services.size() > 1);
 }
 
-void MainWindow::setProofreadingAvailable(bool available)
-{
-    m_proofreadingAvailable = available;
-    m_proofreadingPanel->setVisible(available);
-    m_checkButton->setVisible(available);
-    if (!available) {
-        m_proofreadingPanel->clear();
-        updateHighlights();
-        emit checkCancelled();
-    }
-}
-
 void MainWindow::showTranslationStarted()
 {
     m_resultEdit->clear();
     m_copyButton->setEnabled(false);
     m_detectedLang.clear();
     updateSwapButton();
-    m_proofreadingPanel->clear();
-    updateHighlights();
-    emit checkCancelled();
     setStatus(tr("Translating…"));
 }
 
@@ -275,10 +219,7 @@ void MainWindow::translateText(const QString &text)
     const QSignalBlocker blocker(m_sourceEdit);
     m_sourceEdit->setPlainText(text);
     m_sourceEdit->moveCursor(QTextCursor::Start);
-    // setPlainText() is blocked above, so the stale-result handler does not run.
-    m_proofreadingPanel->clear();
-    updateHighlights();
-    emit checkCancelled();
+    // setPlainText() is blocked above, so the typing timer does not start.
     requestTranslation();
 }
 
@@ -305,8 +246,6 @@ void MainWindow::retranslateUi()
     m_resultEdit->setPlaceholderText(tr("Translation"));
     m_translateButton->setText(tr("Translate"));
     m_translateButton->setToolTip(tr("Ctrl+Enter"));
-    m_checkButton->setText(tr("Check"));
-    m_checkButton->setToolTip(tr("Check the source text"));
     m_copyButton->setText(tr("Copy"));
     m_copyButton->setToolTip(tr("Copy the translation to the clipboard"));
     updateSwapButton();
@@ -323,18 +262,11 @@ void MainWindow::showTranslation(const TranslationRequest &request,
     const QSignalBlocker blocker(m_sourceEdit);
     m_sourceEdit->setPlainText(request.text);
     m_sourceEdit->moveCursor(QTextCursor::Start);
-    // setPlainText() is blocked above, so the stale-result handler does not run.
-    m_proofreadingPanel->clear();
-    updateHighlights();
-    emit checkCancelled();
     showResult(result);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    m_proofreadingPanel->clear();
-    updateHighlights();
-    emit checkCancelled();
     if (m_closeHidesToTray) {
         hide();
         event->ignore();
@@ -358,196 +290,6 @@ void MainWindow::requestTranslation()
     emit translateRequested(TranslationRequest{text,
                                                m_sourceLang->currentCode(),
                                                m_targetLang->currentCode()});
-}
-
-void MainWindow::startCheck()
-{
-    m_autoTranslateTimer->stop();
-    const QString text = m_sourceEdit->toPlainText();
-    if (text.trimmed().isEmpty()) {
-        // A replacement can leave an empty field; the old offsets are stale.
-        m_proofreadingPanel->clear();
-        updateHighlights();
-        setStatus(tr("Nothing to check"));
-        return;
-    }
-    setStatus(QString());
-    m_proofreadingPanel->show();
-    m_proofreadingPanel->showChecking();
-    updateHighlights();
-    emit checkRequested(text);
-}
-
-void MainWindow::showProofreadingResult(const ProofreadingResult &result)
-{
-    onProofreadingResult(result);
-}
-
-void MainWindow::onProofreadingResult(const ProofreadingResult &result)
-{
-    if (result.error == TranslationError::Cancelled)
-        return;
-
-    m_proofreadingPanel->showResult(result);
-    updateHighlights();
-}
-
-void MainWindow::updateHighlights()
-{
-    QList<QTextEdit::ExtraSelection> selections;
-    const QString text = m_sourceEdit->toPlainText();
-    for (const ProofreadingIssue &issue : m_proofreadingPanel->issues()) {
-        if (issue.offset < 0 || issue.length < 0 || issue.offset > text.size()
-            || issue.length > text.size() - issue.offset) {
-            continue;
-        }
-        QTextEdit::ExtraSelection selection;
-        QTextCharFormat format;
-        format.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
-        format.setUnderlineColor(QColor(0xd3, 0x2f, 0x2f));
-        selection.format = format;
-        QTextCursor cursor(m_sourceEdit->document());
-        cursor.setPosition(issue.offset);
-        cursor.setPosition(issue.offset + issue.length, QTextCursor::KeepAnchor);
-        selection.cursor = cursor;
-        selections.append(selection);
-    }
-    m_sourceEdit->setExtraSelections(selections);
-}
-
-void MainWindow::selectIssue(int row)
-{
-    const ProofreadingIssue *issue = m_proofreadingPanel->issueAt(row);
-    if (!issue)
-        return;
-    const int size = m_sourceEdit->toPlainText().size();
-    if (issue->offset < 0 || issue->offset > size)
-        return;
-    const int end = qMin(size, issue->offset + qMax(0, issue->length));
-    QTextCursor cursor(m_sourceEdit->document());
-    cursor.setPosition(issue->offset);
-    cursor.setPosition(end, QTextCursor::KeepAnchor);
-    m_sourceEdit->setTextCursor(cursor);
-}
-
-void MainWindow::applyReplacement(int row, int replacementIndex)
-{
-    const ProofreadingIssue *issue = m_proofreadingPanel->issueAt(row);
-    if (!issue || replacementIndex < 0 || replacementIndex >= issue->replacements.size())
-        return;
-    if (!ProofreadingText::isApplicable(m_sourceEdit->toPlainText(), *issue))
-        return;
-
-    m_applyingEdit = true;
-    QTextCursor cursor(m_sourceEdit->document());
-    cursor.beginEditBlock();
-    cursor.setPosition(issue->offset);
-    cursor.setPosition(issue->offset + issue->length, QTextCursor::KeepAnchor);
-    cursor.insertText(issue->replacements.at(replacementIndex));
-    cursor.endEditBlock();
-    m_applyingEdit = false;
-
-    // The replacement moved the remaining offsets: ask for a fresh check
-    // instead of shifting the list.
-    startCheck();
-}
-
-void MainWindow::ignoreIssue(int row)
-{
-    Q_UNUSED(row);
-    // The panel has already dropped the row and its issue.
-    updateHighlights();
-}
-
-void MainWindow::replaceAll(bool preview)
-{
-    const QString current = m_sourceEdit->toPlainText();
-    const QString corrected = m_proofreadingPanel->correctedText(current);
-    if (preview && corrected != current && !previewCorrections(corrected))
-        return;
-
-    applyIssueEdits(m_proofreadingPanel->issues());
-    m_proofreadingPanel->clear();
-    updateHighlights();
-    if (!preview)
-        setStatus(tr("Corrections applied"));
-}
-
-bool MainWindow::previewCorrections(const QString &corrected)
-{
-    QDialog dialog(this);
-    dialog.setObjectName(QStringLiteral("proofreadingPreviewDialog"));
-    dialog.setWindowTitle(tr("Preview of corrections"));
-
-    auto *layout = new QVBoxLayout(&dialog);
-    auto *label = new QLabel(tr("Corrected text:"), &dialog);
-    auto *preview = new QPlainTextEdit(&dialog);
-    preview->setObjectName(QStringLiteral("proofreadingPreview"));
-    preview->setReadOnly(true);
-    preview->setPlainText(corrected);
-    auto *buttons =
-        new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-    if (QPushButton *ok = buttons->button(QDialogButtonBox::Ok))
-        ok->setObjectName(QStringLiteral("proofreadingPreviewOk"));
-    if (QPushButton *cancel = buttons->button(QDialogButtonBox::Cancel))
-        cancel->setObjectName(QStringLiteral("proofreadingPreviewCancel"));
-    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-
-    layout->addWidget(label);
-    layout->addWidget(preview, 1);
-    layout->addWidget(buttons);
-    dialog.resize(520, 360);
-    return dialog.exec() == QDialog::Accepted;
-}
-
-void MainWindow::applyIssueEdits(const QVector<ProofreadingIssue> &issues)
-{
-    const QString text = m_sourceEdit->toPlainText();
-    QVector<ProofreadingIssue> applicable;
-    applicable.reserve(issues.size());
-    for (const ProofreadingIssue &issue : issues) {
-        if (ProofreadingText::isApplicable(text, issue))
-            applicable.append(issue);
-    }
-    if (applicable.isEmpty())
-        return;
-
-    // The same order as ProofreadingText::corrected(): from the end of the
-    // text to the beginning, the longer range first at the same offset, and
-    // the rule id for ties.
-    std::sort(applicable.begin(), applicable.end(),
-              [](const ProofreadingIssue &left, const ProofreadingIssue &right) {
-                  if (left.offset != right.offset)
-                      return left.offset > right.offset;
-                  if (left.length != right.length)
-                      return left.length > right.length;
-                  return left.ruleId < right.ruleId;
-              });
-
-    // One edit block for all issues: a single Ctrl+Z restores the previous
-    // text. setPlainText() would clear the undo stack instead.
-    m_applyingEdit = true;
-    QTextCursor cursor(m_sourceEdit->document());
-    cursor.beginEditBlock();
-    int appliedFrom = text.size();
-    for (const ProofreadingIssue &issue : applicable) {
-        if (issue.offset + issue.length > appliedFrom)
-            continue;
-        cursor.setPosition(issue.offset);
-        cursor.setPosition(issue.offset + issue.length, QTextCursor::KeepAnchor);
-        cursor.insertText(issue.replacements.first());
-        appliedFrom = issue.offset;
-    }
-    cursor.endEditBlock();
-    m_applyingEdit = false;
-}
-
-void MainWindow::copyCorrected()
-{
-    QGuiApplication::clipboard()->setText(
-        m_proofreadingPanel->correctedText(m_sourceEdit->toPlainText()));
-    statusBar()->showMessage(tr("Corrected text copied to the clipboard"), 2000);
 }
 
 void MainWindow::swapLanguages()

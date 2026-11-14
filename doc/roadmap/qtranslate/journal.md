@@ -2,15 +2,16 @@
 
 ## Where we left off
 
-Current node: stage `09-proofreading-standalone` is `in-progress` (`base: 3e75331`). Its first child
-`01-remove-online-gate` is `done` as `11eb5bc`; the second `02-remove-pre-translation-flow` is
-`in-progress` and the coordinator starts next. The stage is the user's 2026-11-14 correction of
-stage 5: text checking is a standalone feature on par with translation, in its own window and mode.
-The translation window becomes translation-only; a separate non-modal `ProofreadingWindow` (own
-editor, **Check**, issue list, Replace/Ignore/Replace all/Copy) is opened from the tray item **Check
-text…** (child `03`). `proofreading/enabled` is the only switch; `allowOnlineServices` is gone. The
-two hotkeys check an external selection: one shows the popup, the other immediately replaces the
-selection with the corrected text (child `04`). Stage `08-free-services-always-on` remains `done`
+Current node: stage `09-proofreading-standalone` is `in-progress` (`base: 3e75331`). Its first two
+children are `done`: `01-remove-online-gate` as `11eb5bc` and `02-remove-pre-translation-flow` as
+`d9428c9`; the third `03-extract-proofreading-window` is `in-progress` and the coordinator starts
+next. The stage is the user's 2026-11-14 correction of stage 5: text checking is a standalone feature
+on par with translation, in its own window and mode. The translation window becomes translation-only;
+a separate non-modal `ProofreadingWindow` (own editor, **Check**, issue list,
+Replace/Ignore/Replace all/Copy) is opened from the tray item **Check text…** (this child).
+`proofreading/enabled` is the only switch; `allowOnlineServices` is gone. The two hotkeys check an
+external selection: one shows the popup, the other immediately replaces the selection with the
+corrected text (child `04`). Stage `08-free-services-always-on` remains `done`
 (`2650def..2ebf5ae`, docs in the closing commit).
 
 Stages 1-3, 5 and 8 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by the user's
@@ -23,10 +24,10 @@ proofreading stage, the native Debian source package and GPL-3.0-or-later. The p
 release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub release stays until
 the user checks the current code on Windows.
 
-Work is on `main` (matches the root `branch:`); the working tree holds the task 02 map updates. Linux
-is 45/45 in the `qtranslate-trixie` container, Windows 39 (derived, not run locally); `.ts` is at 376
+Work is on `main` (matches the root `branch:`); the working tree holds the task 03 map updates. Linux
+is 45/45 in the `qtranslate-trixie` container, Windows 39 (derived, not run locally); `.ts` is at 368
 and the stage ends at 374 with 46 Linux / 40 Windows tests after the new `tst_mainwindow`. The next
-node is task 02; `06-llm-actions` follows stage 9.
+node is task 03; `06-llm-actions` follows stage 9.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
@@ -274,3 +275,17 @@ has six languages and no `auto`. Next: plan and run stage 8.
   performed. Sandbox note: under a non-root UID in `qtranslate-trixie`,
   `tst_hotkeymanager_wayland` needs `/etc/passwd` and `/etc/group` mounted. No real problems left.
   Next: `02-remove-pre-translation-flow`.
+- 2026-11-14 — Task `09/02-remove-pre-translation-flow` done as `d9428c9`. Removed
+  `proofreading/checkBeforeTranslation`/`autoReplace` with their INI pair, the **Options** group and
+  its widgets, `MainWindow::setProofreadingOptions()`, `BeforeTranslationChoice`,
+  `askBeforeTranslation()` and the dialog, `m_checkBeforeTranslation`/`m_autoReplace`/
+  `m_pendingTranslationCheck`, and the automatic replacement after a check. `requestTranslation()`
+  lost `userInitiated` and its five callers were updated; the manual Check/Replace/Ignore/Replace
+  all/preview/Copy/highlights remain, and the panel stays in `MainWindow` for child 03. Tests:
+  three pre-translation cases removed, `translationDoesNotStartACheck()` added,
+  `removedProofreadingOptionsAreIgnored()` added, the dialog asserts the absent group. Linux
+  Debug/Release 45/45 with no warnings in `qtranslate-trixie`; 14 `.ts` at 368 with 0
+  unfinished/empty/vanished; Windows 39 not performed. One rejected review remark: the now
+  write-only `m_proofreadingAvailable` stays until child 03 removes the checking surface, as the
+  plan says; `replaceAll(false)` and the `Corrections applied` string are also left for 03. No real
+  problems. Next: `03-extract-proofreading-window`.

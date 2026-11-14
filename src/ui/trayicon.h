@@ -33,12 +33,14 @@ public:
     void showMessage(const QString &title, const QString &message);
     void setToolTip(const QString &text);
     void setHotkeysPaused(bool paused);
+    void setCheckTextVisible(bool visible);
     void setServices(const QList<ServiceEntry> &services, const QString &activeId);
     void retranslate();
 
 signals:
     void showWindowRequested();
     void toggleWindowRequested();
+    void checkTextRequested();
     void serviceSelected(const QString &id);
     void hotkeysPauseToggled(bool paused);
     void settingsRequested();
@@ -51,6 +53,7 @@ private:
     QMenu *m_serviceMenu = nullptr;
     QSystemTrayIcon *m_tray = nullptr;
     QAction *m_showAction = nullptr;
+    QAction *m_checkTextAction = nullptr;
     QAction *m_pauseHotkeysAction = nullptr;
     QAction *m_settingsAction = nullptr;
     QAction *m_quitAction = nullptr;

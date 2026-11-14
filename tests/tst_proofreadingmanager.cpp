@@ -193,7 +193,7 @@ private slots:
 
         for (const QString &text : {QString(), QStringLiteral(" \n\t ")}) {
             auto reply = std::unique_ptr<ProofreadingReply>(
-                manager.check(request(text), ProofreadingManager::Channel::MainWindow));
+                manager.check(request(text), ProofreadingManager::Channel::Window));
             QCOMPARE(service->checkCalls, 0);
             QVERIFY(!reply->isFinished());
             QSignalSpy finished(reply.get(), &ProofreadingReply::finished);
@@ -214,7 +214,7 @@ private slots:
 
         auto reply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QVERIFY(!reply->isFinished());
         QSignalSpy finished(reply.get(), &ProofreadingReply::finished);
         QCOMPARE(finished.size(), 0);
@@ -235,7 +235,7 @@ private slots:
 
         auto reply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QVERIFY(!reply->isFinished());
         QSignalSpy finished(reply.get(), &ProofreadingReply::finished);
         QCOMPARE(finished.size(), 0);
@@ -249,7 +249,7 @@ private slots:
         service->configurationErrorText.clear();
         auto second = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QVERIFY(!second->isFinished());
         QSignalSpy secondFinished(second.get(), &ProofreadingReply::finished);
         QCOMPARE(secondFinished.size(), 0);
@@ -268,7 +268,7 @@ private slots:
 
         auto reply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QCOMPARE(remote->checkCalls, 1);
         QCOMPARE(remote->requests.size(), 1);
         remote->replies.first()->complete({});
@@ -285,7 +285,7 @@ private slots:
 
         auto autoReply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello"), Languages::autoCode()),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QVERIFY(!autoReply->isFinished());
         QSignalSpy autoFinished(autoReply.get(), &ProofreadingReply::finished);
         QCOMPARE(autoFinished.size(), 0);
@@ -296,7 +296,7 @@ private slots:
         // A code that is not in languages() is rejected as well.
         auto unknownReply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello"), QStringLiteral("xx")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QVERIFY(!unknownReply->isFinished());
         QSignalSpy unknownFinished(unknownReply.get(), &ProofreadingReply::finished);
         QCOMPARE(unknownFinished.size(), 0);
@@ -328,7 +328,7 @@ private slots:
                                         {QStringLiteral("grammar"),
                                          QStringLiteral("style")}};
         auto reply = std::unique_ptr<ProofreadingReply>(
-            manager.check(asked, ProofreadingManager::Channel::MainWindow));
+            manager.check(asked, ProofreadingManager::Channel::Window));
         QSignalSpy finished(reply.get(), &ProofreadingReply::finished);
         // The service finishes through the event loop, never inside check().
         QCOMPARE(finished.size(), 0);
@@ -365,7 +365,7 @@ private slots:
 
         auto first = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("one")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QSignalSpy firstFinished(first.get(), &ProofreadingReply::finished);
 
         auto inPlace = std::unique_ptr<ProofreadingReply>(
@@ -374,7 +374,7 @@ private slots:
 
         auto second = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("two")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QSignalSpy secondFinished(second.get(), &ProofreadingReply::finished);
 
         QCOMPARE(firstFinished.size(), 1);
@@ -397,7 +397,7 @@ private slots:
     void cancelEmptyChannelIsNoOp()
     {
         ProofreadingManager manager;
-        manager.cancel(ProofreadingManager::Channel::MainWindow);
+        manager.cancel(ProofreadingManager::Channel::Window);
         manager.cancel(ProofreadingManager::Channel::InPlace);
         manager.cancelAll();
 
@@ -405,7 +405,7 @@ private slots:
         manager.registerService(service);
         auto reply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QCOMPARE(service->checkCalls, 1);
         service->replies.first()->complete({});
         QVERIFY(reply->result().ok());
@@ -419,7 +419,7 @@ private slots:
 
         auto main = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("one")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         auto inPlace = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("two")),
                           ProofreadingManager::Channel::InPlace));
@@ -438,12 +438,12 @@ private slots:
         manager.registerService(service);
 
         delete manager.check(request(QStringLiteral("one")),
-                             ProofreadingManager::Channel::MainWindow);
+                             ProofreadingManager::Channel::Window);
         QVERIFY(service->replies.at(0).isNull());
 
         auto second = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("two")),
-                          ProofreadingManager::Channel::MainWindow));
+                          ProofreadingManager::Channel::Window));
         QVERIFY(!second->isFinished());
         manager.cancelAll();
         QCOMPARE(second->result().error, TranslationError::Cancelled);
@@ -468,7 +468,7 @@ private slots:
             service->replyMode = FakeProofreadingService::ReplyMode::Queued;
             auto reply = std::unique_ptr<ProofreadingReply>(
                 manager.check(request(QStringLiteral("TOPSECRET text")),
-                              ProofreadingManager::Channel::MainWindow));
+                              ProofreadingManager::Channel::Window));
             QSignalSpy finished(reply.get(), &ProofreadingReply::finished);
             QVERIFY(finished.wait(1000));
             QVERIFY(reply->result().ok());
@@ -479,7 +479,7 @@ private slots:
             service->nextResult.errorMessage = QStringLiteral("offline TOPSECRET key=TOPSECRET");
             auto failed = std::unique_ptr<ProofreadingReply>(
                 manager.check(request(QStringLiteral("TOPSECRET text")),
-                              ProofreadingManager::Channel::MainWindow));
+                              ProofreadingManager::Channel::Window));
             QSignalSpy failedFinished(failed.get(), &ProofreadingReply::finished);
             QVERIFY(failedFinished.wait(1000));
             QCOMPARE(failed->result().error, TranslationError::Network);

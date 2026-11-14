@@ -18,6 +18,7 @@ class PopupWindow;
 class ProofreadingManager;
 class ProofreadingPopupWindow;
 class ProofreadingReply;
+class ProofreadingWindow;
 class QMimeData;
 class QTimer;
 class SelectionGrabber;
@@ -76,7 +77,8 @@ private:
     void showSettings();
     PopupWindow *ensurePopup();
     void translateInMainWindow(const TranslationRequest &request);
-    void checkInMainWindow(const QString &text);
+    void checkInProofreadingWindow(const QString &text);
+    void showProofreadingWindow();
     void updateProofreadingUi();
     void translateSelectionInMainWindow();
     void translateSelectionInPopup();
@@ -127,7 +129,7 @@ private:
     LanguageToolService *m_languageTool = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for
     QPointer<TranslationReply> m_popupReply;      // the request the popup waits for
-    QPointer<ProofreadingReply> m_mainWindowCheck; // the check the main window waits for
+    QPointer<ProofreadingReply> m_windowCheck;    // the check the checking window waits for
     QPointer<TranslationReply> m_inPlaceReply;    // the request for replacing a selection
     quintptr m_inPlaceTarget = 0;                 // window that had the selection
     std::unique_ptr<QMimeData> m_pasteSnapshot;   // clipboard to restore after pasting
@@ -144,6 +146,7 @@ private:
     std::unique_ptr<MainWindow> m_mainWindow;
     std::unique_ptr<PopupWindow> m_popup;
     std::unique_ptr<ProofreadingPopupWindow> m_proofreadingPopup;
+    std::unique_ptr<ProofreadingWindow> m_proofreadingWindow;
     TrayIcon *m_tray = nullptr;
     HotkeyManager *m_hotkeys = nullptr;
     QTimer *m_fullscreenTimer = nullptr;

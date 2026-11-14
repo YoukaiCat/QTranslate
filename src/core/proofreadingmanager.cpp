@@ -47,10 +47,10 @@ QString channelName(ProofreadingManager::Channel channel)
     switch (channel) {
     case ProofreadingManager::Channel::InPlace:
         return QStringLiteral("in-place");
-    case ProofreadingManager::Channel::MainWindow:
+    case ProofreadingManager::Channel::Window:
         break;
     }
-    return QStringLiteral("main-window");
+    return QStringLiteral("window");
 }
 
 // Only ids, the channel, the language/categories and the error kind: never the
@@ -194,7 +194,7 @@ void ProofreadingManager::cancel(Channel channel)
 
 void ProofreadingManager::cancelAll()
 {
-    cancel(Channel::MainWindow);
+    cancel(Channel::Window);
     cancel(Channel::InPlace);
 }
 
@@ -203,7 +203,7 @@ QPointer<ProofreadingReply> &ProofreadingManager::current(Channel channel)
     switch (channel) {
     case Channel::InPlace:
         return m_inPlaceReply;
-    case Channel::MainWindow:
+    case Channel::Window:
         break;
     }
     return m_mainWindowReply;

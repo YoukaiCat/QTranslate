@@ -34,6 +34,7 @@
 #include "ui/mainwindow.h"
 #include "ui/popupwindow.h"
 #include "ui/proofreadingpopupwindow.h"
+#include "ui/proofreadingwindow.h"
 #include "ui/settingsdialog.h"
 #include "ui/trayicon.h"
 #include "ui/translationerrortext.h"
@@ -128,18 +129,14 @@ void AppController::start()
             &AppController::translateInMainWindow);
     connect(m_mainWindow.get(), &MainWindow::serviceChanged, this,
             &AppController::selectService);
-    connect(m_mainWindow.get(), &MainWindow::checkRequested, this,
-            &AppController::checkInMainWindow);
-    connect(m_mainWindow.get(), &MainWindow::checkCancelled, this, [this] {
-        if (m_proofreading)
-            m_proofreading->cancel(ProofreadingManager::Channel::MainWindow);
-    });
     updateProofreadingUi();
 
     if (m_trayAvailable) {
         m_tray = new TrayIcon(icon, this);
         connect(m_tray, &TrayIcon::showWindowRequested, this, &AppController::showMainWindow);
         connect(m_tray, &TrayIcon::toggleWindowRequested, this, &AppController::toggleMainWindow);
+        connect(m_tray, &TrayIcon::checkTextRequested, this,
+                &AppController::showProofreadingWindow);
         connect(m_tray, &TrayIcon::serviceSelected, this, &AppController::selectService);
         connect(m_tray, &TrayIcon::settingsRequested, this, &AppController::showSettings);
         connect(m_tray, &TrayIcon::quitRequested, this, &AppController::quit);
@@ -149,6 +146,9 @@ void AppController::start()
         // Without a tray, the last closed window has to end the application.
         QApplication::setQuitOnLastWindowClosed(true);
     }
+    // The tray item's visibility belongs to this call and the tray exists only
+    // now; the earlier call above cannot set it.
+    updateProofreadingUi();
 
     if (m_waylandSession) {
         const QString title = tr("Limited Wayland support");
@@ -656,8 +656,12 @@ void AppController::applySettings(const AppSettings &oldSettings,
 
     if (oldSettings.proofreading.enabled && !newSettings.proofreading.enabled) {
         // An open confirmation belongs to a feature that has just been turned
-        // off; nothing may be replaced or copied from it afterwards.
+        // off; nothing may be replaced or copied from it afterwards. The
+        // checking window's availability update clears it and cancels the
+        // check; hide it here like the popup.
         closeProofreadingPopup();
+        if (m_proofreadingWindow)
+            m_proofreadingWindow->hide();
     }
 
     // A cached translation from the old service mode or variant must not be
@@ -859,7 +863,7 @@ void AppController::translateInMainWindow(const TranslationRequest &request)
     });
 }
 
-void AppController::checkInMainWindow(const QString &text)
+void AppController::checkInProofreadingWindow(const QString &text)
 {
     if (!m_proofreading)
         return;
@@ -867,30 +871,49 @@ void AppController::checkInMainWindow(const QString &text)
     const ProofreadingRequest request{text, settings.proofreading.language,
                                      settings.proofreading.categories};
 
-    // Cancels the previous main-window check; its finished() arrives right
-    // here with Cancelled and is ignored below.
+    // Cancels the previous window check; its finished() arrives right here with
+    // Cancelled and is ignored below.
     ProofreadingReply *reply =
-        m_proofreading->check(request, ProofreadingManager::Channel::MainWindow);
+        m_proofreading->check(request, ProofreadingManager::Channel::Window);
     reply->setParent(this); // freed with the controller if still pending at exit
-    m_mainWindowCheck = reply;
+    m_windowCheck = reply;
 
     // The window shows "Checking…" itself before it emits checkRequested().
     connect(reply, &ProofreadingReply::finished, this, [this, reply] {
-        if (reply == m_mainWindowCheck
-            && reply->result().error != TranslationError::Cancelled) {
-            m_mainWindow->showProofreadingResult(reply->result());
+        if (reply == m_windowCheck && reply->result().error != TranslationError::Cancelled) {
+            if (m_proofreadingWindow)
+                m_proofreadingWindow->showProofreadingResult(reply->result());
         }
         reply->deleteLater();
     });
 }
 
+void AppController::showProofreadingWindow()
+{
+    if (!m_proofreadingWindow) {
+        m_proofreadingWindow = std::make_unique<ProofreadingWindow>();
+        connect(m_proofreadingWindow.get(), &ProofreadingWindow::checkRequested, this,
+                &AppController::checkInProofreadingWindow);
+        connect(m_proofreadingWindow.get(), &ProofreadingWindow::checkCancelled, this, [this] {
+            if (m_proofreading)
+                m_proofreading->cancel(ProofreadingManager::Channel::Window);
+        });
+        updateProofreadingUi();
+    }
+    m_proofreadingWindow->showAndActivate();
+}
+
 void AppController::updateProofreadingUi()
 {
-    if (!m_mainWindow)
-        return;
     const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
-    const bool available = m_proofreading && m_proofreading->activeService() != nullptr;
-    m_mainWindow->setProofreadingAvailable(available && settings.proofreading.enabled);
+    const bool available = m_proofreading && m_proofreading->activeService() != nullptr
+        && settings.proofreading.enabled;
+    if (m_proofreadingWindow)
+        m_proofreadingWindow->setProofreadingAvailable(available);
+    if (m_tray)
+        m_tray->setCheckTextVisible(available);
+    if (!available && m_proofreadingWindow)
+        m_proofreadingWindow->hide();
 }
 
 void AppController::translateSelectionInMainWindow()
@@ -1432,6 +1455,8 @@ void AppController::prepareForQuit()
     closeProofreadingPopup();
     if (m_popup)
         m_popup->hide();
+    if (m_proofreadingWindow)
+        m_proofreadingWindow->hide();
     if (m_mainWindow)
         m_mainWindow->setCloseHidesToTray(false);
 }
