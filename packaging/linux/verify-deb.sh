@@ -512,7 +512,12 @@ else
 fi
 
 problems=()
-for path in ./usr/share/doc/qtranslate/copyright ./usr/share/doc/qtranslate/changelog.gz; do
+# dh_compress gzips regular files over 4 KiB under usr/share/doc, so the
+# LICENSE that CMake installs arrives here as LICENSE.gz (copyright is exempt).
+for path in \
+    ./usr/share/doc/qtranslate/copyright \
+    ./usr/share/doc/qtranslate/LICENSE.gz \
+    ./usr/share/doc/qtranslate/changelog.gz; do
     if ! listing_has "$path"; then
         problems+=("missing $path")
     fi
@@ -523,7 +528,7 @@ fi
 if [ "${#problems[@]}" -eq 0 ]; then
     pass contents-docs
 else
-    fail contents-docs "expected copyright and changelog.gz only (README.Debian optional); got: $(join "${problems[@]}")"
+    fail contents-docs "expected copyright, LICENSE.gz and changelog.gz only (README.Debian optional); got: $(join "${problems[@]}")"
 fi
 
 bundle_hits=$(awk '
@@ -542,6 +547,7 @@ fi
         ./usr/share/applications/qtranslate.desktop \
         ./usr/share/icons/hicolor/256x256/apps/qtranslate.png \
         ./usr/share/doc/qtranslate/copyright \
+        ./usr/share/doc/qtranslate/LICENSE.gz \
         ./usr/share/doc/qtranslate/changelog.gz \
         ./usr/share/doc/qtranslate/README.Debian
 } >"$tmpdir/allowlist.txt"

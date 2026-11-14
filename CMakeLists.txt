@@ -200,6 +200,9 @@ install(TARGETS qtranslate
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+# Ship the license text with the install tree every binary bundle is built from.
+install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/qtranslate)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(FILES packaging/linux/qtranslate.desktop
         DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
