@@ -4,12 +4,11 @@
 
 Current node: stage `01-gpl-3-0-or-later` is `in-progress` at `17dd709`. Task
 [01-license-docs-and-metadata](01-gpl-3-0-or-later/01-license-docs-and-metadata/plan.md) is `done`
-(commit `9044d7c`: `LICENSE`, `debian/copyright` with `GPL-3+`, both READMEs, `AGENTS.md`,
-architecture, handoff and `debian/README.Debian`). Task
-[02-license-in-bundles](01-gpl-3-0-or-later/02-license-in-bundles/plan.md) is `in-progress`; the
-coordinator is adding the CMake install rule and verifying the bundle paths. After it: stage
-acceptance, root outcome, `status: done` in this map and `doc/roadmap/README.md`. Branch `main`.
-Nothing is pushed.
+(`9044d7c`); task [02-license-in-bundles](01-gpl-3-0-or-later/02-license-in-bundles/plan.md) is
+`done` (`15df6a3`): `CMakeLists.txt` installs `LICENSE` at `share/doc/qtranslate`, the gate admits
+`LICENSE.gz` in the `.deb`, the Astra tar.gz carries `LICENSE`, and the docs were updated in
+`1cc4574`. The stage acceptance is next; after it the root outcome and `status: done` in this map
+and `doc/roadmap/README.md`. Branch `main`. Nothing is pushed.
 
 ## Journal
 

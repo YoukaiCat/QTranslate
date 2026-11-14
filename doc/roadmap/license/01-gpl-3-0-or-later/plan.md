@@ -42,8 +42,9 @@ choice was checked against the current and planned dependencies; see the root `#
 - `LICENSE` holds the GPL-3 text; `debian/copyright` is DEP-5 with `GPL-3+` and no "all rights
   reserved" grant in the live tree; the READMEs, `AGENTS.md`, `doc/architecture.md`,
   `doc/handoff.md` and `debian/README.Debian` describe the license consistently.
-- `CMakeLists.txt` installs `LICENSE` under `share/doc/qtranslate`; the Linux tar.gz and the `.deb`
-  carry the text, the Windows `dist`/ZIP/installer path is checked statically (no MSVC here), and
+- `CMakeLists.txt` installs `LICENSE` under `share/doc/qtranslate`; the Linux tar.gz and the
+  AppImage/Windows bundle carry it, the `.deb` carries `LICENSE.gz` (`dh_compress`) next to the
+  GPL `copyright`, the Windows `dist`/ZIP/installer path is checked statically (no MSVC here), and
   the package gate and the 45 Linux tests still pass.
 - The native `.deb` gate is unchanged; `lintian` on the source package does not complain about the
   copyright; the `debian` map's closed outcome is cross-referenced in its journal, not rewritten.
