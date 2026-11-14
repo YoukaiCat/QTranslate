@@ -37,6 +37,9 @@
   Astra's `dpkg-buildpackage` 1.21 rejects one).
 - Run one test: `ctest --test-dir build/cli-Release -R tst_settings --output-on-failure`.
   Run everything: `ctest --test-dir build/cli-Release --output-on-failure`.
+- During agent work, run builds and tests in the `qtranslate-trixie` Docker image or a VM where
+  possible, so the host stays responsive; run the final Debug/Release check on the host once the
+  work is finished.
 - The Windows CI job sets `QT_QPA_PLATFORM=offscreen`; use it for headless GUI tests.
   `tst_popupwindow` and `tst_settingsdialog` also set offscreen themselves. The Linux CI job runs
   GUI tests under `xvfb-run`.
