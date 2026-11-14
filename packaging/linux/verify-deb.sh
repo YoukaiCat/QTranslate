@@ -549,7 +549,8 @@ fi
         ./usr/share/doc/qtranslate/copyright \
         ./usr/share/doc/qtranslate/LICENSE.gz \
         ./usr/share/doc/qtranslate/changelog.gz \
-        ./usr/share/doc/qtranslate/README.Debian
+        ./usr/share/doc/qtranslate/README.Debian \
+        ./usr/share/doc/qtranslate/README.Debian.gz
 } >"$tmpdir/allowlist.txt"
 extras=$(awk 'NR == FNR { allowed[$0] = 1; next } $1 ~ /^-/ && !($2 in allowed) { print $2 }' \
     "$tmpdir/allowlist.txt" "$tmpdir/contents.txt")

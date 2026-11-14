@@ -10,8 +10,8 @@
 # built from the install tree by the pinned linuxdeploy,
 # linuxdeploy-plugin-qt, and appimagetool AppImages; those tools are downloaded
 # into build/linux-tools/appimage and verified by SHA256. This script owns the
-# Linux bundle layout; CMake only installs the binary, the desktop file, and the
-# icon.
+# Linux bundle layout; CMake only installs the binary, the desktop file, the
+# icon, and the license text.
 set -euo pipefail
 umask 022
 
