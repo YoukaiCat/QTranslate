@@ -891,8 +891,6 @@ void AppController::updateProofreadingUi()
     const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
     const bool available = m_proofreading && m_proofreading->activeService() != nullptr;
     m_mainWindow->setProofreadingAvailable(available && settings.proofreading.enabled);
-    m_mainWindow->setProofreadingOptions(settings.proofreading.checkBeforeTranslation,
-                                         settings.proofreading.autoReplace);
 }
 
 void AppController::translateSelectionInMainWindow()

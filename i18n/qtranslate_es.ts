@@ -46,55 +46,55 @@
         <translation>Los secretos se guardan sin cifrar en un archivo que solo puede leer tu usuario porque el llavero del sistema no está disponible.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1037"/>
-        <location filename="../src/app/appcontroller.cpp" line="1129"/>
+        <location filename="../src/app/appcontroller.cpp" line="1035"/>
+        <location filename="../src/app/appcontroller.cpp" line="1127"/>
         <source>Nothing is selected.</source>
         <translation>No hay nada seleccionado.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1079"/>
+        <location filename="../src/app/appcontroller.cpp" line="1077"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>La ventana activa cambió; la traducción fue copiada al portapapeles.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1100"/>
+        <location filename="../src/app/appcontroller.cpp" line="1098"/>
         <source>Enable text checking in Settings → Text checking.</source>
         <translation>Active la revisión de texto en Ajustes → Revisión de texto.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1191"/>
+        <location filename="../src/app/appcontroller.cpp" line="1189"/>
         <source>Could not paste automatically; the corrected text is on the clipboard.</source>
         <translation>No se pudo pegar automáticamente; el texto corregido está en el portapapeles.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1198"/>
+        <location filename="../src/app/appcontroller.cpp" line="1196"/>
         <source>The active window changed; the corrected text was copied to the clipboard.</source>
         <translation>La ventana activa cambió; el texto corregido fue copiado al portapapeles.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1211"/>
+        <location filename="../src/app/appcontroller.cpp" line="1209"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>Texto corregido copiado al portapapeles</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1289"/>
-        <location filename="../src/app/appcontroller.cpp" line="1292"/>
+        <location filename="../src/app/appcontroller.cpp" line="1287"/>
+        <location filename="../src/app/appcontroller.cpp" line="1290"/>
         <source>Check the selection</source>
         <translation>Comprobar la selección</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1365"/>
+        <location filename="../src/app/appcontroller.cpp" line="1363"/>
         <source>System tray unavailable</source>
         <translation>Bandeja del sistema no disponible</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1366"/>
+        <location filename="../src/app/appcontroller.cpp" line="1364"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>La bandeja del sistema no está disponible, por lo que la aplicación no puede permanecer en segundo plano. Al cerrar la ventana se cierra la aplicación.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1070"/>
-        <location filename="../src/app/appcontroller.cpp" line="1323"/>
+        <location filename="../src/app/appcontroller.cpp" line="1068"/>
+        <location filename="../src/app/appcontroller.cpp" line="1321"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>No se pudo pegar automáticamente; la traducción está en el portapapeles.</translation>
     </message>
@@ -109,8 +109,8 @@
         <translation>Los atajos de teclado globales requieren el portal GlobalShortcuts. Si este escritorio no lo proporciona, copie el texto seleccionado con Ctrl+C y use los comandos de la CLI o un acceso directo del escritorio; el reemplazo en el lugar copia la traducción al portapapeles en lugar de pegarla.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1347"/>
-        <location filename="../src/app/appcontroller.cpp" line="1350"/>
+        <location filename="../src/app/appcontroller.cpp" line="1345"/>
+        <location filename="../src/app/appcontroller.cpp" line="1348"/>
         <source>Translate and replace</source>
         <translation>Traducir y reemplazar</translation>
     </message>
@@ -723,147 +723,127 @@
     <name>MainWindow</name>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="52"/>
-        <location filename="../src/ui/mainwindow.cpp" line="308"/>
+        <location filename="../src/ui/mainwindow.cpp" line="294"/>
         <source>Source language</source>
         <translation>Idioma de origen</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="57"/>
-        <location filename="../src/ui/mainwindow.cpp" line="310"/>
+        <location filename="../src/ui/mainwindow.cpp" line="296"/>
         <source>Swap languages</source>
         <translation>Invertir idiomas</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="61"/>
-        <location filename="../src/ui/mainwindow.cpp" line="312"/>
+        <location filename="../src/ui/mainwindow.cpp" line="298"/>
         <source>Target language</source>
         <translation>Idioma de destino</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="65"/>
-        <location filename="../src/ui/mainwindow.cpp" line="315"/>
+        <location filename="../src/ui/mainwindow.cpp" line="301"/>
         <source>Translation service</source>
         <translation>Servicio de traducción</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="73"/>
-        <location filename="../src/ui/mainwindow.cpp" line="314"/>
+        <location filename="../src/ui/mainwindow.cpp" line="300"/>
         <source>Service:</source>
         <translation>Servicio:</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="83"/>
-        <location filename="../src/ui/mainwindow.cpp" line="316"/>
+        <location filename="../src/ui/mainwindow.cpp" line="302"/>
         <source>Source text</source>
         <translation>Texto fuente</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="84"/>
-        <location filename="../src/ui/mainwindow.cpp" line="317"/>
+        <location filename="../src/ui/mainwindow.cpp" line="303"/>
         <source>Enter text to translate</source>
         <translation>Ingrese el texto para traducir</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="87"/>
         <location filename="../src/ui/mainwindow.cpp" line="89"/>
-        <location filename="../src/ui/mainwindow.cpp" line="318"/>
-        <location filename="../src/ui/mainwindow.cpp" line="319"/>
+        <location filename="../src/ui/mainwindow.cpp" line="304"/>
+        <location filename="../src/ui/mainwindow.cpp" line="305"/>
         <source>Translation</source>
         <translation>Traducción</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="107"/>
-        <location filename="../src/ui/mainwindow.cpp" line="322"/>
+        <location filename="../src/ui/mainwindow.cpp" line="308"/>
         <source>Check</source>
         <translation>Comprobar</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="109"/>
-        <location filename="../src/ui/mainwindow.cpp" line="323"/>
+        <location filename="../src/ui/mainwindow.cpp" line="309"/>
         <source>Check the source text</source>
         <translation>Comprobar el texto original</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="111"/>
-        <location filename="../src/ui/mainwindow.cpp" line="320"/>
+        <location filename="../src/ui/mainwindow.cpp" line="306"/>
         <source>Translate</source>
         <translation>Traducir</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="113"/>
-        <location filename="../src/ui/mainwindow.cpp" line="321"/>
+        <location filename="../src/ui/mainwindow.cpp" line="307"/>
         <source>Ctrl+Enter</source>
         <translation>Ctrl+Enter</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="114"/>
-        <location filename="../src/ui/mainwindow.cpp" line="324"/>
+        <location filename="../src/ui/mainwindow.cpp" line="310"/>
         <source>Copy</source>
         <translation>Copiar</translation>
     </message>
     <message>
         <location filename="../src/ui/mainwindow.cpp" line="116"/>
-        <location filename="../src/ui/mainwindow.cpp" line="325"/>
+        <location filename="../src/ui/mainwindow.cpp" line="311"/>
         <source>Copy the translation to the clipboard</source>
         <translation>Copiar la traducción al portapapeles</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="259"/>
+        <location filename="../src/ui/mainwindow.cpp" line="246"/>
         <source>Translating…</source>
         <translation>Traduciendo…</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="278"/>
+        <location filename="../src/ui/mainwindow.cpp" line="265"/>
         <source>Detected language: %1</source>
         <translation>Idioma detectado: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="396"/>
+        <location filename="../src/ui/mainwindow.cpp" line="371"/>
         <source>Nothing to check</source>
         <translation>Nada que comprobar</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="536"/>
+        <location filename="../src/ui/mainwindow.cpp" line="473"/>
         <source>Corrections applied</source>
         <translation>Correcciones aplicadas</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="543"/>
+        <location filename="../src/ui/mainwindow.cpp" line="480"/>
         <source>Preview of corrections</source>
         <translation>Vista previa de las correcciones</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="546"/>
+        <location filename="../src/ui/mainwindow.cpp" line="483"/>
         <source>Corrected text:</source>
         <translation>Texto corregido:</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="571"/>
-        <source>Check before translation</source>
-        <translation>Comprobar antes de traducir</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/mainwindow.cpp" line="574"/>
-        <source>%1 issues found in the source text.</source>
-        <translation>Se encontraron %1 problemas en el texto original.</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/mainwindow.cpp" line="577"/>
-        <source>Apply corrections and translate</source>
-        <translation>Aplicar correcciones y traducir</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/mainwindow.cpp" line="580"/>
-        <source>Translate anyway</source>
-        <translation>Traducir de todos modos</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/mainwindow.cpp" line="651"/>
+        <location filename="../src/ui/mainwindow.cpp" line="550"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>Texto corregido copiado al portapapeles</translation>
     </message>
     <message>
-        <location filename="../src/ui/mainwindow.cpp" line="681"/>
+        <location filename="../src/ui/mainwindow.cpp" line="579"/>
         <source>Translation copied to the clipboard</source>
         <translation>Traducción copiada al portapapeles</translation>
     </message>
@@ -1256,7 +1236,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="44"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="986"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="960"/>
         <source>Settings</source>
         <translation>Ajustes</translation>
     </message>
@@ -1337,7 +1317,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="167"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="575"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="556"/>
         <source> ms</source>
         <translation> ms</translation>
     </message>
@@ -1462,7 +1442,7 @@
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="303"/>
         <location filename="../src/ui/settingsdialog.cpp" line="350"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="604"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="585"/>
         <source>Checking…</source>
         <translation>De cheques…</translation>
     </message>
@@ -1623,7 +1603,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="475"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="973"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="947"/>
         <source>Enter a valid http(s) LanguageTool URL, or leave the field empty for the public endpoint.</source>
         <translation>Introduzca una URL de LanguageTool http(s) válida o deje el campo vacío para el punto final público.</translation>
     </message>
@@ -1673,172 +1653,152 @@
         <translation>Estilo</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="511"/>
-        <source>Options</source>
-        <translation>Opciones</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="515"/>
-        <source>Check before translation</source>
-        <translation>Revisar antes de traducir</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="519"/>
-        <source>Apply corrections automatically</source>
-        <translation>Aplicar las correcciones automáticamente</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="522"/>
-        <source>Corrections are applied without asking. Every change stays one undo step.</source>
-        <translation>Las correcciones se aplican sin preguntar. Cada cambio se deshace en un solo paso.</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="512"/>
         <source>Text checking</source>
         <translation>Revisión de texto</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="548"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="529"/>
         <source>No proxy</source>
         <translation>Sin proxy</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="549"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="530"/>
         <source>System proxy</source>
         <translation>proxy del sistema</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="550"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
         <source>Manual proxy</source>
         <translation>Proxy manual</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="553"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="534"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="554"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="535"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="557"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="538"/>
         <source>Proxy host</source>
         <translation>anfitrión proxy</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="561"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="542"/>
         <source>Not set</source>
         <translation>No establecido</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="562"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="543"/>
         <source>The proxy requires authentication</source>
         <translation>El proxy requiere autenticación</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="566"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="547"/>
         <source>User name</source>
         <translation>Nombre de usuario</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="570"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
         <source>Password</source>
         <translation>Contraseña</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="576"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="557"/>
         <source>Test connection</source>
         <translation>Conexión de prueba</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="583"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="564"/>
         <source>Proxy mode:</source>
         <translation>Modo proxy:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="584"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="565"/>
         <source>Proxy type:</source>
         <translation>Tipo de proxy:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="585"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="566"/>
         <source>Host:</source>
         <translation>Anfitrión:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="586"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
         <source>Port:</source>
         <translation>Puerto:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="588"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
         <source>User name:</source>
         <translation>Nombre de usuario:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="589"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="570"/>
         <source>Password:</source>
         <translation>Contraseña:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="590"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
         <source>Request timeout:</source>
         <translation>Solicitar tiempo de espera:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="595"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="576"/>
         <source>Network</source>
         <translation>Red</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="852"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="827"/>
         <source>Effective instance: %1</source>
         <translation>Instancia efectiva: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="913"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="887"/>
         <source>Translate in a popup</source>
         <translation>Traducir en una ventana emergente</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="915"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="889"/>
         <source>Replace the selected text with the translation</source>
         <translation>Reemplazar el texto seleccionado con la traducción.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="916"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="890"/>
         <source>Translate in the main window</source>
         <translation>Traducir en la ventana principal</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="917"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="891"/>
         <source>Show the main window</source>
         <translation>Mostrar la ventana principal</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="926"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="900"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>&quot;%1&quot; utiliza más de una combinación de teclas. Las teclas de acceso rápido globales admiten una única combinación.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="934"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="908"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>&quot;%1&quot; no se puede utilizar como tecla de acceso rápido global.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="947"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="921"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>Se asigna la misma combinación de teclas más de una vez: %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="958"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="932"/>
         <source>The primary and additional languages must differ.</source>
         <translation>Los idiomas principal y adicional deben diferir.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="965"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="939"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>Ingrese el host y el puerto del proxy, o elija otro modo de proxy.</translation>
     </message>

@@ -148,8 +148,6 @@ private slots:
         QCOMPARE(settings.proofreading.categories,
                  QStringList({QStringLiteral("spelling"), QStringLiteral("grammar"),
                               QStringLiteral("punctuation"), QStringLiteral("style")}));
-        QVERIFY(!settings.proofreading.checkBeforeTranslation);
-        QVERIFY(!settings.proofreading.autoReplace);
         QVERIFY(settings.proofreading.hotkey.isEmpty());
 
         QCOMPARE(settings.network.proxyMode, QStringLiteral("system"));
@@ -423,8 +421,6 @@ private slots:
         settings.proofreading.endpoint = QStringLiteral("https://lt.example.invalid/v2/check");
         settings.proofreading.categories =
             QStringList({QStringLiteral("style"), QStringLiteral("grammar")});
-        settings.proofreading.checkBeforeTranslation = true;
-        settings.proofreading.autoReplace = true;
         settings.proofreading.hotkey =
             QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11"));
         store.save(settings);
@@ -439,8 +435,6 @@ private slots:
                  QStringLiteral("https://lt.example.invalid/v2/check"));
         QCOMPARE(result.proofreading.categories,
                  QStringList({QStringLiteral("grammar"), QStringLiteral("style")}));
-        QVERIFY(result.proofreading.checkBeforeTranslation);
-        QVERIFY(result.proofreading.autoReplace);
         QCOMPARE(result.proofreading.hotkey,
                  QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11")));
         QCOMPARE(result.settingsVersion, 1);
@@ -620,8 +614,8 @@ private slots:
             raw.sync();
         }
 
-        // The old gate key is ignored: the feature switch loads, the options
-        // keep their defaults and loading does not warn.
+        // The old gate key is ignored: the feature switch loads and loading
+        // does not warn.
         {
             WarningCapture capture;
             SettingsStore store(path, fakeCodec());
@@ -629,8 +623,6 @@ private slots:
             QVERIFY2(g_warnings.isEmpty(),
                      qPrintable(g_warnings.join(QStringLiteral("; "))));
             QVERIFY(store.current().proofreading.enabled);
-            QVERIFY(!store.current().proofreading.checkBeforeTranslation);
-            QVERIFY(!store.current().proofreading.autoReplace);
 
             // The key is not written again; an unknown key may stay in the INI.
             store.save(store.current());
@@ -638,6 +630,47 @@ private slots:
         SettingsStore loaded(path, fakeCodec());
         loaded.load();
         QVERIFY(loaded.current().proofreading.enabled);
+        QCOMPARE(loaded.current().settingsVersion, 1);
+    }
+
+    void removedProofreadingOptionsAreIgnored()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("proofreading/enabled"), true);
+            raw.setValue(QStringLiteral("proofreading/hotkey"),
+                         QStringLiteral("Ctrl+Alt+Shift+F11"));
+            // The removed options are ignored on load: checking is not a
+            // pre-translation step and a check never replaces text by itself.
+            raw.setValue(QStringLiteral("proofreading/checkBeforeTranslation"), true);
+            raw.setValue(QStringLiteral("proofreading/autoReplace"), true);
+            raw.sync();
+        }
+
+        // Loading does not warn and keeps the settings that still exist; the
+        // stale keys may stay in the file, but they have no effect.
+        {
+            WarningCapture capture;
+            SettingsStore store(path, fakeCodec());
+            store.load();
+            QVERIFY2(g_warnings.isEmpty(),
+                     qPrintable(g_warnings.join(QStringLiteral("; "))));
+            QVERIFY(store.current().proofreading.enabled);
+            QCOMPARE(store.current().proofreading.hotkey,
+                     QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11")));
+            QCOMPARE(store.current().settingsVersion, 1);
+            store.save(store.current());
+        }
+
+        SettingsStore loaded(path, fakeCodec());
+        loaded.load();
+        QVERIFY(loaded.current().proofreading.enabled);
+        QCOMPARE(loaded.current().proofreading.hotkey,
+                 QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11")));
         QCOMPARE(loaded.current().settingsVersion, 1);
     }
 

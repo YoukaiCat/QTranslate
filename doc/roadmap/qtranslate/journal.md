@@ -2,17 +2,16 @@
 
 ## Where we left off
 
-Current node: stage `09-proofreading-standalone` is `in-progress` (`base: 3e75331`). It has four
-children; `01-remove-online-gate` is `in-progress` and the coordinator starts next. The stage is the
-user's 2026-11-14 correction of stage 5: text checking is a standalone feature on par with
-translation, in its own window and mode. The translation window becomes translation-only; a separate
-non-modal `ProofreadingWindow` (own editor, **Check**, issue list, Replace/Ignore/Replace all/Copy)
-is opened from the tray item **Check text…**. Remove `proofreading/checkBeforeTranslation`,
-`proofreading/autoReplace` and `proofreading/allowOnlineServices`;
-`proofreading/enabled` is the only switch. The two hotkeys check an external selection: one shows the
-popup, the other immediately replaces the selection with the corrected text. Children `02`, `03` and
-`04` follow task 01. Stage `08-free-services-always-on` remains `done` (`2650def..2ebf5ae`, docs in
-the closing commit).
+Current node: stage `09-proofreading-standalone` is `in-progress` (`base: 3e75331`). Its first child
+`01-remove-online-gate` is `done` as `11eb5bc`; the second `02-remove-pre-translation-flow` is
+`in-progress` and the coordinator starts next. The stage is the user's 2026-11-14 correction of
+stage 5: text checking is a standalone feature on par with translation, in its own window and mode.
+The translation window becomes translation-only; a separate non-modal `ProofreadingWindow` (own
+editor, **Check**, issue list, Replace/Ignore/Replace all/Copy) is opened from the tray item **Check
+text…** (child `03`). `proofreading/enabled` is the only switch; `allowOnlineServices` is gone. The
+two hotkeys check an external selection: one shows the popup, the other immediately replaces the
+selection with the corrected text (child `04`). Stage `08-free-services-always-on` remains `done`
+(`2650def..2ebf5ae`, docs in the closing commit).
 
 Stages 1-3, 5 and 8 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by the user's
 2026-11-05 decision and is not dropped; stages 6-7 are `todo` and wait for stage 9. The root is
@@ -24,10 +23,10 @@ proofreading stage, the native Debian source package and GPL-3.0-or-later. The p
 release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub release stays until
 the user checks the current code on Windows.
 
-Work is on `main` (matches the root `branch:`); the working tree holds the stage-9 map files and the
-AGENTS.md testing note. Linux is 45/45, Windows 39 (derived, not run locally); `.ts` has 379
-messages before this change, and the stage ends at 374 with 46 Linux / 40 Windows tests after the new
-`tst_mainwindow`. The next node is task 01; `06-llm-actions` follows stage 9.
+Work is on `main` (matches the root `branch:`); the working tree holds the task 02 map updates. Linux
+is 45/45 in the `qtranslate-trixie` container, Windows 39 (derived, not run locally); `.ts` is at 376
+and the stage ends at 374 with 46 Linux / 40 Windows tests after the new `tst_mainwindow`. The next
+node is task 02; `06-llm-actions` follows stage 9.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
@@ -261,3 +260,17 @@ has six languages and no `auto`. Next: plan and run stage 8.
   finished, run the final Debug/Release check on the host. The image is built from
   `packaging/linux/trixie.Dockerfile` (`docker build -f packaging/linux/trixie.Dockerfile -t
   qtranslate-trixie .`); only `debian:trixie` exists locally at the moment, so build it if absent.
+- 2026-11-14 — Task `09/01-remove-online-gate` done as `11eb5bc`. Removed
+  `proofreading/allowOnlineServices` with its INI pair, the manager
+  `onlineServicesAllowed()`/`setOnlineServicesAllowed()` API and refusal,
+  `ProofreadingService::isLocal()` with the `LanguageToolService` override, the **Online checking**
+  group and the two `AppController` syncs. `proofreading/enabled` is the only consent; the popup check
+  and `--proofread-selection` now return with `Enable text checking in Settings → Text checking.`
+  before the grab, so nothing is copied or requested while the feature is off. Tests:
+  `removedOnlineGateKeyIsIgnored`, `anyProviderChecksWithoutAGate`, `proofreadingTabHasNoGate`; one
+  extra test file (`tst_proofreadingpopup.cpp`) used the old gate sentence as an arbitrary error and
+  was switched to an existing manager message. Linux Debug/Release 45/45 with no warnings in the
+  `qtranslate-trixie` container; 14 `.ts` at 376 with 0 unfinished/empty/vanished; Windows 39 not
+  performed. Sandbox note: under a non-root UID in `qtranslate-trixie`,
+  `tst_hotkeymanager_wayland` needs `/etc/passwd` and `/etc/group` mounted. No real problems left.
+  Next: `02-remove-pre-translation-flow`.

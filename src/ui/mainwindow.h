@@ -50,7 +50,6 @@ public:
 
     // The checking mode is on, and a provider is registered.
     void setProofreadingAvailable(bool available);
-    void setProofreadingOptions(bool checkBeforeTranslation, bool autoReplace);
 
     // A translation requested through translateRequested() has started / finished.
     void showTranslationStarted();
@@ -84,10 +83,8 @@ protected:
     void changeEvent(QEvent *event) override;
 
 private:
-    enum class BeforeTranslationChoice { Dismissed, ApplyCorrections, TranslateAnyway };
-
     void buildUi();
-    void requestTranslation(bool userInitiated = true);
+    void requestTranslation();
     void swapLanguages();
     void copyResult();
     void setStatus(const QString &text, bool isError = false);
@@ -101,7 +98,6 @@ private:
     void ignoreIssue(int row);
     void replaceAll(bool preview);
     void copyCorrected();
-    BeforeTranslationChoice askBeforeTranslation(int issueCount);
     bool previewCorrections(const QString &corrected);
     void applyIssueEdits(const QVector<ProofreadingIssue> &issues);
 
@@ -123,8 +119,5 @@ private:
     QString m_detectedLang; // of the last translation; lets ⇄ work with "Auto-detect"
     bool m_closeHidesToTray = true;
     bool m_proofreadingAvailable = false;
-    bool m_checkBeforeTranslation = false;
-    bool m_autoReplace = false;
-    bool m_pendingTranslationCheck = false;
     bool m_applyingEdit = false;
 };

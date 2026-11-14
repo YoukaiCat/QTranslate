@@ -508,25 +508,6 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     proofreadingIssuesLayout->addLayout(proofreadingCategories);
     textCheckingLayout->addWidget(m_proofreadingIssuesGroup);
 
-    m_proofreadingOptionsGroup = new QGroupBox(tr("Options"), textCheckingPage);
-    m_proofreadingOptionsGroup->setObjectName(QStringLiteral("proofreadingOptionsGroup"));
-    auto *proofreadingOptionsLayout = new QVBoxLayout(m_proofreadingOptionsGroup);
-    m_proofreadingCheckBeforeTranslation =
-        new QCheckBox(tr("Check before translation"), m_proofreadingOptionsGroup);
-    m_proofreadingCheckBeforeTranslation->setObjectName(
-        QStringLiteral("proofreadingCheckBeforeTranslation"));
-    m_proofreadingAutoReplace =
-        new QCheckBox(tr("Apply corrections automatically"), m_proofreadingOptionsGroup);
-    m_proofreadingAutoReplace->setObjectName(QStringLiteral("proofreadingAutoReplace"));
-    auto *autoReplaceWarning = new QLabel(
-        tr("Corrections are applied without asking. Every change stays one undo step."),
-        m_proofreadingOptionsGroup);
-    autoReplaceWarning->setWordWrap(true);
-    proofreadingOptionsLayout->addWidget(m_proofreadingCheckBeforeTranslation);
-    proofreadingOptionsLayout->addWidget(m_proofreadingAutoReplace);
-    proofreadingOptionsLayout->addWidget(autoReplaceWarning);
-    textCheckingLayout->addWidget(m_proofreadingOptionsGroup);
-
     textCheckingLayout->addStretch();
     m_tabs->addTab(textCheckingPage, tr("Text checking"));
 
@@ -706,9 +687,6 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
         settings.proofreading.categories.contains(QStringLiteral("punctuation")));
     m_proofreadingStyle->setChecked(
         settings.proofreading.categories.contains(QStringLiteral("style")));
-    m_proofreadingCheckBeforeTranslation->setChecked(
-        settings.proofreading.checkBeforeTranslation);
-    m_proofreadingAutoReplace->setChecked(settings.proofreading.autoReplace);
     updateProofreadingControls();
 
     const int proxyMode = m_proxyMode->findData(settings.network.proxyMode);
@@ -775,9 +753,6 @@ AppSettings SettingsDialog::settings() const
             categories << id;
     }
     result.proofreading.categories = categories;
-    result.proofreading.checkBeforeTranslation =
-        m_proofreadingCheckBeforeTranslation->isChecked();
-    result.proofreading.autoReplace = m_proofreadingAutoReplace->isChecked();
     result.network.proxyMode = m_proxyMode->currentData().toString();
     result.network.proxyType = m_proxyType->currentData().toString();
     result.network.proxyHost = m_proxyHost->text().trimmed();
@@ -860,7 +835,6 @@ void SettingsDialog::updateProofreadingControls()
     // The mode switch disables the whole page except itself.
     m_proofreadingProviderGroup->setEnabled(enabled);
     m_proofreadingIssuesGroup->setEnabled(enabled);
-    m_proofreadingOptionsGroup->setEnabled(enabled);
     m_proofreadingProvider->setEnabled(enabled && hasProvider);
     m_proofreadingEndpoint->setEnabled(enabled && hasProvider);
 

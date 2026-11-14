@@ -130,10 +130,9 @@ void MainWindow::buildUi()
 
     m_autoTranslateTimer = new QTimer(this);
     m_autoTranslateTimer->setSingleShot(true);
-    connect(m_autoTranslateTimer, &QTimer::timeout, this, [this] { requestTranslation(false); });
+    connect(m_autoTranslateTimer, &QTimer::timeout, this, [this] { requestTranslation(); });
     connect(m_sourceEdit, &QPlainTextEdit::textChanged, this, [this] {
-        // Our own edits (Replace, Replace all, autoReplace, applying the
-        // corrections before a translation) must neither start the timer nor
+        // Our own edits (Replace, Replace all) must neither start the timer nor
         // invalidate the list: they are handled explicitly by their caller.
         if (m_applyingEdit)
             return;
@@ -141,7 +140,6 @@ void MainWindow::buildUi()
         // highlights and cancel the open request instead of shifting them.
         m_proofreadingPanel->clear();
         updateHighlights();
-        m_pendingTranslationCheck = false;
         emit checkCancelled();
         if (m_autoTranslateDelayMs <= 0)
             return;
@@ -151,11 +149,8 @@ void MainWindow::buildUi()
             m_autoTranslateTimer->start(m_autoTranslateDelayMs);
     });
 
-    connect(m_translateButton, &QPushButton::clicked, this, [this] { requestTranslation(true); });
-    connect(m_checkButton, &QPushButton::clicked, this, [this] {
-        m_pendingTranslationCheck = false;
-        startCheck();
-    });
+    connect(m_translateButton, &QPushButton::clicked, this, [this] { requestTranslation(); });
+    connect(m_checkButton, &QPushButton::clicked, this, [this] { startCheck(); });
     connect(m_proofreadingPanel, &ProofreadingPanel::issueSelected, this,
             &MainWindow::selectIssue);
     connect(m_proofreadingPanel, &ProofreadingPanel::replacementChosen, this,
@@ -168,7 +163,7 @@ void MainWindow::buildUi()
     for (const QKeySequence &keys : {QKeySequence(Qt::CTRL | Qt::Key_Return),
                                      QKeySequence(Qt::CTRL | Qt::Key_Enter)}) {
         auto *shortcut = new QShortcut(keys, this);
-        connect(shortcut, &QShortcut::activated, this, [this] { requestTranslation(true); });
+        connect(shortcut, &QShortcut::activated, this, [this] { requestTranslation(); });
     }
     connect(m_swapButton, &QToolButton::clicked, this, &MainWindow::swapLanguages);
     connect(m_copyButton, &QPushButton::clicked, this, &MainWindow::copyResult);
@@ -235,15 +230,8 @@ void MainWindow::setProofreadingAvailable(bool available)
     if (!available) {
         m_proofreadingPanel->clear();
         updateHighlights();
-        m_pendingTranslationCheck = false;
         emit checkCancelled();
     }
-}
-
-void MainWindow::setProofreadingOptions(bool checkBeforeTranslation, bool autoReplace)
-{
-    m_checkBeforeTranslation = checkBeforeTranslation;
-    m_autoReplace = autoReplace;
 }
 
 void MainWindow::showTranslationStarted()
@@ -254,7 +242,6 @@ void MainWindow::showTranslationStarted()
     updateSwapButton();
     m_proofreadingPanel->clear();
     updateHighlights();
-    m_pendingTranslationCheck = false;
     emit checkCancelled();
     setStatus(tr("Translating…"));
 }
@@ -291,9 +278,8 @@ void MainWindow::translateText(const QString &text)
     // setPlainText() is blocked above, so the stale-result handler does not run.
     m_proofreadingPanel->clear();
     updateHighlights();
-    m_pendingTranslationCheck = false;
     emit checkCancelled();
-    requestTranslation(true);
+    requestTranslation();
 }
 
 void MainWindow::setAutoTranslateDelay(int ms)
@@ -340,7 +326,6 @@ void MainWindow::showTranslation(const TranslationRequest &request,
     // setPlainText() is blocked above, so the stale-result handler does not run.
     m_proofreadingPanel->clear();
     updateHighlights();
-    m_pendingTranslationCheck = false;
     emit checkCancelled();
     showResult(result);
 }
@@ -349,7 +334,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     m_proofreadingPanel->clear();
     updateHighlights();
-    m_pendingTranslationCheck = false;
     emit checkCancelled();
     if (m_closeHidesToTray) {
         hide();
@@ -366,19 +350,11 @@ void MainWindow::changeEvent(QEvent *event)
         retranslateUi();
 }
 
-void MainWindow::requestTranslation(bool userInitiated)
+void MainWindow::requestTranslation()
 {
     if (m_autoTranslateTimer)
         m_autoTranslateTimer->stop();
     const QString text = m_sourceEdit->toPlainText();
-    if (userInitiated && m_checkBeforeTranslation && m_proofreadingAvailable
-        && !text.trimmed().isEmpty()) {
-        // The flag must survive startCheck(): showProofreadingResult() reads it
-        // to continue the translation after the check.
-        m_pendingTranslationCheck = true;
-        startCheck();
-        return;
-    }
     emit translateRequested(TranslationRequest{text,
                                                m_sourceLang->currentCode(),
                                                m_targetLang->currentCode()});
@@ -392,7 +368,6 @@ void MainWindow::startCheck()
         // A replacement can leave an empty field; the old offsets are stale.
         m_proofreadingPanel->clear();
         updateHighlights();
-        m_pendingTranslationCheck = false;
         setStatus(tr("Nothing to check"));
         return;
     }
@@ -415,43 +390,6 @@ void MainWindow::onProofreadingResult(const ProofreadingResult &result)
 
     m_proofreadingPanel->showResult(result);
     updateHighlights();
-
-    // Built from the current field/languages and emitted directly: going back
-    // through requestTranslation() would restart the check-before-translation
-    // branch and loop.
-    const auto translate = [this] {
-        // The corrections may have restarted the timer; only one request may
-        // leave this flow.
-        m_autoTranslateTimer->stop();
-        emit translateRequested(TranslationRequest{m_sourceEdit->toPlainText(),
-                                                   m_sourceLang->currentCode(),
-                                                   m_targetLang->currentCode()});
-    };
-
-    if (m_pendingTranslationCheck) {
-        m_pendingTranslationCheck = false;
-        if (!result.ok() || result.issues.isEmpty()) {
-            translate();
-            return;
-        }
-        switch (askBeforeTranslation(result.issues.size())) {
-        case BeforeTranslationChoice::ApplyCorrections:
-            applyIssueEdits(result.issues);
-            m_proofreadingPanel->clear();
-            updateHighlights();
-            translate();
-            break;
-        case BeforeTranslationChoice::TranslateAnyway:
-            translate();
-            break;
-        case BeforeTranslationChoice::Dismissed:
-            break;
-        }
-        return;
-    }
-
-    if (m_autoReplace && result.ok() && !result.issues.isEmpty())
-        replaceAll(false);
 }
 
 void MainWindow::updateHighlights()
@@ -511,7 +449,6 @@ void MainWindow::applyReplacement(int row, int replacementIndex)
 
     // The replacement moved the remaining offsets: ask for a fresh check
     // instead of shifting the list.
-    m_pendingTranslationCheck = false;
     startCheck();
 }
 
@@ -562,44 +499,6 @@ bool MainWindow::previewCorrections(const QString &corrected)
     layout->addWidget(buttons);
     dialog.resize(520, 360);
     return dialog.exec() == QDialog::Accepted;
-}
-
-MainWindow::BeforeTranslationChoice MainWindow::askBeforeTranslation(int issueCount)
-{
-    QDialog dialog(this);
-    dialog.setObjectName(QStringLiteral("checkBeforeTranslationDialog"));
-    dialog.setWindowTitle(tr("Check before translation"));
-
-    auto *layout = new QVBoxLayout(&dialog);
-    auto *label = new QLabel(tr("%1 issues found in the source text.").arg(issueCount), &dialog);
-    label->setWordWrap(true);
-    auto *buttons = new QHBoxLayout;
-    auto *applyButton = new QPushButton(tr("Apply corrections and translate"), &dialog);
-    applyButton->setObjectName(QStringLiteral("applyCorrectionsAndTranslate"));
-    applyButton->setDefault(true);
-    auto *anywayButton = new QPushButton(tr("Translate anyway"), &dialog);
-    anywayButton->setObjectName(QStringLiteral("translateAnyway"));
-    buttons->addStretch();
-    buttons->addWidget(applyButton);
-    buttons->addWidget(anywayButton);
-    layout->addWidget(label);
-    layout->addLayout(buttons);
-
-    connect(applyButton, &QPushButton::clicked, &dialog, [&dialog] {
-        dialog.done(int(BeforeTranslationChoice::ApplyCorrections));
-    });
-    connect(anywayButton, &QPushButton::clicked, &dialog, [&dialog] {
-        dialog.done(int(BeforeTranslationChoice::TranslateAnyway));
-    });
-
-    switch (dialog.exec()) {
-    case int(BeforeTranslationChoice::ApplyCorrections):
-        return BeforeTranslationChoice::ApplyCorrections;
-    case int(BeforeTranslationChoice::TranslateAnyway):
-        return BeforeTranslationChoice::TranslateAnyway;
-    default:
-        return BeforeTranslationChoice::Dismissed;
-    }
 }
 
 void MainWindow::applyIssueEdits(const QVector<ProofreadingIssue> &issues)
@@ -662,13 +561,12 @@ void MainWindow::swapLanguages()
     m_sourceLang->setCurrentCode(newSource);
     m_targetLang->setCurrentCode(newTarget);
 
-    // The translation becomes the new source text and is translated back. A
-    // swap is not an explicit translate request, so it bypasses the check.
+    // The translation becomes the new source text and is translated back.
     const QString translation = m_resultEdit->toPlainText();
     if (!translation.isEmpty()) {
         const QSignalBlocker blocker(m_sourceEdit);
         m_sourceEdit->setPlainText(translation);
-        requestTranslation(false);
+        requestTranslation();
     }
 }
 

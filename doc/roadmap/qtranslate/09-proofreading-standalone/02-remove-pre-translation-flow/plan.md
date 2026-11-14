@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 depends: [01-remove-online-gate]
 ---
@@ -244,3 +244,56 @@ Design decisions:
   performed. The dialog and the main window were not inspected interactively; the widget assertions
   are the automated gate.
 - Nothing is needed from the user: the 2026-11-14 decision removed both settings explicitly.
+
+## Outcome
+
+Done. Text checking is no longer a pre-translation step and a finished check never edits the source
+field on its own; the manual **Check** panel is untouched and remains in `MainWindow` for child `03`.
+
+- Settings: `ProofreadingSettings::checkBeforeTranslation`/`autoReplace`, their INI load/save and
+  every read in the dialog and window are gone; `settingsVersion` stays `1` and a stale pair is
+  ignored, not migrated or removed.
+- Main window: `setProofreadingOptions()`, `BeforeTranslationChoice`, `askBeforeTranslation()` with
+  its dialog, `m_checkBeforeTranslation`, `m_autoReplace` and `m_pendingTranslationCheck` with all
+  nine resets are gone. `requestTranslation()` lost `userInitiated` and its five call sites were
+  updated; `onProofreadingResult()` keeps only the `Cancelled` guard, `showResult()` and
+  `updateHighlights()`. `applyIssueEdits()`, `replaceAll()`, `previewCorrections()`,
+  `copyCorrected()` and the highlight/selection helpers are unchanged.
+- Dialog and controller: the **Options** group (two checkboxes and the automatic-replacement
+  warning) and its three members are gone; `updateProofreadingControls()` keeps the
+  Provider/Issues/endpoint disabling and the endpoint warning. `AppController` no longer calls
+  `setProofreadingOptions()`.
+- Tests: `tst_proofreadingpanel` lost `autoReplaceAppliesOnce`, `checkBeforeTranslationWithIssues`
+  and `checkBeforeTranslationWithoutIssues`; `checkBeforeTranslationOff` is now
+  `translationDoesNotStartACheck()` and `autoTranslateBypassesCheck` has no option setup. The
+  preview-modal helper and the manual Check/Replace/Ignore/Replace all/Copy/stale-result tests stay.
+  `tst_settings` gained `removedProofreadingOptionsAreIgnored()` (raw INI with the stale pair, no
+  warning, `enabled`/`hotkey`/`settingsVersion` preserved, `save()`/`load()` round trip);
+  `tst_settingsdialog` asserts the absent group and both checkboxes while keeping the
+  Provider/Issues/endpoint/URL checks. The names of the removed widgets are assembled from parts in
+  the tests, as the online-gate names already were, so a literal does not reappear in the sources.
+- Translations: all 14 `.ts` are at **368** messages (376 − 8: four `MainWindow` strings and four
+  `SettingsDialog` ones); 0 unfinished/empty/vanished, no added `<source>`, only `<location>` churn.
+  `lupdate` first kept the eight entries as obsolete; rerunning with `-no-obsolete` on the generated
+  project removed them, as the plan required.
+- Verification in the `qtranslate-trixie` container (Qt 6.8.2): Linux Debug and Release build with
+  zero `warning:` and pass 45/45 under `xvfb-run -a`; `tst_proofreadingpanel`, `tst_settings`,
+  `tst_settingsdialog` and `tst_translations` are green. The static `rg` checks from step 8 are
+  clean; in `tests` only the two legacy key names in `tst_settings.cpp` remain. Offscreen startup
+  with a stale INI (`enabled=true` and both removed keys) loads without a warning, logs no
+  check/settings lines, and the INI is not rewritten.
+- Not automated: the interactive "open the field and press Translate" smoke — `qtranslate-trixie`
+  has no `xdotool`/`xclip`, and installing packages was not allowed. The same path is covered by
+  `translationDoesNotStartACheck()` (clicks Translate; one `translateRequested`, zero
+  `checkRequested`) and `autoTranslateBypassesCheck()`. Windows Debug/Release and its 39 tests are
+  not performed (no MSVC here).
+- Review notes: `m_proofreadingAvailable` became write-only when the pre-translation branch went and
+  is kept on purpose because `03-extract-proofreading-window` deletes it with the rest of the
+  checking surface. `replaceAll(false)` and the `Corrections applied` string now have no caller; the
+  plan keeps `replaceAll()` and the string for the panel and for child `03`. `doc/proofreading.md`,
+  `doc/architecture.md`, `doc/handoff.md`, the READMEs and `AGENTS.md` still describe the removed
+  settings; that is the lead's pass.
+- Only the ten code/test files and the 14 `.ts` files changed; no CMake, version, README or `doc/`
+  change beyond the two map files the lead prepared (this plan and the journal).
+- Repeat-run note: do not run `update_translations` and `tst_translations` at the same time; the
+  test reads the `.ts` files while `lupdate` rewrites them and can fail spuriously.

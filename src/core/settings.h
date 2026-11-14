@@ -72,8 +72,6 @@ struct ProofreadingSettings
     QString endpoint; // empty: the provider default
     // proofreadingCategoryIds(); initialised in AppSettings' constructor.
     QStringList categories;
-    bool checkBeforeTranslation = false;
-    bool autoReplace = false;
     // Empty by default: the action is disabled until the user assigns it.
     QKeySequence hotkey;
 };

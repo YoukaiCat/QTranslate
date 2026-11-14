@@ -51,6 +51,24 @@ QString removedOnlineWarningObjectName()
     return QStringLiteral("proofreadingOnline") + QStringLiteral("Warning");
 }
 
+// The Options group and its two checkboxes went with the pre-translation check
+// and the automatic replacement; the names are assembled so they stay out of
+// the source.
+QString removedProofreadingOptionsGroupObjectName()
+{
+    return QStringLiteral("proofreading") + QStringLiteral("OptionsGroup");
+}
+
+QString removedCheckBeforeTranslationObjectName()
+{
+    return QStringLiteral("proofreadingCheck") + QStringLiteral("BeforeTranslation");
+}
+
+QString removedAutoReplaceObjectName()
+{
+    return QStringLiteral("proofreading") + QStringLiteral("AutoReplace");
+}
+
 } // namespace
 
 class TestSettingsDialog : public QObject
@@ -899,8 +917,6 @@ private slots:
         settings.proofreading.endpoint = QStringLiteral("http://127.0.0.1:8081/v2/check");
         settings.proofreading.categories = {QStringLiteral("grammar"),
                                             QStringLiteral("style")};
-        settings.proofreading.checkBeforeTranslation = true;
-        settings.proofreading.autoReplace = true;
 
         const QList<SettingsDialog::ProofreadingProvider> providers = {
             {QStringLiteral("languagetool"), QStringLiteral("LanguageTool"),
@@ -970,8 +986,6 @@ private slots:
                  QStringLiteral("http://127.0.0.1:8081/v2/check"));
         QCOMPARE(result.proofreading.categories,
                  QStringList({QStringLiteral("grammar"), QStringLiteral("style")}));
-        QVERIFY(result.proofreading.checkBeforeTranslation);
-        QVERIFY(result.proofreading.autoReplace);
 
         // The language list follows the selected provider and is rebuilt on a
         // provider change; a provider without Auto-detect offers no "auto".
@@ -1021,15 +1035,13 @@ private slots:
             dialog.findChild<QGroupBox *>(QStringLiteral("proofreadingProviderGroup"));
         auto *issuesGroup =
             dialog.findChild<QGroupBox *>(QStringLiteral("proofreadingIssuesGroup"));
-        auto *optionsGroup =
-            dialog.findChild<QGroupBox *>(QStringLiteral("proofreadingOptionsGroup"));
         auto *provider =
             dialog.findChild<QComboBox *>(QStringLiteral("proofreadingProvider"));
         auto *endpoint =
             dialog.findChild<QLineEdit *>(QStringLiteral("proofreadingEndpoint"));
         auto *endpointWarning =
             dialog.findChild<QLabel *>(QStringLiteral("proofreadingEndpointWarning"));
-        QVERIFY(enabled && providerGroup && issuesGroup && optionsGroup && provider && endpoint
+        QVERIFY(enabled && providerGroup && issuesGroup && provider && endpoint
                 && endpointWarning);
 
         // The enable switch is the only consent: the former online group and
@@ -1038,11 +1050,16 @@ private slots:
         QVERIFY(!dialog.findChild<QCheckBox *>(removedAllowOnlineObjectName()));
         QVERIFY(!dialog.findChild<QLabel *>(removedOnlineWarningObjectName()));
 
+        // The former Options group is gone as a whole: no pre-translation
+        // check and no automatic replacement.
+        QVERIFY(!dialog.findChild<QGroupBox *>(removedProofreadingOptionsGroupObjectName()));
+        QVERIFY(!dialog.findChild<QCheckBox *>(removedCheckBeforeTranslationObjectName()));
+        QVERIFY(!dialog.findChild<QCheckBox *>(removedAutoReplaceObjectName()));
+
         const AppSettings before = dialog.settings();
         QVERIFY(!enabled->isChecked());
         QVERIFY(!providerGroup->isEnabled());
         QVERIFY(!issuesGroup->isEnabled());
-        QVERIFY(!optionsGroup->isEnabled());
 
         // Only the mode switch disables rows.
         enabled->setChecked(true);

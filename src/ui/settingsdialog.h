@@ -146,9 +146,6 @@ private:
     QCheckBox *m_proofreadingGrammar = nullptr;
     QCheckBox *m_proofreadingPunctuation = nullptr;
     QCheckBox *m_proofreadingStyle = nullptr;
-    QGroupBox *m_proofreadingOptionsGroup = nullptr;
-    QCheckBox *m_proofreadingCheckBeforeTranslation = nullptr;
-    QCheckBox *m_proofreadingAutoReplace = nullptr;
 
     QLineEdit *m_mozhiInstance = nullptr;
     QComboBox *m_mozhiEngine = nullptr;

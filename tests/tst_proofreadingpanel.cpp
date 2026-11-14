@@ -448,130 +448,10 @@ private slots:
         QCOMPARE(source->extraSelections().size(), 2);
     }
 
-    void autoReplaceAppliesOnce()
+    void translationDoesNotStartACheck()
     {
         MainWindow window;
         window.setProofreadingAvailable(true);
-        window.setProofreadingOptions(false, true);
-        auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
-        auto *panel = window.findChild<ProofreadingPanel *>();
-        QVERIFY(source);
-        QVERIFY(panel);
-        source->setPlainText(QStringLiteral("abc def"));
-
-        const ProofreadingResult checked =
-            makeResult({makeIssue(0, 3, QStringLiteral("First"),
-                                  replacements(QStringLiteral("AAA")), QStringLiteral("R1")),
-                        makeIssue(4, 3, QStringLiteral("Second"),
-                                  replacements(QStringLiteral("BBB")), QStringLiteral("R2"))});
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
-        window.showProofreadingResult(checked);
-
-        QCOMPARE(source->toPlainText(), QStringLiteral("AAA BBB"));
-        QCOMPARE(checkSpy.count(), 0);
-        auto *list = panel->findChild<QListWidget *>(QStringLiteral("proofreadingIssues"));
-        QVERIFY(list);
-        QCOMPARE(list->count(), 0);
-        QCOMPARE(source->extraSelections().size(), 0);
-
-        source->undo();
-        QCOMPARE(source->toPlainText(), QStringLiteral("abc def"));
-
-        // With the option off nothing is applied without a click.
-        window.setProofreadingOptions(false, false);
-        window.showProofreadingResult(checked);
-        QCOMPARE(source->toPlainText(), QStringLiteral("abc def"));
-        QCOMPARE(list->count(), 2);
-    }
-
-    void checkBeforeTranslationWithIssues()
-    {
-        MainWindow window;
-        window.setProofreadingAvailable(true);
-        window.setProofreadingOptions(true, false);
-        auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
-        auto *translate = window.findChild<QPushButton *>(QStringLiteral("translate"));
-        QVERIFY(source);
-        QVERIFY(translate);
-        source->setPlainText(QStringLiteral("abc def"));
-
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
-        QSignalSpy translateSpy(&window, &MainWindow::translateRequested);
-
-        translate->click();
-        QCOMPARE(checkSpy.count(), 1);
-        QCOMPARE(translateSpy.count(), 0);
-
-        const ProofreadingResult checked =
-            makeResult({makeIssue(0, 3, QStringLiteral("First"),
-                                  replacements(QStringLiteral("XYZ")), QStringLiteral("R1"))});
-
-        ModalActionPtr action = scheduleModalAction(QStringLiteral("translateAnyway"));
-        window.showProofreadingResult(checked);
-        QVERIFY(action->clicked);
-        QCOMPARE(translateSpy.count(), 1);
-        QCOMPARE(translateSpy.at(0).at(0).value<TranslationRequest>().text,
-                 QStringLiteral("abc def"));
-        QCOMPARE(source->toPlainText(), QStringLiteral("abc def"));
-
-        translate->click();
-        QCOMPARE(checkSpy.count(), 2);
-        action = scheduleModalAction(QStringLiteral("applyCorrectionsAndTranslate"));
-        window.showProofreadingResult(checked);
-        QVERIFY(action->clicked);
-        QCOMPARE(translateSpy.count(), 2);
-        QCOMPARE(source->toPlainText(), QStringLiteral("XYZ def"));
-        QCOMPARE(translateSpy.at(1).at(0).value<TranslationRequest>().text,
-                 QStringLiteral("XYZ def"));
-
-        translate->click();
-        QCOMPARE(checkSpy.count(), 3);
-        action = scheduleModalAction(QStringLiteral("escape"));
-        window.showProofreadingResult(checked);
-        QVERIFY(action->clicked);
-        QCOMPARE(translateSpy.count(), 2);
-        QCOMPARE(source->toPlainText(), QStringLiteral("XYZ def"));
-    }
-
-    void checkBeforeTranslationWithoutIssues()
-    {
-        MainWindow window;
-        window.setProofreadingAvailable(true);
-        window.setProofreadingOptions(true, false);
-        auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
-        auto *translate = window.findChild<QPushButton *>(QStringLiteral("translate"));
-        auto *panel = window.findChild<ProofreadingPanel *>();
-        QVERIFY(source);
-        QVERIFY(translate);
-        QVERIFY(panel);
-        source->setPlainText(QStringLiteral("Clean text"));
-
-        QSignalSpy checkSpy(&window, &MainWindow::checkRequested);
-        QSignalSpy translateSpy(&window, &MainWindow::translateRequested);
-
-        translate->click();
-        QCOMPARE(checkSpy.count(), 1);
-        window.showProofreadingResult(makeResult({}));
-        QCOMPARE(translateSpy.count(), 1);
-        QCOMPARE(translateSpy.at(0).at(0).value<TranslationRequest>().text,
-                 QStringLiteral("Clean text"));
-
-        translate->click();
-        QCOMPARE(checkSpy.count(), 2);
-        window.showProofreadingResult(
-            makeError(TranslationError::Network, QStringLiteral("host not found")));
-        QCOMPARE(translateSpy.count(), 2);
-        auto *state = panel->findChild<QLabel *>(QStringLiteral("proofreadingState"));
-        QVERIFY(state);
-        QVERIFY2(state->text().contains(QStringLiteral("Network error")),
-                 qPrintable(state->text()));
-    }
-
-    void checkBeforeTranslationOff()
-    {
-        MainWindow window;
-        window.setProofreadingAvailable(true);
-        window.setProofreadingOptions(false, false);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         auto *translate = window.findChild<QPushButton *>(QStringLiteral("translate"));
         QVERIFY(source);
@@ -589,7 +469,6 @@ private slots:
     {
         MainWindow window;
         window.setProofreadingAvailable(true);
-        window.setProofreadingOptions(true, false);
         window.setAutoTranslateDelay(10);
         auto *source = window.findChild<QPlainTextEdit *>(QStringLiteral("sourceText"));
         QVERIFY(source);

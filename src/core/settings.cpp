@@ -541,12 +541,6 @@ void SettingsStore::load()
     loaded.proofreading.categories =
         settings.value(QStringLiteral("categories"), loaded.proofreading.categories)
             .toStringList();
-    loaded.proofreading.checkBeforeTranslation =
-        settings.value(QStringLiteral("checkBeforeTranslation"),
-                       loaded.proofreading.checkBeforeTranslation)
-            .toBool();
-    loaded.proofreading.autoReplace =
-        settings.value(QStringLiteral("autoReplace"), loaded.proofreading.autoReplace).toBool();
     loaded.proofreading.hotkey =
         readKeySequence(settings, QStringLiteral("hotkey"), loaded.proofreading.hotkey);
     settings.endGroup();
@@ -684,9 +678,6 @@ void SettingsStore::save(const AppSettings &settings)
     out.setValue(QStringLiteral("language"), normalized.proofreading.language);
     out.setValue(QStringLiteral("endpoint"), normalized.proofreading.endpoint);
     out.setValue(QStringLiteral("categories"), normalized.proofreading.categories);
-    out.setValue(QStringLiteral("checkBeforeTranslation"),
-                 normalized.proofreading.checkBeforeTranslation);
-    out.setValue(QStringLiteral("autoReplace"), normalized.proofreading.autoReplace);
     out.setValue(QStringLiteral("hotkey"),
                  normalized.proofreading.hotkey.toString(QKeySequence::PortableText));
     out.endGroup();
