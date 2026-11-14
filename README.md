@@ -6,8 +6,8 @@ Lightweight desktop translator. It lives in the system tray, translates the text
 selected in any application with a global hotkey, and can replace the selection with the
 translation directly in the active input field.
 
-> **Status:** 0.12.0 released. The Windows installer, the portable archive, and the Linux packages
-> are available. See the [0.12.0 release notes](doc/releases/0.12.0.md) for the changes.
+> **Status:** 0.13.0 released. The Windows installer, the portable archive, and the Linux packages
+> are available. See the [0.13.0 release notes](doc/releases/0.13.0.md) for the changes.
 
 **English** | [Русский](README.ru.md)
 
@@ -53,26 +53,26 @@ translation directly in the active input field.
 
 The latest build is on the [Releases](https://github.com/youkaicat/QTranslate/releases/latest) page:
 
-- **[`qtranslate-0.12.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-win64-setup.exe)**. Installs QTranslate for the current user
+- **[`qtranslate-0.13.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate-0.13.0-win64-setup.exe)**. Installs QTranslate for the current user
   without administrator rights; by default it creates a Start menu shortcut and enables autostart,
   with an optional desktop shortcut. It also adds an uninstaller. Uninstalling keeps the settings
   in `%APPDATA%\qtranslate`.
-- **[`qtranslate-0.12.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-win64.zip)**. Extract it and run `bin\qtranslate.exe`;
+- **[`qtranslate-0.13.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate-0.13.0-win64.zip)**. Extract it and run `bin\qtranslate.exe`;
   no installation or administrator rights are needed. The archive is self-contained: Qt and the
   MSVC runtime are included.
 The installer is not code-signed yet, so Windows SmartScreen may show a warning.
 
 The Linux packages are built for Debian 13 (trixie):
-**[`qtranslate-0.12.0-linux-x86_64.tar.gz`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-linux-x86_64.tar.gz)**,
-**[`qtranslate_0.12.0_amd64.deb`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate_0.12.0_amd64.deb)**,
+**[`qtranslate-0.13.0-linux-x86_64.tar.gz`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate-0.13.0-linux-x86_64.tar.gz)**,
+**[`qtranslate_0.13.0_amd64.deb`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate_0.13.0_amd64.deb)**,
 and
-**[`qtranslate-0.12.0-x86_64.AppImage`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-x86_64.AppImage)**
+**[`qtranslate-0.13.0-x86_64.AppImage`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate-0.13.0-x86_64.AppImage)**
 (use `--appimage-extract-and-run` when FUSE is unavailable).
 They require glibc 2.38 or newer and do not run on Astra Linux 1.8.7. Astra Linux is supported through
 a separate native build, `qtranslate-<version>-linux-x86_64-astra.tar.gz` and
 `qtranslate_<version>_amd64.deb` (the same file name as the trixie package, but built against Astra's
 Qt 6.10.2 and glibc 2.36); those are local verification artifacts and are not published by CI. See
-[Linux](#linux-0120) for build and packaging steps.
+[Linux](#linux-0130) for build and packaging steps.
 
 ## Usage
 
@@ -96,7 +96,7 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
   hotkeys** disables them manually.
 - `--translate-popup`, `--translate-main`, `--translate-inplace` and `--proofread-selection` run the
   four scenarios in an already running instance (or start one). They are mutually exclusive and are
-  the portable trigger for Wayland and desktop shortcuts; see [Linux](#linux-0120).
+  the portable trigger for Wayland and desktop shortcuts; see [Linux](#linux-0130).
 - `--minimized` starts hidden in the tray; `--verbose` writes a detailed log. On Windows the log is
   `%LOCALAPPDATA%\qtranslate\qtranslate.log`; on Linux it is
   `$XDG_STATE_HOME/qtranslate/qtranslate.log` (`~/.local/state/...` when unset).
@@ -179,7 +179,7 @@ The output goes to `build/artifacts`. The CI workflow
 `windows-latest` with Qt 6.8.3 LTS. Pushing a tag such as `v0.11.0` publishes a GitHub release with
 these artifacts; the tag must match the version in `CMakeLists.txt`.
 
-### Linux (0.12.0)
+### Linux (0.13.0)
 
 QTranslate builds, links, and passes 45 tests (36 shared plus 9 Linux platform tests) in Debug and
 Release with `-Wall -Wextra` and no warnings on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7

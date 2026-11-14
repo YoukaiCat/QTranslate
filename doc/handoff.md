@@ -12,13 +12,14 @@ is English. The migration to the tree roadmap and the English baseline is comple
 
 - The GitHub repository was recreated on 2026-11-06; the new repository contains only the clean
   local history and no pre-recreation commits, tags, or releases. Its releases are 0.11.1 (tag
-  `v0.11.1`) and 0.12.0 (tag `v0.12.0`, published on 2026-11-09 by the tag CI). The old
-  repository's history and activity are gone.
+  `v0.11.1`), 0.12.0 (tag `v0.12.0`, published on 2026-11-09 by the tag CI), and 0.13.0 (tag
+  `v0.13.0`, published on 2026-11-14 by the tag CI). The old repository's history and activity are
+  gone.
 - The local history was rewritten on 2026-11-06 to replace a wrong author/committer address; all
   local commits use the GitHub noreply identity. The rewritten history was pushed to the new
   repository; no other push was made.
 - The old local tags are unchanged: `v0.11.0` points to `f50c1da`, `v0.10.0` to `726dac0`; they
-  were not pushed to the new repository. Only `v0.11.1` is on the remote.
+  were not pushed to the new repository. Of the old tags, only `v0.11.1` is on the remote.
 - History: release 0.10.0, removal of the checksum links and return of `SHA256SUMS.txt` as an
   unlisted asset, then 0.11.0: OpenAI-compatible translation, merged DeepL, QTranslate branding.
 - After 0.11.0, a hotkey fix for games and the autopause setting were added to `main`; they were
@@ -111,7 +112,7 @@ is English. The migration to the tree roadmap and the English baseline is comple
 ## Native Debian packaging (2026-11-14)
 
 - The repository is a native Debian source package: top-level `debian/` with `control`, `rules`
-  (`dh`, Release, `nocheck` → `QTRANSLATE_BUILD_TESTS=OFF`), `changelog` (`0.12.0`),
+  (`dh`, Release, `nocheck` → `QTRANSLATE_BUILD_TESTS=OFF`), `changelog` (`0.13.0`),
   `copyright` (DEP-5, GPL-3.0-or-later; the full text is in `LICENSE`),
   `source/format` (`3.0 (native)`), `source/options` (a bare `tar-ignore` line restores
   dpkg-source's default `-I` list, plus `build`, `build-*`, `out`, `.claude`), `.gitignore` and
@@ -119,7 +120,7 @@ is English. The migration to the tree roadmap and the English baseline is comple
   2026-11-14; the acceptance evidence is in its `## Outcome`.
 - Build: `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot -us -uc`
   from the repository root, without a trailing `.` (Astra's `dpkg-buildpackage` 1.21 rejects one).
-  It writes `qtranslate_0.12.0_amd64.deb`, the `.dsc` and the `.tar.xz` to the parent directory;
+  It writes `qtranslate_0.13.0_amd64.deb`, the `.dsc` and the `.tar.xz` to the parent directory;
   `dbgsym`, `.buildinfo` and `.changes` also appear there and are not published. `nocheck` skips
   the tests, `nodoc` leaves `README.Debian` out of the package, and without `nocheck` the rules run
   45/45 tests under `xvfb-run -a` (no trusted-client entries were needed under Xvfb; a real Parsec
@@ -134,7 +135,7 @@ is English. The migration to the tree roadmap and the English baseline is comple
   `libxtst6 (>= 2:1.2.5)`.
 - `packaging/linux/package.sh` builds the `.deb` through `dpkg-buildpackage` in a clean copy under
   the staging directory and publishes only the main `.deb`; the `+astra1` suffix was dropped (both
-  targets build `qtranslate_0.12.0_amd64.deb`), and `dbgsym` is not published. The Linux CI job
+  targets build `qtranslate_0.13.0_amd64.deb`), and `dbgsym` is not published. The Linux CI job
   installs `debhelper`/`fakeroot`/`pkg-config`, builds the native `.deb`, runs the gate, keeps the
   45 tests and uploads the same `qtranslate-linux-x64` set. `build-essential` was removed from
   `Build-Depends`; `lintian` on the `.dsc` is clean apart from two
@@ -217,6 +218,12 @@ is English. The migration to the tree roadmap and the English baseline is comple
     `SHA256SUMS-linux.txt`; every asset digest matches its checksum file.
   - CI run of the tag: https://github.com/YoukaiCat/QTranslate/actions/runs/42668400346
   - Release notes: [`releases/0.12.0.md`](releases/0.12.0.md).
+- `v0.13.0` — published on 2026-11-14 from `main`:
+  https://github.com/YoukaiCat/QTranslate/releases/tag/v0.13.0
+  - Proofreading with LanguageTool, the native Debian source package, and GPL-3.0-or-later.
+  - Local Linux Debug/Release 45/45 with no warnings; `--version` prints `QTranslate 0.13.0`; the
+    native `.deb` gate is 15/15. Windows not performed (no MSVC); the tag CI is the build gate.
+  - Release notes: [`releases/0.13.0.md`](releases/0.13.0.md).
 
 ## Localization (old stage 12, completed)
 
@@ -469,6 +476,23 @@ both READMEs, this handoff and the roadmap journal.
    (user decision of 2026-11-09, superseding the earlier timing).
 5. The next milestone is stage 6 (`06-llm-actions`); stage 5 (`05-proofreading`) is accepted and its
    documentation is updated.
+
+## Release 0.13.0 (2026-11-14)
+
+The user asked for a new release on 2026-11-14 and approved 0.13.0 and the push. 0.13.0 comes from
+`main`; the release commit bumps the version in `CMakeLists.txt` and `resources/qtranslate.rc`,
+adds `doc/releases/0.13.0.md` and updates both READMEs, this handoff and the roadmap journal.
+
+1. Local Linux: Debug/Release 45/45 with no warnings; `--version` prints `QTranslate 0.13.0`; the
+   native `.deb` is built by `dpkg-buildpackage` and `verify-deb.sh` reports 15/15.
+2. Windows Debug/Release, `package.ps1` and the installer were not performed (no MSVC); the tag CI
+   is the build gate. No local artifacts are uploaded manually.
+3. `main` and the annotated tag `v0.13.0` were pushed; the CI `linux` job builds the trixie
+   `tar.gz`, native `.deb` and AppImage, the `windows` job builds the installer and ZIP, and the
+   `release` job publishes them with `SHA256SUMS.txt`/`SHA256SUMS-linux.txt` (unlisted).
+4. The release includes proofreading with LanguageTool, the native Debian package and
+   GPL-3.0-or-later.
+5. The next milestone is stage 6 (`06-llm-actions`); stage 5 (`05-proofreading`) is accepted.
 
 ## User rules
 

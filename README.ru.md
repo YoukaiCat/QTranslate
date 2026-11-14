@@ -6,8 +6,8 @@
 любой программе по глобальной горячей клавише и умеет сразу заменять выделение переводом в
 активном поле ввода.
 
-> **Статус:** 0.12.0 выпущен. Доступны установщик для Windows, портативный архив и пакеты Linux.
-> Что изменилось — в [заметках к релизу 0.12.0](doc/releases/0.12.0.md).
+> **Статус:** 0.13.0 выпущен. Доступны установщик для Windows, портативный архив и пакеты Linux.
+> Что изменилось — в [заметках к релизу 0.13.0](doc/releases/0.13.0.md).
 
 [English](README.md) | **Русский**
 
@@ -54,27 +54,27 @@
 
 Последняя сборка — на странице [Releases](https://github.com/youkaicat/QTranslate/releases/latest):
 
-- **[`qtranslate-0.12.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-win64-setup.exe)**. Устанавливает QTranslate для текущего
+- **[`qtranslate-0.13.0-win64-setup.exe`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate-0.13.0-win64-setup.exe)**. Устанавливает QTranslate для текущего
   пользователя без прав администратора; по умолчанию создаёт ярлык в меню «Пуск» и включает
   автозагрузку, ярлык на рабочем столе — по желанию. Добавляет деинсталлятор. При удалении
   настройки в `%APPDATA%\qtranslate` сохраняются.
-- **[`qtranslate-0.12.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-win64.zip)**. Распакуйте и запустите
+- **[`qtranslate-0.13.0-win64.zip`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate-0.13.0-win64.zip)**. Распакуйте и запустите
   `bin\qtranslate.exe`; установка и права администратора не нужны. Архив самодостаточен: Qt и
   runtime MSVC уже включены.
 Установщик пока не подписан кодом, поэтому Windows SmartScreen может показать предупреждение.
 
 Пакеты Linux собираются для Debian 13 (trixie):
-**[`qtranslate-0.12.0-linux-x86_64.tar.gz`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-linux-x86_64.tar.gz)**,
-**[`qtranslate_0.12.0_amd64.deb`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate_0.12.0_amd64.deb)**,
+**[`qtranslate-0.13.0-linux-x86_64.tar.gz`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate-0.13.0-linux-x86_64.tar.gz)**,
+**[`qtranslate_0.13.0_amd64.deb`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate_0.13.0_amd64.deb)**,
 и
-**[`qtranslate-0.12.0-x86_64.AppImage`](https://github.com/youkaicat/QTranslate/releases/download/v0.12.0/qtranslate-0.12.0-x86_64.AppImage)**
+**[`qtranslate-0.13.0-x86_64.AppImage`](https://github.com/youkaicat/QTranslate/releases/download/v0.13.0/qtranslate-0.13.0-x86_64.AppImage)**
 (если FUSE недоступен, запускайте с `--appimage-extract-and-run`).
 Им нужен glibc 2.38 или новее, на Astra Linux 1.8.7 они не работают.
 Astra Linux поддерживается отдельной нативной сборкой:
 `qtranslate-<version>-linux-x86_64-astra.tar.gz` и `qtranslate_<version>_amd64.deb` (то же имя
 файла, что у trixie-пакета, но собрано против Qt 6.10.2 и glibc 2.36 Astra); это локальные
 проверочные артефакты, CI их не публикует. Сборка и упаковка — в разделе
-[«Linux»](#linux-0120).
+[«Linux»](#linux-0130).
 
 ## Использование
 
@@ -99,7 +99,7 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
 - `--translate-popup`, `--translate-main`, `--translate-inplace` и `--proofread-selection` запускают
   четыре сценария в уже работающем экземпляре (или стартуют его). Опции взаимоисключающие; это
   переносимый способ привязать действие к ярлыку рабочего стола и основной путь для Wayland — см.
-  [«Linux»](#linux-0120).
+  [«Linux»](#linux-0130).
 - `--minimized` запускает программу скрытой в трее; `--verbose` пишет подробный лог. В Windows это
   `%LOCALAPPDATA%\qtranslate\qtranslate.log`, в Linux —
   `$XDG_STATE_HOME/qtranslate/qtranslate.log` (`~/.local/state/...`, если переменная не задана).
@@ -183,7 +183,7 @@ ctest --test-dir build/release --output-on-failure
 `windows-latest` с Qt 6.8.3 LTS. Пуш тега вроде `v0.11.0` публикует GitHub Release с этими
 файлами; версия тега должна совпадать с версией в `CMakeLists.txt`.
 
-### Linux (0.12.0)
+### Linux (0.13.0)
 
 QTranslate собирается, компонуется и проходит 45 тестов (36 общих и 9 платформенных Linux) в Debug
 и Release с `-Wall -Wextra` и без предупреждений на Debian 13 (trixie, Qt 6.8.2) и Astra Linux

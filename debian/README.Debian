@@ -11,12 +11,12 @@ argument of dpkg-buildpackage.
 
 The artifacts land in the parent directory:
 
-  qtranslate_0.12.0_amd64.deb
-  qtranslate-dbgsym_0.12.0_amd64.deb
-  qtranslate_0.12.0.dsc
-  qtranslate_0.12.0.tar.xz
-  qtranslate_0.12.0_amd64.buildinfo
-  qtranslate_0.12.0_amd64.changes
+  qtranslate_0.13.0_amd64.deb
+  qtranslate-dbgsym_0.13.0_amd64.deb
+  qtranslate_0.13.0.dsc
+  qtranslate_0.13.0.tar.xz
+  qtranslate_0.13.0_amd64.buildinfo
+  qtranslate_0.13.0_amd64.changes
 
 The debug symbols are in qtranslate-dbgsym, not in the main .deb.  The
 dbgsym package is built but not published with the release.
@@ -51,7 +51,7 @@ current tree, not from a VCS export, and the version in debian/changelog
 carries no Debian revision.
 
 debian/source/options keeps the local CMake build directories and the local
-tool state out of qtranslate_0.12.0.tar.xz, even when the tree is copied with
+tool state out of qtranslate_0.13.0.tar.xz, even when the tree is copied with
 its .git directory and a populated build/:
 
   tar-ignore              the bare line restores dpkg-source's default
@@ -68,7 +68,7 @@ directory, and it has to run on a cleaned tree: the exclusions above do not
 cover the debhelper residue (debian/qtranslate/, debian/qtranslate.substvars,
 debian/debhelper-build-stamp), so run debian/rules clean first, as
 dpkg-buildpackage does.  dpkg-source always excludes debian/files itself.
-dpkg-source -x qtranslate_0.12.0.dsc extracts qtranslate-0.12.0/ without the
+dpkg-source -x qtranslate_0.13.0.dsc extracts qtranslate-0.13.0/ without the
 VCS metadata.
 
 License

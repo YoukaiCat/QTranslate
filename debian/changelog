@@ -1,3 +1,11 @@
+qtranslate (0.13.0) unstable; urgency=medium
+
+  * New upstream release: proofreading with LanguageTool.
+  * Build the .deb as a native Debian source package with dpkg-buildpackage.
+  * License the project under GPL-3.0-or-later.
+
+ -- Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>  Sat, 14 Nov 2026 00:00:00 +0000
+
 qtranslate (0.12.0) unstable; urgency=medium
 
   * Initial Debian packaging built with dpkg-buildpackage.

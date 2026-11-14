@@ -10,13 +10,13 @@ stage is `06-llm-actions` (`todo`, no children; the planner splits it). Stage 4
 The root is `in-progress`; its `Done when` requires every stage to be done or dropped, so stage 4's
 blocked state is a deliberate exception.
 
-Release **0.12.0** was published on 2026-11-09 from `main` (`ef9500a`, tag `v0.12.0`); the tag CI
-built and published all Windows and Linux assets, and the checksums match. The old 0.11.1 GitHub
-release stays until the user checks the current code on Windows.
+Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
+proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
+release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub release stays until
+the user checks the current code on Windows.
 
-Work is on `main` (matches the root `branch:`); the working tree is clean apart from the
-documentation commit being prepared. Linux is 45/45, Windows 39 (derived, not run locally); `.ts`
-has 383 messages.
+Work is on `main` (matches the root `branch:`); the working tree is clean. Linux is 45/45, Windows
+39 (derived, not run locally); `.ts` has 383 messages. The next node is `06-llm-actions`.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
@@ -162,3 +162,11 @@ POST is urlencoded, not multipart; Reverso has six languages and no `auto`. The 
 - 2026-11-10 — Task `07/04-proofreading-hotkey` done as `590ea5f`: fifth `HotkeyAction::ProofreadSelection`, empty-by-default `proofreading/hotkey` in `[proofreading]`, Hotkeys row with duplicate/multi-combination validation, the Windows action-generic path, and the X11/Wayland tables driven by one `kLastAction`; activation calls `AppController::proofreadSelectionInPlace()`. `tst_hotkeymanager_x11` 16/16, `tst_hotkeymanager_wayland` 20/20, `tst_settings` 65/65, `tst_settingsdialog` 31/31; Linux 45/45, `.ts` 383; Windows 39 not performed. Astra needed `fly-set-execid.sh` after rebuilding the X11 test binary. Reviewer added two tests (settings→widget direction and the row staying enabled with `proofreading.enabled=false`). Stage `07-external-selection-proofreading` acceptance over `62e5cea..590ea5f` then found and fixed one integration defect in `0ca1ad2`: a new selection action now closes an open proofreading popup before grabbing, and a proofreading request cancels a running in-place translation, so the two flows cannot race over the clipboard or paste a stale confirmation. The stage is closed `done`; Linux 45/45, `.ts` 383, Windows 39 not performed. Real problems recorded: a click on the non-activating popup under a real WM is unverified (degrades safely to clipboard), the 500 ms clipboard-restore race is old and unchanged, the `QSKIP`-without-`DISPLAY` gap, the fixed 400 ms grabber wait, the shared "translation" paste-failure wording, and stale documentation (AGENTS/README/architecture/handoff/proofreading.md) which the lead updates before closing the parent stage. Next: parent stage `05-proofreading` acceptance and the documentation pass.
 - 2026-11-10 — Stage `05-proofreading` accepted and closed `done` over `eb91f6b..263091f`. The acceptance coordinator checked all six active children end to end (contract → LanguageTool parser/service → settings/tab → main window → external popup/CLI/hotkey), found no further code defect, and ran fresh Debug/Release trees: 45/45, zero warnings, `tst_translations` 4/4, `.ts` 383, Windows 39 not performed. The lead then applied the documentation pass: `AGENTS.md` (39/45, 36 shared, 3 Windows-only, 9 Linux-only, proofreading tests, no-credential rule), both READMEs (text-checking features, `--proofread-selection`, five hotkeys, 45/36/9, LanguageTool limitations), `doc/architecture.md` (platform matrix, scheme, file/test lists, hotkeys, LanguageTool language mapping, proofreading manager/service, `[proofreading]` keys, MainWindow/SettingsDialog, §4.14/§4.15, errors, logging, tests, §9 decisions/limitations), `doc/handoff.md` (current state, proofreading implemented, counts), `doc/proofreading.md` (implemented status, reply interface, no credentials, tests, checkboxes), and the root plan history/counts. Real problems recorded, not fixed: a real-WM click on the non-activating popup is unverified (safe clipboard fallback); disabling the online gate during a running long check does not abort the remaining chunks (privacy edge); the 400 ms grabber clipboard wait and the older 500 ms restore race; the unreachable `QSKIP` without `DISPLAY`; the shared "translation" paste-failure wording; unchecking all categories normalizes back to all four. The next stage is `06-llm-actions`, which needs a planner split and depends on this stage for its `proofread` action.
 - 2026-11-13 — Work temporarily switched to the new `debian` map for native Debian packaging. The user asked for a top-level `debian/` and the standard `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot -us -uc` workflow (no trailing `.`) instead of the manual `.deb` staging in `packaging/linux/package.sh` `build_deb()`. The new map is `doc/roadmap/debian/plan.md` (`in-progress`, `base: dfd6f2e`). This map stays `in-progress` at `06-llm-actions`; none of its nodes was changed and the next node there is unchanged. No push.
+- 2026-11-14 — Release 0.13.0. The user approved 0.13.0 and the push. The release includes stage
+  `05-proofreading` (LanguageTool), the native Debian source package and GPL-3.0-or-later; the
+  version is bumped in `CMakeLists.txt`, `resources/qtranslate.rc` and `debian/changelog`;
+  `doc/releases/0.13.0.md`, both READMEs, `doc/architecture.md` and `doc/handoff.md` are updated.
+  Local Linux is 45/45 with no warnings; the native `.deb` gate is 15/15. Windows is not performed
+  locally (no MSVC); the tag CI is the build gate. `main` and the annotated tag `v0.13.0` are
+  pushed; the tag CI publishes the assets. The `qtranslate` map stays `in-progress`; the next node
+  is `06-llm-actions`.
