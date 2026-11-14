@@ -172,6 +172,20 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     translationForm->addRow(tr("Additional language:"), m_secondaryLanguage);
     translationForm->addRow(tr("Maximum text length:"), m_maxLength);
     translationForm->addRow(tr("Auto-translate delay:"), m_autoTranslateDelay);
+    m_fallbackService = new QComboBox(translationPage);
+    m_fallbackService->setObjectName(QStringLiteral("fallbackService"));
+    m_fallbackService->addItem(tr("None"), QString());
+    for (const auto &service : m_fallbackServices)
+        m_fallbackService->addItem(service.second, service.first);
+    m_fallbackHint = new QLabel(
+        tr("When the selected service fails with no connection, a timeout, a rate limit, an "
+           "exceeded quota or an invalid key, the text is sent once more to the fallback "
+           "service. None turns it off. The text is sent to a third party."),
+        translationPage);
+    m_fallbackHint->setObjectName(QStringLiteral("fallbackHint"));
+    m_fallbackHint->setWordWrap(true);
+    translationForm->addRow(tr("Fallback service:"), m_fallbackService);
+    translationForm->addRow(m_fallbackHint);
     auto *translationHint = new QLabel(
         tr("The additional language is used automatically when the detected text is already "
            "in the primary language."),
@@ -196,7 +210,10 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     servicesScroll->setFrameShape(QFrame::NoFrame);
     auto *servicesContent = new QWidget(servicesScroll);
     auto *servicesLayout = new QVBoxLayout(servicesContent);
+    // Provider order: keep in sync with AppController::createTranslation() and
+    // fallbackServiceIds().
     auto *googleGroup = new QGroupBox(tr("Google Translate"), servicesContent);
+    googleGroup->setObjectName(QStringLiteral("googleGroup"));
     auto *googleForm = new QFormLayout(googleGroup);
     m_googleMode = new QComboBox(googleGroup);
     m_googleMode->setObjectName(QStringLiteral("googleMode"));
@@ -218,7 +235,36 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     connect(m_googleMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             &SettingsDialog::updateGoogleControls);
 
+    servicesLayout->addWidget(googleGroup);
+
+    auto *yandexGroup = new QGroupBox(tr("Yandex"), servicesContent);
+    yandexGroup->setObjectName(QStringLiteral("yandexGroup"));
+    auto *yandexLayout = new QVBoxLayout(yandexGroup);
+    auto *yandexHint = new QLabel(
+        tr("Yandex web is an unofficial endpoint and needs no key. It may stop working, apply "
+           "rate limits or block requests. Long text is sent in several requests. The text is "
+           "sent to a third party."),
+        yandexGroup);
+    yandexHint->setObjectName(QStringLiteral("yandexHint"));
+    yandexHint->setWordWrap(true);
+    yandexLayout->addWidget(yandexHint);
+    servicesLayout->addWidget(yandexGroup);
+
+    auto *bingGroup = new QGroupBox(tr("Bing"), servicesContent);
+    bingGroup->setObjectName(QStringLiteral("bingGroup"));
+    auto *bingLayout = new QVBoxLayout(bingGroup);
+    auto *bingHint = new QLabel(
+        tr("Bing web is an unofficial endpoint and needs no key. It may stop working, apply "
+           "rate limits or block requests. Long text is sent in several requests. The text is "
+           "sent to a third party."),
+        bingGroup);
+    bingHint->setObjectName(QStringLiteral("bingHint"));
+    bingHint->setWordWrap(true);
+    bingLayout->addWidget(bingHint);
+    servicesLayout->addWidget(bingGroup);
+
     auto *deepLGroup = new QGroupBox(tr("DeepL"), servicesContent);
+    deepLGroup->setObjectName(QStringLiteral("deepLGroup"));
     auto *deepLForm = new QFormLayout(deepLGroup);
     m_deeplMode = new QComboBox(deepLGroup);
     m_deeplMode->setObjectName(QStringLiteral("deeplMode"));
@@ -258,8 +304,10 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
         m_checkDeepLKey->setEnabled(false);
         emit deepLKeyCheckRequested(m_deeplApiKey->text().trimmed());
     });
+    servicesLayout->addWidget(deepLGroup);
 
     auto *llmGroup = new QGroupBox(tr("OpenAI-compatible provider"), servicesContent);
+    llmGroup->setObjectName(QStringLiteral("llmGroup"));
     auto *llmForm = new QFormLayout(llmGroup);
     m_llmBaseUrl = new QLineEdit(llmGroup);
     m_llmBaseUrl->setObjectName(QStringLiteral("llmBaseUrl"));
@@ -304,28 +352,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
         emit llmModelsRequested(m_llmBaseUrl->text().trimmed(),
                                 m_llmApiKey->text().trimmed());
     });
-
-    servicesLayout->addWidget(googleGroup);
-    servicesLayout->addWidget(deepLGroup);
     servicesLayout->addWidget(llmGroup);
-    m_fallbackGroup = new QGroupBox(tr("Fallback service"), servicesContent);
-    m_fallbackGroup->setObjectName(QStringLiteral("fallbackGroup"));
-    auto *fallbackLayout = new QVBoxLayout(m_fallbackGroup);
-    m_fallbackService = new QComboBox(m_fallbackGroup);
-    m_fallbackService->setObjectName(QStringLiteral("fallbackService"));
-    m_fallbackService->addItem(tr("None"), QString());
-    for (const auto &service : m_fallbackServices)
-        m_fallbackService->addItem(service.second, service.first);
-    m_fallbackHint = new QLabel(
-        tr("When the selected service fails with no connection, a timeout, a rate limit, an "
-           "exceeded quota or an invalid key, the text is sent once more to the fallback "
-           "service. None turns it off. The text is sent to a third party."),
-        m_fallbackGroup);
-    m_fallbackHint->setObjectName(QStringLiteral("fallbackHint"));
-    m_fallbackHint->setWordWrap(true);
-    fallbackLayout->addWidget(m_fallbackService);
-    fallbackLayout->addWidget(m_fallbackHint);
-    servicesLayout->addWidget(m_fallbackGroup);
 
     auto *myMemoryGroup = new QGroupBox(tr("MyMemory"), servicesContent);
     myMemoryGroup->setObjectName(QStringLiteral("mymemoryGroup"));
@@ -389,32 +416,6 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     servicesLayout->addWidget(mozhiGroup);
     connect(m_mozhiInstance, &QLineEdit::textChanged, this,
             &SettingsDialog::updateMozhiControls);
-
-    auto *yandexGroup = new QGroupBox(tr("Yandex"), servicesContent);
-    yandexGroup->setObjectName(QStringLiteral("yandexGroup"));
-    auto *yandexLayout = new QVBoxLayout(yandexGroup);
-    auto *yandexHint = new QLabel(
-        tr("Yandex web is an unofficial endpoint and needs no key. It may stop working, apply "
-           "rate limits or block requests. Long text is sent in several requests. The text is "
-           "sent to a third party."),
-        yandexGroup);
-    yandexHint->setObjectName(QStringLiteral("yandexHint"));
-    yandexHint->setWordWrap(true);
-    yandexLayout->addWidget(yandexHint);
-    servicesLayout->addWidget(yandexGroup);
-
-    auto *bingGroup = new QGroupBox(tr("Bing"), servicesContent);
-    bingGroup->setObjectName(QStringLiteral("bingGroup"));
-    auto *bingLayout = new QVBoxLayout(bingGroup);
-    auto *bingHint = new QLabel(
-        tr("Bing web is an unofficial endpoint and needs no key. It may stop working, apply "
-           "rate limits or block requests. Long text is sent in several requests. The text is "
-           "sent to a third party."),
-        bingGroup);
-    bingHint->setObjectName(QStringLiteral("bingHint"));
-    bingHint->setWordWrap(true);
-    bingLayout->addWidget(bingHint);
-    servicesLayout->addWidget(bingGroup);
 
     auto *reversoGroup = new QGroupBox(tr("Reverso"), servicesContent);
     reversoGroup->setObjectName(QStringLiteral("reversoGroup"));

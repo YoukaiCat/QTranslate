@@ -3,17 +3,16 @@
 ## Where we left off
 
 Current node: stage `08-free-services-always-on` is `in-progress` (`base: 2650def`, the 0.13.0
-release commit); its first child `01-remove-free-services-gate` is `todo, detailed: true` and the
-coordinator starts next. It is a user-requested correction of stage 3: remove the
-`translation/allowFreeServices` opt-in gate and the whole opt-in concept, make every service
-available by default and delete the **Allow free web services** checkbox (user decision,
-2026-11-14). The second child `02-move-fallback-and-order-services` (`todo, detailed`, depends on
-`01`) moves the **Fallback service** combo to the Translation page and sets the order Google,
-Yandex, Bing, DeepL, OpenAI-compatible, MyMemory, Mozhi, Reverso. The planner has finished; the
-coordinator, the second task and the lead's documentation pass follow. Stages 1-3 and 5 are `done`;
-stage 4 `04-local-offline-translation` stays `blocked` by the user's 2026-11-05 decision and is not
-dropped; stages 6-7 are `todo`. The root is `in-progress`; its `Done when` requires every stage to
-be done or dropped, so stage 4's blocked state is a deliberate exception.
+release commit). Its first child `01-remove-free-services-gate` is `done` as `7b1265c`; the second
+child `02-move-fallback-and-order-services` is `done` in the task commit. The
+stage is a user-requested correction of stage 3: remove the `translation/allowFreeServices` opt-in
+gate and the whole opt-in concept, make every service available by default and delete the **Allow
+free web services** checkbox (user decision, 2026-11-14). Task 02 moves the **Fallback service**
+combo to the Translation page and sets the order Google, Yandex, Bing, DeepL, OpenAI-compatible,
+MyMemory, Mozhi, Reverso. The lead's documentation pass and the stage acceptance follow. Stages 1-3
+and 5 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by the user's 2026-11-05
+decision and is not dropped; stages 6-7 are `todo`. The root is `in-progress`; its `Done when`
+requires every stage to be done or dropped, so stage 4's blocked state is a deliberate exception.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
@@ -199,3 +198,28 @@ has six languages and no `auto`. Next: plan and run stage 8.
   as a deferred user decision. Rejected: defaulting the gate to true (dead setting), keeping the
   fallback on Services (conceptually wrong per the user), one oversized task (two independently
   acceptable results; the `.ts` update is atomic with 01).
+- 2026-11-14 — Task `08/01-remove-free-services-gate` done as `7b1265c`. Removed the
+  `translation/allowFreeServices` setting and the whole opt-in concept: the field and INI pair,
+  `requiresOptIn()` and its five overrides, the manager flag/refusal/fallback gate, the six
+  `AppController` places, the checkbox/**Free web services** group/general hint, five gate
+  `update*Controls()` functions and the gate sentences in the six hints. Every registered service is
+  available at startup and in the pickers; fallback accepts any registered non-primary service;
+  old INIs with the key load without it and keep the service. Tests were rewritten (`freeWebGateIsGone`,
+  `anyRegisteredServiceCanBeActive`, `fallbackWorksWithoutAGate`, `fallbackCanBeAnyRegisteredService`,
+  `legacyFreeServicesGateKeyIsIgnored`); the legacy name/objectName is assembled from literals in the
+  tests so the strict `rg` gate over `src`/`tests` stays empty (reviewer accepted). Linux Debug and
+  Release 45/45 with no warnings; 14 `.ts` are 379 messages each with 0 unfinished/empty/vanished;
+  Windows 39 not performed. Next: `02-move-fallback-and-order-services`.
+- 2026-11-14 — Task `08/02-move-fallback-and-order-services` done in the task commit. The
+  **Fallback service** combo moved from the Services page to the Translation page as a
+  `Fallback service:` form row with its hint and no group box; `fallbackService`/`fallbackHint` keep
+  their object names and behaviour, `m_fallbackGroup` and the `fallbackGroup` object name are gone.
+  Providers are in one order — Google, Yandex, Bing, DeepL, OpenAI-compatible, MyMemory, Mozhi,
+  Reverso — in the Services page (whole blocks, so focus order matches), in
+  `AppController::createTranslation()` (the pickers follow registration order) and in
+  `fallbackServiceIds()` (Yandex, Bing, MyMemory, Mozhi, Reverso); Google stays the default active
+  service. Added the `googleGroup`/`deepLGroup`/`llmGroup` object names and `providerOrder()`; the
+  fallback test now proves the widgets are on the Translation page, not on Services. The 14 `.ts`
+  stay at 379 messages with 0 unfinished/empty/vanished; the old group title is replaced by the
+  translated `Fallback service:` label. Linux Debug/Release 45/45 with no warnings; Windows 39 not
+  performed. Next: the lead's documentation pass and stage `08-free-services-always-on` acceptance.

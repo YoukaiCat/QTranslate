@@ -27,6 +27,13 @@ QString removedGateObjectName()
     return QStringLiteral("allowFree") + QStringLiteral("Services");
 }
 
+// Same for the fallback group box, which became a form row on the Translation
+// page: the identifier must not come back.
+QString removedFallbackGroupObjectName()
+{
+    return QStringLiteral("fallback") + QStringLiteral("Group");
+}
+
 } // namespace
 
 class TestSettingsDialog : public QObject
@@ -521,10 +528,8 @@ private slots:
                               true);
         auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("yandexGroup"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("yandexHint"));
-        auto *mozhiGroup = dialog.findChild<QGroupBox *>(QStringLiteral("mozhiGroup"));
         QVERIFY(group);
         QVERIFY(hint);
-        QVERIFY(mozhiGroup);
 
         QCOMPARE(group->title(), QStringLiteral("Yandex"));
         QVERIFY(!group->isHidden());
@@ -537,11 +542,6 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("several requests")));
         QVERIFY(hint->text().contains(QStringLiteral("third party")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
-
-        const QLayout *servicesLayout = group->parentWidget()->layout();
-        QVERIFY(servicesLayout);
-        QVERIFY(servicesLayout->indexOf(mozhiGroup) >= 0);
-        QVERIFY(servicesLayout->indexOf(mozhiGroup) < servicesLayout->indexOf(group));
     }
 
     void bingGroup()
@@ -552,10 +552,8 @@ private slots:
                               true);
         auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("bingGroup"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("bingHint"));
-        auto *yandexGroup = dialog.findChild<QGroupBox *>(QStringLiteral("yandexGroup"));
         QVERIFY(group);
         QVERIFY(hint);
-        QVERIFY(yandexGroup);
 
         QCOMPARE(group->title(), QStringLiteral("Bing"));
         QVERIFY(!group->isHidden());
@@ -568,11 +566,6 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("several requests")));
         QVERIFY(hint->text().contains(QStringLiteral("third party")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
-
-        const QLayout *servicesLayout = group->parentWidget()->layout();
-        QVERIFY(servicesLayout);
-        QVERIFY(servicesLayout->indexOf(yandexGroup) >= 0);
-        QVERIFY(servicesLayout->indexOf(yandexGroup) < servicesLayout->indexOf(group));
     }
 
     void reversoGroup()
@@ -583,10 +576,8 @@ private slots:
                               true);
         auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("reversoGroup"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("reversoHint"));
-        auto *bingGroup = dialog.findChild<QGroupBox *>(QStringLiteral("bingGroup"));
         QVERIFY(group);
         QVERIFY(hint);
-        QVERIFY(bingGroup);
 
         QCOMPARE(group->title(), QStringLiteral("Reverso"));
         QVERIFY(!group->isHidden());
@@ -601,41 +592,62 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("English")));
         QVERIFY(hint->text().contains(QStringLiteral("source language")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
-
-        const QLayout *servicesLayout = group->parentWidget()->layout();
-        QVERIFY(servicesLayout);
-        QVERIFY(servicesLayout->indexOf(bingGroup) >= 0);
-        QVERIFY(servicesLayout->indexOf(bingGroup) < servicesLayout->indexOf(group));
     }
 
-    void fallbackGroup()
+    void fallbackRowOnTranslationPage()
     {
         const QList<QPair<QString, QString>> services = {
+            {QStringLiteral("yandex-web"), QStringLiteral("Yandex")},
+            {QStringLiteral("bing-web"), QStringLiteral("Bing")},
             {QStringLiteral("mymemory"), QStringLiteral("MyMemory")},
             {QStringLiteral("mozhi"), QStringLiteral("Mozhi")},
+            {QStringLiteral("reverso"), QStringLiteral("Reverso")},
         };
 
         SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
                               {QStringLiteral("de"), QStringLiteral("en"),
                                QStringLiteral("ru")},
                               true, services);
-        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("fallbackGroup"));
+        QVERIFY(!dialog.findChild<QGroupBox *>(removedFallbackGroupObjectName()));
         auto *combo = dialog.findChild<QComboBox *>(QStringLiteral("fallbackService"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("fallbackHint"));
-        auto *myMemoryGroup = dialog.findChild<QGroupBox *>(QStringLiteral("mymemoryGroup"));
-        QVERIFY(group);
         QVERIFY(combo);
         QVERIFY(hint);
-        QVERIFY(myMemoryGroup);
 
-        QCOMPARE(group->title(), QStringLiteral("Fallback service"));
-        QCOMPARE(combo->count(), 3);
+        // A fallback is a translation behaviour, so the row lives on the
+        // Translation page, not on Services.
+        auto *translationPage =
+            dialog.findChild<LanguageComboBox *>(QStringLiteral("sourceLanguage"))
+                ->parentWidget();
+        auto *servicesPage =
+            dialog.findChild<QScrollArea *>(QStringLiteral("servicesScroll"))->parentWidget();
+        QVERIFY(translationPage);
+        QVERIFY(servicesPage);
+        QVERIFY(translationPage->isAncestorOf(combo));
+        QVERIFY(translationPage->isAncestorOf(hint));
+        QVERIFY(!servicesPage->isAncestorOf(combo));
+        QVERIFY(!servicesPage->isAncestorOf(hint));
+
+        bool labelFound = false;
+        for (const QLabel *label : translationPage->findChildren<QLabel *>()) {
+            if (label->text() == QStringLiteral("Fallback service:"))
+                labelFound = true;
+        }
+        QVERIFY(labelFound);
+
+        QCOMPARE(combo->count(), 6);
         QCOMPARE(combo->itemText(0), QStringLiteral("None"));
         QCOMPARE(combo->itemData(0).toString(), QString());
-        QCOMPARE(combo->itemText(1), QStringLiteral("MyMemory"));
-        QCOMPARE(combo->itemData(1).toString(), QStringLiteral("mymemory"));
-        QCOMPARE(combo->itemText(2), QStringLiteral("Mozhi"));
-        QCOMPARE(combo->itemData(2).toString(), QStringLiteral("mozhi"));
+        QCOMPARE(combo->itemText(1), QStringLiteral("Yandex"));
+        QCOMPARE(combo->itemData(1).toString(), QStringLiteral("yandex-web"));
+        QCOMPARE(combo->itemText(2), QStringLiteral("Bing"));
+        QCOMPARE(combo->itemData(2).toString(), QStringLiteral("bing-web"));
+        QCOMPARE(combo->itemText(3), QStringLiteral("MyMemory"));
+        QCOMPARE(combo->itemData(3).toString(), QStringLiteral("mymemory"));
+        QCOMPARE(combo->itemText(4), QStringLiteral("Mozhi"));
+        QCOMPARE(combo->itemData(4).toString(), QStringLiteral("mozhi"));
+        QCOMPARE(combo->itemText(5), QStringLiteral("Reverso"));
+        QCOMPARE(combo->itemData(5).toString(), QStringLiteral("reverso"));
         QCOMPARE(combo->currentIndex(), 0);
         QCOMPARE(dialog.settings().translation.fallbackService, QString());
 
@@ -648,17 +660,10 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("None")));
         QVERIFY(hint->text().contains(QStringLiteral("third party")));
 
-        // The fallback stays on the Services page and precedes the
-        // per-service groups.
-        const QLayout *servicesLayout = group->parentWidget()->layout();
-        QVERIFY(servicesLayout);
-        QVERIFY(servicesLayout->indexOf(group) >= 0);
-        QVERIFY(servicesLayout->indexOf(group) < servicesLayout->indexOf(myMemoryGroup));
-
         QVERIFY(combo->isEnabled());
 
-        combo->setCurrentIndex(2);
-        QCOMPARE(combo->currentIndex(), 2);
+        combo->setCurrentIndex(4);
+        QCOMPARE(combo->currentIndex(), 4);
         QCOMPARE(dialog.settings().translation.fallbackService, QStringLiteral("mozhi"));
 
         AppSettings remembered;
@@ -669,7 +674,7 @@ private slots:
         auto *rememberedCombo =
             rememberedDialog.findChild<QComboBox *>(QStringLiteral("fallbackService"));
         QVERIFY(rememberedCombo);
-        QCOMPARE(rememberedCombo->currentIndex(), 2);
+        QCOMPARE(rememberedCombo->currentIndex(), 4);
         QVERIFY(rememberedCombo->isEnabled());
         QCOMPARE(rememberedDialog.settings().translation.fallbackService,
                  QStringLiteral("mozhi"));
@@ -684,6 +689,34 @@ private slots:
         QVERIFY(unknownCombo);
         QCOMPARE(unknownCombo->currentIndex(), 0);
         QCOMPARE(unknownDialog.settings().translation.fallbackService, QString());
+    }
+
+    void providerOrder()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *scroll = dialog.findChild<QScrollArea *>(QStringLiteral("servicesScroll"));
+        QVERIFY(scroll);
+        QVERIFY(scroll->widget());
+        const QLayout *layout = scroll->widget()->layout();
+        QVERIFY(layout);
+
+        const QStringList names = {
+            QStringLiteral("googleGroup"), QStringLiteral("yandexGroup"),
+            QStringLiteral("bingGroup"),   QStringLiteral("deepLGroup"),
+            QStringLiteral("llmGroup"),    QStringLiteral("mymemoryGroup"),
+            QStringLiteral("mozhiGroup"),  QStringLiteral("reversoGroup"),
+        };
+        int previous = -1;
+        for (const QString &name : names) {
+            auto *group = dialog.findChild<QGroupBox *>(name);
+            QVERIFY2(group, qPrintable(name));
+            const int index = layout->indexOf(group);
+            QVERIFY2(index >= 0, qPrintable(name));
+            QVERIFY2(index > previous, qPrintable(name));
+            previous = index;
+        }
+        QVERIFY(!dialog.findChild<QGroupBox *>(removedFallbackGroupObjectName()));
     }
 
     void llmModels()

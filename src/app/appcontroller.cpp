@@ -245,29 +245,32 @@ void AppController::createTranslation()
     m_translations->setSecondaryLanguage(settings.translation.secondaryLang);
     m_translations->setFallbackService(settings.translation.fallbackService);
 
+    // Provider order: keep in sync with the Services page and fallbackServiceIds().
+    // The main-window and tray pickers follow this order through
+    // updateServiceSelectors(), which iterates the registered services.
     m_google = new GoogleTranslateService(m_network);
+    m_yandexWeb = new YandexWebService(m_network);
+    m_bingWeb = new BingWebService(m_network);
     m_deepl = new DeepLService(m_network);
     m_llm = new OpenAiCompatibleService(m_network);
     m_mymemory = new MyMemoryService(m_network);
     m_mozhi = new MozhiService(m_network);
-    m_yandexWeb = new YandexWebService(m_network);
-    m_bingWeb = new BingWebService(m_network);
     m_reverso = new ReversoService(m_network);
     m_google->applySettings(settings);
+    m_yandexWeb->applySettings(settings);
+    m_bingWeb->applySettings(settings);
     m_deepl->applySettings(settings);
     m_llm->applySettings(settings);
     m_mymemory->applySettings(settings);
     m_mozhi->applySettings(settings);
-    m_yandexWeb->applySettings(settings);
-    m_bingWeb->applySettings(settings);
     m_reverso->applySettings(settings);
     m_translations->registerService(m_google);
+    m_translations->registerService(m_yandexWeb);
+    m_translations->registerService(m_bingWeb);
     m_translations->registerService(m_deepl);
     m_translations->registerService(m_llm);
     m_translations->registerService(m_mymemory);
     m_translations->registerService(m_mozhi);
-    m_translations->registerService(m_yandexWeb);
-    m_translations->registerService(m_bingWeb);
     m_translations->registerService(m_reverso);
 
     if (m_translations->service(settings.translation.service))

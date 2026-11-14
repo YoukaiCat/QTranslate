@@ -5,91 +5,91 @@
     <name>AppController</name>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="176"/>
-        <location filename="../src/app/appcontroller.cpp" line="720"/>
+        <location filename="../src/app/appcontroller.cpp" line="723"/>
         <source>Autostart</source>
         <translation>自動起動</translation>
     </message>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="177"/>
-        <location filename="../src/app/appcontroller.cpp" line="721"/>
+        <location filename="../src/app/appcontroller.cpp" line="724"/>
         <source>Could not update the autostart entry.</source>
         <translation>自動開始エントリを更新できませんでした。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="349"/>
+        <location filename="../src/app/appcontroller.cpp" line="352"/>
         <source>Hotkey unavailable</source>
         <translation>ホットキーは使用できません</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="350"/>
+        <location filename="../src/app/appcontroller.cpp" line="353"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 はすでに別のプログラムによって使用されています。そのプログラムを閉じるか、設定で別の組み合わせを選択してください。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="413"/>
+        <location filename="../src/app/appcontroller.cpp" line="416"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="774"/>
+        <location filename="../src/app/appcontroller.cpp" line="777"/>
         <source>DeepL is not available.</source>
         <translation>DeepLは使用できません。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="789"/>
+        <location filename="../src/app/appcontroller.cpp" line="792"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI 互換プロバイダーを利用できません。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="833"/>
+        <location filename="../src/app/appcontroller.cpp" line="836"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>システムキーリングが利用できないため、シークレットはお使いのユーザーだけが読めるファイルに暗号化されずに保存されます。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1036"/>
-        <location filename="../src/app/appcontroller.cpp" line="1120"/>
+        <location filename="../src/app/appcontroller.cpp" line="1039"/>
+        <location filename="../src/app/appcontroller.cpp" line="1123"/>
         <source>Nothing is selected.</source>
         <translation>何も選択されていません。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1078"/>
+        <location filename="../src/app/appcontroller.cpp" line="1081"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>アクティブなウィンドウが変更されました。翻訳がクリップボードにコピーされました。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1182"/>
+        <location filename="../src/app/appcontroller.cpp" line="1185"/>
         <source>Could not paste automatically; the corrected text is on the clipboard.</source>
         <translation>自動的に貼り付けることができませんでした。修正後のテキストはクリップボードにあります。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1189"/>
+        <location filename="../src/app/appcontroller.cpp" line="1192"/>
         <source>The active window changed; the corrected text was copied to the clipboard.</source>
         <translation>アクティブなウィンドウが変更されました。修正後のテキストがクリップボードにコピーされました。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1202"/>
+        <location filename="../src/app/appcontroller.cpp" line="1205"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>修正後のテキストをクリップボードにコピーしました</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1280"/>
         <location filename="../src/app/appcontroller.cpp" line="1283"/>
+        <location filename="../src/app/appcontroller.cpp" line="1286"/>
         <source>Check the selection</source>
         <translation>選択範囲をチェック</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1356"/>
+        <location filename="../src/app/appcontroller.cpp" line="1359"/>
         <source>System tray unavailable</source>
         <translation>システムトレイを利用できません</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1357"/>
+        <location filename="../src/app/appcontroller.cpp" line="1360"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>システムトレイを利用できないため、アプリケーションはバックグラウンドに留まることができません。ウィンドウを閉じるとアプリケーションが終了します。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1069"/>
-        <location filename="../src/app/appcontroller.cpp" line="1314"/>
+        <location filename="../src/app/appcontroller.cpp" line="1072"/>
+        <location filename="../src/app/appcontroller.cpp" line="1317"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>自動的に貼り付けることができませんでした。翻訳はクリップボードにあります。</translation>
     </message>
@@ -104,8 +104,8 @@
         <translation>グローバルホットキーには GlobalShortcuts ポータルが必要です。このデスクトップが提供していない場合は、Ctrl+C で選択したテキストをコピーし、CLI コマンドまたはデスクトップショートカットを使用してください。その場での置き換えでは、貼り付けの代わりに翻訳がクリップボードにコピーされます。</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1338"/>
         <location filename="../src/app/appcontroller.cpp" line="1341"/>
+        <location filename="../src/app/appcontroller.cpp" line="1344"/>
         <source>Translate and replace</source>
         <translation>翻訳して置き換える</translation>
     </message>
@@ -1372,102 +1372,102 @@
         <translation>自動翻訳の遅延:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="176"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="190"/>
         <source>The additional language is used automatically when the detected text is already in the primary language.</source>
         <translation>検出されたテキストがすでに主言語である場合、追加の言語が自動的に使用されます。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="184"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="198"/>
         <source>General</source>
         <translation>一般的な</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="185"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="199"/>
         <source>Hotkeys</source>
         <translation>ホットキー</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="186"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="200"/>
         <source>Translation</source>
         <translation>翻訳</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="199"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="214"/>
         <source>Google Translate</source>
         <translation>Google 翻訳</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="203"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="219"/>
         <source>Free endpoint (no key)</source>
         <translation>無料のエンドポイント (キーなし)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="204"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="220"/>
         <source>Cloud Translation API (key required)</source>
         <translation>クラウド翻訳 API (キーが必要)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="209"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="225"/>
         <source>Google Cloud API key</source>
         <translation>Google クラウド API キー</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="210"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="247"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="226"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="292"/>
         <source>Mode:</source>
         <translation>モード：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="211"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="248"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="287"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="227"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="293"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="334"/>
         <source>API key:</source>
         <translation>API キー：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="213"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="229"/>
         <source>The free mode uses the public endpoint and needs no key. The Cloud API requires a key with the Translation API enabled.</source>
         <translation>無料モードではパブリック エンドポイントを使用するため、キーは必要ありません。クラウド API には、変換 API が有効になっているキーが必要です。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="221"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="265"/>
         <source>DeepL</source>
         <translation>DeepL</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="225"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="270"/>
         <source>API (key required)</source>
         <translation>API（キーが必要）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="226"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="271"/>
         <source>Free web (unofficial, no key)</source>
         <translation>無料ウェブ版（非公式、キー不要）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="230"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="275"/>
         <source>DeepL API key (ends with :fx for Free)</source>
         <translation>DeepL API キー (無料の場合は :fx で終わる)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="235"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="280"/>
         <source>Check key</source>
         <translation>キーを確認</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="249"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="294"/>
         <source>English target:</source>
         <translation>英語の目標:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="257"/>
         <location filename="../src/ui/settingsdialog.cpp" line="302"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="349"/>
         <location filename="../src/ui/settingsdialog.cpp" line="620"/>
         <source>Checking…</source>
         <translation>チェック中…</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="242"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="287"/>
         <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
         <translation>API キーなしで利用できます。この非公式エンドポイントは停止したり、レート制限やリクエストのブロックを行う場合があります。テキストは DeepL に送信されます。</translation>
     </message>
@@ -1482,82 +1482,77 @@
         <translation>別のアプリケーションで選択範囲をチェックします。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="262"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="308"/>
         <source>OpenAI-compatible provider</source>
         <translation>OpenAI 互換プロバイダー</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="270"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
         <source>API key</source>
         <translation>API キー</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="278"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
         <source>Model ID, for example openai/gpt-4o-mini</source>
         <translation>モデル ID（例: openai/gpt-4o-mini）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="280"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="327"/>
         <source>Load models</source>
         <translation>モデルを読み込む</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="286"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
         <source>Server URL:</source>
         <translation>サーバー URL:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="288"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="335"/>
         <source>Model:</source>
         <translation>モデル:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="292"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
         <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key. The text is sent to the selected provider.</source>
         <translation>OpenAI 互換の Chat Completions API を使用します。既定のサーバーは OpenRouter です。URL は OpenAI、Ollama、llama.cpp、TeamRouter など、他の互換エンドポイントにも指定できます。モデルはお使いのキーで利用できる必要があります。テキストは選択したプロバイダーに送信されます。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="311"/>
-        <source>Fallback service</source>
-        <translation>フォールバックサービス</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="177"/>
         <source>None</source>
         <translation>なし</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="330"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="356"/>
         <source>MyMemory</source>
         <translation>MyMemory</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="343"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="369"/>
         <source>Mozhi</source>
         <translation>Mozhi</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="350"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="376"/>
         <source>Instance URL:</source>
         <translation>インスタンス URL:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="365"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="391"/>
         <source>Engine:</source>
         <translation>エンジン:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="373"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="399"/>
         <source>Enter a base http(s) instance URL without credentials, a query or a fragment. The default instance will be used.</source>
         <translation>認証情報、クエリ、フラグメントを含まないベースの http(s) インスタンス URL を入力してください。デフォルトのインスタンスが使用されます。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="393"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="239"/>
         <source>Yandex</source>
         <translation>Yandex</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="406"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="252"/>
         <source>Bing</source>
         <translation>Bing</translation>
     </message>
@@ -1567,27 +1562,32 @@
         <translation>Reverso</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="320"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="181"/>
         <source>When the selected service fails with no connection, a timeout, a rate limit, an exceeded quota or an invalid key, the text is sent once more to the fallback service. None turns it off. The text is sent to a third party.</source>
         <translation>選択したサービスが接続なし、タイムアウト、レート制限、クォータ超過、または無効なキーで失敗すると、テキストはフォールバックサービスにもう一度送信されます。「なし」で無効になります。テキストは第三者に送信されます。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="334"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="360"/>
         <source>MyMemory is a free translation API and needs no key. It cannot detect the source language, and long text is sent in several requests. The text is sent to a third party.</source>
         <translation>MyMemory は無料の翻訳 API で、キーは不要です。ソース言語を検出できず、長いテキストは複数のリクエストに分けて送信されます。テキストは第三者に送信されます。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="381"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="407"/>
         <source>Mozhi is a proxy to public translation engines. Instances are unofficial: they may stop working or rate-limit requests, and some engines may be disabled on an instance. A self-hosted instance&apos;s terms and stability are your responsibility. Long text is sent in several requests. The text is sent to the selected instance and engine.</source>
         <translation>Mozhi は公共の翻訳エンジンへのプロキシです。インスタンスは非公式です。停止したり、リクエストをレート制限したりする場合があり、インスタンスによっては一部のエンジンが無効になっていることがあります。セルフホストしたインスタンスの利用条件と安定性はご自身の責任です。長いテキストは複数のリクエストに分けて送信されます。テキストは選択したインスタンスとエンジンに送信されます。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="397"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="243"/>
         <source>Yandex web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests. The text is sent to a third party.</source>
         <translation>Yandex web は非公式エンドポイントで、キーは不要です。停止したり、レート制限やリクエストのブロックを行う場合があります。長いテキストは複数のリクエストに分けて送信されます。テキストは第三者に送信されます。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="410"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="187"/>
+        <source>Fallback service:</source>
+        <translation>フォールバックサービス:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="256"/>
         <source>Bing web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests. The text is sent to a third party.</source>
         <translation>Bing web は非公式エンドポイントで、キーは不要です。停止したり、レート制限やリクエストのブロックを行う場合があります。長いテキストは複数のリクエストに分けて送信されます。テキストは第三者に送信されます。</translation>
     </message>

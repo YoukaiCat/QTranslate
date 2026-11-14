@@ -130,8 +130,9 @@ Q_DECLARE_METATYPE(AppSettings)
 // instance and engine rules live in one place. They never log.
 QStringList mozhiEngineIds();
 // The settings-layer guard for translation/fallbackService: the five no-key web
-// endpoints that may be a one-hop fallback. The manager resolves the id at
-// request time and ignores an unknown or unregistered one.
+// endpoints that may be a one-hop fallback, listed in the provider order. The
+// manager resolves the id at request time and ignores an unknown or
+// unregistered one.
 QStringList fallbackServiceIds();
 // The settings-layer guard for proofreading/provider: only ids that a
 // registered service can answer are listed. proofreadingCategoryIds() is the

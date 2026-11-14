@@ -131,7 +131,6 @@ private:
     QPushButton *m_loadLlmModels = nullptr;
     QLabel *m_llmStatus = nullptr;
 
-    QGroupBox *m_fallbackGroup = nullptr;
     QComboBox *m_fallbackService = nullptr;
     QLabel *m_fallbackHint = nullptr;
 

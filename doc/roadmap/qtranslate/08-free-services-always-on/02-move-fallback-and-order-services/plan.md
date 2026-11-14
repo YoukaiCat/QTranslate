@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 detailed: true
 depends: [01-remove-free-services-gate]
 ---
@@ -210,3 +210,52 @@ Design decisions:
   moves Google, the default active service changes with it.
 - Do not touch text checking. `proofreading/allowOnlineServices` is a separate feature with a
   separate, deferred user decision.
+
+## Outcome
+
+Done. The **Fallback service** control is a `Fallback service:` form row on the Translation page,
+followed by its hint, with no group box; `m_fallbackGroup` and the `fallbackGroup` object name are
+gone, while `fallbackService` and `fallbackHint` keep their names and behaviour. The providers are
+in one order everywhere: Google, Yandex, Bing, DeepL, OpenAI-compatible, MyMemory, Mozhi, Reverso in
+the Services page, in `AppController::createTranslation()` (the main-window/tray pickers follow it
+through `updateServiceSelectors()`) and in `fallbackServiceIds()` (`yandex-web`, `bing-web`,
+`mymemory`, `mozhi`, `reverso`). Google stays first, so the default active service and the
+first-request behaviour do not change. No gate, category or setting was reintroduced; the Text
+checking tab and `proofreading/allowOnlineServices` are byte-identical.
+
+- Files: `src/ui/settingsdialog.{h,cpp}`, `src/app/appcontroller.cpp`,
+  `src/core/settings.{h,cpp}`, `tests/tst_settings.cpp`, `tests/tst_settingsdialog.cpp` and the 14
+  `i18n/*.ts`. No `doc/` (apart from this roadmap entry and the map files the lead had already
+  changed), README, `AGENTS.md`, CMake, version, proofreading or `[proofreading]` change.
+- The Services diff is a whole-block move: creation, layout and keyboard focus order agree. The
+  missing `googleGroup`, `deepLGroup` and `llmGroup` object names were added for `providerOrder()`;
+  all hint strings and the other object names are byte-identical.
+- Deliberate deviation: the plan asks for `findChild<QGroupBox *>("fallbackGroup") == nullptr` and,
+  in the same `Done when`, for `rg "fallbackGroup"` to return nothing over `src` and `tests`. As in
+  `01`, the test assembles the identifier from two literals
+  (`removedFallbackGroupObjectName()`), so both hold; the test still checks the exact name at run
+  time.
+- Tests: `fallbackGroup()` became `fallbackRowOnTranslationPage()` (no group; the combo and the hint
+  are descendants of the Translation page and not of the Services page; the label, the six items in
+  order, enabled, remembered and unknown-id cases; the hint substrings). Added `providerOrder()`
+  (layout index order of all eight groups, no fallback group). The neighbour-order assertions in
+  `yandexGroup()`, `bingGroup()` and `reversoGroup()` were removed; their content checks stay.
+  `tst_settings::defaults` asserts the new `fallbackServiceIds()` order.
+- Translations: the 14 `.ts` files are at 379 messages each with 0 unfinished/empty/vanished; the
+  old group title `Fallback service` is gone, the new `Fallback service:` label is translated in
+  every file and the moved hint keeps its translations. The diff is location churn plus that one
+  message; `lupdate` quote re-escaping in ar/hi/ko/pt_BR/tr was reverted to keep it so.
+- Verification: Linux Debug and Release build with `-Wall -Wextra` and no `warning:`; both pass
+  `xvfb-run -a ctest` 45/45, with `tst_settings`, `tst_settingsdialog` and `tst_translations` green.
+  `rg` finds no `fallbackGroup`, `m_fallbackGroup`, `requiresOptIn`, `allowFreeServices` or
+  `freeServicesAllowed` in `src`/`tests`. The Translation page was checked for clipping offscreen at
+  `600x600` and on a real display: the new rows fit with a large margin.
+- Not performed: Windows Debug/Release and its 39 tests (no MSVC in this environment); CI on Qt
+  6.8.3 / `debian:trixie`; real network requests. `AppController` has no test target, so the picker
+  order is code-reviewed through `createTranslation()` and `updateServiceSelectors()`, not asserted
+  by a test.
+- Known, not fixed because it is out of scope: the provider order is a rule at two sites (the
+  Services page and the registration order), so both carry a `keep in sync` comment. The
+  pre-existing unused `m_mozhiHint` member remains; `m_fallbackService` and `m_fallbackHint` are now
+  read in `loadValues()`/`settings()` or added to the form, so the old note about them no longer
+  applies.

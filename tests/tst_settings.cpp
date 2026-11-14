@@ -120,8 +120,8 @@ private slots:
         QCOMPARE(settings.translation.autoTranslateDelayMs, 700);
         QVERIFY(settings.translation.fallbackService.isEmpty());
         QCOMPARE(fallbackServiceIds(),
-                 QStringList({QStringLiteral("mymemory"), QStringLiteral("mozhi"),
-                              QStringLiteral("yandex-web"), QStringLiteral("bing-web"),
+                 QStringList({QStringLiteral("yandex-web"), QStringLiteral("bing-web"),
+                              QStringLiteral("mymemory"), QStringLiteral("mozhi"),
                               QStringLiteral("reverso")}));
 
         QCOMPARE(settings.google.mode, QStringLiteral("free"));

@@ -307,9 +307,11 @@ QStringList mozhiEngineIds()
 
 QStringList fallbackServiceIds()
 {
+    // Provider order, restricted to the no-key web endpoints: keep in sync
+    // with the Services page and AppController::createTranslation().
     return {
-        QStringLiteral("mymemory"),   QStringLiteral("mozhi"),
         QStringLiteral("yandex-web"), QStringLiteral("bing-web"),
+        QStringLiteral("mymemory"),   QStringLiteral("mozhi"),
         QStringLiteral("reverso"),
     };
 }
