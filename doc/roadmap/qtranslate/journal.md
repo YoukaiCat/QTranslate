@@ -12,8 +12,8 @@ shows the result; the second hotkey checks and immediately replaces the selectio
 field. Final host Debug/Release 46/46 each; `.ts` 374; Windows 40 not run. Stage
 `08-free-services-always-on` remains `done` (`2650def..2ebf5ae`, docs in the closing commit).
 
-The next node is `06-llm-actions` (it needs a planner split); it was **not started** because the main
-session reached the 360k context threshold. Stages 1-3, 5, 8 and 9 are `done`; stage 4
+The next planned node after the wording cleanup is `06-llm-actions` (it needs a planner split); it was
+**not started** because the main session reached the 360k context threshold. Stages 1-3, 5, 8 and 9 are `done`; stage 4
 `04-local-offline-translation` stays `blocked` by the user's 2026-11-05 decision and is not dropped;
 stages 6-7 are `todo`. The root is `in-progress`; its `Done when` requires every stage to be done or
 dropped, so stage 4's blocked state is a deliberate exception.
@@ -28,6 +28,18 @@ Linux Debug/Release 46/46 on the host in fresh `/tmp/opencode/qtranslate-final-{
 (the old `build/linux-*` trees are stale and fail with a moc mismatch); Windows 40 (derived, not run
 locally); `.ts` is at 374. The `qtranslate-trixie` image is built. Resume with `/new`, agent `lead`,
 `@continue`; the next node is `06-llm-actions`.
+
+Decision on the provider hints (2026-11-15): the per-service hints in Settings said "The text is sent
+to a third party" only for the no-key services (Yandex, Bing, MyMemory, Reverso, the fallback row),
+and the user asked whether that is not true for every provider. It is true for every online provider
+except a self-hosted endpoint (a local OpenAI-compatible server, an own Mozhi instance, a
+self-hosted LanguageTool); the sentence is a leftover from the removed free-services gate, kept on
+purpose by `doc/free-endpoints.md` §10, and the wording is inconsistent across groups (Google has
+none, DeepL free web says "sent to DeepL", the LLM group says "selected provider", Mozhi says
+"selected instance and engine"). User decision: remove the privacy/recipient sentences from the
+settings hints everywhere and keep only the provider-specific warnings. `10-provider-hint-cleanup`
+is the current node (task, `in-progress`, detailed); it is worked before stage 6 because the user
+asked now, and `06-llm-actions` (which needs a planner split) follows it.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
@@ -318,3 +330,16 @@ has six languages and no `auto`. Next: plan and run stage 8.
   target); the enable gate is checked before the grab, so disabling the mode while a grab is already
   running can still send that one request; the three new translations are machine-made and need a
   native review. Next: stage acceptance, docs pass and the final host check.
+- 2026-11-15 — User decision on the provider hints, and the new node. The user asked why only some
+  provider groups say "The text is sent to a third party" and chose "remove it everywhere: it is
+  obvious that the text goes to a server". Removed: the recipient/privacy sentences in the
+  fallback row, Yandex, Bing, MyMemory, Reverso ("third party"), DeepL free web ("sent to DeepL"),
+  the OpenAI-compatible group ("selected provider") and Mozhi ("selected instance and engine").
+  Kept: the provider-specific warnings (unofficial endpoint, no key, rate limits, blocks, several
+  requests, source-language limits), the single global paragraph in both READMEs
+  (`README.md:315-317`, `README.ru.md:320`) and the LanguageTool public/self-hosted hint. Rejected:
+  one shared note at the top of the Services page (the user does not want the statement at all), and
+  repeating the sentence in every group. This supersedes the UI-warning part of
+  `doc/free-endpoints.md` §10 and architecture §7; the lead's documentation pass follows the code
+  task. Added root task `10-provider-hint-cleanup` and worked it before stage 6 because the user
+  asked now; the rest of the map order is unchanged.

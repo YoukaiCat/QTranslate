@@ -1261,7 +1261,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="44"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="969"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="965"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
@@ -1342,7 +1342,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="173"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="562"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="558"/>
         <source> ms</source>
         <translation> 毫秒</translation>
     </message>
@@ -1375,6 +1375,11 @@
         <location filename="../src/ui/settingsdialog.cpp" line="180"/>
         <source>Auto-translate delay:</source>
         <translation>自动翻译延迟：</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="187"/>
+        <source>When the selected service fails with no connection, a timeout, a rate limit, an exceeded quota or an invalid key, the text is sent once more to the fallback service. None turns it off.</source>
+        <translation>如果所选服务因连接失败、超时、请求频率限制、配额超限或密钥无效而出错，文本会再发送一次到备用服务。“无”会关闭此功能。</translation>
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="196"/>
@@ -1418,14 +1423,14 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="233"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="297"/>
         <source>Mode:</source>
         <translation>模式：</translation>
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="234"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="300"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="341"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="298"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
         <source>API key:</source>
         <translation>API 密钥：</translation>
     </message>
@@ -1435,46 +1440,61 @@
         <translation>免费模式使用公共端点，不需要密钥。云 API 需要启用翻译 API 的密钥。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="272"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="250"/>
+        <source>Yandex web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
+        <translation>Yandex web 是非官方端点，无需密钥。它可能停止工作、限制请求频率或阻止请求。长文本会分成多个请求发送。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="262"/>
+        <source>Bing web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
+        <translation>Bing web 是非官方端点，无需密钥。它可能停止工作、限制请求频率或阻止请求。长文本会分成多个请求发送。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="270"/>
         <source>DeepL</source>
         <translation>DeepL</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="277"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="275"/>
         <source>API (key required)</source>
         <translation>API（需要密钥）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="278"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="276"/>
         <source>Free web (unofficial, no key)</source>
         <translation>免费网页版（非官方，无需密钥）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="282"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="280"/>
         <source>DeepL API key (ends with :fx for Free)</source>
         <translation>DeepL API 密钥（以 :fx 结尾免费）</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="287"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="285"/>
         <source>Check key</source>
         <translation>检查密钥</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="301"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="292"/>
+        <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests.</source>
+        <translation>无需 API 密钥。此非官方端点可能停止工作、限制请求频率或阻止请求。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
         <source>English target:</source>
         <translation>英语目标：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="309"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="356"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="591"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="307"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="353"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
         <source>Checking…</source>
         <translation>检查…</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="294"/>
-        <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
-        <translation>无需 API 密钥。此非官方端点可能停止工作、限制请求频率或阻止请求；文本会发送至 DeepL。</translation>
+        <location filename="../src/ui/settingsdialog.cpp" line="426"/>
+        <source>Reverso is an unofficial endpoint and needs no key. It supports only English, French, German, Spanish, Italian and Russian and cannot detect the source language. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
+        <translation>Reverso 是非官方端点，无需密钥。它仅支持英语、法语、德语、西班牙语、意大利语和俄语，且无法检测源语言。它可能停止工作、限制请求频率或阻止请求。长文本会分成多个请求发送。</translation>
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="75"/>
@@ -1482,39 +1502,34 @@
         <translation>Windows 启动时启动 %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="315"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="313"/>
         <source>OpenAI-compatible provider</source>
         <translation>OpenAI 兼容提供程序</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="324"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="322"/>
         <source>API key</source>
         <translation>API 密钥</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="332"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="330"/>
         <source>Model ID, for example openai/gpt-4o-mini</source>
         <translation>模型 ID，例如 openai/gpt-4o-mini</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="334"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="332"/>
         <source>Load models</source>
         <translation>加载模型</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="340"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="338"/>
         <source>Server URL:</source>
         <translation>服务器 URL：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="342"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="340"/>
         <source>Model:</source>
         <translation>模型：</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="346"/>
-        <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key. The text is sent to the selected provider.</source>
-        <translation>使用与 OpenAI 兼容的 Chat Completions API。默认服务器为 OpenRouter；URL 可指向其他兼容端点，例如 OpenAI、Ollama、llama.cpp 或 TeamRouter。模型必须可用于你的密钥。文本将发送给所选提供程序。</translation>
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="183"/>
@@ -1522,27 +1537,37 @@
         <translation>无</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="363"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="344"/>
+        <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key.</source>
+        <translation>使用与 OpenAI 兼容的 Chat Completions API。默认服务器为 OpenRouter；URL 可指向其他兼容端点，例如 OpenAI、Ollama、llama.cpp 或 TeamRouter。模型必须可用于你的密钥。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="360"/>
         <source>MyMemory</source>
         <translation>MyMemory</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="376"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="364"/>
+        <source>MyMemory is a free translation API and needs no key. It cannot detect the source language, and long text is sent in several requests.</source>
+        <translation>MyMemory 是免费的翻译 API，无需密钥。它无法检测源语言，长文本会分成多个请求发送。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="372"/>
         <source>Mozhi</source>
         <translation>Mozhi</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="383"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="379"/>
         <source>Instance URL:</source>
         <translation>实例 URL：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="398"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="394"/>
         <source>Engine:</source>
         <translation>引擎：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="406"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="402"/>
         <source>Enter a base http(s) instance URL without credentials, a query or a fragment. The default instance will be used.</source>
         <translation>请输入不含凭据、查询或片段的基础 http(s) 实例 URL。将使用默认实例。</translation>
     </message>
@@ -1552,34 +1577,19 @@
         <translation>Yandex</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="259"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="258"/>
         <source>Bing</source>
         <translation>Bing</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="426"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="410"/>
+        <source>Mozhi is a proxy to public translation engines. Instances are unofficial: they may stop working or rate-limit requests, and some engines may be disabled on an instance. A self-hosted instance&apos;s terms and stability are your responsibility. Long text is sent in several requests.</source>
+        <translation>Mozhi 是公共翻译引擎的代理。实例并非官方提供：它们可能停止工作或限制请求频率，某些引擎可能在实例上被禁用。自托管实例的条款和稳定性由您负责。长文本会分成多个请求发送。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="422"/>
         <source>Reverso</source>
         <translation>Reverso</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="187"/>
-        <source>When the selected service fails with no connection, a timeout, a rate limit, an exceeded quota or an invalid key, the text is sent once more to the fallback service. None turns it off. The text is sent to a third party.</source>
-        <translation>如果所选服务因连接失败、超时、请求频率限制、配额超限或密钥无效而出错，文本会再发送一次到备用服务。“无”会关闭此功能。文本会发送给第三方。</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="367"/>
-        <source>MyMemory is a free translation API and needs no key. It cannot detect the source language, and long text is sent in several requests. The text is sent to a third party.</source>
-        <translation>MyMemory 是免费的翻译 API，无需密钥。它无法检测源语言，长文本会分成多个请求发送。文本会发送给第三方。</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="414"/>
-        <source>Mozhi is a proxy to public translation engines. Instances are unofficial: they may stop working or rate-limit requests, and some engines may be disabled on an instance. A self-hosted instance&apos;s terms and stability are your responsibility. Long text is sent in several requests. The text is sent to the selected instance and engine.</source>
-        <translation>Mozhi 是公共翻译引擎的代理。实例并非官方提供：它们可能停止工作或限制请求频率，某些引擎可能在实例上被禁用。自托管实例的条款和稳定性由您负责。长文本会分成多个请求发送。文本会发送至所选的实例和引擎。</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="250"/>
-        <source>Yandex web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests. The text is sent to a third party.</source>
-        <translation>Yandex web 是非官方端点，无需密钥。它可能停止工作、限制请求频率或阻止请求。长文本会分成多个请求发送。文本会发送给第三方。</translation>
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="131"/>
@@ -1597,238 +1607,228 @@
         <translation>备用服务：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="263"/>
-        <source>Bing web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests. The text is sent to a third party.</source>
-        <translation>Bing web 是非官方端点，无需密钥。它可能停止工作、限制请求频率或阻止请求。长文本会分成多个请求发送。文本会发送给第三方。</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="430"/>
-        <source>Reverso is an unofficial endpoint and needs no key. It supports only English, French, German, Spanish, Italian and Russian and cannot detect the source language. It may stop working, apply rate limits or block requests. Long text is sent in several requests. The text is sent to a third party.</source>
-        <translation>Reverso 是非官方端点，无需密钥。它仅支持英语、法语、德语、西班牙语、意大利语和俄语，且无法检测源语言。它可能停止工作、限制请求频率或阻止请求。长文本会分成多个请求发送。文本会发送给第三方。</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="443"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="439"/>
         <source>Services</source>
         <translation>服务</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="449"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="445"/>
         <source>Enable text checking</source>
         <translation>启用文本检查</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="452"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="448"/>
         <source>Finds spelling, grammar, and punctuation errors in a separate mode and does not change translation settings.</source>
         <translation>在独立模式下查找拼写、语法和标点错误，不更改翻译设置。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="459"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="455"/>
         <source>Provider</source>
         <translation>提供商</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="475"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="471"/>
         <source>Leave empty to use the public LanguageTool endpoint. A self-hosted server keeps the text on your machine; the public service has rate limits and sees the checked text.</source>
         <translation>留空以使用公共 LanguageTool 端点。自托管服务器会将文本保留在您的机器上；公共服务有速率限制，并且会看到被检查的文本。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="481"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="956"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="477"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="952"/>
         <source>Enter a valid http(s) LanguageTool URL, or leave the field empty for the public endpoint.</source>
         <translation>请输入有效的 http(s) LanguageTool URL，或留空以使用公共端点。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="488"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="484"/>
         <source>Provider:</source>
         <translation>提供商：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="489"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="485"/>
         <source>Checking language:</source>
         <translation>检查语言：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="490"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="486"/>
         <source>LanguageTool URL:</source>
         <translation>LanguageTool URL：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="495"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="491"/>
         <source>Issues</source>
         <translation>问题</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="498"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="494"/>
         <source>Categories:</source>
         <translation>类别：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="496"/>
         <source>Spelling</source>
         <translation>拼写</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="502"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="498"/>
         <source>Grammar</source>
         <translation>语法</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="504"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
         <source>Punctuation</source>
         <translation>标点</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="506"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="502"/>
         <source>Style</source>
         <translation>风格</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="518"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
         <source>Text checking</source>
         <translation>文本检查</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="535"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
         <source>No proxy</source>
         <translation>无代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="536"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="532"/>
         <source>System proxy</source>
         <translation>系统代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="537"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="533"/>
         <source>Manual proxy</source>
         <translation>手动代理</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="540"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="536"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="541"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="537"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="544"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="540"/>
         <source>Proxy host</source>
         <translation>代理主机</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="548"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="544"/>
         <source>Not set</source>
         <translation>未设置</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="549"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
         <source>The proxy requires authentication</source>
         <translation>代理需要身份验证</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="553"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="549"/>
         <source>User name</source>
         <translation>用户名</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="557"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="553"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="563"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="559"/>
         <source>Test connection</source>
         <translation>测试连接</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="570"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="566"/>
         <source>Proxy mode:</source>
         <translation>代理模式：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
         <source>Proxy type:</source>
         <translation>代理类型：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="572"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="568"/>
         <source>Host:</source>
         <translation>主持人：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
         <source>Port:</source>
         <translation>港口：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="575"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
         <source>User name:</source>
         <translation>用户名：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="576"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="572"/>
         <source>Password:</source>
         <translation>密码：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="577"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
         <source>Request timeout:</source>
         <translation>请求超时：</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="582"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="578"/>
         <source>Network</source>
         <translation>网络</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="835"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="831"/>
         <source>Effective instance: %1</source>
         <translation>实际实例：%1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="895"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="891"/>
         <source>Translate in a popup</source>
         <translation>在弹出窗口中翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="897"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="893"/>
         <source>Replace the selected text with the translation</source>
         <translation>用翻译替换所选文本</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="898"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="894"/>
         <source>Translate in the main window</source>
         <translation>在主窗口中翻译</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="899"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="895"/>
         <source>Show the main window</source>
         <translation>显示主窗口</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="909"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="905"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>“%1”使用多个组合键。全局热键支持单一组合。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="917"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="913"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>“%1”不能用作全局热键。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="930"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="926"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>同一组合键被分配多次：%1。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="941"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="937"/>
         <source>The primary and additional languages must differ.</source>
         <translation>主要语言和附加语言必须不同。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="948"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="944"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>输入代理主机和端口，或选择其他代理模式。</translation>
     </message>

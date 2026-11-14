@@ -186,7 +186,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_fallbackHint = new QLabel(
         tr("When the selected service fails with no connection, a timeout, a rate limit, an "
            "exceeded quota or an invalid key, the text is sent once more to the fallback "
-           "service. None turns it off. The text is sent to a third party."),
+           "service. None turns it off."),
         translationPage);
     m_fallbackHint->setObjectName(QStringLiteral("fallbackHint"));
     m_fallbackHint->setWordWrap(true);
@@ -248,8 +248,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     auto *yandexLayout = new QVBoxLayout(yandexGroup);
     auto *yandexHint = new QLabel(
         tr("Yandex web is an unofficial endpoint and needs no key. It may stop working, apply "
-           "rate limits or block requests. Long text is sent in several requests. The text is "
-           "sent to a third party."),
+           "rate limits or block requests. Long text is sent in several requests."),
         yandexGroup);
     yandexHint->setObjectName(QStringLiteral("yandexHint"));
     yandexHint->setWordWrap(true);
@@ -261,8 +260,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     auto *bingLayout = new QVBoxLayout(bingGroup);
     auto *bingHint = new QLabel(
         tr("Bing web is an unofficial endpoint and needs no key. It may stop working, apply "
-           "rate limits or block requests. Long text is sent in several requests. The text is "
-           "sent to a third party."),
+           "rate limits or block requests. Long text is sent in several requests."),
         bingGroup);
     bingHint->setObjectName(QStringLiteral("bingHint"));
     bingHint->setWordWrap(true);
@@ -292,7 +290,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_deepLKeyStatus->setTextInteractionFlags(Qt::TextSelectableByMouse);
     m_deepLWebHint = new QLabel(
         tr("Available without an API key. This unofficial endpoint may stop working, apply "
-           "rate limits or block requests, and the text is sent to DeepL."),
+           "rate limits or block requests."),
         deepLGroup);
     m_deepLWebHint->setObjectName(QStringLiteral("deepLWebHint"));
     m_deepLWebHint->setWordWrap(true);
@@ -345,8 +343,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     auto *llmHint = new QLabel(
         tr("Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; "
            "the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp "
-           "or TeamRouter. The model must be available to your key. The text is sent to the "
-           "selected provider."),
+           "or TeamRouter. The model must be available to your key."),
         llmGroup);
     llmHint->setObjectName(QStringLiteral("llmHint"));
     llmHint->setWordWrap(true);
@@ -365,8 +362,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     auto *myMemoryLayout = new QVBoxLayout(myMemoryGroup);
     auto *myMemoryHint = new QLabel(
         tr("MyMemory is a free translation API and needs no key. It cannot detect the source "
-           "language, and long text is sent in several requests. The text is sent to a third "
-           "party."),
+           "language, and long text is sent in several requests."),
         myMemoryGroup);
     myMemoryHint->setObjectName(QStringLiteral("mymemoryHint"));
     myMemoryHint->setWordWrap(true);
@@ -414,7 +410,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
         tr("Mozhi is a proxy to public translation engines. Instances are unofficial: they may "
            "stop working or rate-limit requests, and some engines may be disabled on an instance. "
            "A self-hosted instance's terms and stability are your responsibility. Long text is "
-           "sent in several requests. The text is sent to the selected instance and engine."),
+           "sent in several requests."),
         mozhiGroup);
     m_mozhiHint->setObjectName(QStringLiteral("mozhiHint"));
     m_mozhiHint->setWordWrap(true);
@@ -430,7 +426,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
         tr("Reverso is an unofficial endpoint and needs no key. It supports only English, French, "
            "German, Spanish, Italian and Russian and cannot detect the source language. It may "
            "stop working, apply rate limits or block requests. Long text is sent in several "
-           "requests. The text is sent to a third party."),
+           "requests."),
         reversoGroup);
     reversoHint->setObjectName(QStringLiteral("reversoHint"));
     reversoHint->setWordWrap(true);

@@ -462,7 +462,8 @@ private slots:
         QVERIFY(hint->wordWrap());
         QVERIFY(hint->text().contains(QStringLiteral("no key")));
         QVERIFY(hint->text().contains(QStringLiteral("source language")));
-        QVERIFY(hint->text().contains(QStringLiteral("third party")));
+        QVERIFY(hint->text().contains(QStringLiteral("several requests")));
+        QVERIFY(!hint->text().contains(QStringLiteral("third party")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
     }
 
@@ -503,7 +504,7 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("rate-limit")));
         QVERIFY(hint->text().contains(QStringLiteral("self-hosted")));
         QVERIFY(hint->text().contains(QStringLiteral("several requests")));
-        QVERIFY(hint->text().contains(QStringLiteral("selected instance")));
+        QVERIFY(!hint->text().contains(QStringLiteral("selected instance")));
         QVERIFY(warning->text().contains(QStringLiteral("http(s)")));
         QVERIFY(warning->text().contains(QStringLiteral("default instance")));
 
@@ -604,7 +605,7 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("rate")));
         QVERIFY(hint->text().contains(QStringLiteral("block")));
         QVERIFY(hint->text().contains(QStringLiteral("several requests")));
-        QVERIFY(hint->text().contains(QStringLiteral("third party")));
+        QVERIFY(!hint->text().contains(QStringLiteral("third party")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
     }
 
@@ -628,7 +629,7 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("rate")));
         QVERIFY(hint->text().contains(QStringLiteral("block")));
         QVERIFY(hint->text().contains(QStringLiteral("several requests")));
-        QVERIFY(hint->text().contains(QStringLiteral("third party")));
+        QVERIFY(!hint->text().contains(QStringLiteral("third party")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
     }
 
@@ -652,7 +653,7 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("rate")));
         QVERIFY(hint->text().contains(QStringLiteral("block")));
         QVERIFY(hint->text().contains(QStringLiteral("several requests")));
-        QVERIFY(hint->text().contains(QStringLiteral("third party")));
+        QVERIFY(!hint->text().contains(QStringLiteral("third party")));
         QVERIFY(hint->text().contains(QStringLiteral("English")));
         QVERIFY(hint->text().contains(QStringLiteral("source language")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
@@ -722,7 +723,7 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("quota")));
         QVERIFY(hint->text().contains(QStringLiteral("invalid key")));
         QVERIFY(hint->text().contains(QStringLiteral("None")));
-        QVERIFY(hint->text().contains(QStringLiteral("third party")));
+        QVERIFY(!hint->text().contains(QStringLiteral("third party")));
 
         QVERIFY(combo->isEnabled());
 
@@ -836,6 +837,20 @@ private slots:
                                       Qt::CaseInsensitive));
         QVERIFY(hint->text().contains(QStringLiteral("unofficial"),
                                       Qt::CaseInsensitive));
+        QVERIFY(!hint->text().contains(QStringLiteral("sent to DeepL")));
+    }
+
+    void llmHint()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("llmHint"));
+        QVERIFY(hint);
+        QVERIFY(hint->wordWrap());
+        QVERIFY(hint->text().contains(QStringLiteral("OpenAI-compatible")));
+        QVERIFY(hint->text().contains(QStringLiteral("OpenRouter")));
+        QVERIFY(hint->text().contains(QStringLiteral("your key")));
+        QVERIFY(!hint->text().contains(QStringLiteral("selected provider")));
     }
 
     void secretStorageHint()
