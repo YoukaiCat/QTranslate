@@ -29,17 +29,15 @@ Linux Debug/Release 46/46 on the host in fresh `/tmp/opencode/qtranslate-final-{
 locally); `.ts` is at 374. The `qtranslate-trixie` image is built. Resume with `/new`, agent `lead`,
 `@continue`; the next node is `06-llm-actions`.
 
-Decision on the provider hints (2026-11-15): the per-service hints in Settings said "The text is sent
-to a third party" only for the no-key services (Yandex, Bing, MyMemory, Reverso, the fallback row),
-and the user asked whether that is not true for every provider. It is true for every online provider
-except a self-hosted endpoint (a local OpenAI-compatible server, an own Mozhi instance, a
-self-hosted LanguageTool); the sentence is a leftover from the removed free-services gate, kept on
-purpose by `doc/free-endpoints.md` §10, and the wording is inconsistent across groups (Google has
-none, DeepL free web says "sent to DeepL", the LLM group says "selected provider", Mozhi says
-"selected instance and engine"). User decision: remove the privacy/recipient sentences from the
-settings hints everywhere and keep only the provider-specific warnings. `10-provider-hint-cleanup`
-is the current node (task, `in-progress`, detailed); it is worked before stage 6 because the user
-asked now, and `06-llm-actions` (which needs a planner split) follows it.
+Task `10-provider-hint-cleanup` is `done` as `589dbb5`: the eight recipient/privacy sentences are
+gone from the settings hints (fallback, Yandex, Bing, DeepL free web, OpenAI-compatible, MyMemory,
+Mozhi, Reverso); the provider-specific warnings stay. The 14 `.ts` sources were regenerated with
+Qt 6.10 `lupdate` through `update_translations` and the 112 translations edited by hand (the Korean
+DeepL tail was rewritten for grammar); 374 messages, 0 unfinished or vanished. Host Debug/Release
+46/46 and Release in `qtranslate-trixie` 46/46, 0 warnings; Windows 40 not performed. Documentation
+was updated in the same session: architecture §4.15/§7, `doc/free-endpoints.md` §10 and both README
+limitation lists; the single global README paragraph stays. The next node is `06-llm-actions`, which
+needs a planner split.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
@@ -343,3 +341,15 @@ has six languages and no `auto`. Next: plan and run stage 8.
   `doc/free-endpoints.md` §10 and architecture §7; the lead's documentation pass follows the code
   task. Added root task `10-provider-hint-cleanup` and worked it before stage 6 because the user
   asked now; the rest of the map order is unchanged.
+- 2026-11-15 — Task `10-provider-hint-cleanup` done as `589dbb5`. Removed the eight
+  recipient/privacy sentences from the settings hints and kept the provider-specific warnings;
+  the exact final texts and the per-language `.ts` tails are in the task plan. The 14 `.ts` sources
+  were generated with Qt 6.10 `lupdate` through `update_translations` (the Qt 5.15 `lupdate` on
+  `PATH` would have damaged them), the 112 translations were edited by hand, the Korean DeepL tail
+  was rewritten instead of trimmed, and every other message stayed byte-identical (374 messages per
+  file, 0 unfinished, 0 vanished). Tests: five `third party`/`selected instance` assertions
+  inverted, `several requests` added for MyMemory, `sent to DeepL` negative added, a new `llmHint`
+  slot. Verification: host Debug/Release 46/46 and trixie Release 46/46, 0 warnings; Windows 40 not
+  performed (no MSVC). No real problems deferred. The lead updated `doc/architecture.md` §4.15/§7,
+  `doc/free-endpoints.md` §10 and both README limitation lists; the global README paragraph stays.
+  Next node: `06-llm-actions` (needs a planner split).

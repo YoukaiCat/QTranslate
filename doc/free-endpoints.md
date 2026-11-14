@@ -310,7 +310,7 @@ different engine. The user picks one fallback service; the primary stays the pri
 ## 10. What not to do
 
 - Do not present unofficial endpoints as an official API. They are available by default, but the
-  settings hints must keep the unofficial, rate-limit, block and third-party warnings.
+  settings hints must keep the unofficial, rate-limit and block warnings.
 - Do not bypass paid quotas or publish other people's keys/cookies.
 - Do not use public Mozhi/LibreTranslate instances as the only channel without a fallback.
 - Do not copy QTranslate code without complying with MPL-2.0; write implementations yourself from

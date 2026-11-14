@@ -284,10 +284,9 @@ security policy's approval. To revoke it, run
 - Mozhi, Yandex web, Bing web and Reverso are unofficial endpoints without an API key. They may be
   rate-limited, change or stop working; MyMemory is a free no-key API with its own quota and a
   500-byte request limit. Reverso supports only English, French, German, Spanish, Italian and
-  Russian and cannot detect the source language. All of them send the text to a third party.
+  Russian and cannot detect the source language.
 - OpenRouter and other OpenAI-compatible providers need an API key and an available model. Quality,
-  speed and cost depend on the chosen model; free models have strict rate limits. The text is sent
-  to the selected provider.
+  speed and cost depend on the chosen model; free models have strict rate limits.
 - LanguageTool checking is enabled by **Settings → Text checking**; there is no separate online
   gate. The public API limits requests to about 20 per minute and 20 000 characters per request, and
   self-hosted LanguageTool is more reliable for long or frequent checks. The checked text goes to the

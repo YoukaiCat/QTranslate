@@ -1813,7 +1813,7 @@ applies the changes, "Cancel" changes nothing. Tabs:
    switching when the text is already in the primary language (old plan stage 8).
 4. **Services** — the groups are ordered Google, Yandex, Bing, DeepL, OpenAI-compatible, MyMemory,
    Mozhi, Reverso. Google: mode (free/Cloud API), key (password echo). Yandex, Bing, MyMemory, Mozhi
-   and Reverso are no-key groups with their own unofficial-endpoint, rate-limit and third-party
+   and Reverso are no-key groups with their own unofficial-endpoint, rate-limit and block
    warnings; there is no common gate group or enabling switch. DeepL: mode
    (API with a key or a free web endpoint without a key), key (password echo), English variant,
    "Check key" button with an asynchronous result (`character_count`/`character_limit` or
@@ -2128,8 +2128,10 @@ C++ exceptions are not used for flow control: errors are passed in `TranslationR
 - **Translated or checked texts, keys, and passwords are never written to the log** — only lengths, response codes, time.
 - All requests use HTTPS only; TLS errors are not ignored.
 - Secrets in the INI use DPAPI on Windows and libsecret or a `0600` fallback on Linux (§4.11).
-- In the help and when a service is selected for the first time, state that the text is sent to a third-party service
-  (Google/DeepL, and LanguageTool for the checking mode).
+- A single statement in both READMEs says that the text is sent to the selected provider and that a
+  local server keeps it on the machine; the per-provider settings hints do not repeat it (user
+  decision, 2026-11-15). The Text checking hint still explains the public versus self-hosted
+  LanguageTool endpoint.
 
 ---
 
