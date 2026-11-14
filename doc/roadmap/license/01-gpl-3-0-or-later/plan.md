@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 17dd709
 ---
 
@@ -46,8 +46,10 @@ choice was checked against the current and planned dependencies; see the root `#
   AppImage/Windows bundle carry it, the `.deb` carries `LICENSE.gz` (`dh_compress`) next to the
   GPL `copyright`, the Windows `dist`/ZIP/installer path is checked statically (no MSVC here), and
   the package gate and the 45 Linux tests still pass.
-- The native `.deb` gate is unchanged; `lintian` on the source package does not complain about the
-  copyright; the `debian` map's closed outcome is cross-referenced in its journal, not rewritten.
+- The native `.deb` gate still reports 15/15 and its `--self-test` 4/4; the allowlist admits
+  `LICENSE.gz` and both `README.Debian` names. `lintian` on the source package does not complain
+  about the copyright; the `debian` map's closed outcome is cross-referenced in its journal, not
+  rewritten.
 - No application code, tests or behavior change; no push, tag or release.
 
 ## Risks and what is needed from the user
@@ -60,3 +62,25 @@ choice was checked against the current and planned dependencies; see the root `#
 - **Windows.** The Windows build, installer and ZIP cannot be built here (no MSVC); the install
   path is verified statically and the Windows result is recorded as not performed.
 - **Release approval.** Pushing, tagging and publishing remain the user's decisions.
+
+## Outcome
+
+Accepted on 2026-11-14. Tasks: `01-license-docs-and-metadata` (`9044d7c`), `02-license-in-bundles`
+(`15df6a3`), documentation follow-up `1cc4574`; the acceptance found two minimal issues and fixed
+them in `5a48732` (a stale `package.sh` comment and the `README.Debian.gz` allowlist variant).
+
+- `LICENSE` is the verbatim GPL-3 text; `debian/copyright` is DEP-5 with `GPL-3+`; the READMEs,
+  `AGENTS.md`, `doc/architecture.md`, `doc/handoff.md` and `debian/README.Debian` state
+  GPL-3.0-or-later and link `LICENSE`.
+- `CMakeLists.txt` installs `LICENSE` at `share/doc/qtranslate`; the install tree, the Linux
+  `tar.gz`, the AppImage (static path) and the Windows `dist`/ZIP/installer (static path) carry it.
+  The `.deb` carries `usr/share/doc/qtranslate/LICENSE.gz` (`dh_compress`) next to the GPL
+  `copyright` and `changelog.gz`.
+- `verify-deb.sh` admits `LICENSE.gz` and both `README.Debian` names; it reports 15/15 and its
+  `--self-test` 4/4. The 45 Linux tests pass. `lintian` on the `.dsc` has no copyright or license
+  error (the `extra-license-file` info in the `.deb` is expected).
+- Scope: `17dd709..5a48732` changes only `LICENSE`, the live documents, `debian/copyright`,
+  `debian/README.Debian`, `CMakeLists.txt`, `verify-deb.sh`, a comment in `package.sh` and the map;
+  application code and tests are untouched. Windows and the Astra AppImage were not built (no MSVC;
+  the astra target does not build an AppImage) and are recorded as not performed. No push, tag or
+  release.

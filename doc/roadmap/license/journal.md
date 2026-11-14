@@ -2,13 +2,12 @@
 
 ## Where we left off
 
-Current node: stage `01-gpl-3-0-or-later` is `in-progress` at `17dd709`. Task
-[01-license-docs-and-metadata](01-gpl-3-0-or-later/01-license-docs-and-metadata/plan.md) is `done`
-(`9044d7c`); task [02-license-in-bundles](01-gpl-3-0-or-later/02-license-in-bundles/plan.md) is
-`done` (`15df6a3`): `CMakeLists.txt` installs `LICENSE` at `share/doc/qtranslate`, the gate admits
-`LICENSE.gz` in the `.deb`, the Astra tar.gz carries `LICENSE`, and the docs were updated in
-`1cc4574`. The stage acceptance is next; after it the root outcome and `status: done` in this map
-and `doc/roadmap/README.md`. Branch `main`. Nothing is pushed.
+The map is closed: the stage and root are `done`, the root `## Outcome` is in the closing map
+commit, and `doc/roadmap/README.md` lists `license` as `done`. The accepted tree is
+`17dd709..5a48732`; the closing commit carries this journal, the stage outcome and the root
+outcome. There is no active work on this map. The `qtranslate` map is untouched and remains
+`in-progress` at `06-llm-actions`, so the next session continues there. Nothing was pushed. Branch
+`main`.
 
 ## Journal
 
@@ -22,3 +21,12 @@ and `doc/roadmap/README.md`. Branch `main`. Nothing is pushed.
   prerequisite if code signing is pursued later. The closed `debian` map keeps its historical
   all-rights-reserved outcome; this map records the license change and the `debian` journal gets a
   one-line cross-reference.
+
+- 2026-11-14 — Stage `01-gpl-3-0-or-later` accepted and the map closed. Documentation and metadata
+  landed in `9044d7c`; the CMake install rule and the `LICENSE.gz` gate allowlist in `15df6a3`;
+  the package/bundle descriptions were updated in `1cc4574`; the acceptance fixed the stale
+  `package.sh` comment and admitted `README.Debian.gz` in `5a48732`. The acceptance re-checked
+  `LICENSE` (identical to the system GPL-3 text), `debian/copyright` (`GPL-3+`), the install tree,
+  the Astra tar.gz and `.deb`, the gate (15/15, self-test 4/4), the 45 Linux tests and `lintian`
+  (no copyright/license error); Windows and the Astra AppImage were recorded as not performed.
+  No push, tag or release.
