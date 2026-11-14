@@ -34,9 +34,6 @@ struct TranslationSettings
     QString secondaryLang;
     int maxLength = 20000;
     int autoTranslateDelayMs = 700; // 0 = off; used by the auto-translate stage
-    // Gates services whose requiresOptIn() is true: the manager refuses them
-    // while this is false.
-    bool allowFreeServices = false;
     // Empty means no fallback. One of fallbackServiceIds() otherwise.
     QString fallbackService;
 };
@@ -132,9 +129,9 @@ Q_DECLARE_METATYPE(AppSettings)
 // Pure helpers shared by SettingsStore and the Mozhi settings UI, so the
 // instance and engine rules live in one place. They never log.
 QStringList mozhiEngineIds();
-// The settings-layer guard for translation/fallbackService. It must track the
-// services registered with requiresOptIn(); the manager still ignores an
-// unknown id at request time.
+// The settings-layer guard for translation/fallbackService: the five no-key web
+// endpoints that may be a one-hop fallback. The manager resolves the id at
+// request time and ignores an unknown or unregistered one.
 QStringList fallbackServiceIds();
 // The settings-layer guard for proofreading/provider: only ids that a
 // registered service can answer are listed. proofreadingCategoryIds() is the

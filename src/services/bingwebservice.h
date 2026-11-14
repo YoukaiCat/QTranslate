@@ -11,7 +11,7 @@ class NetworkManager;
 // The unofficial Bing web endpoint (see doc/free-endpoints.md, §3). It needs
 // no key, but it is a scraped browser endpoint with no SLA: the translator page
 // supplies a short-lived token and a MUID cookie that the translate request
-// must send back. It is enabled together with the other free web services.
+// must send back.
 //
 // doc/free-endpoints.md gives no Bing-specific pause or request limit, so the
 // 1000 ms pause and the 5000 UTF-16-unit chunk are conservative named
@@ -26,7 +26,6 @@ public:
     QString id() const override;
     QString displayName() const override;
     bool isConfigured() const override;
-    bool requiresOptIn() const override;
     QStringList sourceLanguages() const override;
     QStringList targetLanguages() const override;
     void applySettings(const AppSettings &) override;

@@ -1,7 +1,5 @@
 #include "core/translationmanager.h"
 #include "core/translationservice.h"
-#include "net/networkmanager.h"
-#include "services/mymemoryservice.h"
 
 #include <QLoggingCategory>
 #include <QPointer>
@@ -53,18 +51,15 @@ private:
 class FakeService : public TranslationService
 {
 public:
-    explicit FakeService(QString id = QStringLiteral("fake"), bool configured = true,
-                         bool optIn = false)
+    explicit FakeService(QString id = QStringLiteral("fake"), bool configured = true)
         : m_id(std::move(id))
         , m_configured(configured)
-        , m_optIn(optIn)
     {
     }
 
     QString id() const override { return m_id; }
     QString displayName() const override { return m_id; }
     bool isConfigured() const override { return m_configured; }
-    bool requiresOptIn() const override { return m_optIn; }
     QStringList sourceLanguages() const override { return {QStringLiteral("en")}; }
     QStringList targetLanguages() const override { return {QStringLiteral("ru")}; }
     void applySettings(const AppSettings &) override {}
@@ -83,7 +78,6 @@ public:
 private:
     QString m_id;
     bool m_configured;
-    bool m_optIn;
 };
 
 TranslationRequest request(const QString &text)
@@ -91,7 +85,7 @@ TranslationRequest request(const QString &text)
     return {text, QStringLiteral("auto"), QStringLiteral("ru")};
 }
 
-// A configured primary and an opt-in fallback wired for the fallback tests.
+// A configured primary and a fallback wired for the fallback tests.
 struct FallbackPair
 {
     FakeService *primary = nullptr;
@@ -101,11 +95,10 @@ struct FallbackPair
 FallbackPair withFallback(TranslationManager &manager)
 {
     auto *primary = new FakeService(QStringLiteral("primary"));
-    auto *fallback = new FakeService(QStringLiteral("free"), true, true);
+    auto *fallback = new FakeService(QStringLiteral("free"));
     manager.registerService(primary);
     manager.registerService(fallback);
     manager.setFallbackService(fallback->id());
-    manager.setFreeServicesAllowed(true);
     return {primary, fallback};
 }
 
@@ -305,91 +298,23 @@ private slots:
         QCOMPARE(reply->result().serviceId, QStringLiteral("fake"));
     }
 
-    void optInServiceIsRefusedWhenDisabled()
+    void anyRegisteredServiceCanBeActive()
     {
         TranslationManager manager;
-        QVERIFY(!manager.freeServicesAllowed());
-        auto *service = new FakeService(QStringLiteral("free"), true, true);
-        manager.registerService(service);
+        auto *first = new FakeService(QStringLiteral("first"));
+        auto *second = new FakeService(QStringLiteral("second"));
+        manager.registerService(first);
+        manager.registerService(second);
+        manager.setActiveService(QStringLiteral("second"));
 
-        std::unique_ptr<TranslationReply> reply(
-            manager.translate(request(QStringLiteral("Hello")),
-                              TranslationManager::Channel::MainWindow));
-        QVERIFY(service->requests.isEmpty());
-
-        QSignalSpy finished(reply.get(), &TranslationReply::finished);
-        QVERIFY(finished.wait(1000));
-        QCOMPARE(reply->result().error, TranslationError::ServiceUnavailable);
-        QCOMPARE(reply->result().serviceId, QStringLiteral("free"));
-        QVERIFY(reply->result().errorMessage.contains(QStringLiteral("Settings")));
-
-        // The refusal is not cached: with the gate on the request goes through.
-        manager.setFreeServicesAllowed(true);
-        std::unique_ptr<TranslationReply> second(
-            manager.translate(request(QStringLiteral("Hello")),
-                              TranslationManager::Channel::MainWindow));
-        QCOMPARE(service->requests.size(), 1);
-        service->replies.first()->complete(QStringLiteral("Привет"));
-        QCOMPARE(second->result().translatedText, QStringLiteral("Привет"));
-    }
-
-    void optInServiceWorksWhenEnabled()
-    {
-        TranslationManager manager;
-        manager.setFreeServicesAllowed(true);
-        auto *service = new FakeService(QStringLiteral("free"), true, true);
-        manager.registerService(service);
-
-        auto first = std::unique_ptr<TranslationReply>(
-            manager.translate(request(QStringLiteral("Hello")),
-                              TranslationManager::Channel::MainWindow));
-        QCOMPARE(service->requests.size(), 1);
-        service->replies.first()->complete(QStringLiteral("Привет"));
-        QVERIFY(first->result().ok());
-
-        auto second = std::unique_ptr<TranslationReply>(
-            manager.translate(request(QStringLiteral("Hello")),
-                              TranslationManager::Channel::MainWindow));
-        QSignalSpy finished(second.get(), &TranslationReply::finished);
-        QVERIFY(finished.wait(1000));
-        QCOMPARE(second->result().translatedText, QStringLiteral("Привет"));
-        QCOMPARE(service->requests.size(), 1);
-    }
-
-    void gatedRealServiceIsRefused()
-    {
-        NetworkManager network;
-        TranslationManager manager;
-        QVERIFY(!manager.freeServicesAllowed());
-        auto *service = new MyMemoryService(&network);
-        manager.registerService(service);
-        manager.setActiveService(QStringLiteral("mymemory"));
-
-        std::unique_ptr<TranslationReply> reply(
-            manager.translate(request(QStringLiteral("Hello")),
-                              TranslationManager::Channel::MainWindow));
-        QSignalSpy finished(reply.get(), &TranslationReply::finished);
-        QVERIFY(finished.wait(1000));
-        QCOMPARE(reply->result().error, TranslationError::ServiceUnavailable);
-        QCOMPARE(reply->result().serviceId, QStringLiteral("mymemory"));
-        QVERIFY(reply->result().errorMessage.contains(QStringLiteral("Settings")));
-        QVERIFY(reply->result().translatedText.isEmpty());
-    }
-
-    void regularServiceIsNotAffectedByTheGate()
-    {
-        TranslationManager manager;
-        QVERIFY(!manager.freeServicesAllowed());
-        auto *service = new FakeService;
-        manager.registerService(service);
-
-        auto reply = std::unique_ptr<TranslationReply>(
-            manager.translate(request(QStringLiteral("Hello")),
-                              TranslationManager::Channel::MainWindow));
-        QCOMPARE(service->requests.size(), 1);
-        service->replies.first()->complete(QStringLiteral("Привет"));
+        auto reply = std::unique_ptr<TranslationReply>(manager.translate(
+            request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        QCOMPARE(first->requests.size(), 0);
+        QCOMPARE(second->requests.size(), 1);
+        second->replies.first()->complete(QStringLiteral("Привет"));
         QVERIFY(reply->result().ok());
         QCOMPARE(reply->result().translatedText, QStringLiteral("Привет"));
+        QCOMPARE(reply->result().serviceId, QStringLiteral("second"));
     }
 
     void maxLengthBoundary()
@@ -645,11 +570,10 @@ private slots:
     {
         TranslationManager manager;
         auto *primary = new FakeService(QStringLiteral("primary"), false);
-        auto *fallback = new FakeService(QStringLiteral("free"), true, true);
+        auto *fallback = new FakeService(QStringLiteral("free"));
         manager.registerService(primary);
         manager.registerService(fallback);
         manager.setFallbackService(QStringLiteral("free"));
-        manager.setFreeServicesAllowed(true);
 
         auto reply = std::unique_ptr<TranslationReply>(manager.translate(
             request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
@@ -677,7 +601,6 @@ private slots:
         QTest::newRow("empty") << QString();
         QTest::newRow("unregistered") << QStringLiteral("missing");
         QTest::newRow("primary itself") << QStringLiteral("primary");
-        QTest::newRow("non-opt-in service") << QStringLiteral("regular");
     }
 
     void fallbackIsIgnoredWhenInvalid()
@@ -686,13 +609,12 @@ private slots:
 
         TranslationManager manager;
         auto *primary = new FakeService(QStringLiteral("primary"));
-        auto *fallback = new FakeService(QStringLiteral("free"), true, true);
+        auto *fallback = new FakeService(QStringLiteral("free"));
         auto *regular = new FakeService(QStringLiteral("regular"));
         manager.registerService(primary);
         manager.registerService(fallback);
         manager.registerService(regular);
         manager.setFallbackService(fallbackId);
-        manager.setFreeServicesAllowed(true);
 
         auto reply = std::unique_ptr<TranslationReply>(manager.translate(
             request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
@@ -707,43 +629,45 @@ private slots:
         QCOMPARE(reply->result().serviceId, QStringLiteral("primary"));
     }
 
-    void fallbackRequiresTheGate()
+    void fallbackWorksWithoutAGate()
+    {
+        TranslationManager manager;
+        const FallbackPair services = withFallback(manager);
+
+        auto reply = std::unique_ptr<TranslationReply>(manager.translate(
+            request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
+        QSignalSpy finished(reply.get(), &TranslationReply::finished);
+        QCOMPARE(services.primary->requests.size(), 1);
+        services.primary->replies.first()->completeError(TranslationError::Network,
+                                                         QStringLiteral("offline"));
+        QCOMPARE(finished.size(), 0);
+        QCOMPARE(services.fallback->requests.size(), 1);
+
+        services.fallback->replies.first()->complete(QStringLiteral("Привет"));
+        QCOMPARE(finished.size(), 1);
+        QVERIFY(reply->result().ok());
+        QCOMPARE(reply->result().translatedText, QStringLiteral("Привет"));
+        QCOMPARE(reply->result().serviceId, QStringLiteral("free"));
+    }
+
+    void fallbackCanBeAnyRegisteredService()
     {
         TranslationManager manager;
         auto *primary = new FakeService(QStringLiteral("primary"));
-        auto *fallback = new FakeService(QStringLiteral("free"), true, true);
+        auto *regular = new FakeService(QStringLiteral("regular"));
         manager.registerService(primary);
-        manager.registerService(fallback);
-        manager.setFallbackService(QStringLiteral("free"));
-        QVERIFY(!manager.freeServicesAllowed());
+        manager.registerService(regular);
+        manager.setFallbackService(QStringLiteral("regular"));
 
-        auto first = std::unique_ptr<TranslationReply>(manager.translate(
+        auto reply = std::unique_ptr<TranslationReply>(manager.translate(
             request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
         primary->replies.first()->completeError(TranslationError::Network,
                                                 QStringLiteral("offline"));
-        QVERIFY(fallback->requests.isEmpty());
-        QCOMPARE(first->result().error, TranslationError::Network);
-
-        // The same settings with the gate on do fall back.
-        manager.setFreeServicesAllowed(true);
-        auto second = std::unique_ptr<TranslationReply>(manager.translate(
-            request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
-        primary->replies.at(1)->completeError(TranslationError::Network,
-                                              QStringLiteral("offline"));
-        QCOMPARE(fallback->requests.size(), 1);
-        fallback->replies.first()->complete(QStringLiteral("Привет"));
-        QVERIFY(second->result().ok());
-        QCOMPARE(second->result().serviceId, QStringLiteral("free"));
-
-        // Turning the gate off while the primary is in flight is honoured: the
-        // fallback is resolved at failure time.
-        auto third = std::unique_ptr<TranslationReply>(manager.translate(
-            request(QStringLiteral("Bye")), TranslationManager::Channel::MainWindow));
-        manager.setFreeServicesAllowed(false);
-        primary->replies.at(2)->completeError(TranslationError::Network,
-                                              QStringLiteral("offline"));
-        QCOMPARE(fallback->requests.size(), 1);
-        QCOMPARE(third->result().error, TranslationError::Network);
+        QCOMPARE(regular->requests.size(), 1);
+        regular->replies.first()->complete(QStringLiteral("Привет"));
+        QVERIFY(reply->result().ok());
+        QCOMPARE(reply->result().translatedText, QStringLiteral("Привет"));
+        QCOMPARE(reply->result().serviceId, QStringLiteral("regular"));
     }
 
     void fallbackFailureReturnsPrimaryError()
@@ -816,14 +740,13 @@ private slots:
     {
         TranslationManager manager;
         auto *primary = new FakeService(QStringLiteral("primary"));
-        auto *fallback = new FakeService(QStringLiteral("free"), true, true);
-        auto *other = new FakeService(QStringLiteral("other"), true, true);
+        auto *fallback = new FakeService(QStringLiteral("free"));
+        auto *other = new FakeService(QStringLiteral("other"));
         manager.registerService(primary);
         manager.registerService(fallback);
         manager.registerService(other);
         manager.setFallbackService(QStringLiteral("  Free \n"));
         QCOMPARE(manager.fallbackService(), QStringLiteral("free"));
-        manager.setFreeServicesAllowed(true);
 
         auto first = std::unique_ptr<TranslationReply>(manager.translate(
             request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
@@ -853,28 +776,6 @@ private slots:
         other->replies.first()->complete(QStringLiteral("Hello"));
         QVERIFY(second->result().ok());
         QCOMPARE(second->result().serviceId, QStringLiteral("other"));
-    }
-
-    void disablingTheGateClearsTheFallbackCache()
-    {
-        TranslationManager manager;
-        const FallbackPair services = withFallback(manager);
-
-        auto first = std::unique_ptr<TranslationReply>(manager.translate(
-            request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
-        services.primary->replies.first()->completeError(TranslationError::Network,
-                                                         QStringLiteral("offline"));
-        services.fallback->replies.first()->complete(QStringLiteral("Привет"));
-        QVERIFY(first->result().ok());
-
-        manager.setFreeServicesAllowed(false);
-        auto second = std::unique_ptr<TranslationReply>(manager.translate(
-            request(QStringLiteral("Hello")), TranslationManager::Channel::MainWindow));
-        QCOMPARE(services.primary->requests.size(), 2);
-        services.primary->replies.at(1)->completeError(TranslationError::Network,
-                                                       QStringLiteral("offline"));
-        QCOMPARE(services.fallback->requests.size(), 1);
-        QCOMPARE(second->result().error, TranslationError::Network);
     }
 
     void noSecondHopOrSmartRetry()

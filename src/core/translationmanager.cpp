@@ -177,9 +177,9 @@ private:
     }
 
     // The primary failed, an early or a real result. The fallback is resolved
-    // here, at failure time, so a gate or fallback change made while the
-    // primary was in flight is honoured. One hop only: a fallback failure
-    // finishes with the primary error and never starts another request.
+    // here, at failure time, so a fallback change made while the primary was in
+    // flight is honoured. One hop only: a fallback failure finishes with the
+    // primary error and never starts another request.
     void onPrimaryError(const TranslationResult &result)
     {
         if (!m_fallbackStarted && isRetryable(result.error)) {
@@ -300,15 +300,6 @@ void TranslationManager::setMaxLength(int length)
     m_maxLength = length > 0 ? length : kDefaultMaxLength;
 }
 
-void TranslationManager::setFreeServicesAllowed(bool allowed)
-{
-    if (m_freeServicesAllowed == allowed)
-        return;
-    m_freeServicesAllowed = allowed;
-    if (!allowed)
-        clearCache();
-}
-
 void TranslationManager::setFallbackService(const QString &id)
 {
     const QString normalized = id.trimmed().toLower();
@@ -320,14 +311,10 @@ void TranslationManager::setFallbackService(const QString &id)
 
 TranslationService *TranslationManager::fallbackFor(TranslationService *primary) const
 {
-    if (m_fallbackService.isEmpty() || !m_freeServicesAllowed)
+    if (m_fallbackService.isEmpty())
         return nullptr;
     TranslationService *fallback = service(m_fallbackService);
     if (!fallback || fallback == primary)
-        return nullptr;
-    if (primary && fallback->id() == primary->id())
-        return nullptr;
-    if (!fallback->requiresOptIn())
         return nullptr;
     return fallback;
 }
@@ -364,10 +351,6 @@ TranslationReply *TranslationManager::translate(const TranslationRequest &reques
                                   QStringLiteral("%1 characters, the limit is %2")
                                       .arg(request.text.size())
                                       .arg(m_maxLength));
-    } else if (m_active->requiresOptIn() && !m_freeServicesAllowed) {
-        reply = finishedWithError(
-            serviceId, TranslationError::ServiceUnavailable,
-            TranslationManager::tr("Enable free web services in Settings → Services."));
     } else if (!m_active->isConfigured()) {
         const QString hint = m_active->configurationError();
         TranslationResult result;

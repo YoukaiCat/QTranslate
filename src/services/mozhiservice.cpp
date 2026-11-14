@@ -347,11 +347,6 @@ bool MozhiService::isConfigured() const
     return true;
 }
 
-bool MozhiService::requiresOptIn() const
-{
-    return true;
-}
-
 QStringList MozhiService::sourceLanguages() const
 {
     return Languages::supported(kServiceId, Languages::Direction::Source);

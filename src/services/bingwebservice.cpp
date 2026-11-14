@@ -559,11 +559,6 @@ bool BingWebService::isConfigured() const
     return true;
 }
 
-bool BingWebService::requiresOptIn() const
-{
-    return true;
-}
-
 QStringList BingWebService::sourceLanguages() const
 {
     return Languages::supported(kServiceId, Languages::Direction::Source);

@@ -299,7 +299,6 @@ private slots:
         QCOMPARE(m_service->id(), QStringLiteral("bing-web"));
         QCOMPARE(m_service->displayName(), QStringLiteral("Bing"));
         QVERIFY(m_service->isConfigured());
-        QVERIFY(m_service->requiresOptIn());
 
         const QStringList sources = m_service->sourceLanguages();
         const QStringList targets = m_service->targetLanguages();

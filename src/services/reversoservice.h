@@ -7,9 +7,9 @@
 class NetworkManager;
 
 // The unofficial Reverso web endpoint (see doc/free-endpoints.md, §4). It needs
-// no key, but it is a scraped browser endpoint with no SLA, so it is opt-in
-// together with the other free web services. The endpoint declares six
-// languages only (en, fr, de, es, it, ru) and has no automatic detection.
+// no key, but it is a scraped browser endpoint with no SLA. The endpoint
+// declares six languages only (en, fr, de, es, it, ru) and has no automatic
+// detection.
 //
 // The 600 ms pause between requests and the 5000 UTF-16-unit request limit are
 // named assumptions: the doc gives no measured Reverso-specific value.
@@ -23,7 +23,6 @@ public:
     QString id() const override;
     QString displayName() const override;
     bool isConfigured() const override;
-    bool requiresOptIn() const override;
     QStringList sourceLanguages() const override;
     QStringList targetLanguages() const override;
     void applySettings(const AppSettings &) override;

@@ -7,9 +7,9 @@
 class NetworkManager;
 
 // The unofficial Yandex web endpoint (see doc/free-endpoints.md, §2). It needs
-// no key, but it is a scraped browser endpoint with no SLA, so it is enabled
-// together with the other free web services. Yandex has one Chinese code and
-// one Portuguese code, which is a known limitation of the language branch.
+// no key, but it is a scraped browser endpoint with no SLA. Yandex has one
+// Chinese code and one Portuguese code, which is a known limitation of the
+// language branch.
 //
 // The 750 ms pause between requests comes from doc/free-endpoints.md, §8. The
 // 5000 UTF-16-unit request limit is a conservative assumption: the doc gives no
@@ -24,7 +24,6 @@ public:
     QString id() const override;
     QString displayName() const override;
     bool isConfigured() const override;
-    bool requiresOptIn() const override;
     QStringList sourceLanguages() const override;
     QStringList targetLanguages() const override;
     void applySettings(const AppSettings &) override;

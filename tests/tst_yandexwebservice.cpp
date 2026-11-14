@@ -219,7 +219,6 @@ private slots:
         QCOMPARE(m_service->id(), QStringLiteral("yandex-web"));
         QCOMPARE(m_service->displayName(), QStringLiteral("Yandex"));
         QVERIFY(m_service->isConfigured());
-        QVERIFY(m_service->requiresOptIn());
 
         const QStringList sources = m_service->sourceLanguages();
         const QStringList targets = m_service->targetLanguages();

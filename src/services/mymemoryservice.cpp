@@ -311,11 +311,6 @@ bool MyMemoryService::isConfigured() const
     return true;
 }
 
-bool MyMemoryService::requiresOptIn() const
-{
-    return true;
-}
-
 QStringList MyMemoryService::sourceLanguages() const
 {
     return Languages::supported(kServiceId, Languages::Direction::Source);

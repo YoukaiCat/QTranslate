@@ -384,11 +384,6 @@ bool ReversoService::isConfigured() const
     return true;
 }
 
-bool ReversoService::requiresOptIn() const
-{
-    return true;
-}
-
 QStringList ReversoService::sourceLanguages() const
 {
     return Languages::supported(kServiceId, Languages::Direction::Source);

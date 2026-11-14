@@ -6,9 +6,8 @@
 
 class NetworkManager;
 
-// The free MyMemory API (see doc/free-endpoints.md, §6). It needs no key, but
-// it requires an explicit source language and is enabled together with the
-// other free web services.
+// The free MyMemory API (see doc/free-endpoints.md, §6). It needs no key and
+// cannot detect the source language.
 class MyMemoryService : public QueuedWebService
 {
     Q_OBJECT
@@ -19,7 +18,6 @@ public:
     QString id() const override;
     QString displayName() const override;
     bool isConfigured() const override;
-    bool requiresOptIn() const override;
     QStringList sourceLanguages() const override;
     QStringList targetLanguages() const override;
     void applySettings(const AppSettings &) override;

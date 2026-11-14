@@ -8,8 +8,7 @@ class NetworkManager;
 
 // The free Mozhi API (see doc/free-endpoints.md, §5): one integration gives
 // access to several engines through a public or self-hosted instance. It needs
-// no key, but it sends text to a third party and is enabled together with the
-// other free web services.
+// no key, but it sends text to a third party.
 //
 // The 500 ms pause between requests and the 5000 UTF-16-unit request limit are
 // conservative assumptions. doc/free-endpoints.md gives no Mozhi-specific
@@ -24,7 +23,6 @@ public:
     QString id() const override;
     QString displayName() const override;
     bool isConfigured() const override;
-    bool requiresOptIn() const override;
     QStringList sourceLanguages() const override;
     QStringList targetLanguages() const override;
     void applySettings(const AppSettings &) override;

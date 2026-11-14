@@ -243,7 +243,6 @@ void AppController::createTranslation()
     m_translations->setMaxLength(settings.translation.maxLength);
     m_translations->setPrimaryLanguage(settings.translation.primaryLang);
     m_translations->setSecondaryLanguage(settings.translation.secondaryLang);
-    m_translations->setFreeServicesAllowed(settings.translation.allowFreeServices);
     m_translations->setFallbackService(settings.translation.fallbackService);
 
     m_google = new GoogleTranslateService(m_network);
@@ -271,17 +270,11 @@ void AppController::createTranslation()
     m_translations->registerService(m_bingWeb);
     m_translations->registerService(m_reverso);
 
-    if (TranslationService *service = m_translations->service(settings.translation.service)) {
-        if (service->requiresOptIn() && !settings.translation.allowFreeServices) {
-            qCWarning(lcApp) << "Configured service needs free web services to be enabled:"
-                             << settings.translation.service;
-        } else {
-            m_translations->setActiveService(settings.translation.service);
-        }
-    } else if (!settings.translation.service.isEmpty()) {
+    if (m_translations->service(settings.translation.service))
+        m_translations->setActiveService(settings.translation.service);
+    else if (!settings.translation.service.isEmpty())
         qCWarning(lcApp) << "Configured service is not available:"
                          << settings.translation.service;
-    }
 }
 
 void AppController::createProofreading()
@@ -542,10 +535,7 @@ void AppController::updateServiceSelectors()
 
     QList<MainWindow::ServiceEntry> mainWindowServices;
     QList<TrayIcon::ServiceEntry> trayServices;
-    const bool freeServicesAllowed = m_translations->freeServicesAllowed();
     for (const TranslationService *service : m_translations->services()) {
-        if (service->requiresOptIn() && !freeServicesAllowed)
-            continue;
         mainWindowServices.append({service->id(), service->displayName()});
         trayServices.append({service->id(), service->displayName()});
     }
@@ -623,18 +613,6 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_mainWindow->setAutoTranslateDelay(newSettings.translation.autoTranslateDelayMs);
     }
 
-    if (oldSettings.translation.allowFreeServices
-        != newSettings.translation.allowFreeServices) {
-        m_translations->setFreeServicesAllowed(newSettings.translation.allowFreeServices);
-        const TranslationService *active = m_translations->activeService();
-        if (!newSettings.translation.allowFreeServices && active && active->requiresOptIn()) {
-            qCWarning(lcApp) << "Free web services are disabled; switching to google from"
-                             << active->id();
-            m_translations->setActiveService(QStringLiteral("google"));
-        }
-        updateServiceSelectors();
-    }
-
     if (m_translations->fallbackService() != newSettings.translation.fallbackService)
         m_translations->setFallbackService(newSettings.translation.fallbackService);
 
@@ -710,9 +688,6 @@ void AppController::applySettings(const AppSettings &oldSettings,
         if (!service) {
             qCWarning(lcApp) << "Configured service is not available:"
                              << newSettings.translation.service;
-        } else if (service->requiresOptIn() && !newSettings.translation.allowFreeServices) {
-            qCWarning(lcApp) << "Configured service needs free web services to be enabled:"
-                             << newSettings.translation.service;
         } else {
             m_translations->setActiveService(newSettings.translation.service);
         }
@@ -762,9 +737,10 @@ void AppController::showSettings()
     const TranslationService *service = m_translations->activeService();
     const bool secretStorageAvailable = SecretProtector::isAvailable();
     QList<QPair<QString, QString>> fallbackServices;
-    for (const TranslationService *candidate : m_translations->services()) {
-        if (candidate->requiresOptIn())
-            fallbackServices.append({candidate->id(), candidate->displayName()});
+    for (const QString &id : fallbackServiceIds()) {
+        const TranslationService *candidate = m_translations->service(id);
+        if (candidate)
+            fallbackServices.append({id, candidate->displayName()});
     }
 
     QList<SettingsDialog::ProofreadingProvider> proofreadingProviders;

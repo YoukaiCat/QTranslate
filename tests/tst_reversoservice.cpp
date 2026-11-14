@@ -249,7 +249,6 @@ private slots:
         QCOMPARE(m_service->id(), QStringLiteral("reverso"));
         QCOMPARE(m_service->displayName(), QStringLiteral("Reverso"));
         QVERIFY(m_service->isConfigured());
-        QVERIFY(m_service->requiresOptIn());
 
         const QStringList sources = m_service->sourceLanguages();
         const QStringList targets = m_service->targetLanguages();

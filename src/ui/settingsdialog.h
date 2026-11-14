@@ -83,12 +83,7 @@ private:
     bool anyHotkeyEditFocused() const;
     void updateGoogleControls();
     void updateDeepLControls();
-    void updateMyMemoryControls();
     void updateMozhiControls();
-    void updateYandexControls();
-    void updateBingControls();
-    void updateReversoControls();
-    void updateFallbackControls();
     void updateProofreadingControls();
     void updateProofreadingLanguage();
     void updateProxyControls();
@@ -120,7 +115,6 @@ private:
     LanguageComboBox *m_secondaryLanguage = nullptr;
     QSpinBox *m_maxLength = nullptr;
     QSpinBox *m_autoTranslateDelay = nullptr;
-    QCheckBox *m_allowFreeServices = nullptr;
 
     QComboBox *m_googleMode = nullptr;
     QLineEdit *m_googleApiKey = nullptr;
@@ -160,20 +154,11 @@ private:
     QCheckBox *m_proofreadingAllowOnline = nullptr;
     QLabel *m_proofreadingOnlineWarning = nullptr;
 
-    QGroupBox *m_mymemoryGroup = nullptr;
-
-    QGroupBox *m_mozhiGroup = nullptr;
     QLineEdit *m_mozhiInstance = nullptr;
     QComboBox *m_mozhiEngine = nullptr;
     QLabel *m_mozhiEffectiveInstance = nullptr;
     QLabel *m_mozhiInstanceWarning = nullptr;
     QLabel *m_mozhiHint = nullptr;
-
-    QGroupBox *m_yandexGroup = nullptr;
-
-    QGroupBox *m_bingGroup = nullptr;
-
-    QGroupBox *m_reversoGroup = nullptr;
 
     QComboBox *m_proxyMode = nullptr;
     QComboBox *m_proxyType = nullptr;

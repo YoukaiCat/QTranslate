@@ -2,13 +2,18 @@
 
 ## Where we left off
 
-Current node: stage `05-proofreading` is `done` (accepted over `eb91f6b..263091f`, no code defect;
-the child stage `07` acceptance fix is `0ca1ad2`). Its documentation is updated in `AGENTS.md`, both
-READMEs, `doc/architecture.md`, `doc/handoff.md`, `doc/proofreading.md` and the root plan. The next
-stage is `06-llm-actions` (`todo`, no children; the planner splits it). Stage 4
-`04-local-offline-translation` stays `blocked` by the user's 2026-11-05 decision and is not dropped.
-The root is `in-progress`; its `Done when` requires every stage to be done or dropped, so stage 4's
-blocked state is a deliberate exception.
+Current node: stage `08-free-services-always-on` is `in-progress` (`base: 2650def`, the 0.13.0
+release commit); its first child `01-remove-free-services-gate` is `todo, detailed: true` and the
+coordinator starts next. It is a user-requested correction of stage 3: remove the
+`translation/allowFreeServices` opt-in gate and the whole opt-in concept, make every service
+available by default and delete the **Allow free web services** checkbox (user decision,
+2026-11-14). The second child `02-move-fallback-and-order-services` (`todo, detailed`, depends on
+`01`) moves the **Fallback service** combo to the Translation page and sets the order Google,
+Yandex, Bing, DeepL, OpenAI-compatible, MyMemory, Mozhi, Reverso. The planner has finished; the
+coordinator, the second task and the lead's documentation pass follow. Stages 1-3 and 5 are `done`;
+stage 4 `04-local-offline-translation` stays `blocked` by the user's 2026-11-05 decision and is not
+dropped; stages 6-7 are `todo`. The root is `in-progress`; its `Done when` requires every stage to
+be done or dropped, so stage 4's blocked state is a deliberate exception.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
@@ -16,17 +21,15 @@ release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub r
 the user checks the current code on Windows.
 
 Work is on `main` (matches the root `branch:`); the working tree is clean. Linux is 45/45, Windows
-39 (derived, not run locally); `.ts` has 383 messages. The next node is `06-llm-actions`.
+39 (derived, not run locally); `.ts` has 383 messages before this change. The next node is stage 8.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
 clears the cache for `google.mode`, `deepl.mode` and `deepl.englishVariant`. Recorded limitations:
 MyMemory's Auto-detect rough edge and Reverso's rejection of `auto` remain a later shared-UI
 decision; Yandex's `zh-Hant`→`zh` and the absent `pt-PT` are recorded. Decisions: one configured
-fallback step, not a literal multi-step chain; DeepL `free-web` stays outside the gate; the Bing
-POST is urlencoded, not multipart; Reverso has six languages and no `auto`. The user deferred the
-0.12.0 release on 2026-11-08 (no version bump, tag, push, or release). Next: split and detail
-`05-proofreading` with the planner, then run it.
+fallback step, not a literal multi-step chain; the Bing POST is urlencoded, not multipart; Reverso
+has six languages and no `auto`. Next: plan and run stage 8.
 
 ## Journal
 
@@ -170,3 +173,29 @@ POST is urlencoded, not multipart; Reverso has six languages and no `auto`. The 
   locally (no MSVC); the tag CI is the build gate. `main` and the annotated tag `v0.13.0` are
   pushed; the tag CI publishes the assets. The `qtranslate` map stays `in-progress`; the next node
   is `06-llm-actions`.
+- 2026-11-14 — User decision: remove the free-web-services gate. The user saw the **Allow free web
+  services** checkbox in Settings → Services, found it confusing and asked to remove it: every
+  service must be available by default and there must be no checkbox. Facts checked before the
+  decision: the free Google endpoint (`google.mode=free`) and DeepL `free-web` were never behind the
+  gate; it only disabled MyMemory, Mozhi, Yandex web, Bing web, Reverso, their settings groups, the
+  fallback combo and the `TranslationManager` request path. The lead created stage
+  `08-free-services-always-on` (`base: 2650def`, `in-progress`) and put it before stage 6. Rejected:
+  defaulting `translation/allowFreeServices` to true while hiding the checkbox (dead setting and dead
+  code), keeping the gate and only changing the default (the user explicitly rejects the checkbox),
+  gating only the unofficial services (all services must be available). The per-service
+  unofficial-endpoint warnings stay; only the gate text goes. The **proofreading/allowOnlineServices**
+  gate is untouched — the user's request was about translation services. Docs are the lead's pass
+  after the code.
+- 2026-11-14 — User added two presentation corrections to stage 8 and rejected the gate concept
+  itself. (1) The **Fallback service** combo moves from Services to the Translation page: a fallback
+  is translation behaviour, not a provider setting, and the user called the old placement
+  conceptually wrong. (2) The provider order in Settings → Services is Google, Yandex, Bing, DeepL,
+  OpenAI-compatible, then all others; the lead extends the same order to the main-window/tray
+  pickers and the fallback options so one order is used everywhere. The planner split the stage into
+  `01-remove-free-services-gate` (gate and opt-in terminology removal, tests, 14 `.ts`) and
+  `02-move-fallback-and-order-services` (presentation only, depends on 01). The user also said the
+  text-checking question was understood incorrectly and will be discussed after this stage;
+  `proofreading/allowOnlineServices` and the Text checking tab stay byte-identical and are recorded
+  as a deferred user decision. Rejected: defaulting the gate to true (dead setting), keeping the
+  fallback on Services (conceptually wrong per the user), one oversized task (two independently
+  acceptable results; the `.ts` update is atomic with 01).

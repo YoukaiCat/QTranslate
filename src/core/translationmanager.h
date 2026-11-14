@@ -39,15 +39,10 @@ public:
     int maxLength() const { return m_maxLength; }
     void setMaxLength(int length);
 
-    // Whether services with requiresOptIn() are allowed. The manager refuses
-    // them with ServiceUnavailable while this is false.
-    bool freeServicesAllowed() const { return m_freeServicesAllowed; }
-    void setFreeServicesAllowed(bool allowed);
-
     // A service that is tried once when the active service fails with a
     // retryable error. Empty means no fallback. The id is resolved at request
-    // time; an unknown or non-opt-in service is ignored. Changing it clears the
-    // cache.
+    // time; an unknown or unregistered service is ignored. Changing it clears
+    // the cache.
     QString fallbackService() const { return m_fallbackService; }
     void setFallbackService(const QString &id);
 
@@ -85,7 +80,6 @@ private:
     QList<TranslationService *> m_services;
     TranslationService *m_active = nullptr;
     int m_maxLength = kDefaultMaxLength;
-    bool m_freeServicesAllowed = false;
     QString m_fallbackService;
     QString m_primaryLanguage;
     QString m_secondaryLanguage;

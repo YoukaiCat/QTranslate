@@ -35,6 +35,27 @@ QByteArray readFile(const QString &path)
     return file.readAll();
 }
 
+QStringList g_warnings;
+
+void collectWarning(QtMsgType type, const QMessageLogContext &, const QString &message)
+{
+    if (type == QtWarningMsg)
+        g_warnings << message;
+}
+
+// Captures warnings for one scope and restores the previous handler on exit.
+struct WarningCapture
+{
+    WarningCapture()
+        : previous(qInstallMessageHandler(collectWarning))
+    {
+        g_warnings.clear();
+    }
+    ~WarningCapture() { qInstallMessageHandler(previous); }
+
+    QtMessageHandler previous;
+};
+
 #if defined(Q_OS_LINUX)
 // Saves and restores an environment variable even when an assertion ends the
 // test function early.
@@ -97,7 +118,6 @@ private slots:
         QVERIFY(settings.translation.secondaryLang != settings.translation.primaryLang);
         QCOMPARE(settings.translation.maxLength, 20000);
         QCOMPARE(settings.translation.autoTranslateDelayMs, 700);
-        QVERIFY(!settings.translation.allowFreeServices);
         QVERIFY(settings.translation.fallbackService.isEmpty());
         QCOMPARE(fallbackServiceIds(),
                  QStringList({QStringLiteral("mymemory"), QStringLiteral("mozhi"),
@@ -241,7 +261,6 @@ private slots:
         settings.translation.secondaryLang = QStringLiteral("fr");
         settings.translation.maxLength = 5000;
         settings.translation.autoTranslateDelayMs = 0;
-        settings.translation.allowFreeServices = true;
         settings.translation.fallbackService = QStringLiteral("mymemory");
 
         settings.google.mode = QStringLiteral("cloud");
@@ -297,7 +316,6 @@ private slots:
         QCOMPARE(result.translation.secondaryLang, QStringLiteral("fr"));
         QCOMPARE(result.translation.maxLength, 5000);
         QCOMPARE(result.translation.autoTranslateDelayMs, 0);
-        QVERIFY(result.translation.allowFreeServices);
         QCOMPARE(result.translation.fallbackService, QStringLiteral("mymemory"));
 
         QCOMPARE(result.google.mode, QStringLiteral("cloud"));
@@ -341,7 +359,7 @@ private slots:
 
         const QByteArray ini = readFile(path);
         QVERIFY(!ini.isEmpty());
-        QVERIFY(ini.contains("allowFreeServices=true"));
+        QVERIFY(!ini.contains(QByteArrayLiteral("allowFree") + QByteArrayLiteral("Services")));
         QVERIFY(ini.contains("fallbackService=mymemory"));
         QVERIFY(!ini.contains("google-secret"));
         QVERIFY(!ini.contains("deepl-secret"));
@@ -567,7 +585,6 @@ private slots:
         SettingsStore store(path, fakeCodec());
         AppSettings settings = store.current();
         settings.translation.service = QStringLiteral("deepl");
-        settings.translation.allowFreeServices = true;
         settings.translation.fallbackService = QStringLiteral("mozhi");
         settings.translation.maxLength = 5000;
         store.save(settings);
@@ -583,7 +600,6 @@ private slots:
         SettingsStore loaded(path, fakeCodec());
         loaded.load();
         QCOMPARE(loaded.current().translation.service, QStringLiteral("deepl"));
-        QVERIFY(loaded.current().translation.allowFreeServices);
         QCOMPARE(loaded.current().translation.fallbackService, QStringLiteral("mozhi"));
         QCOMPARE(loaded.current().translation.maxLength, 5000);
         QVERIFY(loaded.current().proofreading.enabled);
@@ -701,10 +717,9 @@ private slots:
         QCOMPARE(store.current().settingsVersion, 1);
         QCOMPARE(store.current().translation.fallbackService, QStringLiteral("mozhi"));
 
-        // An unknown id and a non-opt-in service are reset to none. The warning
-        // is fixed and must not echo the typed value.
-        const QString warning =
-            QStringLiteral("Fallback service is not a supported opt-in service; using none");
+        // An unknown id and a service that is not a no-key web endpoint are
+        // reset to none. The warning is fixed and must not echo the typed value.
+        const QString warning = QStringLiteral("Fallback service is not supported; using none");
         for (const QString &value :
              {QStringLiteral("nope"), QStringLiteral("google"), QStringLiteral("deepl")}) {
             QVERIFY(!warning.contains(value));
@@ -719,6 +734,42 @@ private slots:
             loaded.load();
             QCOMPARE(loaded.current().translation.fallbackService, QString());
         }
+    }
+
+    void legacyFreeServicesGateKeyIsIgnored()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("translation/service"), QStringLiteral("mymemory"));
+            // Assembled from parts: the removed identifier must not reappear in
+            // the source as a gate reference.
+            raw.setValue(QStringLiteral("translation/allowFree") + QStringLiteral("Services"),
+                         false);
+            raw.sync();
+        }
+
+        // The old setting is ignored: MyMemory stays selected and loading does
+        // not warn about services.
+        {
+            WarningCapture capture;
+            SettingsStore store(path, fakeCodec());
+            store.load();
+            for (const QString &message : g_warnings) {
+                QVERIFY2(!message.contains(QStringLiteral("service"), Qt::CaseInsensitive),
+                         qPrintable(message));
+            }
+            QCOMPARE(store.current().translation.service, QStringLiteral("mymemory"));
+
+            // The key is not written again; an unknown key may stay in the INI.
+            store.save(store.current());
+        }
+        SettingsStore loaded(path, fakeCodec());
+        loaded.load();
+        QCOMPARE(loaded.current().translation.service, QStringLiteral("mymemory"));
     }
 
     void mozhiGroupIsOptional()

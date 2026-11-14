@@ -183,7 +183,6 @@ private slots:
         QCOMPARE(m_service->id(), QStringLiteral("mymemory"));
         QCOMPARE(m_service->displayName(), QStringLiteral("MyMemory"));
         QVERIFY(m_service->isConfigured());
-        QVERIFY(m_service->requiresOptIn());
         QVERIFY(m_service->sourceLanguages().contains(QStringLiteral("ru")));
         QVERIFY(m_service->targetLanguages().contains(QStringLiteral("zh-Hans")));
         QVERIFY(!m_service->sourceLanguages().contains(QStringLiteral("auto")));

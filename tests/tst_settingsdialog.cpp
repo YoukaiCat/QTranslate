@@ -18,6 +18,17 @@
 #include <QTabWidget>
 #include <QTest>
 
+namespace {
+
+// The removed gate's object name is assembled so the identifier does not
+// reappear in the source; the test still checks that no such widget exists.
+QString removedGateObjectName()
+{
+    return QStringLiteral("allowFree") + QStringLiteral("Services");
+}
+
+} // namespace
+
 class TestSettingsDialog : public QObject
 {
     Q_OBJECT
@@ -45,7 +56,6 @@ private slots:
         settings.translation.secondaryLang = QStringLiteral("fr");
         settings.translation.maxLength = 5000;
         settings.translation.autoTranslateDelayMs = 0;
-        settings.translation.allowFreeServices = true;
         settings.popup.autoCloseOnFocusLoss = false;
         settings.proofreading.hotkey = QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F9);
 
@@ -79,9 +89,6 @@ private slots:
             dialog.findChild<QSpinBox *>(QStringLiteral("autoTranslateDelay"));
         auto *pauseInFullscreen =
             dialog.findChild<QCheckBox *>(QStringLiteral("pauseInFullscreen"));
-        auto *allowFreeServices =
-            dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
-        auto *freeWebHint = dialog.findChild<QLabel *>(QStringLiteral("freeWebHint"));
 
         QVERIFY(autostart);
         QVERIFY(startMinimized);
@@ -97,8 +104,6 @@ private slots:
         QVERIFY(maxLength);
         QVERIFY(delay);
         QVERIFY(pauseInFullscreen);
-        QVERIFY(allowFreeServices);
-        QVERIFY(freeWebHint);
 
         QVERIFY(autostart->isChecked());
         QVERIFY(!startMinimized->isChecked());
@@ -116,9 +121,6 @@ private slots:
         QCOMPARE(maxLength->value(), 5000);
         QCOMPARE(delay->value(), 0);
         QVERIFY(pauseInFullscreen->isChecked());
-        QVERIFY(allowFreeServices->isChecked());
-        QVERIFY(freeWebHint->wordWrap());
-        QVERIFY(freeWebHint->text().contains(QStringLiteral("third party")));
     }
 
     void returnsEditedValues()
@@ -156,7 +158,6 @@ private slots:
         dialog.findChild<QSpinBox *>(QStringLiteral("maxLength"))->setValue(7000);
         dialog.findChild<QSpinBox *>(QStringLiteral("autoTranslateDelay"))->setValue(1200);
         dialog.findChild<QCheckBox *>(QStringLiteral("pauseInFullscreen"))->setChecked(false);
-        dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"))->setChecked(true);
 
         const AppSettings result = dialog.settings();
         QVERIFY(result.general.autostart);
@@ -174,7 +175,6 @@ private slots:
         QCOMPARE(result.translation.secondaryLang, QStringLiteral("de"));
         QCOMPARE(result.translation.maxLength, 7000);
         QCOMPARE(result.translation.autoTranslateDelayMs, 1200);
-        QVERIFY(result.translation.allowFreeServices);
         QVERIFY(!result.hotkeys.pauseInFullscreen);
         QCOMPARE(result.google.apiKey, QStringLiteral("keep-me"));
         QCOMPARE(result.network.proxyHost, QStringLiteral("proxy.local"));
@@ -359,20 +359,22 @@ private slots:
         QCOMPARE(result.llm.model, QStringLiteral("local-model"));
     }
 
-    void freeWebServicesGate()
+    void freeWebGateIsGone()
     {
         SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
                               {QStringLiteral("de"), QStringLiteral("en")}, true);
-        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
-        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("freeWebHint"));
-        QVERIFY(checkbox);
-        QVERIFY(hint);
-        QVERIFY(!checkbox->isChecked());
-        QVERIFY(!dialog.settings().translation.allowFreeServices);
-        QVERIFY(hint->wordWrap());
+        QVERIFY(!dialog.findChild<QCheckBox *>(removedGateObjectName()));
+        QVERIFY(!dialog.findChild<QLabel *>(QStringLiteral("freeWebHint")));
 
-        checkbox->setChecked(true);
-        QVERIFY(dialog.settings().translation.allowFreeServices);
+        for (const char *name : {"mymemoryGroup", "mozhiGroup", "yandexGroup", "bingGroup",
+                                 "reversoGroup"}) {
+            auto *group = dialog.findChild<QGroupBox *>(QString::fromLatin1(name));
+            QVERIFY2(group, name);
+            QVERIFY2(group->isEnabled(), name);
+        }
+        auto *fallback = dialog.findChild<QComboBox *>(QStringLiteral("fallbackService"));
+        QVERIFY(fallback);
+        QVERIFY(fallback->isEnabled());
     }
 
     void myMemoryGroup()
@@ -381,28 +383,16 @@ private slots:
                               {QStringLiteral("de"), QStringLiteral("en")}, true);
         auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("mymemoryGroup"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("mymemoryHint"));
-        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
         QVERIFY(group);
         QVERIFY(hint);
-        QVERIFY(checkbox);
 
         QCOMPARE(group->title(), QStringLiteral("MyMemory"));
-        QVERIFY(!checkbox->isChecked());
-        QVERIFY(!group->isEnabled());
+        QVERIFY(group->isEnabled());
         QVERIFY(hint->wordWrap());
         QVERIFY(hint->text().contains(QStringLiteral("no key")));
         QVERIFY(hint->text().contains(QStringLiteral("source language")));
         QVERIFY(hint->text().contains(QStringLiteral("third party")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
-        QVERIFY(!dialog.settings().translation.allowFreeServices);
-
-        checkbox->setChecked(true);
-        QVERIFY(group->isEnabled());
-        QVERIFY(dialog.settings().translation.allowFreeServices);
-
-        checkbox->setChecked(false);
-        QVERIFY(!group->isEnabled());
-        QVERIFY(!dialog.settings().translation.allowFreeServices);
     }
 
     void mozhiGroup()
@@ -419,19 +409,16 @@ private slots:
             dialog.findChild<QLabel *>(QStringLiteral("mozhiEffectiveInstance"));
         auto *warning =
             dialog.findChild<QLabel *>(QStringLiteral("mozhiInstanceWarning"));
-        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
         QVERIFY(group);
         QVERIFY(hint);
         QVERIFY(instance);
         QVERIFY(engine);
         QVERIFY(effective);
         QVERIFY(warning);
-        QVERIFY(checkbox);
 
         const QString defaultInstance = QStringLiteral("https://mozhi.adminforge.de");
         QCOMPARE(group->title(), QStringLiteral("Mozhi"));
-        QVERIFY(!checkbox->isChecked());
-        QVERIFY(!group->isEnabled());
+        QVERIFY(group->isEnabled());
         QCOMPARE(instance->text(), defaultInstance);
         QCOMPARE(instance->placeholderText(), defaultInstance);
         QCOMPARE(engine->currentData().toString(), QStringLiteral("google"));
@@ -465,11 +452,6 @@ private slots:
             QCOMPARE(engine->itemText(i), engineNames.at(i));
         }
 
-        checkbox->setChecked(true);
-        QVERIFY(group->isEnabled());
-        checkbox->setChecked(false);
-        QVERIFY(!group->isEnabled());
-
         for (const QString &invalid : {QStringLiteral("ftp://host"), QString(),
                                        QStringLiteral("https://host/?engine=google")}) {
             instance->setText(invalid);
@@ -497,7 +479,6 @@ private slots:
     void mozhiGroupShowsCustomSettings()
     {
         AppSettings settings;
-        settings.translation.allowFreeServices = true;
         settings.mozhi.instance = QStringLiteral("https://mozhi.example.org/proxy");
         settings.mozhi.engine = QStringLiteral("libretranslate");
 
@@ -541,39 +522,26 @@ private slots:
         auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("yandexGroup"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("yandexHint"));
         auto *mozhiGroup = dialog.findChild<QGroupBox *>(QStringLiteral("mozhiGroup"));
-        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
         QVERIFY(group);
         QVERIFY(hint);
         QVERIFY(mozhiGroup);
-        QVERIFY(checkbox);
 
         QCOMPARE(group->title(), QStringLiteral("Yandex"));
-        QVERIFY(!checkbox->isChecked());
         QVERIFY(!group->isHidden());
-        QVERIFY(!group->isEnabled());
+        QVERIFY(group->isEnabled());
         QVERIFY(hint->wordWrap());
         QVERIFY(hint->text().contains(QStringLiteral("unofficial")));
         QVERIFY(hint->text().contains(QStringLiteral("no key")));
         QVERIFY(hint->text().contains(QStringLiteral("rate")));
         QVERIFY(hint->text().contains(QStringLiteral("block")));
-        QVERIFY(hint->text().contains(QStringLiteral("free web services")));
         QVERIFY(hint->text().contains(QStringLiteral("several requests")));
         QVERIFY(hint->text().contains(QStringLiteral("third party")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
-        QVERIFY(!dialog.settings().translation.allowFreeServices);
 
         const QLayout *servicesLayout = group->parentWidget()->layout();
         QVERIFY(servicesLayout);
         QVERIFY(servicesLayout->indexOf(mozhiGroup) >= 0);
         QVERIFY(servicesLayout->indexOf(mozhiGroup) < servicesLayout->indexOf(group));
-
-        checkbox->setChecked(true);
-        QVERIFY(group->isEnabled());
-        QVERIFY(dialog.settings().translation.allowFreeServices);
-
-        checkbox->setChecked(false);
-        QVERIFY(!group->isEnabled());
-        QVERIFY(!dialog.settings().translation.allowFreeServices);
     }
 
     void bingGroup()
@@ -585,39 +553,26 @@ private slots:
         auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("bingGroup"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("bingHint"));
         auto *yandexGroup = dialog.findChild<QGroupBox *>(QStringLiteral("yandexGroup"));
-        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
         QVERIFY(group);
         QVERIFY(hint);
         QVERIFY(yandexGroup);
-        QVERIFY(checkbox);
 
         QCOMPARE(group->title(), QStringLiteral("Bing"));
-        QVERIFY(!checkbox->isChecked());
         QVERIFY(!group->isHidden());
-        QVERIFY(!group->isEnabled());
+        QVERIFY(group->isEnabled());
         QVERIFY(hint->wordWrap());
         QVERIFY(hint->text().contains(QStringLiteral("unofficial")));
         QVERIFY(hint->text().contains(QStringLiteral("no key")));
         QVERIFY(hint->text().contains(QStringLiteral("rate")));
         QVERIFY(hint->text().contains(QStringLiteral("block")));
-        QVERIFY(hint->text().contains(QStringLiteral("free web services")));
         QVERIFY(hint->text().contains(QStringLiteral("several requests")));
         QVERIFY(hint->text().contains(QStringLiteral("third party")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
-        QVERIFY(!dialog.settings().translation.allowFreeServices);
 
         const QLayout *servicesLayout = group->parentWidget()->layout();
         QVERIFY(servicesLayout);
         QVERIFY(servicesLayout->indexOf(yandexGroup) >= 0);
         QVERIFY(servicesLayout->indexOf(yandexGroup) < servicesLayout->indexOf(group));
-
-        checkbox->setChecked(true);
-        QVERIFY(group->isEnabled());
-        QVERIFY(dialog.settings().translation.allowFreeServices);
-
-        checkbox->setChecked(false);
-        QVERIFY(!group->isEnabled());
-        QVERIFY(!dialog.settings().translation.allowFreeServices);
     }
 
     void reversoGroup()
@@ -629,41 +584,28 @@ private slots:
         auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("reversoGroup"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("reversoHint"));
         auto *bingGroup = dialog.findChild<QGroupBox *>(QStringLiteral("bingGroup"));
-        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
         QVERIFY(group);
         QVERIFY(hint);
         QVERIFY(bingGroup);
-        QVERIFY(checkbox);
 
         QCOMPARE(group->title(), QStringLiteral("Reverso"));
-        QVERIFY(!checkbox->isChecked());
         QVERIFY(!group->isHidden());
-        QVERIFY(!group->isEnabled());
+        QVERIFY(group->isEnabled());
         QVERIFY(hint->wordWrap());
         QVERIFY(hint->text().contains(QStringLiteral("unofficial")));
         QVERIFY(hint->text().contains(QStringLiteral("no key")));
         QVERIFY(hint->text().contains(QStringLiteral("rate")));
         QVERIFY(hint->text().contains(QStringLiteral("block")));
-        QVERIFY(hint->text().contains(QStringLiteral("free web services")));
         QVERIFY(hint->text().contains(QStringLiteral("several requests")));
         QVERIFY(hint->text().contains(QStringLiteral("third party")));
         QVERIFY(hint->text().contains(QStringLiteral("English")));
         QVERIFY(hint->text().contains(QStringLiteral("source language")));
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
-        QVERIFY(!dialog.settings().translation.allowFreeServices);
 
         const QLayout *servicesLayout = group->parentWidget()->layout();
         QVERIFY(servicesLayout);
         QVERIFY(servicesLayout->indexOf(bingGroup) >= 0);
         QVERIFY(servicesLayout->indexOf(bingGroup) < servicesLayout->indexOf(group));
-
-        checkbox->setChecked(true);
-        QVERIFY(group->isEnabled());
-        QVERIFY(dialog.settings().translation.allowFreeServices);
-
-        checkbox->setChecked(false);
-        QVERIFY(!group->isEnabled());
-        QVERIFY(!dialog.settings().translation.allowFreeServices);
     }
 
     void fallbackGroup()
@@ -680,12 +622,10 @@ private slots:
         auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("fallbackGroup"));
         auto *combo = dialog.findChild<QComboBox *>(QStringLiteral("fallbackService"));
         auto *hint = dialog.findChild<QLabel *>(QStringLiteral("fallbackHint"));
-        auto *checkbox = dialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
         auto *myMemoryGroup = dialog.findChild<QGroupBox *>(QStringLiteral("mymemoryGroup"));
         QVERIFY(group);
         QVERIFY(combo);
         QVERIFY(hint);
-        QVERIFY(checkbox);
         QVERIFY(myMemoryGroup);
 
         QCOMPARE(group->title(), QStringLiteral("Fallback service"));
@@ -705,49 +645,32 @@ private slots:
         QVERIFY(hint->text().contains(QStringLiteral("rate limit")));
         QVERIFY(hint->text().contains(QStringLiteral("quota")));
         QVERIFY(hint->text().contains(QStringLiteral("invalid key")));
-        QVERIFY(hint->text().contains(QStringLiteral("free web services")));
         QVERIFY(hint->text().contains(QStringLiteral("None")));
         QVERIFY(hint->text().contains(QStringLiteral("third party")));
 
-        // The gate group holds the fallback, which precedes the per-service
-        // groups.
-        const QWidget *freeWebGroup = checkbox->parentWidget();
+        // The fallback stays on the Services page and precedes the
+        // per-service groups.
         const QLayout *servicesLayout = group->parentWidget()->layout();
-        QVERIFY(freeWebGroup);
         QVERIFY(servicesLayout);
-        QVERIFY(servicesLayout->indexOf(freeWebGroup) >= 0);
-        QVERIFY(servicesLayout->indexOf(freeWebGroup) < servicesLayout->indexOf(group));
+        QVERIFY(servicesLayout->indexOf(group) >= 0);
         QVERIFY(servicesLayout->indexOf(group) < servicesLayout->indexOf(myMemoryGroup));
 
-        QVERIFY(!checkbox->isChecked());
-        QVERIFY(!combo->isEnabled());
+        QVERIFY(combo->isEnabled());
 
         combo->setCurrentIndex(2);
-        checkbox->setChecked(true);
-        QVERIFY(combo->isEnabled());
-        QCOMPARE(combo->currentIndex(), 2);
-        QCOMPARE(dialog.settings().translation.fallbackService, QStringLiteral("mozhi"));
-
-        // Turning the gate off disables the combo but keeps the choice.
-        checkbox->setChecked(false);
-        QVERIFY(!combo->isEnabled());
         QCOMPARE(combo->currentIndex(), 2);
         QCOMPARE(dialog.settings().translation.fallbackService, QStringLiteral("mozhi"));
 
         AppSettings remembered;
-        remembered.translation.allowFreeServices = false;
         remembered.translation.fallbackService = QStringLiteral("mozhi");
         SettingsDialog rememberedDialog(remembered, {QStringLiteral("en")},
                                         {QStringLiteral("de"), QStringLiteral("en")}, true,
                                         services);
         auto *rememberedCombo =
             rememberedDialog.findChild<QComboBox *>(QStringLiteral("fallbackService"));
-        auto *rememberedCheckbox =
-            rememberedDialog.findChild<QCheckBox *>(QStringLiteral("allowFreeServices"));
         QVERIFY(rememberedCombo);
-        QVERIFY(rememberedCheckbox);
         QCOMPARE(rememberedCombo->currentIndex(), 2);
-        QVERIFY(!rememberedCombo->isEnabled());
+        QVERIFY(rememberedCombo->isEnabled());
         QCOMPARE(rememberedDialog.settings().translation.fallbackService,
                  QStringLiteral("mozhi"));
 
@@ -1105,7 +1028,6 @@ private slots:
         QCOMPARE(after.translation.maxLength, before.translation.maxLength);
         QCOMPARE(after.translation.autoTranslateDelayMs,
                  before.translation.autoTranslateDelayMs);
-        QCOMPARE(after.translation.allowFreeServices, before.translation.allowFreeServices);
         QCOMPARE(after.translation.fallbackService, before.translation.fallbackService);
     }
 

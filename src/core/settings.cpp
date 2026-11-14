@@ -167,7 +167,7 @@ void normalize(AppSettings &settings)
         settings.translation.fallbackService.clear();
     } else if (!fallbackServiceIds().contains(fallback)) {
         qCWarning(lcSettings)
-            << "Fallback service is not a supported opt-in service; using none";
+            << "Fallback service is not supported; using none";
         settings.translation.fallbackService.clear();
     } else {
         settings.translation.fallbackService = fallback;
@@ -492,10 +492,6 @@ void SettingsStore::load()
         settings.value(QStringLiteral("autoTranslateDelayMs"),
                        loaded.translation.autoTranslateDelayMs)
             .toInt();
-    loaded.translation.allowFreeServices =
-        settings.value(QStringLiteral("allowFreeServices"),
-                       loaded.translation.allowFreeServices)
-            .toBool();
     loaded.translation.fallbackService =
         settings.value(QStringLiteral("fallbackService"), QString()).toString();
     settings.endGroup();
@@ -656,8 +652,6 @@ void SettingsStore::save(const AppSettings &settings)
     out.setValue(QStringLiteral("maxLength"), normalized.translation.maxLength);
     out.setValue(QStringLiteral("autoTranslateDelayMs"),
                  normalized.translation.autoTranslateDelayMs);
-    out.setValue(QStringLiteral("allowFreeServices"),
-                 normalized.translation.allowFreeServices);
     out.setValue(QStringLiteral("fallbackService"), normalized.translation.fallbackService);
     out.endGroup();
 

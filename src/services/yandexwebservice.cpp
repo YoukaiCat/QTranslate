@@ -344,11 +344,6 @@ bool YandexWebService::isConfigured() const
     return true;
 }
 
-bool YandexWebService::requiresOptIn() const
-{
-    return true;
-}
-
 QStringList YandexWebService::sourceLanguages() const
 {
     return Languages::supported(kServiceId, Languages::Direction::Source);

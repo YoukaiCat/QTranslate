@@ -308,21 +308,6 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     servicesLayout->addWidget(googleGroup);
     servicesLayout->addWidget(deepLGroup);
     servicesLayout->addWidget(llmGroup);
-    auto *freeWebGroup = new QGroupBox(tr("Free web services"), servicesContent);
-    auto *freeWebForm = new QFormLayout(freeWebGroup);
-    m_allowFreeServices = new QCheckBox(tr("Allow free web services"), freeWebGroup);
-    m_allowFreeServices->setObjectName(QStringLiteral("allowFreeServices"));
-    auto *freeWebHint = new QLabel(
-        tr("These services need no API key. Most are unofficial: they may stop working, apply "
-           "rate limits or block requests, and the text is sent to a third party. The Google "
-           "and DeepL APIs remain the recommended choice."),
-        freeWebGroup);
-    freeWebHint->setObjectName(QStringLiteral("freeWebHint"));
-    freeWebHint->setWordWrap(true);
-    freeWebForm->addRow(m_allowFreeServices);
-    freeWebForm->addRow(freeWebHint);
-    servicesLayout->addWidget(freeWebGroup);
-
     m_fallbackGroup = new QGroupBox(tr("Fallback service"), servicesContent);
     m_fallbackGroup->setObjectName(QStringLiteral("fallbackGroup"));
     auto *fallbackLayout = new QVBoxLayout(m_fallbackGroup);
@@ -334,42 +319,36 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_fallbackHint = new QLabel(
         tr("When the selected service fails with no connection, a timeout, a rate limit, an "
            "exceeded quota or an invalid key, the text is sent once more to the fallback "
-           "service. Enable free web services above to use a fallback; None turns it off. The "
-           "text is sent to a third party."),
+           "service. None turns it off. The text is sent to a third party."),
         m_fallbackGroup);
     m_fallbackHint->setObjectName(QStringLiteral("fallbackHint"));
     m_fallbackHint->setWordWrap(true);
     fallbackLayout->addWidget(m_fallbackService);
     fallbackLayout->addWidget(m_fallbackHint);
     servicesLayout->addWidget(m_fallbackGroup);
-    connect(m_allowFreeServices, &QCheckBox::toggled, this,
-            &SettingsDialog::updateFallbackControls);
 
     auto *myMemoryGroup = new QGroupBox(tr("MyMemory"), servicesContent);
     myMemoryGroup->setObjectName(QStringLiteral("mymemoryGroup"));
     auto *myMemoryLayout = new QVBoxLayout(myMemoryGroup);
     auto *myMemoryHint = new QLabel(
-        tr("MyMemory is a free translation API and needs no key. Enable free web services above "
-           "to use it. It cannot detect the source language, and long text is sent in several "
-           "requests. The text is sent to a third party."),
+        tr("MyMemory is a free translation API and needs no key. It cannot detect the source "
+           "language, and long text is sent in several requests. The text is sent to a third "
+           "party."),
         myMemoryGroup);
     myMemoryHint->setObjectName(QStringLiteral("mymemoryHint"));
     myMemoryHint->setWordWrap(true);
     myMemoryLayout->addWidget(myMemoryHint);
     servicesLayout->addWidget(myMemoryGroup);
-    m_mymemoryGroup = myMemoryGroup;
-    connect(m_allowFreeServices, &QCheckBox::toggled, this,
-            &SettingsDialog::updateMyMemoryControls);
 
-    m_mozhiGroup = new QGroupBox(tr("Mozhi"), servicesContent);
-    m_mozhiGroup->setObjectName(QStringLiteral("mozhiGroup"));
-    auto *mozhiLayout = new QVBoxLayout(m_mozhiGroup);
+    auto *mozhiGroup = new QGroupBox(tr("Mozhi"), servicesContent);
+    mozhiGroup->setObjectName(QStringLiteral("mozhiGroup"));
+    auto *mozhiLayout = new QVBoxLayout(mozhiGroup);
     auto *mozhiForm = new QFormLayout;
-    m_mozhiInstance = new QLineEdit(m_mozhiGroup);
+    m_mozhiInstance = new QLineEdit(mozhiGroup);
     m_mozhiInstance->setObjectName(QStringLiteral("mozhiInstance"));
     m_mozhiInstance->setPlaceholderText(MozhiSettings{}.instance);
     mozhiForm->addRow(tr("Instance URL:"), m_mozhiInstance);
-    m_mozhiEngine = new QComboBox(m_mozhiGroup);
+    m_mozhiEngine = new QComboBox(mozhiGroup);
     m_mozhiEngine->setObjectName(QStringLiteral("mozhiEngine"));
     // Display names are product names, so they stay untranslated.
     const QHash<QString, QString> engineNames = {
@@ -385,7 +364,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
         m_mozhiEngine->addItem(engineNames.value(id, id), id);
     mozhiForm->addRow(tr("Engine:"), m_mozhiEngine);
     mozhiLayout->addLayout(mozhiForm);
-    m_mozhiEffectiveInstance = new QLabel(m_mozhiGroup);
+    m_mozhiEffectiveInstance = new QLabel(mozhiGroup);
     m_mozhiEffectiveInstance->setObjectName(QStringLiteral("mozhiEffectiveInstance"));
     m_mozhiEffectiveInstance->setWordWrap(true);
     m_mozhiEffectiveInstance->setTextFormat(Qt::PlainText);
@@ -393,7 +372,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_mozhiInstanceWarning = new QLabel(
         tr("Enter a base http(s) instance URL without credentials, a query or a fragment. "
            "The default instance will be used."),
-        m_mozhiGroup);
+        mozhiGroup);
     m_mozhiInstanceWarning->setObjectName(QStringLiteral("mozhiInstanceWarning"));
     m_mozhiInstanceWarning->setWordWrap(true);
     m_mozhiInstanceWarning->setVisible(false);
@@ -401,64 +380,55 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_mozhiHint = new QLabel(
         tr("Mozhi is a proxy to public translation engines. Instances are unofficial: they may "
            "stop working or rate-limit requests, and some engines may be disabled on an instance. "
-           "A self-hosted instance's terms and stability are your responsibility. Enable free web "
-           "services above to use Mozhi. Long text is sent in several requests. The text is sent "
-           "to the selected instance and engine."),
-        m_mozhiGroup);
+           "A self-hosted instance's terms and stability are your responsibility. Long text is "
+           "sent in several requests. The text is sent to the selected instance and engine."),
+        mozhiGroup);
     m_mozhiHint->setObjectName(QStringLiteral("mozhiHint"));
     m_mozhiHint->setWordWrap(true);
     mozhiLayout->addWidget(m_mozhiHint);
-    servicesLayout->addWidget(m_mozhiGroup);
-    connect(m_allowFreeServices, &QCheckBox::toggled, this,
-            &SettingsDialog::updateMozhiControls);
+    servicesLayout->addWidget(mozhiGroup);
     connect(m_mozhiInstance, &QLineEdit::textChanged, this,
             &SettingsDialog::updateMozhiControls);
 
-    m_yandexGroup = new QGroupBox(tr("Yandex"), servicesContent);
-    m_yandexGroup->setObjectName(QStringLiteral("yandexGroup"));
-    auto *yandexLayout = new QVBoxLayout(m_yandexGroup);
+    auto *yandexGroup = new QGroupBox(tr("Yandex"), servicesContent);
+    yandexGroup->setObjectName(QStringLiteral("yandexGroup"));
+    auto *yandexLayout = new QVBoxLayout(yandexGroup);
     auto *yandexHint = new QLabel(
-        tr("Yandex web is an unofficial endpoint and needs no key. Enable free web services above "
-           "to use it. It may stop working, apply rate limits or block requests. Long text is sent "
-           "in several requests. The text is sent to a third party."),
-        m_yandexGroup);
+        tr("Yandex web is an unofficial endpoint and needs no key. It may stop working, apply "
+           "rate limits or block requests. Long text is sent in several requests. The text is "
+           "sent to a third party."),
+        yandexGroup);
     yandexHint->setObjectName(QStringLiteral("yandexHint"));
     yandexHint->setWordWrap(true);
     yandexLayout->addWidget(yandexHint);
-    servicesLayout->addWidget(m_yandexGroup);
-    connect(m_allowFreeServices, &QCheckBox::toggled, this,
-            &SettingsDialog::updateYandexControls);
+    servicesLayout->addWidget(yandexGroup);
 
-    m_bingGroup = new QGroupBox(tr("Bing"), servicesContent);
-    m_bingGroup->setObjectName(QStringLiteral("bingGroup"));
-    auto *bingLayout = new QVBoxLayout(m_bingGroup);
+    auto *bingGroup = new QGroupBox(tr("Bing"), servicesContent);
+    bingGroup->setObjectName(QStringLiteral("bingGroup"));
+    auto *bingLayout = new QVBoxLayout(bingGroup);
     auto *bingHint = new QLabel(
-        tr("Bing web is an unofficial endpoint and needs no key. Enable free web services above "
-           "to use it. It may stop working, apply rate limits or block requests. Long text is sent "
-           "in several requests. The text is sent to a third party."),
-        m_bingGroup);
+        tr("Bing web is an unofficial endpoint and needs no key. It may stop working, apply "
+           "rate limits or block requests. Long text is sent in several requests. The text is "
+           "sent to a third party."),
+        bingGroup);
     bingHint->setObjectName(QStringLiteral("bingHint"));
     bingHint->setWordWrap(true);
     bingLayout->addWidget(bingHint);
-    servicesLayout->addWidget(m_bingGroup);
-    connect(m_allowFreeServices, &QCheckBox::toggled, this,
-            &SettingsDialog::updateBingControls);
+    servicesLayout->addWidget(bingGroup);
 
-    m_reversoGroup = new QGroupBox(tr("Reverso"), servicesContent);
-    m_reversoGroup->setObjectName(QStringLiteral("reversoGroup"));
-    auto *reversoLayout = new QVBoxLayout(m_reversoGroup);
+    auto *reversoGroup = new QGroupBox(tr("Reverso"), servicesContent);
+    reversoGroup->setObjectName(QStringLiteral("reversoGroup"));
+    auto *reversoLayout = new QVBoxLayout(reversoGroup);
     auto *reversoHint = new QLabel(
         tr("Reverso is an unofficial endpoint and needs no key. It supports only English, French, "
-           "German, Spanish, Italian and Russian and cannot detect the source language. Enable free "
-           "web services above to use it. It may stop working, apply rate limits or block requests. "
-           "Long text is sent in several requests. The text is sent to a third party."),
-        m_reversoGroup);
+           "German, Spanish, Italian and Russian and cannot detect the source language. It may "
+           "stop working, apply rate limits or block requests. Long text is sent in several "
+           "requests. The text is sent to a third party."),
+        reversoGroup);
     reversoHint->setObjectName(QStringLiteral("reversoHint"));
     reversoHint->setWordWrap(true);
     reversoLayout->addWidget(reversoHint);
-    servicesLayout->addWidget(m_reversoGroup);
-    connect(m_allowFreeServices, &QCheckBox::toggled, this,
-            &SettingsDialog::updateReversoControls);
+    servicesLayout->addWidget(reversoGroup);
 
     servicesLayout->addStretch();
     servicesScroll->setWidget(servicesContent);
@@ -700,7 +670,6 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
 
     m_maxLength->setValue(settings.translation.maxLength);
     m_autoTranslateDelay->setValue(settings.translation.autoTranslateDelayMs);
-    m_allowFreeServices->setChecked(settings.translation.allowFreeServices);
     const int fallbackIndex =
         m_fallbackService->findData(settings.translation.fallbackService);
     m_fallbackService->setCurrentIndex(fallbackIndex >= 0 ? fallbackIndex : 0);
@@ -772,12 +741,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_proxyTestStatus->clear();
     m_testProxy->setEnabled(true);
     updateProxyControls();
-    updateMyMemoryControls();
     updateMozhiControls();
-    updateYandexControls();
-    updateBingControls();
-    updateReversoControls();
-    updateFallbackControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -798,7 +762,6 @@ AppSettings SettingsDialog::settings() const
     result.translation.secondaryLang = m_secondaryLanguage->currentCode();
     result.translation.maxLength = m_maxLength->value();
     result.translation.autoTranslateDelayMs = m_autoTranslateDelay->value();
-    result.translation.allowFreeServices = m_allowFreeServices->isChecked();
     result.translation.fallbackService = m_fallbackService->currentData().toString();
     result.popup.autoCloseOnFocusLoss = m_autoClosePopup->isChecked();
     result.google.mode = m_googleMode->currentData().toString();
@@ -900,38 +863,12 @@ void SettingsDialog::updateDeepLControls()
     m_deepLWebHint->setVisible(freeWeb);
 }
 
-void SettingsDialog::updateMyMemoryControls()
-{
-    m_mymemoryGroup->setEnabled(m_allowFreeServices->isChecked());
-}
-
 void SettingsDialog::updateMozhiControls()
 {
-    m_mozhiGroup->setEnabled(m_allowFreeServices->isChecked());
     const QString text = m_mozhiInstance->text();
     m_mozhiEffectiveInstance->setText(
         tr("Effective instance: %1").arg(normalizedMozhiInstance(text)));
     m_mozhiInstanceWarning->setVisible(!isValidMozhiInstance(text));
-}
-
-void SettingsDialog::updateYandexControls()
-{
-    m_yandexGroup->setEnabled(m_allowFreeServices->isChecked());
-}
-
-void SettingsDialog::updateBingControls()
-{
-    m_bingGroup->setEnabled(m_allowFreeServices->isChecked());
-}
-
-void SettingsDialog::updateReversoControls()
-{
-    m_reversoGroup->setEnabled(m_allowFreeServices->isChecked());
-}
-
-void SettingsDialog::updateFallbackControls()
-{
-    m_fallbackService->setEnabled(m_allowFreeServices->isChecked());
 }
 
 void SettingsDialog::updateProofreadingControls()
