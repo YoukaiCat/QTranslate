@@ -70,3 +70,10 @@ debian/debhelper-build-stamp), so run debian/rules clean first, as
 dpkg-buildpackage does.  dpkg-source always excludes debian/files itself.
 dpkg-source -x qtranslate_0.12.0.dsc extracts qtranslate-0.12.0/ without the
 VCS metadata.
+
+License
+-------
+
+QTranslate is licensed under the GNU General Public License, version 3 or
+later (GPL-3.0-or-later).  The upstream LICENSE file holds the complete
+text; the installed /usr/share/doc/qtranslate/copyright states it.

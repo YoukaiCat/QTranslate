@@ -112,7 +112,7 @@ is English. The migration to the tree roadmap and the English baseline is comple
 
 - The repository is a native Debian source package: top-level `debian/` with `control`, `rules`
   (`dh`, Release, `nocheck` → `QTRANSLATE_BUILD_TESTS=OFF`), `changelog` (`0.12.0`),
-  `copyright` (DEP-5, all rights reserved — the project has no license file and none was added),
+  `copyright` (DEP-5, GPL-3.0-or-later; the full text is in `LICENSE`),
   `source/format` (`3.0 (native)`), `source/options` (a bare `tar-ignore` line restores
   dpkg-source's default `-I` list, plus `build`, `build-*`, `out`, `.claude`), `.gitignore` and
   `README.Debian`. Roadmap: [`roadmap/debian/plan.md`](roadmap/debian/plan.md), closed on
@@ -142,6 +142,10 @@ is English. The migration to the tree roadmap and the English baseline is comple
   `packaging/linux/package.sh` has nine pre-existing `shellcheck` notes; the release `.deb` is not
   code-signed; old `0.11.0` artifacts remain in the local `build/artifacts-linux` and are not
   uploads.
+- License: GPL-3.0-or-later, chosen on 2026-11-14. GPLv2-only was rejected because Qt 6 is
+  LGPLv3/GPLv3 and OpenSSL is Apache-2.0; the current and planned dependencies are otherwise
+  compatible, and the CC-BY-NC NLLB/Seamless model weights are data the project does not ship.
+  `LICENSE` holds the text; the package and the bundles carry it.
 
 ## Hotkeys in fullscreen applications (after 0.11.0)
 

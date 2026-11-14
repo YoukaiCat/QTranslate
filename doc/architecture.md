@@ -4,6 +4,9 @@ This document describes the design of the qtranslate desktop translator: which m
 how they are connected, and how the main scenarios flow. It is the reference document for the
 implementation: if the code diverges from it, either fix the code or deliberately update the document.
 
+The project is licensed under the GNU General Public License, version 3 or later
+(GPL-3.0-or-later); [`LICENSE`](../LICENSE) holds the complete text.
+
 ---
 
 ## 1. Goals and requirements
@@ -143,7 +146,7 @@ qtranslate/
 │   ├── control                 source and binary metadata, Build-Depends
 │   ├── rules                   dh sequence, Release, nocheck/nodoc
 │   ├── changelog               package version, the CMake version
-│   ├── copyright               DEP-5, all rights reserved
+│   ├── copyright               DEP-5, GPL-3.0-or-later
 │   ├── README.Debian           build command and options for packagers
 │   └── source/                 format and tar-ignore
 ├── packaging/
@@ -388,7 +391,7 @@ required files and packs the contents of `dist` into `qtranslate-<version>-win64
 contains the same `bin/`, `plugins/`, `translations/`, and is started via `bin\qtranslate.exe`.
 
 **Linux packages.** The repository is a native Debian source package: `debian/` carries
-`control`, `rules` (the `dh` sequence), `changelog`, `copyright` (DEP-5, all rights reserved),
+`control`, `rules` (the `dh` sequence), `changelog`, `copyright` (DEP-5, GPL-3.0-or-later),
 `source/format` (`3.0 (native)`) and `source/options` (default `tar-ignore` list plus `build`,
 `build-*`, `out`, `.claude`). `DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc"
 dpkg-buildpackage -rfakeroot -us -uc` from the repository root builds

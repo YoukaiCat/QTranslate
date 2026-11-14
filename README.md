@@ -312,3 +312,10 @@ security policy's approval. To revoke it, run
 The text being translated is sent to the selected provider: Google, DeepL, OpenRouter or another
 OpenAI-compatible server. A local server such as Ollama keeps the text on your machine. QTranslate
 does not write the texts to its log.
+
+## License
+
+QTranslate is free software, licensed under the GNU General Public License version 3 or later
+(GPL-3.0-or-later): you can redistribute it and/or modify it under the terms of the GNU General
+Public License as published by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version. See [`LICENSE`](LICENSE) for the full text.

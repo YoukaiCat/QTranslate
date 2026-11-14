@@ -16,6 +16,8 @@
   documents in sync with behavior changes. `README.md` (English) and `README.ru.md` (Russian) must
   stay in sync.
 - Current work state and release handoff: `doc/handoff.md`. Update it at the end of a session.
+- License: GPL-3.0-or-later. `LICENSE` is the source of truth; keep `debian/copyright` and both
+  READMEs in sync with it.
 
 ## Build and test
 
