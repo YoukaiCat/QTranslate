@@ -137,3 +137,9 @@ docs that still name it are stage 3. The existing `qtranslate` map keeps its nod
   (drop `+astra1`, do not publish `dbgsym`), the all-rights-reserved copyright and the deferred
   items (two lintian info tags, no code signing, non-reproducible portable tarball, nine
   pre-existing shellcheck notes, old local 0.11.0 artifacts). No push, tag or release.
+
+- 2026-11-14 — The license question was settled after this map closed: the project is now
+  GPL-3.0-or-later (GPLv2-only rejected because Qt 6 is LGPLv3/GPLv3 and OpenSSL is Apache-2.0).
+  `debian/copyright` now carries `GPL-3+`, `LICENSE` holds the text, and the `license` map is the
+  current record. The all-rights-reserved statements in this map's outcome and stage/task plans are
+  historical and are not rewritten.
