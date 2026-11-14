@@ -33,6 +33,7 @@
 #include "ui/appicon.h"
 #include "ui/mainwindow.h"
 #include "ui/popupwindow.h"
+#include "ui/proofreadingerrortext.h"
 #include "ui/proofreadingpopupwindow.h"
 #include "ui/proofreadingwindow.h"
 #include "ui/settingsdialog.h"
@@ -336,6 +337,9 @@ void AppController::createHotkeys()
         case HotkeyAction::ProofreadSelection:
             proofreadSelectionInPlace();
             break;
+        case HotkeyAction::ProofreadAndReplace:
+            proofreadSelectionAndReplace();
+            break;
         }
     });
 
@@ -365,6 +369,8 @@ void AppController::createHotkeys()
     registerHotkey(HotkeyAction::TranslateToMainWindow, settings.hotkeys.mainWindow);
     registerHotkey(HotkeyAction::ShowMainWindow, settings.hotkeys.showMainWindow);
     registerHotkey(HotkeyAction::ProofreadSelection, settings.proofreading.hotkey);
+    registerHotkey(HotkeyAction::ProofreadAndReplace,
+                   settings.proofreading.replaceHotkey);
     updateTrayToolTip();
 
     m_fullscreenTimer = new QTimer(this);
@@ -404,7 +410,7 @@ void AppController::updateTrayToolTip()
     for (const HotkeyAction action :
          {HotkeyAction::TranslateToPopup, HotkeyAction::TranslateAndReplace,
           HotkeyAction::TranslateToMainWindow, HotkeyAction::ShowMainWindow,
-          HotkeyAction::ProofreadSelection}) {
+          HotkeyAction::ProofreadSelection, HotkeyAction::ProofreadAndReplace}) {
         const QKeySequence sequence = m_hotkeys->hotkey(action);
         if (!sequence.isEmpty())
             keys << sequence.toString(QKeySequence::NativeText);
@@ -596,6 +602,8 @@ void AppController::applySettings(const AppSettings &oldSettings,
                  newSettings.hotkeys.showMainWindow);
     updateHotkey(HotkeyAction::ProofreadSelection, oldSettings.proofreading.hotkey,
                  newSettings.proofreading.hotkey);
+    updateHotkey(HotkeyAction::ProofreadAndReplace, oldSettings.proofreading.replaceHotkey,
+                 newSettings.proofreading.replaceHotkey);
     if (oldSettings.hotkeys.pauseInFullscreen != newSettings.hotkeys.pauseInFullscreen) {
         m_pauseInFullscreen = newSettings.hotkeys.pauseInFullscreen;
         updateFullscreenState();
@@ -1185,6 +1193,101 @@ void AppController::proofreadSelectionInPlace()
                 m_hasInPlaceCheckResult = true;
             }
             m_proofreadingPopup->showResult(result);
+        });
+    });
+}
+
+void AppController::proofreadSelectionAndReplace()
+{
+    if (!m_proofreading)
+        return;
+
+    const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
+    if (!settings.proofreading.enabled) {
+        // The switch is the only consent: while it is off, nothing is copied
+        // and no request is made, whichever entry point was used.
+        showProofreadingMessage(tr("Enable text checking in Settings → Text checking."));
+        return;
+    }
+
+    if (m_grabber->isBusy()) {
+        // A grab is already talking to the source application; sending
+        // another Ctrl+C now would break both operations.
+        qCDebug(lcApp) << "Proofread and replace ignored: a selection grab is already in progress";
+        return;
+    }
+
+    // The popup check and the replace check share the external-selection
+    // channel: a new invocation cancels the previous one.
+    closeProofreadingPopup();
+
+    // A new proofreading invocation supersedes an unfinished translate-and-replace
+    // answer: both captured the same selection, and whichever pasted last would
+    // overwrite the other. The proofreading action is the newer request.
+    m_translations->cancel(TranslationManager::Channel::InPlace);
+    m_inPlaceReply = nullptr;
+
+    // Captured before the grab: it is the window the user is typing in. On
+    // Wayland (and when X11 focus is PointerRoot/None) there is no handle; the
+    // grabber reads the manually copied clipboard and the corrected text goes
+    // to the clipboard instead of being pasted.
+    const quintptr target = Platform::foregroundWindow();
+
+    m_grabber->grab([this, target](const QString &text) {
+        if (text.isEmpty()) {
+            showProofreadingMessage(tr("Nothing is selected."));
+            return;
+        }
+
+        const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
+        const ProofreadingRequest request{text, settings.proofreading.language,
+                                          settings.proofreading.categories};
+
+        ProofreadingReply *reply =
+            m_proofreading->check(request, ProofreadingManager::Channel::InPlace);
+        reply->setParent(this); // freed with the controller if still pending at exit
+        m_replaceCheck = reply;
+
+        connect(reply, &ProofreadingReply::finished, this, [this, reply, target, text] {
+            reply->deleteLater();
+            // deleteLater() keeps the object alive for this comparison; a
+            // cancelled reply must never paste its text.
+            if (reply != m_replaceCheck)
+                return;
+            m_replaceCheck = nullptr;
+
+            const ProofreadingResult result = reply->result();
+            if (result.error == TranslationError::Cancelled)
+                return;
+            if (!result.ok()) {
+                showProofreadingMessage(ProofreadingErrorText::forResult(result));
+                return;
+            }
+
+            const QString corrected = ProofreadingText::corrected(text, result.issues);
+            if (result.issues.isEmpty() || corrected == text) {
+                // Nothing was applicable: keep the selection and the clipboard.
+                showProofreadingMessage(tr("No issues found in the selection."));
+                return;
+            }
+
+            if (target == 0) {
+                // No window handle: Wayland, or X11 focus is PointerRoot/None.
+                QGuiApplication::clipboard()->setText(corrected);
+                showProofreadingMessage(
+                    tr("Could not paste automatically; the corrected text is on the clipboard."));
+                return;
+            }
+            if (!Platform::isForegroundWindow(target)) {
+                // Do not paste into whatever window happened to become active
+                // while the check was running.
+                QGuiApplication::clipboard()->setText(corrected);
+                showProofreadingMessage(tr("The active window changed; the corrected text was "
+                                           "copied to the clipboard."));
+                return;
+            }
+
+            pasteText(corrected);
         });
     });
 }

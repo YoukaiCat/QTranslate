@@ -160,6 +160,8 @@ void TestHotkeyManagerX11::registersAllActions()
          QKeySequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F10)},
         {HotkeyAction::ProofreadSelection,
          QKeySequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F11)},
+        {HotkeyAction::ProofreadAndReplace,
+         QKeySequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F12)},
     };
 
     for (const auto &testCase : cases) {

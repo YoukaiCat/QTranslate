@@ -84,6 +84,7 @@ private:
     void translateSelectionInPopup();
     void translateSelectionInPlace();
     void proofreadSelectionInPlace();
+    void proofreadSelectionAndReplace();
     void translateInPopup(const TranslationRequest &request);
     void pasteText(const QString &text);
     void restoreClipboardAfterPaste();
@@ -134,6 +135,7 @@ private:
     quintptr m_inPlaceTarget = 0;                 // window that had the selection
     std::unique_ptr<QMimeData> m_pasteSnapshot;   // clipboard to restore after pasting
     QPointer<ProofreadingReply> m_inPlaceCheck;   // the check the confirmation waits for
+    QPointer<ProofreadingReply> m_replaceCheck;   // the check the replace hotkey waits for
     quintptr m_proofreadTarget = 0;               // window that had the checked selection
     QString m_proofreadCorrected;                 // corrected text of the shown result
     bool m_hasInPlaceCheckResult = false;

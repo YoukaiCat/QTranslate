@@ -19,7 +19,8 @@ class ProofreadingManager : public QObject
 public:
     // Independent request streams: a new request cancels the unfinished one of
     // the same channel only. The checking window owns Window; the
-    // external-selection scenario has a confirmation window and reuses InPlace.
+    // external-selection actions (the popup check and check-and-replace) share
+    // InPlace, so either one cancels the other's unfinished check.
     enum class Channel { Window, InPlace };
 
     explicit ProofreadingManager(QObject *parent = nullptr);

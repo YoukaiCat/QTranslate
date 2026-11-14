@@ -149,6 +149,7 @@ private slots:
                  QStringList({QStringLiteral("spelling"), QStringLiteral("grammar"),
                               QStringLiteral("punctuation"), QStringLiteral("style")}));
         QVERIFY(settings.proofreading.hotkey.isEmpty());
+        QVERIFY(settings.proofreading.replaceHotkey.isEmpty());
 
         QCOMPARE(settings.network.proxyMode, QStringLiteral("system"));
         QCOMPARE(settings.network.timeoutMs, 10000);
@@ -423,6 +424,8 @@ private slots:
             QStringList({QStringLiteral("style"), QStringLiteral("grammar")});
         settings.proofreading.hotkey =
             QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11"));
+        settings.proofreading.replaceHotkey =
+            QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F12"));
         store.save(settings);
 
         SettingsStore loaded(path, fakeCodec());
@@ -437,6 +440,8 @@ private slots:
                  QStringList({QStringLiteral("grammar"), QStringLiteral("style")}));
         QCOMPARE(result.proofreading.hotkey,
                  QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11")));
+        QCOMPARE(result.proofreading.replaceHotkey,
+                 QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F12")));
         QCOMPARE(result.settingsVersion, 1);
 
         // The INI holds the group itself and no apiKey.
@@ -447,6 +452,8 @@ private slots:
                      QStringLiteral("languagetool"));
             QCOMPARE(raw.value(QStringLiteral("proofreading/hotkey")).toString(),
                      QStringLiteral("Ctrl+Alt+Shift+F11"));
+            QCOMPARE(raw.value(QStringLiteral("proofreading/replaceHotkey")).toString(),
+                     QStringLiteral("Ctrl+Alt+Shift+F12"));
         }
         const QByteArray ini = readFile(path);
         QVERIFY(ini.contains("[proofreading]"));
@@ -563,6 +570,8 @@ private slots:
         QCOMPARE(store.current().general.startMinimized, false);
         QCOMPARE(store.current().proofreading.provider, QStringLiteral("languagetool"));
         QCOMPARE(store.current().proofreading.categories, proofreadingCategoryIds());
+        QVERIFY(store.current().proofreading.hotkey.isEmpty());
+        QVERIFY(store.current().proofreading.replaceHotkey.isEmpty());
         // Loading an old file must not rewrite it.
         QCOMPARE(readFile(path), before);
     }

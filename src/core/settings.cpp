@@ -543,6 +543,8 @@ void SettingsStore::load()
             .toStringList();
     loaded.proofreading.hotkey =
         readKeySequence(settings, QStringLiteral("hotkey"), loaded.proofreading.hotkey);
+    loaded.proofreading.replaceHotkey = readKeySequence(
+        settings, QStringLiteral("replaceHotkey"), loaded.proofreading.replaceHotkey);
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("network"));
@@ -680,6 +682,8 @@ void SettingsStore::save(const AppSettings &settings)
     out.setValue(QStringLiteral("categories"), normalized.proofreading.categories);
     out.setValue(QStringLiteral("hotkey"),
                  normalized.proofreading.hotkey.toString(QKeySequence::PortableText));
+    out.setValue(QStringLiteral("replaceHotkey"),
+                 normalized.proofreading.replaceHotkey.toString(QKeySequence::PortableText));
     out.endGroup();
 
     out.beginGroup(QStringLiteral("network"));

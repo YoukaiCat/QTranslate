@@ -1,6 +1,6 @@
 ---
 kind: task
-status: todo
+status: done
 depends: [03-extract-proofreading-window]
 ---
 
@@ -120,3 +120,63 @@ Design decisions already fixed for the detailer:
 - The tray notification path is only as good as `showProofreadingMessage()` when no tray exists
   (`showNonModalMessage`), which is pre-existing and untested interactively; record it as not
   performed rather than claiming it works.
+
+## Outcome
+
+Done. The selection medium has two independent hotkeys: `ProofreadSelection` still shows the popup
+result, and the new `ProofreadAndReplace` checks and pastes the corrected text into the source field
+with no confirmation window.
+
+- `HotkeyAction::ProofreadAndReplace` is appended to the enum. The Windows backend is action-generic
+  (`idForAction()`), so nothing changed there; on Linux `kLastAction` moved to the new value and the
+  portal table has a sixth row: `proofread-replace` ("Check the selected text and replace it with the
+  corrected text"). The `proofread-selection` portal description now says the result is shown in a
+  popup. `hotkeymanager_stub.cpp` needed no change.
+- `[proofreading] replaceHotkey` is in `ProofreadingSettings` (empty by default), read with the
+  existing `readKeySequence()` and written as `PortableText`; `settingsVersion` stays `1` and an INI
+  without the key loads an empty sequence without rewriting the file.
+- `SettingsDialog` has the replace row directly after the popup-check row and before the
+  main-window rows (`proofreadReplaceHotkey`), loads/saves it, includes it in `anyHotkeyEditFocused()`
+  and in `validate()` (duplicate combinations between the two proofreading rows and against the
+  other four actions, plus the multi-combination check). The popup row is relabelled to say the
+  result is shown in a popup. Both rows stay editable while `proofreading.enabled` is off; the gate
+  is at activation, as the updated comment in `proofreadingHotkeyIsIndependentOfMode()` says.
+- `AppController::proofreadSelectionAndReplace()` repeats the three-line `proofreading.enabled` gate
+  (same `tr()` literal) before the grab, then the `isBusy()` guard, `closeProofreadingPopup()`, the
+  in-place translation cancel, `foregroundWindow()` before the grab, one
+  `ProofreadingManager::Channel::InPlace` check tracked in `m_replaceCheck`, and a result handler
+  with `deleteLater()` → `reply == m_replaceCheck` → `Cancelled`. Success with applicable issues and
+  a changed text compares the target once and calls `pasteText(corrected)`; `target == 0` and a
+  changed window put the text on the clipboard with the two existing messages; no issues (or a
+  corrected text equal to the original) shows one new message and writes nothing; a failed check
+  shows `ProofreadingErrorText::forResult()`. Message title stays `Check the selection`. No popup,
+  no checking/translation window, no focus-watch timer, no `MainWindow` access, no text in the log.
+  The action is registered at startup, updated in `applySettings()`, dispatched by the `activated`
+  switch and listed in the tray tooltip. The stale `Channel::InPlace` comment is updated.
+- Tests: `tst_settings` covers the default, a round trip, `PortableText` and the absent-key INI;
+  `tst_settingsdialog` covers load/save of the new row, the distinct labels and row order, the
+  isolated duplicate between the two proofreading rows, the multi-combination rejection and the
+  editable-in-both-modes rule; `tst_hotkeymanager_x11` registers the new action;
+  `tst_hotkeymanager_wayland` adds the portal case and moves the 5→6 counts. The Windows-only
+  `tst_hotkeymanager` needs no new case.
+- Translations: the 14 `.ts` files are at **374** messages (the relabelled popup source replaces its
+  old entry, plus the replace label and `No issues found in the selection.`) with 0
+  unfinished/empty/vanished; `lrelease` reports 374 finished and 0 unfinished per file. The three
+  new sources are translated in all 14 languages (machine-authored, not human-reviewed).
+- Verification in the `qtranslate-trixie` container: Linux Debug and Release build with zero
+  `warning:` (`-Wall -Wextra`) and pass **46/46** under `xvfb-run -a`; the targeted
+  `tst_settings`, `tst_settingsdialog`, `tst_hotkeymanager_x11`, `tst_hotkeymanager_wayland` and
+  `tst_translations` are green in both configurations, `git diff --check` is clean. The review found
+  one test weakness: `rejectsDuplicateHotkeys()` did not isolate the proofreading↔replace pair
+  (`popupHotkey` still held the duplicate, so `validate()` failed earlier); accepted and fixed by
+  clearing the popup row before the replace assignment, then re-verified. No rejected remarks and no
+  real problems deferred.
+- Not performed: Windows Debug/Release and its 40 tests (no MSVC); the interactive paste/tray pass
+  and the no-tray `showNonModalMessage` path. The replace flow has no unit test because
+  `AppController` has no test target; it is covered by code review and the shared clipboard/target
+  code of the existing popup and translate-and-replace flows.
+- Notes: `lupdate` leaves one obsolete entry in the files (the target passes no `-no-obsolete`), so
+  the vanished block was removed by hand; `No issues found in the selection.` has no `<location>`
+  because `lupdate` does not attach the string from the nested lambda — the message count and tests
+  are unaffected. The `pasteText()` paste-failure message still says "translation" (the stage-5 gap
+  the plan keeps). No `doc/`, README, `AGENTS.md`, root-plan, CMake or version change; no push.

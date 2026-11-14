@@ -67,7 +67,7 @@ struct ShortcutInfo
 
 // The last HotkeyAction value: every action is enumerated by int(action) in the
 // table and in the portal loops below.
-constexpr HotkeyAction kLastAction = HotkeyAction::ProofreadSelection;
+constexpr HotkeyAction kLastAction = HotkeyAction::ProofreadAndReplace;
 
 const ShortcutInfo &shortcutInfo(HotkeyAction action)
 {
@@ -80,7 +80,9 @@ const ShortcutInfo &shortcutInfo(HotkeyAction action)
          QStringLiteral("Translate selected text in the main window")},
         {QStringLiteral("show-main-window"), QStringLiteral("Show the main window")},
         {QStringLiteral("proofread-selection"),
-         QStringLiteral("Check the selected text and replace it")},
+         QStringLiteral("Check the selected text and show the result in a popup")},
+        {QStringLiteral("proofread-replace"),
+         QStringLiteral("Check the selected text and replace it with the corrected text")},
     };
     return shortcuts[int(action)];
 }

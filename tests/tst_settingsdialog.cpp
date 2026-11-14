@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QFormLayout>
 #include <QGroupBox>
 #include <QKeySequenceEdit>
 #include <QLabel>
@@ -100,6 +101,7 @@ private slots:
         settings.translation.autoTranslateDelayMs = 0;
         settings.popup.autoCloseOnFocusLoss = false;
         settings.proofreading.hotkey = QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F9);
+        settings.proofreading.replaceHotkey = QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F10);
 
         SettingsDialog dialog(settings, {QStringLiteral("en"), QStringLiteral("ru")},
                               {QStringLiteral("de"), QStringLiteral("en"),
@@ -120,6 +122,8 @@ private slots:
             dialog.findChild<QKeySequenceEdit *>(QStringLiteral("mainWindowHotkey"));
         auto *proofreadingHotkey =
             dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"));
+        auto *proofreadReplaceHotkey =
+            dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadReplaceHotkey"));
         auto *source =
             dialog.findChild<LanguageComboBox *>(QStringLiteral("sourceLanguage"));
         auto *primary =
@@ -140,6 +144,7 @@ private slots:
         QVERIFY(replaceHotkey);
         QVERIFY(mainHotkey);
         QVERIFY(proofreadingHotkey);
+        QVERIFY(proofreadReplaceHotkey);
         QVERIFY(source);
         QVERIFY(primary);
         QVERIFY(secondary);
@@ -157,6 +162,8 @@ private slots:
         QCOMPARE(mainHotkey->keySequence(), QKeySequence(Qt::CTRL | Qt::Key_W));
         QCOMPARE(proofreadingHotkey->keySequence(),
                  QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F9));
+        QCOMPARE(proofreadReplaceHotkey->keySequence(),
+                 QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F10));
         QCOMPARE(source->currentCode(), QStringLiteral("en"));
         QCOMPARE(primary->currentCode(), QStringLiteral("de"));
         QCOMPARE(secondary->currentCode(), QStringLiteral("fr"));
@@ -191,6 +198,8 @@ private slots:
             ->setKeySequence(QKeySequence());
         dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"))
             ->setKeySequence(QKeySequence(QStringLiteral("Ctrl+Alt+P")));
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadReplaceHotkey"))
+            ->setKeySequence(QKeySequence(QStringLiteral("Ctrl+Alt+E")));
         dialog.findChild<LanguageComboBox *>(QStringLiteral("sourceLanguage"))
             ->setCurrentCode(QStringLiteral("en"));
         dialog.findChild<LanguageComboBox *>(QStringLiteral("primaryLanguage"))
@@ -212,6 +221,8 @@ private slots:
                  QKeySequence(QStringLiteral("Ctrl+Alt+R")));
         QVERIFY(result.hotkeys.mainWindow.isEmpty());
         QCOMPARE(result.proofreading.hotkey, QKeySequence(QStringLiteral("Ctrl+Alt+P")));
+        QCOMPARE(result.proofreading.replaceHotkey,
+                 QKeySequence(QStringLiteral("Ctrl+Alt+E")));
         QCOMPARE(result.translation.sourceLang, QStringLiteral("en"));
         QCOMPARE(result.translation.primaryLang, QStringLiteral("fr"));
         QCOMPARE(result.translation.secondaryLang, QStringLiteral("de"));
@@ -236,10 +247,20 @@ private slots:
         QVERIFY(!dialog.validate(&error));
         QVERIFY(error.contains(QStringLiteral("assigned more than once")));
 
-        // The proofreading row is checked against the four existing actions too.
+        // The proofreading rows are checked against the four existing actions too.
         dialog.findChild<QKeySequenceEdit *>(QStringLiteral("replaceSelectionHotkey"))
             ->setKeySequence(QKeySequence());
         dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"))
+            ->setKeySequence(duplicate);
+        QVERIFY(!dialog.validate(&error));
+        QVERIFY(error.contains(QStringLiteral("assigned more than once")));
+
+        // A duplicate between the two proofreading rows is rejected as well.
+        // Clear the earlier duplicate on popupHotkey so this failure can only
+        // come from the proofreading/replace pair.
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("popupHotkey"))
+            ->setKeySequence(QKeySequence());
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadReplaceHotkey"))
             ->setKeySequence(duplicate);
         QVERIFY(!dialog.validate(&error));
         QVERIFY(error.contains(QStringLiteral("assigned more than once")));
@@ -253,6 +274,14 @@ private slots:
             ->setKeySequence(QKeySequence(QStringLiteral("Ctrl+K, Ctrl+C")));
 
         QString error;
+        QVERIFY(!dialog.validate(&error));
+        QVERIFY(!error.isEmpty());
+
+        // The replace row rejects a multi-combination sequence too.
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("popupHotkey"))
+            ->setKeySequence(QKeySequence());
+        dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadReplaceHotkey"))
+            ->setKeySequence(QKeySequence(QStringLiteral("Ctrl+K, Ctrl+C")));
         QVERIFY(!dialog.validate(&error));
         QVERIFY(!error.isEmpty());
     }
@@ -275,7 +304,7 @@ private slots:
                               {QStringLiteral("en"), QStringLiteral("ru")}, true);
         for (const char *name : {"popupHotkey", "replaceSelectionHotkey",
                                  "mainWindowHotkey", "showMainWindowHotkey",
-                                 "proofreadingHotkey"}) {
+                                 "proofreadingHotkey", "proofreadReplaceHotkey"}) {
             dialog.findChild<QKeySequenceEdit *>(QString::fromLatin1(name))
                 ->setKeySequence(QKeySequence());
         }
@@ -1008,15 +1037,73 @@ private slots:
             dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingEnabled"));
         auto *hotkey =
             dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"));
-        QVERIFY(enabled && hotkey);
+        auto *replace =
+            dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadReplaceHotkey"));
+        QVERIFY(enabled && hotkey && replace);
         QVERIFY(!enabled->isChecked());
 
-        // A hotkey can be assigned before the feature is enabled, so its row
-        // stays editable in both modes; the action shows a message while the
-        // switch is off.
+        // A combination can be assigned before the feature is enabled, so both
+        // rows stay editable in either mode; the action itself is gated at
+        // activation: while the switch is off, AppController shows a message
+        // and performs no grab and no check.
         QVERIFY(hotkey->isEnabled());
+        QVERIFY(replace->isEnabled());
         enabled->setChecked(true);
         QVERIFY(hotkey->isEnabled());
+        QVERIFY(replace->isEnabled());
+    }
+
+    void proofreadingHotkeyRowsAreDistinctAndOrdered()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("en"), QStringLiteral("ru")}, true);
+        auto *popup =
+            dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadingHotkey"));
+        auto *replace =
+            dialog.findChild<QKeySequenceEdit *>(QStringLiteral("proofreadReplaceHotkey"));
+        auto *main =
+            dialog.findChild<QKeySequenceEdit *>(QStringLiteral("mainWindowHotkey"));
+        QVERIFY(popup && replace && main);
+
+        QFormLayout *form = nullptr;
+        for (QFormLayout *candidate : dialog.findChildren<QFormLayout *>()) {
+            int row = -1;
+            QFormLayout::ItemRole role = QFormLayout::FieldRole;
+            candidate->getWidgetPosition(popup, &row, &role);
+            if (row >= 0) {
+                form = candidate;
+                break;
+            }
+        }
+        QVERIFY(form);
+
+        int popupRow = -1;
+        int replaceRow = -1;
+        int mainRow = -1;
+        QFormLayout::ItemRole role = QFormLayout::FieldRole;
+        form->getWidgetPosition(popup, &popupRow, &role);
+        form->getWidgetPosition(replace, &replaceRow, &role);
+        form->getWidgetPosition(main, &mainRow, &role);
+        QVERIFY(popupRow >= 0);
+        QVERIFY(replaceRow >= 0);
+        QVERIFY(mainRow >= 0);
+        // The replace row follows the popup check and stays before the
+        // main-window rows.
+        QCOMPARE(replaceRow, popupRow + 1);
+        QVERIFY(mainRow > replaceRow);
+
+        const auto labelText = [form](int row) {
+            const QLayoutItem *item = form->itemAt(row, QFormLayout::LabelRole);
+            const auto *label = item ? qobject_cast<QLabel *>(item->widget()) : nullptr;
+            return label ? label->text() : QString();
+        };
+        const QString popupLabel = labelText(popupRow);
+        const QString replaceLabel = labelText(replaceRow);
+        QVERIFY2(popupLabel.contains(QStringLiteral("popup"), Qt::CaseInsensitive),
+                 qPrintable(popupLabel));
+        QVERIFY2(replaceLabel.contains(QStringLiteral("corrected"), Qt::CaseInsensitive),
+                 qPrintable(replaceLabel));
+        QVERIFY(popupLabel != replaceLabel);
     }
 
     void proofreadingTabHasNoGate()

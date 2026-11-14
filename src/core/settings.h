@@ -74,6 +74,8 @@ struct ProofreadingSettings
     QStringList categories;
     // Empty by default: the action is disabled until the user assigns it.
     QKeySequence hotkey;
+    // The separate check-and-replace action; also empty by default.
+    QKeySequence replaceHotkey;
 };
 
 struct NetworkSettings

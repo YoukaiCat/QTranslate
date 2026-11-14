@@ -548,6 +548,9 @@ QList<ActionCase> actionCases()
         {HotkeyAction::ProofreadSelection,
          QKeySequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F11),
          QStringLiteral("proofread-selection"), QStringLiteral("CTRL+ALT+SHIFT+F11")},
+        {HotkeyAction::ProofreadAndReplace,
+         QKeySequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_F12),
+         QStringLiteral("proofread-replace"), QStringLiteral("CTRL+ALT+SHIFT+F12")},
     };
 }
 
@@ -638,11 +641,11 @@ void TestHotkeyManagerWayland::createSessionErrorIsReportedOncePerAction()
         failedActions.insert(int(failures.last().at(0).value<HotkeyAction>()));
         QVERIFY(!failures.last().at(2).toString().isEmpty());
     }
-    QCOMPARE(failures.count(), 5);
-    QCOMPARE(failedActions.size(), 5);
+    QCOMPARE(failures.count(), 6);
+    QCOMPARE(failedActions.size(), 6);
     QVERIFY2(failures.first().at(2).toString().contains(QLatin1String("response 2")),
              qPrintable(failures.first().at(2).toString()));
-    QCOMPARE(m_portal->createCalls, 5);
+    QCOMPARE(m_portal->createCalls, 6);
     QCOMPARE(m_portal->bindCalls, 0);
     QCOMPARE(m_portal->closeCalls, 0);
     for (const ActionCase &testCase : actionCases())
@@ -657,7 +660,7 @@ void TestHotkeyManagerWayland::happyPathBindsAllActions()
     QSignalSpy failures(&manager, &HotkeyManager::registrationFailed);
     QVERIFY(registerAll(&manager));
 
-    // The bind is asynchronous: immediately after the five calls the sequences
+    // The bind is asynchronous: immediately after the six calls the sequences
     // are still reported.
     for (const ActionCase &testCase : actionCases())
         QCOMPARE(manager.hotkey(testCase.action), testCase.sequence);
@@ -665,7 +668,7 @@ void TestHotkeyManagerWayland::happyPathBindsAllActions()
     QTRY_COMPARE_WITH_TIMEOUT(m_portal->createCalls, 1, 10000);
     QTRY_COMPARE_WITH_TIMEOUT(m_portal->bindCalls, 1, 10000);
     QCOMPARE(m_portal->sessionPaths.size(), 1);
-    QCOMPARE(m_portal->lastShortcuts.size(), 5);
+    QCOMPARE(m_portal->lastShortcuts.size(), 6);
     QCOMPARE(m_portal->lastParentWindow, QString());
     QVERIFY(m_portal->lastCreateOptions.contains(QStringLiteral("handle_token")));
     QVERIFY(m_portal->lastCreateOptions.contains(QStringLiteral("session_handle_token")));
@@ -711,7 +714,7 @@ void TestHotkeyManagerWayland::bindCancelIsReported()
     QSignalSpy failures(&manager, &HotkeyManager::registrationFailed);
     QVERIFY(registerAll(&manager));
 
-    QTRY_COMPARE_WITH_TIMEOUT(failures.count(), 5, 10000);
+    QTRY_COMPARE_WITH_TIMEOUT(failures.count(), 6, 10000);
     QCOMPARE(m_portal->bindCalls, 1);
     QSet<int> failedActions;
     for (const QList<QVariant> &failure : std::as_const(failures))
@@ -732,7 +735,7 @@ void TestHotkeyManagerWayland::bindErrorIsReported()
     QSignalSpy failures(&manager, &HotkeyManager::registrationFailed);
     QVERIFY(registerAll(&manager));
 
-    QTRY_COMPARE_WITH_TIMEOUT(failures.count(), 5, 10000);
+    QTRY_COMPARE_WITH_TIMEOUT(failures.count(), 6, 10000);
     QCOMPARE(m_portal->bindCalls, 1);
     for (const ActionCase &testCase : actionCases())
         QCOMPARE(manager.hotkey(testCase.action), testCase.sequence);
@@ -750,7 +753,7 @@ void TestHotkeyManagerWayland::bindTimeoutIsReported()
     QSignalSpy failures(&manager, &HotkeyManager::registrationFailed);
     QVERIFY(registerAll(&manager));
 
-    QTRY_COMPARE_WITH_TIMEOUT(failures.count(), 5, 5000);
+    QTRY_COMPARE_WITH_TIMEOUT(failures.count(), 6, 5000);
     QCOMPARE(m_portal->bindCalls, 1);
     for (const ActionCase &testCase : actionCases())
         QCOMPARE(manager.hotkey(testCase.action), testCase.sequence);
@@ -791,7 +794,7 @@ void TestHotkeyManagerWayland::shortcutsChangedReportsRemoval()
         if (changed.at(i).id == QLatin1String("show-main-window"))
             changed.removeAt(i);
     }
-    QCOMPARE(changed.size(), 4);
+    QCOMPARE(changed.size(), 5);
 
     QSignalSpy failures(&manager, &HotkeyManager::registrationFailed);
     m_portal->emitShortcutsChanged(m_portal->sessionPaths.first(), changed);
@@ -916,7 +919,7 @@ void TestHotkeyManagerWayland::changedSequenceRebinds()
     QCOMPARE(m_portal->lastSessionHandle, m_portal->sessionPaths.at(1));
     QVERIFY2(m_portal->lastClosedSession == oldSession,
              qPrintable(m_portal->lastClosedSession));
-    QCOMPARE(m_portal->lastShortcuts.size(), 5);
+    QCOMPARE(m_portal->lastShortcuts.size(), 6);
 
     QMap<QString, QString> triggers;
     for (const PortalShortcut &shortcut : std::as_const(m_portal->lastShortcuts))
@@ -944,7 +947,7 @@ void TestHotkeyManagerWayland::unregisterAndRegisterCoalesce()
     QTRY_COMPARE_WITH_TIMEOUT(m_portal->createCalls, 2, 10000);
     QTRY_COMPARE_WITH_TIMEOUT(m_portal->bindCalls, 2, 10000);
     QCOMPARE(m_portal->sessionPaths.size(), 2);
-    QCOMPARE(m_portal->lastShortcuts.size(), 5);
+    QCOMPARE(m_portal->lastShortcuts.size(), 6);
 
     QMap<QString, QString> triggers;
     for (const PortalShortcut &shortcut : std::as_const(m_portal->lastShortcuts))

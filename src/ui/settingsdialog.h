@@ -108,6 +108,7 @@ private:
     QKeySequenceEdit *m_mainWindowHotkey = nullptr;
     QKeySequenceEdit *m_showMainWindowHotkey = nullptr;
     QKeySequenceEdit *m_proofreadingHotkey = nullptr;
+    QKeySequenceEdit *m_proofreadReplaceHotkey = nullptr;
     QCheckBox *m_pauseInFullscreen = nullptr;
 
     LanguageComboBox *m_sourceLanguage = nullptr;
