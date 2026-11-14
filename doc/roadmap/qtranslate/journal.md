@@ -2,29 +2,32 @@
 
 ## Where we left off
 
-Current node: no active task. Stage `08-free-services-always-on` is `done` (accepted over
-`2650def..2ebf5ae`; its children are `7b1265c` and `2ebf5ae`, and the documentation pass is in the
-stage-closing commit). The free-services opt-in gate and the whole opt-in concept are gone, every
-service is available by default, the **Allow free web services** checkbox is gone, the **Fallback
-service** row is on the Translation page, and the provider order is Google, Yandex, Bing, DeepL,
-OpenAI-compatible, MyMemory, Mozhi, Reverso. The user deferred the text-checking discussion until
-this work was done and said the lead had understood it incorrectly; that discussion is the next
-item, before new implementation work. `proofreading/allowOnlineServices` and the Text checking tab
-are unchanged for now.
+Current node: stage `09-proofreading-standalone` is `in-progress` (`base: 3e75331`). It has four
+children; `01-remove-online-gate` is `in-progress` and the coordinator starts next. The stage is the
+user's 2026-11-14 correction of stage 5: text checking is a standalone feature on par with
+translation, in its own window and mode. The translation window becomes translation-only; a separate
+non-modal `ProofreadingWindow` (own editor, **Check**, issue list, Replace/Ignore/Replace all/Copy)
+is opened from the tray item **Check text…**. Remove `proofreading/checkBeforeTranslation`,
+`proofreading/autoReplace` and `proofreading/allowOnlineServices`;
+`proofreading/enabled` is the only switch. The two hotkeys check an external selection: one shows the
+popup, the other immediately replaces the selection with the corrected text. Children `02`, `03` and
+`04` follow task 01. Stage `08-free-services-always-on` remains `done` (`2650def..2ebf5ae`, docs in
+the closing commit).
 
 Stages 1-3, 5 and 8 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by the user's
-2026-11-05 decision and is not dropped; stages 6-7 are `todo`. The root is `in-progress`; its
-`Done when` requires every stage to be done or dropped, so stage 4's blocked state is a deliberate
-exception.
+2026-11-05 decision and is not dropped; stages 6-7 are `todo` and wait for stage 9. The root is
+`in-progress`; its `Done when` requires every stage to be done or dropped, so stage 4's blocked
+state is a deliberate exception.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
 release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub release stays until
 the user checks the current code on Windows.
 
-Work is on `main` (matches the root `branch:`); the working tree is clean. Linux is 45/45, Windows
-39 (derived, not run locally); `.ts` has 379 messages. The next node is `06-llm-actions` once the
-text-checking discussion is resolved.
+Work is on `main` (matches the root `branch:`); the working tree holds the stage-9 map files and the
+AGENTS.md testing note. Linux is 45/45, Windows 39 (derived, not run locally); `.ts` has 379
+messages before this change, and the stage ends at 374 with 46 Linux / 40 Windows tests after the new
+`tst_mainwindow`. The next node is task 01; `06-llm-actions` follows stage 9.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
@@ -240,3 +243,21 @@ has six languages and no `auto`. Next: plan and run stage 8.
   Real problems: none; `AppController` has no test target, so the startup/picker order paths remain
   code-review plus legacy-INI smoke. The user deferred the text-checking discussion until this stage
   was done; it is the next item, and `06-llm-actions` waits for it.
+- 2026-11-14 — User corrected the text-checking concept. Text checking is a standalone feature on
+  par with translation, not a pre-translation step: the user wants to check the selected text from
+  any application by one hotkey and see the result in a new popup window (the existing
+  `ProofreadSelection` flow), and to check and immediately replace the selection in the source field
+  by a second hotkey (new). Decisions: remove `proofreading/checkBeforeTranslation` (no checking
+  before translation), `proofreading/autoReplace` (the new hotkey does the replacement) and
+  `proofreading/allowOnlineServices` (the **Enable text checking** switch is the consent; no second
+  privacy gate). Keep `proofreading/enabled` as the only switch with its `false` default, and keep
+  the manual main-window **Check** panel as a separate checking UI. The planner splits stage
+  `09-proofreading-standalone` (`in-progress`, `base: 3e75331`); it is worked before
+  `06-llm-actions`. Rejected: keeping the pre-translation confirmation; keeping an automatic
+  replacement option; keeping the online gate; making text checking default-on without the user
+  asking (the enable checkbox was named as the sufficient control).
+- 2026-11-14 — Testing workflow: during agent work, run builds and tests in the `qtranslate-trixie`
+  Docker image or a VM where possible so the host stays responsive for the user; after the work is
+  finished, run the final Debug/Release check on the host. The image is built from
+  `packaging/linux/trixie.Dockerfile` (`docker build -f packaging/linux/trixie.Dockerfile -t
+  qtranslate-trixie .`); only `debian:trixie` exists locally at the moment, so build it if absent.

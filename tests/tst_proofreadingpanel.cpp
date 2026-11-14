@@ -228,10 +228,10 @@ private slots:
         QVERIFY(list);
         QVERIFY(state);
 
-        const QString gate = QStringLiteral(
-            "Enable online text checking in Settings → Text checking.");
-        window.showProofreadingResult(makeError(TranslationError::ServiceUnavailable, gate));
-        QVERIFY2(state->text().contains(gate), qPrintable(state->text()));
+        const QString message = QStringLiteral(
+            "No text checking provider is available.");
+        window.showProofreadingResult(makeError(TranslationError::ServiceUnavailable, message));
+        QVERIFY2(state->text().contains(message), qPrintable(state->text()));
         QCOMPARE(list->count(), 0);
         QCOMPARE(source->extraSelections().size(), 0);
         QVERIFY(!check->isHidden());

@@ -307,7 +307,6 @@ private slots:
         QCOMPARE(m_service->id(), QStringLiteral("languagetool"));
         QCOMPARE(m_service->displayName(), QStringLiteral("LanguageTool"));
         QVERIFY(m_service->isConfigured());
-        QVERIFY(!m_service->isLocal());
         QVERIFY(m_service->supportsAutoLanguage());
 
         const QStringList languages = m_service->languages();

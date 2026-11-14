@@ -216,11 +216,10 @@ private slots:
         QVERIFY(!replaceAll->isEnabled());
         QVERIFY(preview->toPlainText().isEmpty());
 
-        // The manager's online gate arrives as errorMessage and is shown as is.
-        const QString gate =
-            QStringLiteral("Enable online text checking in Settings → Text checking.");
-        window.showResult(makeError(TranslationError::ServiceUnavailable, gate));
-        QVERIFY2(state->text().contains(gate), qPrintable(state->text()));
+        // A manager-side refusal arrives as errorMessage and is shown as is.
+        const QString message = QStringLiteral("No text checking provider is available.");
+        window.showResult(makeError(TranslationError::ServiceUnavailable, message));
+        QVERIFY2(state->text().contains(message), qPrintable(state->text()));
         QVERIFY2(state->text().contains(QStringLiteral("The text checking service is unavailable")),
                  qPrintable(state->text()));
         QCOMPARE(list->count(), 0);

@@ -547,10 +547,6 @@ void SettingsStore::load()
             .toBool();
     loaded.proofreading.autoReplace =
         settings.value(QStringLiteral("autoReplace"), loaded.proofreading.autoReplace).toBool();
-    loaded.proofreading.allowOnlineServices =
-        settings.value(QStringLiteral("allowOnlineServices"),
-                       loaded.proofreading.allowOnlineServices)
-            .toBool();
     loaded.proofreading.hotkey =
         readKeySequence(settings, QStringLiteral("hotkey"), loaded.proofreading.hotkey);
     settings.endGroup();
@@ -691,8 +687,6 @@ void SettingsStore::save(const AppSettings &settings)
     out.setValue(QStringLiteral("checkBeforeTranslation"),
                  normalized.proofreading.checkBeforeTranslation);
     out.setValue(QStringLiteral("autoReplace"), normalized.proofreading.autoReplace);
-    out.setValue(QStringLiteral("allowOnlineServices"),
-                 normalized.proofreading.allowOnlineServices);
     out.setValue(QStringLiteral("hotkey"),
                  normalized.proofreading.hotkey.toString(QKeySequence::PortableText));
     out.endGroup();

@@ -368,11 +368,6 @@ bool LanguageToolService::supportsAutoLanguage() const
     return true;
 }
 
-bool LanguageToolService::isLocal() const
-{
-    return false;
-}
-
 void LanguageToolService::applySettings(const AppSettings &settings)
 {
     const QUrl configured(settings.proofreading.endpoint);

@@ -34,6 +34,23 @@ QString removedFallbackGroupObjectName()
     return QStringLiteral("fallback") + QStringLiteral("Group");
 }
 
+// The removed online-gate widgets' object names are assembled the same way;
+// the test still checks that no such widgets exist.
+QString removedOnlineGroupObjectName()
+{
+    return QStringLiteral("proofreadingOnline") + QStringLiteral("Group");
+}
+
+QString removedAllowOnlineObjectName()
+{
+    return QStringLiteral("proofreadingAllow") + QStringLiteral("Online");
+}
+
+QString removedOnlineWarningObjectName()
+{
+    return QStringLiteral("proofreadingOnline") + QStringLiteral("Warning");
+}
+
 } // namespace
 
 class TestSettingsDialog : public QObject
@@ -884,7 +901,6 @@ private slots:
                                             QStringLiteral("style")};
         settings.proofreading.checkBeforeTranslation = true;
         settings.proofreading.autoReplace = true;
-        settings.proofreading.allowOnlineServices = true;
 
         const QList<SettingsDialog::ProofreadingProvider> providers = {
             {QStringLiteral("languagetool"), QStringLiteral("LanguageTool"),
@@ -956,7 +972,6 @@ private slots:
                  QStringList({QStringLiteral("grammar"), QStringLiteral("style")}));
         QVERIFY(result.proofreading.checkBeforeTranslation);
         QVERIFY(result.proofreading.autoReplace);
-        QVERIFY(result.proofreading.allowOnlineServices);
 
         // The language list follows the selected provider and is rebuilt on a
         // provider change; a provider without Auto-detect offers no "auto".
@@ -982,14 +997,15 @@ private slots:
         QVERIFY(enabled && hotkey);
         QVERIFY(!enabled->isChecked());
 
-        // An explicit invocation is not gated by proofreading/enabled, so its
-        // hotkey row must stay editable in both modes.
+        // A hotkey can be assigned before the feature is enabled, so its row
+        // stays editable in both modes; the action shows a message while the
+        // switch is off.
         QVERIFY(hotkey->isEnabled());
         enabled->setChecked(true);
         QVERIFY(hotkey->isEnabled());
     }
 
-    void proofreadingGateAndEndpoint()
+    void proofreadingTabHasNoGate()
     {
         const QList<SettingsDialog::ProofreadingProvider> providers = {
             {QStringLiteral("languagetool"), QStringLiteral("LanguageTool"),
@@ -1003,6 +1019,8 @@ private slots:
         auto *enabled = dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingEnabled"));
         auto *providerGroup =
             dialog.findChild<QGroupBox *>(QStringLiteral("proofreadingProviderGroup"));
+        auto *issuesGroup =
+            dialog.findChild<QGroupBox *>(QStringLiteral("proofreadingIssuesGroup"));
         auto *optionsGroup =
             dialog.findChild<QGroupBox *>(QStringLiteral("proofreadingOptionsGroup"));
         auto *provider =
@@ -1011,31 +1029,26 @@ private slots:
             dialog.findChild<QLineEdit *>(QStringLiteral("proofreadingEndpoint"));
         auto *endpointWarning =
             dialog.findChild<QLabel *>(QStringLiteral("proofreadingEndpointWarning"));
-        auto *online =
-            dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingAllowOnline"));
-        auto *onlineWarning =
-            dialog.findChild<QLabel *>(QStringLiteral("proofreadingOnlineWarning"));
-        QVERIFY(enabled && providerGroup && optionsGroup && provider && endpoint
-                && endpointWarning && online && onlineWarning);
+        QVERIFY(enabled && providerGroup && issuesGroup && optionsGroup && provider && endpoint
+                && endpointWarning);
+
+        // The enable switch is the only consent: the former online group and
+        // its widgets are gone.
+        QVERIFY(!dialog.findChild<QGroupBox *>(removedOnlineGroupObjectName()));
+        QVERIFY(!dialog.findChild<QCheckBox *>(removedAllowOnlineObjectName()));
+        QVERIFY(!dialog.findChild<QLabel *>(removedOnlineWarningObjectName()));
 
         const AppSettings before = dialog.settings();
         QVERIFY(!enabled->isChecked());
         QVERIFY(!providerGroup->isEnabled());
+        QVERIFY(!issuesGroup->isEnabled());
         QVERIFY(!optionsGroup->isEnabled());
-        QVERIFY(!online->isChecked());
-        QVERIFY(!onlineWarning->isHidden());
 
-        // Only the mode switch disables rows. The online switch is a warning:
-        // the provider and endpoint stay editable while it is off.
+        // Only the mode switch disables rows.
         enabled->setChecked(true);
         QVERIFY(providerGroup->isEnabled());
+        QVERIFY(issuesGroup->isEnabled());
         QVERIFY(provider->isEnabled());
-        QVERIFY(endpoint->isEnabled());
-        QVERIFY(!online->isChecked());
-        QVERIFY(!onlineWarning->isHidden());
-
-        online->setChecked(true);
-        QVERIFY(onlineWarning->isHidden());
         QVERIFY(endpoint->isEnabled());
 
         endpoint->setText(QStringLiteral("not a URL"));

@@ -32,11 +32,6 @@ public:
     ProofreadingService *activeService() const { return m_active; }
     void setActiveService(const QString &id);
 
-    // Whether services with isLocal() == false are allowed. The manager refuses
-    // them with ServiceUnavailable while this is false.
-    bool onlineServicesAllowed() const { return m_onlineServicesAllowed; }
-    void setOnlineServicesAllowed(bool allowed);
-
     // Checks with the active service. The returned reply is owned by the
     // caller; it finishes with Cancelled if a newer request in the same channel
     // replaces it. finished() is never emitted from inside this call.
@@ -54,7 +49,6 @@ private:
 
     QList<ProofreadingService *> m_services;
     ProofreadingService *m_active = nullptr;
-    bool m_onlineServicesAllowed = false;
     QPointer<ProofreadingReply> m_mainWindowReply;
     QPointer<ProofreadingReply> m_inPlaceReply;
 };

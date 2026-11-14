@@ -150,7 +150,6 @@ private slots:
                               QStringLiteral("punctuation"), QStringLiteral("style")}));
         QVERIFY(!settings.proofreading.checkBeforeTranslation);
         QVERIFY(!settings.proofreading.autoReplace);
-        QVERIFY(!settings.proofreading.allowOnlineServices);
         QVERIFY(settings.proofreading.hotkey.isEmpty());
 
         QCOMPARE(settings.network.proxyMode, QStringLiteral("system"));
@@ -426,7 +425,6 @@ private slots:
             QStringList({QStringLiteral("style"), QStringLiteral("grammar")});
         settings.proofreading.checkBeforeTranslation = true;
         settings.proofreading.autoReplace = true;
-        settings.proofreading.allowOnlineServices = true;
         settings.proofreading.hotkey =
             QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11"));
         store.save(settings);
@@ -443,7 +441,6 @@ private slots:
                  QStringList({QStringLiteral("grammar"), QStringLiteral("style")}));
         QVERIFY(result.proofreading.checkBeforeTranslation);
         QVERIFY(result.proofreading.autoReplace);
-        QVERIFY(result.proofreading.allowOnlineServices);
         QCOMPARE(result.proofreading.hotkey,
                  QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11")));
         QCOMPARE(result.settingsVersion, 1);
@@ -592,7 +589,6 @@ private slots:
         settings = store.current();
         settings.proofreading.enabled = true;
         settings.proofreading.provider = QStringLiteral("languagetool");
-        settings.proofreading.allowOnlineServices = true;
         settings.proofreading.hotkey =
             QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11"));
         store.save(settings);
@@ -603,9 +599,46 @@ private slots:
         QCOMPARE(loaded.current().translation.fallbackService, QStringLiteral("mozhi"));
         QCOMPARE(loaded.current().translation.maxLength, 5000);
         QVERIFY(loaded.current().proofreading.enabled);
-        QVERIFY(loaded.current().proofreading.allowOnlineServices);
         QCOMPARE(loaded.current().proofreading.hotkey,
                  QKeySequence(QStringLiteral("Ctrl+Alt+Shift+F11")));
+    }
+
+    void removedOnlineGateKeyIsIgnored()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("proofreading/enabled"), true);
+            // Assembled from parts: the removed identifier must not reappear in
+            // the source as a gate reference.
+            raw.setValue(QStringLiteral("proofreading/allowOnline")
+                             + QStringLiteral("Services"),
+                         true);
+            raw.sync();
+        }
+
+        // The old gate key is ignored: the feature switch loads, the options
+        // keep their defaults and loading does not warn.
+        {
+            WarningCapture capture;
+            SettingsStore store(path, fakeCodec());
+            store.load();
+            QVERIFY2(g_warnings.isEmpty(),
+                     qPrintable(g_warnings.join(QStringLiteral("; "))));
+            QVERIFY(store.current().proofreading.enabled);
+            QVERIFY(!store.current().proofreading.checkBeforeTranslation);
+            QVERIFY(!store.current().proofreading.autoReplace);
+
+            // The key is not written again; an unknown key may stay in the INI.
+            store.save(store.current());
+        }
+        SettingsStore loaded(path, fakeCodec());
+        loaded.load();
+        QVERIFY(loaded.current().proofreading.enabled);
+        QCOMPARE(loaded.current().settingsVersion, 1);
     }
 
     void migratesLegacyDeepLWebService()

@@ -527,27 +527,10 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     proofreadingOptionsLayout->addWidget(autoReplaceWarning);
     textCheckingLayout->addWidget(m_proofreadingOptionsGroup);
 
-    m_proofreadingOnlineGroup = new QGroupBox(tr("Online checking"), textCheckingPage);
-    m_proofreadingOnlineGroup->setObjectName(QStringLiteral("proofreadingOnlineGroup"));
-    auto *proofreadingOnlineLayout = new QVBoxLayout(m_proofreadingOnlineGroup);
-    m_proofreadingAllowOnline =
-        new QCheckBox(tr("Allow online text checking"), m_proofreadingOnlineGroup);
-    m_proofreadingAllowOnline->setObjectName(QStringLiteral("proofreadingAllowOnline"));
-    m_proofreadingOnlineWarning = new QLabel(
-        tr("The checked text is sent to the provider. Text checking works only while this is "
-           "on; a self-hosted server still needs it."),
-        m_proofreadingOnlineGroup);
-    m_proofreadingOnlineWarning->setObjectName(QStringLiteral("proofreadingOnlineWarning"));
-    m_proofreadingOnlineWarning->setWordWrap(true);
-    proofreadingOnlineLayout->addWidget(m_proofreadingAllowOnline);
-    proofreadingOnlineLayout->addWidget(m_proofreadingOnlineWarning);
-    textCheckingLayout->addWidget(m_proofreadingOnlineGroup);
     textCheckingLayout->addStretch();
     m_tabs->addTab(textCheckingPage, tr("Text checking"));
 
     connect(m_proofreadingEnabled, &QCheckBox::toggled, this,
-            &SettingsDialog::updateProofreadingControls);
-    connect(m_proofreadingAllowOnline, &QCheckBox::toggled, this,
             &SettingsDialog::updateProofreadingControls);
     connect(m_proofreadingProvider, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             &SettingsDialog::updateProofreadingLanguage);
@@ -726,7 +709,6 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_proofreadingCheckBeforeTranslation->setChecked(
         settings.proofreading.checkBeforeTranslation);
     m_proofreadingAutoReplace->setChecked(settings.proofreading.autoReplace);
-    m_proofreadingAllowOnline->setChecked(settings.proofreading.allowOnlineServices);
     updateProofreadingControls();
 
     const int proxyMode = m_proxyMode->findData(settings.network.proxyMode);
@@ -796,7 +778,6 @@ AppSettings SettingsDialog::settings() const
     result.proofreading.checkBeforeTranslation =
         m_proofreadingCheckBeforeTranslation->isChecked();
     result.proofreading.autoReplace = m_proofreadingAutoReplace->isChecked();
-    result.proofreading.allowOnlineServices = m_proofreadingAllowOnline->isChecked();
     result.network.proxyMode = m_proxyMode->currentData().toString();
     result.network.proxyType = m_proxyType->currentData().toString();
     result.network.proxyHost = m_proxyHost->text().trimmed();
@@ -876,19 +857,16 @@ void SettingsDialog::updateProofreadingControls()
 {
     const bool enabled = m_proofreadingEnabled->isChecked();
     const bool hasProvider = !m_proofreadingProviders.isEmpty();
-    // The mode switch disables the whole page except itself. The online switch
-    // is not a disabling gate: the settings stay editable while it is off.
+    // The mode switch disables the whole page except itself.
     m_proofreadingProviderGroup->setEnabled(enabled);
     m_proofreadingIssuesGroup->setEnabled(enabled);
     m_proofreadingOptionsGroup->setEnabled(enabled);
-    m_proofreadingOnlineGroup->setEnabled(enabled);
     m_proofreadingProvider->setEnabled(enabled && hasProvider);
     m_proofreadingEndpoint->setEnabled(enabled && hasProvider);
 
     const QString endpoint = m_proofreadingEndpoint->text().trimmed();
     m_proofreadingEndpointWarning->setVisible(!endpoint.isEmpty()
                                              && !isValidProofreadingEndpoint(endpoint));
-    m_proofreadingOnlineWarning->setVisible(!m_proofreadingAllowOnline->isChecked());
 }
 
 void SettingsDialog::updateProofreadingLanguage()

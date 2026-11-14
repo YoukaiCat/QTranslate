@@ -127,11 +127,6 @@ void ProofreadingManager::setActiveService(const QString &id)
     emit activeServiceChanged(id);
 }
 
-void ProofreadingManager::setOnlineServicesAllowed(bool allowed)
-{
-    m_onlineServicesAllowed = allowed;
-}
-
 ProofreadingReply *ProofreadingManager::check(const ProofreadingRequest &request,
                                               Channel channel)
 {
@@ -154,10 +149,6 @@ ProofreadingReply *ProofreadingManager::check(const ProofreadingRequest &request
                                   hint.isEmpty()
                                       ? tr("The text checking provider is not configured.")
                                       : hint);
-    } else if (!m_active->isLocal() && !m_onlineServicesAllowed) {
-        reply = finishedWithError(
-            serviceId, TranslationError::ServiceUnavailable,
-            tr("Enable online text checking in Settings → Text checking."));
     } else if ((request.language == Languages::autoCode()
                 && !m_active->supportsAutoLanguage())
                || (request.language != Languages::autoCode()

@@ -64,11 +64,6 @@ public:
     virtual QStringList languages() const = 0; // internal codes, without "auto"
     virtual bool supportsAutoLanguage() const { return false; }
 
-    // Sends the text to a remote service; the manager refuses it while
-    // proofreading/allowOnlineServices is false. A future local engine would
-    // return true; no provider of this stage does.
-    virtual bool isLocal() const { return false; }
-
     // Applies the endpoint and category changes without recreating the service.
     virtual void applySettings(const AppSettings &settings) = 0;
 

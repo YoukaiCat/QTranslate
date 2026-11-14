@@ -68,7 +68,6 @@ public:
     QString configurationError() const override { return configurationErrorText; }
     QStringList languages() const override { return languageList; }
     bool supportsAutoLanguage() const override { return autoLanguage; }
-    bool isLocal() const override { return local; }
     void applySettings(const AppSettings &) override {}
 
     ProofreadingReply *check(const ProofreadingRequest &request) override
@@ -101,7 +100,6 @@ public:
     QString configurationErrorText;
     QStringList languageList = {QStringLiteral("en"), QStringLiteral("ru")};
     bool autoLanguage = true;
-    bool local = false;
     ReplyMode replyMode = ReplyMode::Manual;
     ProofreadingResult nextResult;
 
@@ -192,7 +190,6 @@ private slots:
         ProofreadingManager manager;
         auto *service = new FakeProofreadingService;
         manager.registerService(service);
-        manager.setOnlineServicesAllowed(true);
 
         for (const QString &text : {QString(), QStringLiteral(" \n\t ")}) {
             auto reply = std::unique_ptr<ProofreadingReply>(
@@ -235,7 +232,6 @@ private slots:
         service->configured = false;
         service->configurationErrorText = QStringLiteral("Add a LanguageTool key.");
         manager.registerService(service);
-        manager.setOnlineServicesAllowed(true);
 
         auto reply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello")),
@@ -264,54 +260,20 @@ private slots:
         QCOMPARE(service->checkCalls, 0);
     }
 
-    void onlineGateRefusesRemoteProviders()
+    void anyProviderChecksWithoutAGate()
     {
         ProofreadingManager manager;
-        QVERIFY(!manager.onlineServicesAllowed());
         auto *remote = new FakeProofreadingService(QStringLiteral("remote"));
         manager.registerService(remote);
 
         auto reply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello")),
                           ProofreadingManager::Channel::MainWindow));
-        QVERIFY(!reply->isFinished());
-        QSignalSpy finished(reply.get(), &ProofreadingReply::finished);
-        QCOMPARE(finished.size(), 0);
-        QVERIFY(finished.wait(1000));
-        QCOMPARE(reply->result().error, TranslationError::ServiceUnavailable);
-        QCOMPARE(reply->result().errorMessage,
-                 QStringLiteral("Enable online text checking in Settings → Text checking."));
-        QCOMPARE(reply->result().serviceId, QStringLiteral("remote"));
-        QCOMPARE(remote->checkCalls, 0);
-
-        // The refusal is not cached: with the switch on the request goes through.
-        manager.setOnlineServicesAllowed(true);
-        auto allowed = std::unique_ptr<ProofreadingReply>(
-            manager.check(request(QStringLiteral("Hello")),
-                          ProofreadingManager::Channel::MainWindow));
         QCOMPARE(remote->checkCalls, 1);
         QCOMPARE(remote->requests.size(), 1);
         remote->replies.first()->complete({});
-        QVERIFY(allowed->result().ok());
-        QCOMPARE(allowed->result().serviceId, QStringLiteral("remote"));
-    }
-
-    void localProviderWorksWithTheGateOff()
-    {
-        ProofreadingManager manager;
-        QVERIFY(!manager.onlineServicesAllowed());
-        auto *local = new FakeProofreadingService(QStringLiteral("local"));
-        local->local = true;
-        manager.registerService(local);
-
-        auto reply = std::unique_ptr<ProofreadingReply>(
-            manager.check(request(QStringLiteral("Hello")),
-                          ProofreadingManager::Channel::MainWindow));
-        QCOMPARE(local->checkCalls, 1);
-        QCOMPARE(local->requests.size(), 1);
-        local->replies.first()->complete({});
         QVERIFY(reply->result().ok());
-        QCOMPARE(reply->result().serviceId, QStringLiteral("local"));
+        QCOMPARE(reply->result().serviceId, QStringLiteral("remote"));
     }
 
     void unsupportedLanguageIsRejected()
@@ -320,7 +282,6 @@ private slots:
         auto *service = new FakeProofreadingService;
         service->autoLanguage = false;
         manager.registerService(service);
-        manager.setOnlineServicesAllowed(true);
 
         auto autoReply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello"), Languages::autoCode()),
@@ -362,7 +323,6 @@ private slots:
         service->nextResult.issues = {issue};
         service->nextResult.correctedText = QStringLiteral("corrected text");
         manager.registerService(service);
-        manager.setOnlineServicesAllowed(true);
 
         const ProofreadingRequest asked{QStringLiteral("Hello"), QStringLiteral("ru"),
                                         {QStringLiteral("grammar"),
@@ -402,7 +362,6 @@ private slots:
         ProofreadingManager manager;
         auto *service = new FakeProofreadingService;
         manager.registerService(service);
-        manager.setOnlineServicesAllowed(true);
 
         auto first = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("one")),
@@ -444,7 +403,6 @@ private slots:
 
         auto *service = new FakeProofreadingService;
         manager.registerService(service);
-        manager.setOnlineServicesAllowed(true);
         auto reply = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("Hello")),
                           ProofreadingManager::Channel::MainWindow));
@@ -458,7 +416,6 @@ private slots:
         ProofreadingManager manager;
         auto *service = new FakeProofreadingService;
         manager.registerService(service);
-        manager.setOnlineServicesAllowed(true);
 
         auto main = std::unique_ptr<ProofreadingReply>(
             manager.check(request(QStringLiteral("one")),
@@ -479,7 +436,6 @@ private slots:
         ProofreadingManager manager;
         auto *service = new FakeProofreadingService;
         manager.registerService(service);
-        manager.setOnlineServicesAllowed(true);
 
         delete manager.check(request(QStringLiteral("one")),
                              ProofreadingManager::Channel::MainWindow);
@@ -498,7 +454,6 @@ private slots:
         ProofreadingManager manager;
         auto *service = new FakeProofreadingService;
         manager.registerService(service);
-        manager.setOnlineServicesAllowed(true);
 
         {
             LogCapture capture;

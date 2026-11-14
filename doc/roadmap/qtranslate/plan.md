@@ -42,6 +42,8 @@ Old stages 13 (free web endpoints) and 16 (LLM actions) are partially implemente
 6. [LLM actions (old stage 16)](06-llm-actions/plan.md) — summarise, rewrite, explain, pronounce, and structured proofreading.
 7. [Dictionary and glossaries (old stage 17)](07-dictionary/plan.md) — dictionary mode, local glossaries, and additional sources.
 8. [Free web services always on](08-free-services-always-on/plan.md) — remove the opt-in gate; all services are available by default, the checkbox disappears, the fallback row moves to Translation and the providers get one order (user decision, 2026-11-14).
+9. [Text checking as a standalone feature](09-proofreading-standalone/plan.md) — two hotkeys (popup check and check-and-replace), no pre-translation check, no automatic-replacement setting, no online gate (user decision, 2026-11-14).
 
 The order follows the old plan. Stages 3-7 are independent except where they state a dependency.
-Stage 8 is a user-requested correction of stage 3 and is worked before stage 6.
+Stage 8 is a user-requested correction of stage 3 and is worked before stage 6. Stage 9 is a
+user-requested correction of stage 5 and is worked before stage 6 as well.

@@ -285,7 +285,6 @@ void AppController::createProofreading()
     const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
 
     m_proofreading = new ProofreadingManager(this);
-    m_proofreading->setOnlineServicesAllowed(settings.proofreading.allowOnlineServices);
 
     m_languageTool = new LanguageToolService(m_network);
     m_languageTool->applySettings(settings);
@@ -651,7 +650,6 @@ void AppController::applySettings(const AppSettings &oldSettings,
     if (m_languageTool)
         m_languageTool->applySettings(newSettings);
     if (m_proofreading) {
-        m_proofreading->setOnlineServicesAllowed(newSettings.proofreading.allowOnlineServices);
         if (oldSettings.proofreading.provider != newSettings.proofreading.provider)
             m_proofreading->setActiveService(newSettings.proofreading.provider);
     }
@@ -1094,6 +1092,14 @@ void AppController::proofreadSelectionInPlace()
 {
     if (!m_proofreading)
         return;
+
+    const AppSettings settings = m_settings ? m_settings->current() : AppSettings{};
+    if (!settings.proofreading.enabled) {
+        // The switch is the only consent: while it is off, nothing is copied
+        // and no request is made, whichever entry point was used.
+        showProofreadingMessage(tr("Enable text checking in Settings → Text checking."));
+        return;
+    }
 
     if (m_grabber->isBusy()) {
         // A grab is already talking to the source application; sending

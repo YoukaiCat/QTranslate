@@ -5,91 +5,96 @@
     <name>AppController</name>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="176"/>
-        <location filename="../src/app/appcontroller.cpp" line="723"/>
+        <location filename="../src/app/appcontroller.cpp" line="721"/>
         <source>Autostart</source>
         <translation>자동 시작</translation>
     </message>
     <message>
         <location filename="../src/app/appcontroller.cpp" line="177"/>
-        <location filename="../src/app/appcontroller.cpp" line="724"/>
+        <location filename="../src/app/appcontroller.cpp" line="722"/>
         <source>Could not update the autostart entry.</source>
         <translation>자동 시작 항목을 업데이트할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="352"/>
+        <location filename="../src/app/appcontroller.cpp" line="351"/>
         <source>Hotkey unavailable</source>
         <translation>단축키를 사용할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="353"/>
+        <location filename="../src/app/appcontroller.cpp" line="352"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1는 이미 다른 프로그램에서 사용 중입니다. 해당 프로그램을 닫거나 설정에서 다른 조합을 선택하세요.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="416"/>
+        <location filename="../src/app/appcontroller.cpp" line="415"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="777"/>
+        <location filename="../src/app/appcontroller.cpp" line="775"/>
         <source>DeepL is not available.</source>
         <translation>DeepL를 사용할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="792"/>
+        <location filename="../src/app/appcontroller.cpp" line="790"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI 호환 공급자를 사용할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="836"/>
+        <location filename="../src/app/appcontroller.cpp" line="834"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>시스템 키링을 사용할 수 없으므로 비밀은 사용자만 읽을 수 있는 파일에 암호화되지 않은 채로 저장됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1039"/>
-        <location filename="../src/app/appcontroller.cpp" line="1123"/>
+        <location filename="../src/app/appcontroller.cpp" line="1037"/>
+        <location filename="../src/app/appcontroller.cpp" line="1129"/>
         <source>Nothing is selected.</source>
         <translation>선택된 내용이 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1081"/>
+        <location filename="../src/app/appcontroller.cpp" line="1079"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>활성 창이 변경되었습니다. 번역이 클립보드에 복사되었습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1185"/>
+        <location filename="../src/app/appcontroller.cpp" line="1100"/>
+        <source>Enable text checking in Settings → Text checking.</source>
+        <translation>설정 → 텍스트 검사에서 텍스트 검사를 활성화하세요.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/appcontroller.cpp" line="1191"/>
         <source>Could not paste automatically; the corrected text is on the clipboard.</source>
         <translation>자동으로 붙여넣을 수 없습니다. 수정된 텍스트는 클립보드에 있습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1192"/>
+        <location filename="../src/app/appcontroller.cpp" line="1198"/>
         <source>The active window changed; the corrected text was copied to the clipboard.</source>
         <translation>활성 창이 변경되었습니다. 수정된 텍스트가 클립보드에 복사되었습니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1205"/>
+        <location filename="../src/app/appcontroller.cpp" line="1211"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>수정된 텍스트를 클립보드에 복사했습니다</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1283"/>
-        <location filename="../src/app/appcontroller.cpp" line="1286"/>
+        <location filename="../src/app/appcontroller.cpp" line="1289"/>
+        <location filename="../src/app/appcontroller.cpp" line="1292"/>
         <source>Check the selection</source>
         <translation>선택 항목 검사</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1359"/>
+        <location filename="../src/app/appcontroller.cpp" line="1365"/>
         <source>System tray unavailable</source>
         <translation>시스템 트레이를 사용할 수 없음</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1360"/>
+        <location filename="../src/app/appcontroller.cpp" line="1366"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>시스템 트레이를 사용할 수 없으므로 응용 프로그램이 백그라운드에 남을 수 없습니다. 창을 닫으면 응용 프로그램이 종료됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1072"/>
-        <location filename="../src/app/appcontroller.cpp" line="1317"/>
+        <location filename="../src/app/appcontroller.cpp" line="1070"/>
+        <location filename="../src/app/appcontroller.cpp" line="1323"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>자동으로 붙여넣을 수 없습니다. 번역은 클립보드에 있습니다.</translation>
     </message>
@@ -104,8 +109,8 @@
         <translation>전역 단축키에는 GlobalShortcuts 포털이 필요합니다. 이 데스크톱에서 포털을 제공하지 않으면 Ctrl+C로 선택한 텍스트를 복사하고 CLI 명령이나 데스크톱 바로 가기를 사용하세요. 제자리 바꾸기는 붙여넣는 대신 번역을 클립보드에 복사합니다.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1341"/>
-        <location filename="../src/app/appcontroller.cpp" line="1344"/>
+        <location filename="../src/app/appcontroller.cpp" line="1347"/>
+        <location filename="../src/app/appcontroller.cpp" line="1350"/>
         <source>Translate and replace</source>
         <translation>번역 및 교체</translation>
     </message>
@@ -1125,19 +1130,14 @@
 <context>
     <name>ProofreadingManager</name>
     <message>
-        <location filename="../src/core/proofreadingmanager.cpp" line="150"/>
+        <location filename="../src/core/proofreadingmanager.cpp" line="145"/>
         <source>No text checking provider is available.</source>
         <translation>사용 가능한 텍스트 검사 공급자가 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/core/proofreadingmanager.cpp" line="155"/>
+        <location filename="../src/core/proofreadingmanager.cpp" line="150"/>
         <source>The text checking provider is not configured.</source>
         <translation>텍스트 검사 공급자가 구성되지 않았습니다.</translation>
-    </message>
-    <message>
-        <location filename="../src/core/proofreadingmanager.cpp" line="160"/>
-        <source>Enable online text checking in Settings → Text checking.</source>
-        <translation>설정 → 텍스트 검사에서 온라인 텍스트 검사를 활성화하세요.</translation>
     </message>
 </context>
 <context>
@@ -1256,7 +1256,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="44"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="1007"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="986"/>
         <source>Settings</source>
         <translation>설정</translation>
     </message>
@@ -1337,7 +1337,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="167"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="591"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="575"/>
         <source> ms</source>
         <translation> 밀리초</translation>
     </message>
@@ -1392,82 +1392,82 @@
         <translation>번역</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="214"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="215"/>
         <source>Google Translate</source>
         <translation>Google 번역</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="219"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="220"/>
         <source>Free endpoint (no key)</source>
         <translation>무료 엔드포인트(키 없음)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="220"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="221"/>
         <source>Cloud Translation API (key required)</source>
         <translation>Cloud Translation API(키 필요)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="225"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="226"/>
         <source>Google Cloud API key</source>
         <translation>Google 클라우드 API 키</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="226"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="292"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="227"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="293"/>
         <source>Mode:</source>
         <translation>방법:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="227"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="293"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="334"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="228"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="294"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="335"/>
         <source>API key:</source>
         <translation>API 키:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="229"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="230"/>
         <source>The free mode uses the public endpoint and needs no key. The Cloud API requires a key with the Translation API enabled.</source>
         <translation>무료 모드는 공개 엔드포인트를 사용하며 키가 필요하지 않습니다. Cloud API에는 번역 API가 활성화된 키가 필요합니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="265"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="266"/>
         <source>DeepL</source>
         <translation>DeepL</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="270"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="271"/>
         <source>API (key required)</source>
         <translation>API(키 필요)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="271"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="272"/>
         <source>Free web (unofficial, no key)</source>
         <translation>무료 웹(비공식, 키 불필요)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="275"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="276"/>
         <source>DeepL API key (ends with :fx for Free)</source>
         <translation>DeepL API 키(무료인 경우 :fx로 끝남)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="280"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="281"/>
         <source>Check key</source>
         <translation>키 확인</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="294"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="295"/>
         <source>English target:</source>
         <translation>영어 타겟:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="302"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="349"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="620"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="350"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="604"/>
         <source>Checking…</source>
         <translation>확인 중…</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="287"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="288"/>
         <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests, and the text is sent to DeepL.</source>
         <translation>API 키 없이 사용할 수 있습니다. 이 비공식 엔드포인트는 작동을 중단하거나 속도 제한을 적용하거나 요청을 차단할 수 있으며, 텍스트는 DeepL로 전송됩니다.</translation>
     </message>
@@ -1482,37 +1482,37 @@
         <translation>다른 응용 프로그램에서 선택 항목 검사:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="308"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="309"/>
         <source>OpenAI-compatible provider</source>
         <translation>OpenAI 호환 공급자</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="317"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="318"/>
         <source>API key</source>
         <translation>API 키</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="326"/>
         <source>Model ID, for example openai/gpt-4o-mini</source>
         <translation>모델 ID(예: openai/gpt-4o-mini)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="327"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="328"/>
         <source>Load models</source>
         <translation>모델 불러오기</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="334"/>
         <source>Server URL:</source>
         <translation>서버 URL:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="335"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="336"/>
         <source>Model:</source>
         <translation>모델:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="340"/>
         <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key. The text is sent to the selected provider.</source>
         <translation>OpenAI 호환 Chat Completions API를 사용합니다. 기본 서버는 OpenRouter이며, URL은 OpenAI, Ollama, llama.cpp, TeamRouter 등 다른 호환 엔드포인트를 가리킬 수 있습니다. 모델은 키에서 사용할 수 있어야 합니다. 텍스트는 선택한 공급자에게 전송됩니다.</translation>
     </message>
@@ -1522,62 +1522,62 @@
         <translation>없음</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="356"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="357"/>
         <source>MyMemory</source>
         <translation>MyMemory</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="369"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="370"/>
         <source>Mozhi</source>
         <translation>Mozhi</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="376"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="377"/>
         <source>Instance URL:</source>
         <translation>인스턴스 URL:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="391"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="392"/>
         <source>Engine:</source>
         <translation>엔진:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="399"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="400"/>
         <source>Enter a base http(s) instance URL without credentials, a query or a fragment. The default instance will be used.</source>
         <translation>자격 증명, 쿼리 또는 프래그먼트가 없는 기본 http(s) 인스턴스 URL을 입력하세요. 기본 인스턴스가 사용됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="239"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="240"/>
         <source>Yandex</source>
         <translation>Yandex</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="252"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="253"/>
         <source>Bing</source>
         <translation>Bing</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="419"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="420"/>
         <source>Reverso</source>
         <translation>Reverso</translation>
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="181"/>
         <source>When the selected service fails with no connection, a timeout, a rate limit, an exceeded quota or an invalid key, the text is sent once more to the fallback service. None turns it off. The text is sent to a third party.</source>
-        <translation>선택한 서비스가 연결 없음, 시간 초과, 속도 제한, 할당량 초과 또는 잘못된 키로 실패하면 텍스트가 대체 서비스로 한 번 더 전송됩니다. "없음"을 선택하면 꺼집니다. 텍스트는 제3자에게 전송됩니다.</translation>
+        <translation>선택한 서비스가 연결 없음, 시간 초과, 속도 제한, 할당량 초과 또는 잘못된 키로 실패하면 텍스트가 대체 서비스로 한 번 더 전송됩니다. &quot;없음&quot;을 선택하면 꺼집니다. 텍스트는 제3자에게 전송됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="360"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="361"/>
         <source>MyMemory is a free translation API and needs no key. It cannot detect the source language, and long text is sent in several requests. The text is sent to a third party.</source>
         <translation>MyMemory는 무료 번역 API이며 키가 필요하지 않습니다. 소스 언어를 감지하지 못하고 긴 텍스트는 여러 요청으로 나누어 전송됩니다. 텍스트는 제3자에게 전송됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="407"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="408"/>
         <source>Mozhi is a proxy to public translation engines. Instances are unofficial: they may stop working or rate-limit requests, and some engines may be disabled on an instance. A self-hosted instance&apos;s terms and stability are your responsibility. Long text is sent in several requests. The text is sent to the selected instance and engine.</source>
         <translation>Mozhi는 공개 번역 엔진에 대한 프록시입니다. 인스턴스는 비공식이며, 작동을 중단하거나 요청 속도를 제한할 수 있고 인스턴스에서 일부 엔진이 비활성화되어 있을 수 있습니다. 자체 호스팅 인스턴스의 약관과 안정성은 사용자의 책임입니다. 긴 텍스트는 여러 요청으로 나누어 전송됩니다. 텍스트는 선택한 인스턴스와 엔진으로 전송됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="243"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="244"/>
         <source>Yandex web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests. The text is sent to a third party.</source>
         <translation>Yandex web은 비공식 엔드포인트이며 키가 필요하지 않습니다. 작동을 중단하거나 속도 제한을 적용하거나 요청을 차단할 수 있습니다. 긴 텍스트는 여러 요청으로 나누어 전송됩니다. 텍스트는 제3자에게 전송됩니다.</translation>
     </message>
@@ -1587,273 +1587,258 @@
         <translation>대체 서비스:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="256"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="257"/>
         <source>Bing web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests. The text is sent to a third party.</source>
         <translation>Bing web은 비공식 엔드포인트이며 키가 필요하지 않습니다. 작동을 중단하거나 속도 제한을 적용하거나 요청을 차단할 수 있습니다. 긴 텍스트는 여러 요청으로 나누어 전송됩니다. 텍스트는 제3자에게 전송됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="423"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="424"/>
         <source>Reverso is an unofficial endpoint and needs no key. It supports only English, French, German, Spanish, Italian and Russian and cannot detect the source language. It may stop working, apply rate limits or block requests. Long text is sent in several requests. The text is sent to a third party.</source>
         <translation>Reverso는 비공식 엔드포인트이며 키가 필요하지 않습니다. 영어, 프랑스어, 독일어, 스페인어, 이탈리아어, 러시아어만 지원하며 소스 언어를 감지하지 못합니다. 작동을 중단하거나 속도 제한을 적용하거나 요청을 차단할 수 있습니다. 긴 텍스트는 여러 요청으로 나누어 전송됩니다. 텍스트는 제3자에게 전송됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="436"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="437"/>
         <source>Services</source>
         <translation>서비스</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="442"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="443"/>
         <source>Enable text checking</source>
         <translation>텍스트 검사 활성화</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="445"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="446"/>
         <source>Finds spelling, grammar, and punctuation errors in a separate mode and does not change translation settings.</source>
         <translation>맞춤법, 문법, 구두점 오류를 별도 모드에서 찾으며 번역 설정은 변경하지 않습니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="452"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="453"/>
         <source>Provider</source>
         <translation>공급자</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="468"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="469"/>
         <source>Leave empty to use the public LanguageTool endpoint. A self-hosted server keeps the text on your machine; the public service has rate limits and sees the checked text.</source>
         <translation>비워 두면 공개 LanguageTool 엔드포인트를 사용합니다. 자체 호스팅 서버는 텍스트를 사용자의 컴퓨터에 보관합니다. 공개 서비스는 속도 제한이 있으며 검사하는 텍스트를 확인합니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="474"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="994"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="475"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="973"/>
         <source>Enter a valid http(s) LanguageTool URL, or leave the field empty for the public endpoint.</source>
         <translation>유효한 http(s) LanguageTool URL을 입력하거나 공개 엔드포인트를 사용하려면 필드를 비워 두세요.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="481"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="482"/>
         <source>Provider:</source>
         <translation>공급자:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="482"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="483"/>
         <source>Checking language:</source>
         <translation>검사 언어:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="483"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="484"/>
         <source>LanguageTool URL:</source>
         <translation>LanguageTool URL:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="488"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="489"/>
         <source>Issues</source>
         <translation>문제</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="491"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="492"/>
         <source>Categories:</source>
         <translation>범주:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="493"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="494"/>
         <source>Spelling</source>
         <translation>맞춤법</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="495"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="496"/>
         <source>Grammar</source>
         <translation>문법</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="497"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="498"/>
         <source>Punctuation</source>
         <translation>구두점</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="499"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
         <source>Style</source>
         <translation>문체</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="510"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="511"/>
         <source>Options</source>
         <translation>옵션</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="515"/>
         <source>Check before translation</source>
         <translation>번역 전 검사</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="518"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="519"/>
         <source>Apply corrections automatically</source>
         <translation>수정 사항 자동 적용</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="521"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="522"/>
         <source>Corrections are applied without asking. Every change stays one undo step.</source>
         <translation>수정 사항은 묻지 않고 적용됩니다. 각 변경은 한 번의 실행 취소 단계로 유지됩니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="529"/>
-        <source>Online checking</source>
-        <translation>온라인 검사</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="533"/>
-        <source>Allow online text checking</source>
-        <translation>온라인 텍스트 검사 허용</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="536"/>
-        <source>The checked text is sent to the provider. Text checking works only while this is on; a self-hosted server still needs it.</source>
-        <translation>검사하는 텍스트가 공급자에게 전송됩니다. 텍스트 검사는 이 옵션이 켜져 있는 동안에만 작동하며 자체 호스팅 서버에도 필요합니다.</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
         <source>Text checking</source>
         <translation>텍스트 검사</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="564"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="548"/>
         <source>No proxy</source>
         <translation>프록시 없음</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="565"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="549"/>
         <source>System proxy</source>
         <translation>시스템 프록시</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="566"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="550"/>
         <source>Manual proxy</source>
         <translation>수동 프록시</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="553"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="570"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="554"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="557"/>
         <source>Proxy host</source>
         <translation>프록시 호스트</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="577"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="561"/>
         <source>Not set</source>
         <translation>설정되지 않음</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="578"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="562"/>
         <source>The proxy requires authentication</source>
         <translation>프록시에 인증이 필요합니다</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="582"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="566"/>
         <source>User name</source>
         <translation>사용자 이름</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="586"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="570"/>
         <source>Password</source>
         <translation>비밀번호</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="592"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="576"/>
         <source>Test connection</source>
         <translation>테스트 연결</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="599"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="583"/>
         <source>Proxy mode:</source>
         <translation>프록시 모드:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="600"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="584"/>
         <source>Proxy type:</source>
         <translation>프록시 유형:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="601"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="585"/>
         <source>Host:</source>
         <translation>주인:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="602"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="586"/>
         <source>Port:</source>
         <translation>포트:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="604"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="588"/>
         <source>User name:</source>
         <translation>사용자 이름:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="605"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="589"/>
         <source>Password:</source>
         <translation>비밀번호:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="606"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="590"/>
         <source>Request timeout:</source>
         <translation>요청 시간 초과:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="611"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="595"/>
         <source>Network</source>
         <translation>회로망</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="870"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="852"/>
         <source>Effective instance: %1</source>
         <translation>적용되는 인스턴스: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="934"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="913"/>
         <source>Translate in a popup</source>
         <translation>팝업으로 번역</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="936"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="915"/>
         <source>Replace the selected text with the translation</source>
         <translation>선택한 텍스트를 번역으로 교체</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="937"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="916"/>
         <source>Translate in the main window</source>
         <translation>기본 창에서 번역</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="938"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="917"/>
         <source>Show the main window</source>
         <translation>기본 창 표시</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="947"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="926"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>&quot;%1&quot;는 둘 이상의 키 조합을 사용합니다. 글로벌 단축키는 단일 조합을 지원합니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="955"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="934"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>&quot;%1&quot;는 글로벌 단축키로 사용할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="968"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="947"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>동일한 키 조합이 두 번 이상 할당되었습니다: %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="979"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="958"/>
         <source>The primary and additional languages must differ.</source>
         <translation>기본 언어와 추가 언어는 달라야 합니다.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="986"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="965"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>프록시 호스트와 포트를 입력하거나 다른 프록시 모드를 선택하세요.</translation>
     </message>

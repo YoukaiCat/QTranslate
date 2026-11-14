@@ -149,9 +149,6 @@ private:
     QGroupBox *m_proofreadingOptionsGroup = nullptr;
     QCheckBox *m_proofreadingCheckBeforeTranslation = nullptr;
     QCheckBox *m_proofreadingAutoReplace = nullptr;
-    QGroupBox *m_proofreadingOnlineGroup = nullptr;
-    QCheckBox *m_proofreadingAllowOnline = nullptr;
-    QLabel *m_proofreadingOnlineWarning = nullptr;
 
     QLineEdit *m_mozhiInstance = nullptr;
     QComboBox *m_mozhiEngine = nullptr;

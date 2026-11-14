@@ -25,7 +25,6 @@ public:
     bool isConfigured() const override;
     QStringList languages() const override;
     bool supportsAutoLanguage() const override;
-    bool isLocal() const override;
     void applySettings(const AppSettings &settings) override;
     ProofreadingReply *check(const ProofreadingRequest &request) override;
 
