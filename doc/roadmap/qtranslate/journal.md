@@ -2,31 +2,32 @@
 
 ## Where we left off
 
-Current node: stage `09-proofreading-standalone` is `in-progress` (`base: 3e75331`). Its first three
-children are `done`: `01-remove-online-gate` as `11eb5bc`, `02-remove-pre-translation-flow` as
-`d9428c9` and `03-extract-proofreading-window` as `25f0f5f`; the fourth
-`04-check-and-replace-hotkey` is `in-progress` and the coordinator starts next. The stage is the
-user's 2026-11-14 correction of stage 5: text checking is a standalone feature on par with
-translation, in its own window and mode. The translation window is translation-only; the separate
-non-modal `ProofreadingWindow` (own editor, **Check**, issue list, Replace/Ignore/Replace all/Copy)
-is opened from the tray item **Check text…**. `proofreading/enabled` is the only switch;
-`allowOnlineServices` is gone. The first hotkey shows the popup result; the second (this child)
-checks and immediately replaces the selection in the source field. Stage
+Current node: no active task. Stage `09-proofreading-standalone` is `done` (accepted over
+`3e75331..31a2a36`; four task commits `11eb5bc`, `d9428c9`, `25f0f5f`, `31a2a36`, docs in the
+closing commit). Text checking is a standalone feature in its own non-modal `ProofreadingWindow`
+(own editor, **Check**, issue list, Replace/Ignore/Replace all/Copy), opened from the tray item
+**Check text…**; the translation window is translation-only. `proofreading/enabled` is the only
+consent; `allowOnlineServices`, `checkBeforeTranslation` and `autoReplace` are gone. The popup hotkey
+shows the result; the second hotkey checks and immediately replaces the selection in the source
+field. Final host Debug/Release 46/46 each; `.ts` 374; Windows 40 not run. Stage
 `08-free-services-always-on` remains `done` (`2650def..2ebf5ae`, docs in the closing commit).
 
-Stages 1-3, 5 and 8 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by the user's
-2026-11-05 decision and is not dropped; stages 6-7 are `todo` and wait for stage 9. The root is
-`in-progress`; its `Done when` requires every stage to be done or dropped, so stage 4's blocked
-state is a deliberate exception.
+The next node is `06-llm-actions` (it needs a planner split); it was **not started** because the main
+session reached the 360k context threshold. Stages 1-3, 5, 8 and 9 are `done`; stage 4
+`04-local-offline-translation` stays `blocked` by the user's 2026-11-05 decision and is not dropped;
+stages 6-7 are `todo`. The root is `in-progress`; its `Done when` requires every stage to be done or
+dropped, so stage 4's blocked state is a deliberate exception.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
 release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub release stays until
 the user checks the current code on Windows.
 
-Work is on `main` (matches the root `branch:`); the working tree holds the task 04 map updates. Linux
-is 46/46 in the `qtranslate-trixie` container, Windows 40 (derived, not run locally); `.ts` is at 372
-and the stage ends at 374. The next node is task 04; `06-llm-actions` follows stage 9.
+Work is on `main` (matches the root `branch:`); the working tree is clean after this closing commit.
+Linux Debug/Release 46/46 on the host in fresh `/tmp/opencode/qtranslate-final-{debug,release}` trees
+(the old `build/linux-*` trees are stale and fail with a moc mismatch); Windows 40 (derived, not run
+locally); `.ts` is at 374. The `qtranslate-trixie` image is built. Resume with `/new`, agent `lead`,
+`@continue`; the next node is `06-llm-actions`.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
@@ -303,3 +304,17 @@ has six languages and no `auto`. Next: plan and run stage 8.
   two unused includes was rejected as cosmetic; the plan's grep gate was adjusted because the new
   window legitimately owns `setProofreadingAvailable`/`showProofreadingResult`. No real problems.
   Next: `04-check-and-replace-hotkey`.
+- 2026-11-14 — Task `09/04-check-and-replace-hotkey` done as `31a2a36`. Added
+  `HotkeyAction::ProofreadAndReplace`, `[proofreading] replaceHotkey` (empty by default), the second
+  Hotkeys row with duplicate/multi-combination validation, registration/update/dispatch and tray
+  tooltip, the Windows action-generic path, the Linux `kLastAction`/portal row (`proofread-replace`)
+  and the relabelled popup row. `AppController::proofreadSelectionAndReplace()` reuses the selection
+  grab, target capture, `Channel::InPlace`, `pasteText()` and clipboard fallback, with no popup or
+  focus-watch; no issues → one new message and no paste; stale replies are dropped. Tests:
+  `tst_settings`, `tst_settingsdialog`, `tst_hotkeymanager_x11`/`wayland` updated; reviewer fixed the
+  duplicate-hotkey test isolation. Linux Debug/Release 46/46 with no warnings in
+  `qtranslate-trixie`; 14 `.ts` at 374 with 0 unfinished/empty/vanished; Windows 40 not performed.
+  Real problems recorded, not fixed: no unit test for the `AppController` replace flow (no test
+  target); the enable gate is checked before the grab, so disabling the mode while a grab is already
+  running can still send that one request; the three new translations are machine-made and need a
+  native review. Next: stage acceptance, docs pass and the final host check.

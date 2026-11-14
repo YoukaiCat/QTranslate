@@ -17,12 +17,14 @@ translation directly in the active input field.
 - **Ctrl+Shift+Q** translates the selected text and replaces the selection in the active input
   field, which is convenient for replying in chats.
 - **Ctrl+W** opens the main window with the selection translated.
-- **Text checking** is a separate mode with the **Text checking** settings tab: LanguageTool finds
-  spelling, grammar and punctuation issues, the main window highlights them and can replace one
-  issue, all issues or copy the corrected text, and every replacement is one undo step. Online
-  checking is opt-in; the public LanguageTool API and a self-hosted URL work without a key. The
-  selection check in another application uses an optional fifth hotkey (empty by default) or
-  `--proofread-selection` and replaces the selection only after confirmation.
+- **Text checking** is a separate window and mode, opened from the tray item **Check text…**, with
+  the **Text checking** settings tab: LanguageTool finds spelling, grammar and punctuation issues,
+  the checking window highlights them and can replace one issue, all issues or copy the corrected
+  text, and every replacement is one undo step. The translation window has no checking UI.
+  `proofreading/enabled` is the only switch; the public LanguageTool API and a self-hosted URL work
+  without a key. Two optional hotkeys (empty by default) check a selection in another application:
+  one shows the result in a popup, the other replaces the selection with the corrected text
+  immediately; `--proofread-selection` uses the popup scenario.
 - Google Translate (free endpoint or Cloud API) and DeepL (API key or unofficial free web mode),
   plus OpenRouter or another OpenAI-compatible provider. OpenRouter offers free models such as
   `openrouter/free`; any compatible endpoint works, including local Ollama, LM Studio or
@@ -85,11 +87,12 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
 - `Ctrl+Shift+Q` — translate the selection and replace it in the active input field.
 - `Ctrl+W` — open the main window with the selection translated.
 - `Ctrl+Enter` — translate in the main window.
-- **Check** in the main window runs LanguageTool over the source text; **Settings → Text checking**
-  chooses the language, categories, a self-hosted URL and the online gate. The optional
-  **Check the selection in another application** hotkey (empty by default) checks the selected text
-  and replaces it only after confirmation.
-- Settings, service selection, **Show window** and **Quit** are available from the tray menu.
+- **Tray → Check text…** opens the separate text-checking window; **Settings → Text checking**
+  chooses the language, categories and a self-hosted URL. Two optional hotkeys (empty by default)
+  check the selected text in another application: one shows the result in a popup, the other
+  replaces the selection with the corrected text immediately.
+- Settings, service selection, **Show window**, **Check text…** and **Quit** are available from the
+  tray menu.
   Hotkeys, languages, proxy, autostart and API keys are configured in **Settings**.
 - Global hotkeys are released automatically while a fullscreen application is in the foreground,
   so games receive Ctrl+Q/Ctrl+W. This can be disabled in **Settings → Hotkeys**; **Tray → Pause
@@ -180,7 +183,7 @@ these artifacts; the tag must match the version in `CMakeLists.txt`.
 
 ### Linux (0.13.0)
 
-QTranslate builds, links, and passes 45 tests (36 shared plus 9 Linux platform tests) in Debug and
+QTranslate builds, links, and passes 46 tests (37 shared plus 9 Linux platform tests) in Debug and
 Release with `-Wall -Wextra` and no warnings on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7
 (Qt 6.10.2). X11 is the full target: global hotkeys, selection capture, in-place replacement,
 autostart, the four CLI commands, and tray integration are implemented. Wayland is limited: the
@@ -243,7 +246,7 @@ DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot
 `dpkg-buildpackage` writes the `.deb`, the `.dsc`, the `.tar.xz`, the `-dbgsym` package, the
 `.buildinfo` and the `.changes` to the parent directory (Astra's `dpkg-buildpackage` 1.21 rejects a
 trailing `.`; the command has none). The debug symbols stay in the `-dbgsym` package and are not
-released. `nocheck` skips the 45 tests, `nodoc` leaves `README.Debian` out of the package, and
+released. `nocheck` skips the 46 tests, `nodoc` leaves `README.Debian` out of the package, and
 `parallel=N` bounds the build; without `nocheck` the rules run the tests under `xvfb-run -a`. The
 build dependencies are in `debian/control`, and `dpkg-checkbuilddeps` reports what is missing.
 
@@ -285,11 +288,12 @@ security policy's approval. To revoke it, run
 - OpenRouter and other OpenAI-compatible providers need an API key and an available model. Quality,
   speed and cost depend on the chosen model; free models have strict rate limits. The text is sent
   to the selected provider.
-- LanguageTool checking needs the online gate; the public API limits requests to about 20 per
-  minute and 20 000 characters per request, and self-hosted LanguageTool is more reliable for long
-  or frequent checks. The checked text goes to the LanguageTool server. Replacing a selection in
-  another application needs confirmation, undo depends on that application, and a changed foreground
-  window falls back to copying the corrected text to the clipboard.
+- LanguageTool checking is enabled by **Settings → Text checking**; there is no separate online
+  gate. The public API limits requests to about 20 per minute and 20 000 characters per request, and
+  self-hosted LanguageTool is more reliable for long or frequent checks. The checked text goes to the
+  LanguageTool server. The popup hotkey replaces a selection after confirmation; the second hotkey
+  replaces it immediately. Undo depends on the other application, and a changed foreground window
+  falls back to copying the corrected text to the clipboard.
 - The intermediate `Ctrl+C` used to grab a selection may appear in the Windows clipboard history
   (`Win+V`); the original clipboard contents are restored. This is Windows-specific.
 - The installer is not code-signed yet.

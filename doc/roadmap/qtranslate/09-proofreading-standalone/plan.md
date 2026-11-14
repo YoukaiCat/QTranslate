@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 3e75331
 ---
 
@@ -127,3 +127,44 @@ request is made.
   root plan describe the standalone feature, the separate checking window and the two hotkeys, the
   removed settings and the new test counts; the text-checking behaviour is no longer described as a
   pre-translation step, as part of the translation window, or as an online gate.
+
+## Outcome
+
+Done and accepted over `3e75331..31a2a36` (four task commits: `11eb5bc`, `d9428c9`, `25f0f5f`,
+`31a2a36`); the lead's documentation pass is in the stage-closing commit.
+
+- **Standalone window and mode.** Text checking no longer shares the translation window. The new
+  non-modal `ProofreadingWindow` has its own editor, **Check** (Ctrl+Return/Ctrl+Enter),
+  `ProofreadingPanel`, Replace/Ignore/Replace all with preview, Copy corrected text, highlighting,
+  one undo step and the checking/no-issues/error states. It is opened from the tray item **Check
+  text…**, which is hidden while checking is disabled or no provider is registered. The translation
+  window contains no checking widget, button, signal or helper and remains translation-only; both
+  windows can be open at once.
+- **Removed settings and flows.** `proofreading/allowOnlineServices`, `proofreading/checkBeforeTranslation`
+  and `proofreading/autoReplace` and `ProofreadingService::isLocal()` are gone; `proofreading/enabled`
+  (default `false`) is the only consent. The **Options** and **Online checking** groups, the
+  pre-translation confirmation, the automatic replacement and the online-gate error are removed;
+  old INI keys are ignored and `settingsVersion` stays `1`.
+- **Two hotkeys.** `ProofreadSelection` (empty by default) checks the external selection and shows
+  the popup with Replace selection/Copy/Cancel; `ProofreadAndReplace` (empty by default,
+  `proofreading/replaceHotkey`) checks and immediately replaces the selection through the shared
+  foreground/clipboard safety, with no popup; no issues shows a message and pastes nothing. Both are
+  gated on `proofreading/enabled` before the grab, and stale replies never paste.
+- **Tests and translations.** `tst_settings`, `tst_settingsdialog`, `tst_proofreadingmanager`,
+  `tst_proofreadingpopup`, `tst_hotkeymanager_x11`/`wayland`, `tst_translations`; the old
+  `tst_proofreadingpanel` became `tst_proofreadingwindow` (13 slots) and a new `tst_mainwindow`
+  (4 slots) proves the translation window has no checking UI. Linux Debug/Release 46/46 with no
+  warnings in `qtranslate-trixie`; 14 `.ts` at 374 with 0 unfinished/empty/vanished; Windows 40 not
+  performed (no MSVC).
+- **Real problems left unfixed.** `AppController` has no test target, so the tray item, lazy window
+  creation, disable/quit cleanup and the replace-paste branch are covered by code review and widget
+  tests only. The enable gate is checked before the grab, so disabling checking while a grab is
+  already running can still send one request. The shared `pasteText()` failure message still says
+  "translation" on the check-and-replace path. Three new `.ts` messages are machine-translated and
+  need native review.
+- **Final host check.** Fresh Debug and Release trees under
+  `/tmp/opencode/qtranslate-final-debug` and `...-release`: 46/46 each with no warnings. The old
+  `build/linux-debug`/`build/linux-release` trees are stale and fail with a moc mismatch, so they
+  were not used.
+- **Not performed.** Windows Debug/Release and its 40 tests; a real tray/window manager, the live
+  LanguageTool provider and both non-modal windows interactively.

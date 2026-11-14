@@ -44,16 +44,16 @@
   `tst_popupwindow` and `tst_settingsdialog` also set offscreen themselves. The Linux CI job runs
   GUI tests under `xvfb-run`.
 - Debug and Release must build without warnings (`/W4` on Windows, `-Wall -Wextra` on Linux); all
-  39 Windows tests and all 45 Linux tests must pass (36 shared, 3 Windows-only, 9 Linux-only). The
+  40 Windows tests and all 46 Linux tests must pass (37 shared, 3 Windows-only, 9 Linux-only). The
   project requires Qt 6.5+; local development
   uses Qt 6.12 on Windows and Qt 6.10.2 (Astra) or Qt 6.8.2 (trixie) on Linux.
 - Tests use local `QTcpServer` and fixtures; no real Google/DeepL keys or internet are required.
   `tst_hotkeymanager` is Windows-only; `tst_autostart` and `tst_secretprotector` have Windows and
   Linux variants. The X11, Wayland, selection, window-activation, CLI and
   `tst_proofreading_selection_x11` tests are Linux-only. The proofreading tests are
-  `tst_proofreadingmanager`, `tst_languagetoolparser`, `tst_languagetoolservice`,
-  `tst_proofreadingpanel` and `tst_proofreadingpopup` (shared) plus
-  `tst_proofreading_selection_x11` (Linux). The 14 `.ts` files have 379 messages each.
+  `tst_mainwindow`, `tst_proofreadingmanager`, `tst_languagetoolparser`,
+  `tst_languagetoolservice`, `tst_proofreadingwindow` and `tst_proofreadingpopup` (shared) plus
+  `tst_proofreading_selection_x11` (Linux). The 14 `.ts` files have 374 messages each.
 
 ## Git and release approval
 
@@ -130,10 +130,12 @@
 - Logs must never contain translated or checked text, API keys or passwords. `--verbose` writes to
   `%LOCALAPPDATA%\qtranslate\qtranslate.log` on Windows and
   `$XDG_STATE_HOME/qtranslate/qtranslate.log` on Linux.
-- LanguageTool checking is opt-in: `proofreading/allowOnlineServices` defaults to `false`, and the
-  public `api.languagetool.org` or a self-hosted endpoint is used without credentials. Do not send
-  `apiKey`/`username` (the public API rejects them and a 400 can echo the value), do not reuse the
-  translation services or their settings, and keep the checked text out of the logs.
+- LanguageTool checking is enabled by `proofreading/enabled` (default `false`), which is the only
+  consent; there is no second online gate. The public `api.languagetool.org` or a self-hosted
+  endpoint is used without credentials. Text checking is a separate window and mode; the translation
+  window has no checking UI. Do not send `apiKey`/`username` (the public API rejects them and a 400
+  can echo the value), do not reuse the translation services or their settings, and keep the checked
+  text out of the logs.
 - `AppController::start()` calls `Autostart::sync(settings.general.autostart)`; keep installer-written
   settings consistent with it.
 - Deployment intentionally excludes `vc_redist.x64.exe`, D3D/DXC compilers and `opengl32sw.dll`

@@ -53,14 +53,15 @@ is English. The migration to the tree roadmap and the English baseline is comple
   in-place feedback, and explicit warnings; no `ydotool`/`wtype`. A real portal-capable desktop was
   not available; the portal is covered by a mock DBus (20/20) and Weston headless confirms the
   fallback.
-- Tests: 45 on Linux (36 shared plus `tst_hotkeymanager_x11` 16/16,
+- Tests: 46 on Linux (37 shared plus `tst_hotkeymanager_x11` 16/16,
   `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
   `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
   `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 30/30,
   `tst_proofreading_selection_x11` 6/6; the shared proofreading tests are
-  `tst_proofreadingmanager`, `tst_languagetoolparser`, `tst_languagetoolservice`,
-  `tst_proofreadingpanel` and `tst_proofreadingpopup`). Windows keeps 39 tests (36 shared plus 3
-  Windows-only) and was not run here (no MSVC). The 14 `.ts` files have 379 messages each.
+  `tst_mainwindow`, `tst_proofreadingmanager`, `tst_languagetoolparser`,
+  `tst_languagetoolservice`, `tst_proofreadingwindow` and `tst_proofreadingpopup`). Windows keeps
+  40 tests (37 shared plus 3 Windows-only) and was not run here (no MSVC). The 14 `.ts` files have
+  374 messages each.
 - Fallback: `translation/fallbackService` (off by default, one configured service) retries a
   failed primary request once on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`,
   `Network` or `Timeout`; success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and
@@ -104,13 +105,13 @@ is English. The migration to the tree roadmap and the English baseline is comple
   README download links, `doc/releases/0.12.0.md` and this handoff are in the release commit. The
   tag CI is the build gate; Windows Debug/Release and its 39 tests are not performed locally (no
   MSVC). The old 0.11.1 GitHub release stays until the user checks the current code on Windows. The
-  roadmap is past stages 3, 5 and 8: the shared queue, MyMemory, Mozhi, Yandex web, Bing web and
+  roadmap is past stages 3, 5, 8 and 9: the shared queue, MyMemory, Mozhi, Yandex web, Bing web and
   Reverso are done, the one-hop fallback is implemented, stage 5 proofreading (LanguageTool only, no
-  credentials) is accepted, and stage 8 removed the free-services opt-in gate: every service is
-  available by default, the **Fallback service** row is on the Translation page, and the provider
-  order is Google, Yandex, Bing, DeepL, OpenAI-compatible, MyMemory, Mozhi, Reverso. Stage 4
-  (`04-local-offline-translation`) stays `blocked` by the user's 2026-11-05 decision; the next stage
-  is `06-llm-actions`.
+  credentials) was reworked in stage 9 as a standalone checking window with two hotkeys, and stage 8
+  removed the free-services opt-in gate: every service is available by default, the **Fallback
+  service** row is on the Translation page, and the provider order is Google, Yandex, Bing, DeepL,
+  OpenAI-compatible, MyMemory, Mozhi, Reverso. Stage 4 (`04-local-offline-translation`) stays
+  `blocked` by the user's 2026-11-05 decision; the next stage is `06-llm-actions`.
 
 ## Native Debian packaging (2026-11-14)
 
@@ -126,7 +127,7 @@ is English. The migration to the tree roadmap and the English baseline is comple
   It writes `qtranslate_0.13.0_amd64.deb`, the `.dsc` and the `.tar.xz` to the parent directory;
   `dbgsym`, `.buildinfo` and `.changes` also appear there and are not published. `nocheck` skips
   the tests, `nodoc` leaves `README.Debian` out of the package, and without `nocheck` the rules run
-  45/45 tests under `xvfb-run -a` (no trusted-client entries were needed under Xvfb; a real Parsec
+  46/46 tests under `xvfb-run -a` (no trusted-client entries were needed under Xvfb; a real Parsec
   server may still need them, as `README.Debian` says). The package contains the binary, the
   desktop entry, the icon, `copyright`, `changelog.gz` and `LICENSE.gz` (`dh_compress` gzips the
   license text), with no maintainer scripts and `Depends` from `dh_shlibdeps` (`libglib2.0-0` on
@@ -140,7 +141,7 @@ is English. The migration to the tree roadmap and the English baseline is comple
   the staging directory and publishes only the main `.deb`; the `+astra1` suffix was dropped (both
   targets build `qtranslate_0.13.0_amd64.deb`), and `dbgsym` is not published. The Linux CI job
   installs `debhelper`/`fakeroot`/`pkg-config`, builds the native `.deb`, runs the gate, keeps the
-  45 tests and uploads the same `qtranslate-linux-x64` set. `build-essential` was removed from
+  46 tests and uploads the same `qtranslate-linux-x64` set. `build-essential` was removed from
   `Build-Depends`; `lintian` on the `.dsc` is clean apart from two
   `installable-field-mirrors-source` info tags.
 - Known gaps: the portable tarball is not byte-reproducible (gzip mtime), while the `.deb` is;
@@ -332,36 +333,38 @@ is English. The migration to the tree roadmap and the English baseline is comple
 - Next step: a PoC with Python Argos (en↔ru, en↔de, pivot ru→de), measuring quality/speed/RAM; if
   acceptable — a native CTranslate2 runner.
 
-## Proofreading (roadmap stage 5 (old stage 15), implemented)
+## Proofreading (roadmap stages 5 and 9 (old stage 15), implemented)
 
-- [`proofreading.md`](proofreading.md): implemented in stage 5 over `eb91f6b..263091f`, with the
-  acceptance fix `0ca1ad2`. The first version ships **LanguageTool only** (user decision of
-  2026-11-09); Hunspell/Nuspell, Yandex Speller and the LLM checker are deferred. The premium
+- [`proofreading.md`](proofreading.md): implemented in stage 5 over `eb91f6b..263091f` and reworked
+  in stage 9 over `3e75331..31a2a36`. The first version ships **LanguageTool only** (user decision
+  of 2026-11-09); Hunspell/Nuspell, Yandex Speller and the LLM checker are deferred. The premium
   LanguageTool credentials are out of scope: the public API rejects them and can echo a submitted
   key, so the application sends no `apiKey`/`username`.
 - The provider-independent layer is `core/proofreadingtypes`, `proofreadingservice` (a
   `ProofreadingReply` with the `TranslationReply` semantics), `proofreadingmanager` (channels
-  `MainWindow`/`InPlace`, registry, pre-network refusals) and `proofreadingtext` (applying issue
+  `Window`/`InPlace`, registry, pre-network refusals) and `proofreadingtext` (applying issue
   replacements). `LanguageToolService` uses `RequestQueue`, posts `text`, `language` and
   `enabledOnly=false` to the public or self-hosted `v2/check`, chunks at 20 000 UTF-16 units with
   offset shifts, filters categories client-side, supports `auto`, and maps 401/403→`Auth`,
   413→`TooLong`, 429→`RateLimited`, 5xx→`Network`.
-- A separate **Text checking** tab and independent `[proofreading]` keys; `allowOnlineServices` is
-  the privacy gate (off by default) and covers every remote endpoint. `checkBeforeTranslation`,
-  `autoReplace` and the proofreading hotkey are off/empty by default.
-- The main window has **Check**, issue highlighting, Replace/Ignore, Replace all with a preview,
-  Copy corrected text, one-undo-step replacements, and check-before-translation confirmation.
-  `ProofreadingPopupWindow` is a non-activating external-selection confirmation with
-  Replace selection/Copy/Cancel; the flow uses `Channel::InPlace`, a foreground watchdog, clipboard
-  fallback and the shared paste path. The fifth `HotkeyAction::ProofreadSelection` is empty by
-  default; the same scenario is `--proofread-selection`.
-- Verification: Linux Debug/Release 45/45 with no warnings, `.ts` 379, Windows 39 not performed
-  (no MSVC). Known gaps: a click on the non-activating popup under a real window manager is
-  unverified and falls back to the clipboard on a focus change; the grabber waits a fixed 400 ms
-  for the clipboard; the `QSKIP` for a missing `DISPLAY` is unreachable because `QTEST_MAIN` creates
-  the xcb application first; a paste-shortcut failure reuses the shared "translation" wording;
-  disabling the online gate during a running long check does not abort the remaining chunks; the
-  all-categories-unchecked case is normalized back to all four.
+- A separate **Text checking** tab and independent `[proofreading]` keys; `proofreading/enabled`
+  (default `false`) is the only consent and there is no second online gate. The tab keeps the
+  provider, language, URL and categories; the two proofreading hotkeys are empty by default.
+- Text checking is a separate non-modal **ProofreadingWindow** opened from the tray item **Check
+  text…**, with its own editor, Check button, issue highlighting, Replace/Ignore, Replace all with a
+  preview, Copy corrected text and one-undo-step replacements. The translation window has no
+  checking UI. `ProofreadingPopupWindow` remains a non-activating external-selection confirmation
+  with Replace selection/Copy/Cancel (`ProofreadSelection`/`--proofread-selection`); the second
+  hotkey (`ProofreadAndReplace`) checks the selection and replaces it immediately through the shared
+  foreground/clipboard safety.
+- Verification: Linux Debug/Release 46/46 with no warnings in `qtranslate-trixie`, `.ts` 374,
+  Windows 40 not performed (no MSVC). Known gaps: a click on the non-activating popup under a real
+  window manager is unverified and falls back to the clipboard on a focus change; the separate
+  checking window's tray item and both non-modal windows were not exercised interactively; the
+  grabber waits a fixed 400 ms for the clipboard; the `QSKIP` for a missing `DISPLAY` is unreachable
+  because `QTEST_MAIN` creates the xcb application first; a paste-shortcut failure reuses the shared
+  "translation" wording; disabling checking while a selection grab is already running can still send
+  one request; the all-categories-unchecked case is normalized back to all four.
 
 ## LLM actions (roadmap stage 6 (old stage 16), partially implemented)
 
