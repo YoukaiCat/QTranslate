@@ -1,6 +1,7 @@
 ---
 kind: stage
-status: todo
+status: in-progress
+base: 1dec8e0
 depends: [01-endpoint-research]
 ---
 
@@ -10,8 +11,10 @@ depends: [01-endpoint-research]
 
 Add DuckDuckGo as a no-key translation provider with its own `TranslationService`, the protocol and
 language codes recorded by `../01-endpoint-research`, an id in the fallback list, tests and UI
-strings — or drop the stage together with both children when that research finds no key-less,
-cookie-free public route. The stage is a candidate: it is worked only after the `viable` verdict.
+strings. The research found one browser-less route: the frontend `translation.js`, guarded by a `vqd`
+token read from the page HTML and a browser User-Agent. User decision 2026-11-15: add it anyway,
+because `BingWebService` already uses the same pattern. The `mozhi` engine of the same name stays;
+this stage adds the standalone provider the user asked for.
 
 The work is split into two tasks because the parser and service have their own acceptance (fixtures, a
 local `QTcpServer`, chunking, pacing, error mapping) and the settings group with the translated strings
@@ -43,22 +46,22 @@ the research shows that one is unavoidable, the key and its normalization belong
 
 ## Done when
 
-- With a `viable` verdict: `DuckDuckGo` appears in the main-window and tray service pickers and in the
-  fallback combo; it translates with an explicit source and with auto-detect when the route supports
-  it; it fills `detectedSourceLang` when the response carries one; it rejects an unsupported pair with
-  `UnsupportedLanguage` before any request; long text is split at the observed limit and the chunks are
-  sent sequentially inside one queue slot with the service pause; errors are mapped like the other
-  no-key services (`403`/`429` or a rate-limit body → `RateLimited`, an oversized request → `TooLong`,
-  `5xx` → `Network`, an HTML page, a cookie challenge or a provider error object →
-  `ServiceUnavailable`, malformed or empty → `BadResponse`, timeout/abort → `Timeout`/`Cancelled`); a
-  cross-origin redirect is refused; no text, body, cookie or full URL reaches a log line or an error
-  message.
-- With a `viable` verdict: the parser and service tests pass offline against fixtures and a local
-  `QTcpServer`, `tst_languages` covers the code table and `auto`, `tst_settingsdialog` covers the group,
-  all 14 `.ts` files carry the new strings, Debug and Release build without warnings on Linux and the
-  full suite passes; Windows is reviewed by diff and its tests are recorded as not performed.
-- With a `not viable` verdict: this stage and `01-duckduckgo-service`/`02-duckduckgo-ui` are `dropped`
-  with the research note as the reason, and `git status` shows no new service file.
+- `DuckDuckGo` appears in the main-window and tray service pickers and in the fallback combo; the
+  service fetches `https://duckduckgo.com/?q=translate` with a browser User-Agent, extracts the
+  `vqd="..."` token, caches it and refreshes it when the endpoint rejects it, then posts the text to
+  `translation.js?vqd=...`; it translates with an explicit source and with auto-detect when the route
+  supports it; it fills `detectedSourceLang` when the response carries one; it rejects an unsupported
+  pair with `UnsupportedLanguage` before any request; long text is split below the observed
+  986-character limit and the chunks are sent sequentially inside one queue slot with the service
+  pause; errors are mapped like the other no-key services (`403`/`429` or a rate-limit body →
+  `RateLimited`, an oversized request → `TooLong`, `5xx` → `Network`, an HTML page, a cookie challenge
+  or a provider error object → `ServiceUnavailable`, malformed or empty → `BadResponse`,
+  timeout/abort → `Timeout`/`Cancelled`); a cross-origin redirect is refused; no text, body, cookie or
+  full URL reaches a log line or an error message.
+- The parser and service tests pass offline against fixtures and a local `QTcpServer`, `tst_languages`
+  covers the code table and `auto`, `tst_settingsdialog` covers the group, all 14 `.ts` files carry
+  the new strings, Debug and Release build without warnings on Linux and the full suite passes;
+  Windows is reviewed by diff and its tests are recorded as not performed.
 
 ## Depends on
 
@@ -68,13 +71,14 @@ the observed coverage.
 
 ## Risks and what is needed from the user
 
-- The likely outcome is `not viable`. DuckDuckGo's translation is a search/frontend feature; if every
-  route needs JavaScript, a `vqd`-style token or a cookie taken from a page, the stage is dropped even
-  when the protocol can be reproduced, because the stage rule forbids scraping and cookie replay for a
-  new provider.
-- The existing `mozhi` provider already reaches a `duckduckgo` engine through a public instance. If that
-  is the only working route, the standalone provider adds nothing, and the note must say so; do not
-  re-implement Mozhi's engine under a new name.
+- The route is an undocumented frontend endpoint: a `vqd` token from the page HTML, a browser
+  User-Agent, no cookies. It can be rate-limited, challenged or changed without notice, and the terms
+  of use do not bless automated use. The user accepted this on 2026-11-15 after the Bing precedent.
+- The observed body limit is between 986 and 2006 characters, so chunks are much smaller than for any
+  other provider and a long text costs many requests; the chunk size and the pause stay named
+  conservative assumptions.
+- `mozhi` already reaches the same engine through a public instance. The standalone provider is a user
+  choice, not a replacement for Mozhi; it must not proxy through Mozhi or reuse its engine path.
 - The terms of use may forbid automated use. The research records them and the lead tells the user; a
   dropped provider is a normal result and does not need a workaround.
 - Live smoke tests may be blocked from this network and are recorded as not performed, never as broken.

@@ -18,6 +18,7 @@ const QString mymemory = QStringLiteral("mymemory");
 const QString yandexWeb = QStringLiteral("yandex-web");
 const QString bingWeb = QStringLiteral("bing-web");
 const QString reverso = QStringLiteral("reverso");
+const QString duckduckgo = QStringLiteral("duckduckgo");
 } // namespace
 
 class TestLanguages : public QObject
@@ -138,6 +139,40 @@ private slots:
         QTest::newRow("bing web pa") << bingWeb << "pa" << Direction::Target << "";
         QTest::newRow("bing web haw") << bingWeb << "haw" << Direction::Source << "";
         QTest::newRow("bing web auto") << bingWeb << "auto" << Direction::Source << "";
+        // The DuckDuckGo column is the Bing catalogue plus `es`: the inherited
+        // shapes come first, then the probe-confirmed codes and the exclusions.
+        QTest::newRow("duckduckgo pt-BR") << duckduckgo << "pt-BR" << Direction::Target << "pt";
+        QTest::newRow("duckduckgo pt-PT") << duckduckgo << "pt-PT" << Direction::Source
+                                          << "pt-PT";
+        QTest::newRow("duckduckgo zh-Hans") << duckduckgo << "zh-Hans" << Direction::Target
+                                            << "zh-Hans";
+        QTest::newRow("duckduckgo zh-Hant") << duckduckgo << "zh-Hant" << Direction::Source
+                                            << "zh-Hant";
+        QTest::newRow("duckduckgo nb") << duckduckgo << "nb" << Direction::Target << "nb";
+        QTest::newRow("duckduckgo sr") << duckduckgo << "sr" << Direction::Source << "sr-Cyrl";
+        QTest::newRow("duckduckgo he") << duckduckgo << "he" << Direction::Target << "he";
+        QTest::newRow("duckduckgo fil") << duckduckgo << "fil" << Direction::Target << "fil";
+        QTest::newRow("duckduckgo jv") << duckduckgo << "jv" << Direction::Source << "jv";
+        QTest::newRow("duckduckgo hmn") << duckduckgo << "hmn" << Direction::Target << "hmn";
+        QTest::newRow("duckduckgo es") << duckduckgo << "es" << Direction::Target << "es";
+        QTest::newRow("duckduckgo en") << duckduckgo << "en" << Direction::Source << "en";
+        QTest::newRow("duckduckgo de") << duckduckgo << "de" << Direction::Target << "de";
+        QTest::newRow("duckduckgo fr") << duckduckgo << "fr" << Direction::Source << "fr";
+        QTest::newRow("duckduckgo it") << duckduckgo << "it" << Direction::Target << "it";
+        QTest::newRow("duckduckgo ja") << duckduckgo << "ja" << Direction::Source << "ja";
+        QTest::newRow("duckduckgo ko") << duckduckgo << "ko" << Direction::Target << "ko";
+        QTest::newRow("duckduckgo pl") << duckduckgo << "pl" << Direction::Source << "pl";
+        QTest::newRow("duckduckgo ru") << duckduckgo << "ru" << Direction::Target << "ru";
+        QTest::newRow("duckduckgo tr") << duckduckgo << "tr" << Direction::Source << "tr";
+        QTest::newRow("duckduckgo uk") << duckduckgo << "uk" << Direction::Target << "uk";
+        QTest::newRow("duckduckgo ar") << duckduckgo << "ar" << Direction::Source << "ar";
+        QTest::newRow("duckduckgo hi") << duckduckgo << "hi" << Direction::Target << "hi";
+        QTest::newRow("duckduckgo ceb") << duckduckgo << "ceb" << Direction::Target << "";
+        QTest::newRow("duckduckgo kk") << duckduckgo << "kk" << Direction::Source << "";
+        QTest::newRow("duckduckgo pa") << duckduckgo << "pa" << Direction::Target << "";
+        QTest::newRow("duckduckgo haw") << duckduckgo << "haw" << Direction::Source << "";
+        QTest::newRow("duckduckgo unknown code") << duckduckgo << "xx" << Direction::Target << "";
+        QTest::newRow("duckduckgo auto") << duckduckgo << "auto" << Direction::Source << "";
         QTest::newRow("reverso en source") << reverso << "en" << Direction::Source << "en";
         QTest::newRow("reverso en target") << reverso << "en" << Direction::Target << "en";
         QTest::newRow("reverso fr source") << reverso << "fr" << Direction::Source << "fr";
@@ -277,6 +312,31 @@ private slots:
                                           << "zh-Hant";
         QTest::newRow("bing web he") << bingWeb << "he" << Direction::Source << "he";
         QTest::newRow("bing web unknown") << bingWeb << "xx" << Direction::Source << "";
+        QTest::newRow("duckduckgo es") << duckduckgo << "es" << Direction::Source << "es";
+        QTest::newRow("duckduckgo en") << duckduckgo << "en" << Direction::Source << "en";
+        QTest::newRow("duckduckgo de") << duckduckgo << "de" << Direction::Target << "de";
+        QTest::newRow("duckduckgo mixed case") << duckduckgo << "FR" << Direction::Source << "fr";
+        QTest::newRow("duckduckgo it") << duckduckgo << "it" << Direction::Source << "it";
+        QTest::newRow("duckduckgo ja") << duckduckgo << "ja" << Direction::Source << "ja";
+        QTest::newRow("duckduckgo ko") << duckduckgo << "ko" << Direction::Source << "ko";
+        QTest::newRow("duckduckgo pl") << duckduckgo << "pl" << Direction::Source << "pl";
+        QTest::newRow("duckduckgo ru") << duckduckgo << "ru" << Direction::Source << "ru";
+        QTest::newRow("duckduckgo tr") << duckduckgo << "tr" << Direction::Source << "tr";
+        QTest::newRow("duckduckgo uk") << duckduckgo << "uk" << Direction::Source << "uk";
+        QTest::newRow("duckduckgo ar") << duckduckgo << "ar" << Direction::Source << "ar";
+        QTest::newRow("duckduckgo hi") << duckduckgo << "hi" << Direction::Source << "hi";
+        QTest::newRow("duckduckgo pt") << duckduckgo << "pt" << Direction::Source << "pt-BR";
+        QTest::newRow("duckduckgo pt-PT") << duckduckgo << "pt-PT" << Direction::Source << "pt-PT";
+        QTest::newRow("duckduckgo sr-Cyrl") << duckduckgo << "sr-Cyrl" << Direction::Source << "sr";
+        // The Bing-only synonym stays scoped to bing-web: nothing was observed
+        // about what DuckDuckGo reports for a Latin-script source.
+        QTest::newRow("duckduckgo sr-Latn") << duckduckgo << "sr-Latn" << Direction::Source << "";
+        QTest::newRow("duckduckgo zh-Hans") << duckduckgo << "zh-Hans" << Direction::Source
+                                            << "zh-Hans";
+        QTest::newRow("duckduckgo zh-Hant") << duckduckgo << "zh-Hant" << Direction::Target
+                                            << "zh-Hant";
+        QTest::newRow("duckduckgo he") << duckduckgo << "he" << Direction::Source << "he";
+        QTest::newRow("duckduckgo unknown") << duckduckgo << "xx" << Direction::Source << "";
         QTest::newRow("reverso en source") << reverso << "en" << Direction::Source << "en";
         QTest::newRow("reverso en target") << reverso << "en" << Direction::Target << "en";
         QTest::newRow("reverso fr source") << reverso << "fr" << Direction::Source << "fr";
@@ -327,7 +387,7 @@ private slots:
         // Every supported language maps to a service code and back to itself,
         // except where several internal codes share a service code (DeepL "PT", "ZH").
         for (const QString &service : {google, deepl, deeplWeb, llm, languageTool, mozhi, mymemory,
-                                       yandexWeb, bingWeb, reverso}) {
+                                       yandexWeb, bingWeb, reverso, duckduckgo}) {
             for (Direction direction : {Direction::Source, Direction::Target}) {
                 for (const QString &code : Languages::supported(service, direction)) {
                     const QString serviceCode = Languages::toServiceCode(service, code, direction);
@@ -405,6 +465,36 @@ private slots:
               QStringLiteral("pa"), QStringLiteral("haw")}) {
             QVERIFY2(!bingWebSources.contains(code), qPrintable(code));
         }
+        const QStringList duckDuckGoSources =
+            Languages::supported(duckduckgo, Direction::Source);
+        QCOMPARE(Languages::supported(duckduckgo, Direction::Target), duckDuckGoSources);
+        QVERIFY(!duckDuckGoSources.isEmpty());
+        // The fifteen codes the follow-up probe confirmed as targets.
+        for (const QString &code :
+             {QStringLiteral("de"), QStringLiteral("fr"), QStringLiteral("es"),
+              QStringLiteral("it"), QStringLiteral("pt-BR"), QStringLiteral("zh-Hans"),
+              QStringLiteral("ja"), QStringLiteral("ko"), QStringLiteral("pl"),
+              QStringLiteral("uk"), QStringLiteral("tr"), QStringLiteral("ar"),
+              QStringLiteral("hi"), QStringLiteral("en"), QStringLiteral("ru")}) {
+            QVERIFY2(duckDuckGoSources.contains(code), qPrintable(code));
+        }
+        for (const QString &code :
+             {Languages::autoCode(), QStringLiteral("ceb"), QStringLiteral("kk"),
+              QStringLiteral("pa"), QStringLiteral("haw")}) {
+            QVERIFY2(!duckDuckGoSources.contains(code), qPrintable(code));
+        }
+        // The column is the Bing catalogue plus exactly `es`: an accidental
+        // divergence between the two inherited tables fails here.
+        const QSet<QString> duckDuckGoSet(duckDuckGoSources.begin(), duckDuckGoSources.end());
+        const QSet<QString> bingWebSet(bingWebSources.begin(), bingWebSources.end());
+        QSet<QString> duckDuckGoOnly = duckDuckGoSet;
+        duckDuckGoOnly.subtract(bingWebSet);
+        QCOMPARE(duckDuckGoOnly, QSet<QString>({QStringLiteral("es")}));
+        QSet<QString> bingWebOnly = bingWebSet;
+        bingWebOnly.subtract(duckDuckGoSet);
+        QVERIFY2(bingWebOnly.isEmpty(), qPrintable(QStringList(bingWebOnly.begin(),
+                                                               bingWebOnly.end())
+                                                       .join(QLatin1Char(','))));
         const QStringList reversoSources = Languages::supported(reverso, Direction::Source);
         QCOMPARE(Languages::supported(reverso, Direction::Target), reversoSources);
         QCOMPARE(reversoSources.size(), 6);

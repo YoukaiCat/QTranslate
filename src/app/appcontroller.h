@@ -28,6 +28,7 @@ class TranslationReply;
 class TrayIcon;
 class BingWebService;
 class DeepLService;
+class DuckDuckGoService;
 class GoogleTranslateService;
 class MyMemoryService;
 class MozhiService;
@@ -126,6 +127,7 @@ private:
     YandexWebService *m_yandexWeb = nullptr;
     BingWebService *m_bingWeb = nullptr;
     ReversoService *m_reverso = nullptr;
+    DuckDuckGoService *m_duckduckgo = nullptr;
     ProofreadingManager *m_proofreading = nullptr;
     LanguageToolService *m_languageTool = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for

@@ -9,10 +9,11 @@ depends: [01-endpoint-research, 02-duckduckgo]
 ## Goal
 
 Add LibreTranslate as a provider that sends text to a LibreTranslate server the user points the
-application at, usually a self-hosted one: a base-URL setting, the language codes and auto-detect of
-that server, an id in the fallback list, tests and UI strings. The stage is a candidate and starts
-only after `../01-endpoint-research` returns `viable`; a `not viable` verdict drops it and both
-children with the research note as the reason.
+application at: a base-URL setting and an optional API key, the language codes and auto-detect of that
+server, an id in the fallback list, tests and UI strings. User decision 2026-11-15: a self-hosted
+server works without a key, and a hosted instance such as `libretranslate.com` works with a key, so
+the key is an optional stored secret. The research found no public key-less instance; the default
+base URL stays empty.
 
 LibreTranslate is an AGPL-3.0 server. QTranslate stays GPL-3.0-or-later and adds only an HTTP client,
 no LibreTranslate code, no server binary and no container. The stage does not start or bundle a
@@ -31,23 +32,28 @@ and the translated strings have another, like `03-free-web-endpoints/03-mozhi`.
   `CMakeLists.txt`, fixtures and `tests/tst_libretranslateparser.cpp`/
   `tests/tst_libretranslateservice.cpp`. Protocol from
   `../01-endpoint-research/notes/duckduckgo-libretranslate.md`: `POST <base>/translate` with a JSON
-  `q`/`source`/`target` body (and `format` only if the research shows it matters), the
-  `translatedText` result and the optional `detectedLanguage.language`/`confidence`.
-- `02-libretranslate-settings-ui` (task): `LibreTranslateSettings` with the base URL in
-  `src/core/settings.h`, the `[libretranslate] baseUrl` key with normalization in
+  `q`/`source`/`target` body, `api_key` when a key is set, the `translatedText` result and the
+  optional `detectedLanguage.language`/`confidence`; `setApiKey()` alongside `setBaseUrl()`, and a
+  `401`/`403` key error → `Auth`.
+- `02-libretranslate-settings-ui` (task): `LibreTranslateSettings` with the base URL and the API key
+  in `src/core/settings.h`, the `[libretranslate] baseUrl` and `apiKey` keys with normalization in
   `src/core/settings.cpp`, `applySettings()` and the cache reset on a change in `AppController`, the
-  `LibreTranslate` group on the Services page (base-URL field, effective-value label, invalid-input
-  warning, hint), `tst_settings`, a `tst_settingsdialog` case and the 14 `.ts` files.
+  `LibreTranslate` group on the Services page (base-URL field, key field with password echo,
+  effective-value label, invalid-input warning, hint), `tst_settings`, a `tst_settingsdialog` case and
+  the 14 `.ts` files.
+- The key is optional and is stored as a secret: DPAPI on Windows, libsecret or the `0600` fallback on
+  Linux, through the same `SecretProtector` path as the other provider keys. An empty key is valid and
+  omits `api_key`; the key never appears in the INI plaintext when a protector is available, in a log
+  line or in an error message.
 - Base-URL rules: extract the Mozhi rules into shared helpers instead of copying them —
   `isValidServiceBaseUrl()`/`normalizedServiceBaseUrl()` (absolute `http(s)`, a host, no credentials,
   no query, no fragment, a path prefix kept, a trailing slash removed) — and keep
   `isValidMozhiInstance()`/`normalizedMozhiInstance()` as thin wrappers so the Mozhi settings UI and its
   tests stay unchanged.
-- Default base URL: when the research finds a public instance that answers without a key, default to
-  it with the Mozhi-style unofficial and self-hosting warning and no hidden rotation; otherwise the
-  value starts empty, `isConfigured()` returns false and `configurationError()` tells the user to enter
-  the base URL of their server. The value is always user-editable, and no request goes to an instance
-  the user did not configure.
+- Default base URL: empty, because no public key-less instance answered. `isConfigured()` returns false
+  and `configurationError()` tells the user to enter the base URL of their server. The user can enter
+  a self-hosted URL without a key or a hosted URL with a key; no request goes to an instance the user
+  did not configure.
 - Append `libretranslate` at the end of the provider order (after `duckduckgo` when that provider is
   added) so the existing pickers and the fallback order do not shift.
 - `doc/`, both READMEs, `doc/handoff.md` and the counts in `AGENTS.md` are the lead's pass after the
@@ -60,9 +66,10 @@ and the translated strings have another, like `03-free-web-endpoints/03-mozhi`.
   source (or `auto` when the server supports detection) and the target codes of the observed table,
   fills `detectedSourceLang` from `detectedLanguage.language`, chunks long text at the observed limit,
   paces requests, maps errors like the other no-key services and keeps the text, the body and the full
-  URL out of logs and messages.
-- Without a base URL (when the research finds no public default) the service reports the configured
-  error instead of sending a request, and the settings page says what to enter.
+  URL out of logs and messages. With a key set it sends `api_key` in the body; without a key it omits
+  it; a server that rejects the key reports `Auth` with a message that names the key, not the text.
+- Without a base URL the service reports the configured error instead of sending a request, and the
+  settings page says what to enter.
 - The base URL is validated and normalized by the shared helpers; a cross-origin redirect is refused;
   a change of the base URL clears the translation cache and does not abort an active reply.
 - Parser, service, settings, languages and dialog tests pass offline; the 14 `.ts` files carry the new
@@ -79,10 +86,10 @@ the lead removes it from this list and this stage follows `01-endpoint-research`
 
 ## Risks and what is needed from the user
 
-- A hosted instance may require an API key (`libretranslate.com` does). That path is outside the
-  key-less rule and this stage. If the research finds no key-less instance and the user still wants the
-  provider, an `api_key` field is a separate user decision — a stored secret, secret storage and a key
-  protection path. Ask; do not add it silently.
+- The key is optional and stored as a secret (user decision 2026-11-15). A hosted instance's account,
+  quota, terms and availability are the user's responsibility; the key is sent only to the server the
+  user configured and never logged. If the server rejects the key, the error names the key, not the
+  text.
 - The value of the provider depends on the user running a server. Quality is Argos-level and lower than
   Google/DeepL, and the language matrix of an instance is whatever models it has installed. The hint
   must say that the base URL points at a server the user trusts and that its terms and availability are

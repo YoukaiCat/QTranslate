@@ -59,6 +59,8 @@ qt_add_library(qtranslate_core STATIC
     src/services/deeplservice.cpp           src/services/deeplservice.h
     src/services/deeplwebparser.cpp         src/services/deeplwebparser.h
     src/services/deeplwebservice.cpp        src/services/deeplwebservice.h
+    src/services/duckduckgoparser.cpp       src/services/duckduckgoparser.h
+    src/services/duckduckgoservice.cpp      src/services/duckduckgoservice.h
     src/services/googleparser.cpp           src/services/googleparser.h
     src/services/googletranslateservice.cpp src/services/googletranslateservice.h
     src/services/languagetoolparser.cpp     src/services/languagetoolparser.h

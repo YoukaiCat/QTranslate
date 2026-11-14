@@ -350,6 +350,35 @@ the reason.
   gains the provider row and the no-default-base-URL rule; both READMEs gain `LibreTranslate` in the
   provider list once the service exists.
 
+## 4. User decision (2026-11-15)
+
+The user overrode two conclusions of this note and chose both providers.
+
+- **DuckDuckGo — add it.** The route in §2.3 stands (a `vqd` token from the page HTML, a browser
+  User-Agent, no cookies, a body limit between 986 and 2006 characters), but the user accepted the
+  token scrape because `BingWebService` already uses the same pattern
+  (`params_AbusePreventionHelper` from the page plus a request-scoped User-Agent). Implement it with a
+  conservative chunk below 986 characters and a token refresh on a rejected token.
+- **LibreTranslate — add it with a base URL and an optional API key.** A self-hosted server works
+  without a key; a hosted instance such as `libretranslate.com` works with a key. The key is stored as
+  a secret like the other provider keys and sent as `api_key` in the JSON body when set. The default
+  base URL stays empty.
+- **Order:** `02-duckduckgo` first, then `03-libretranslate`.
+
+This section supersedes the map decision and the `api_key` bullet of §3; the observations above are
+unchanged and remain the implementation source.
+
+### Follow-up probe (2026-11-15)
+
+The four-code table above is too narrow. A single `vqd` token from the page above, then
+`POST https://duckduckgo.com/translation.js?vqd=...&query=translate&to=<code>` with the body `Hello`,
+a browser User-Agent and no `from`, returned `200` with a translated text for `de`, `fr`, `es`, `it`,
+`pt`, `zh-Hans`, `ja`, `ko`, `pl`, `uk`, `tr`, `ar`, `hi` and `ru`. That matches the source: Mozhi
+describes the engine as "1-1 with Bing Translate", and `langlist-duckduckgo.go` in
+`codeberg.org/aryak/libmozhi`, commit `7324b5c528fe`, is the Bing list converted to Mozhi's format
+(the file header says so). The implementation reuses the observed Bing catalogue
+(`kBingWebCodes` and its overrides) instead of a four-code table.
+
 ## Appendix A. Probes
 
 All probes used neutral sentences only. No cookie jar, no token and no text of a user was sent or

@@ -161,6 +161,7 @@ constexpr QLatin1String kMozhi("mozhi");
 constexpr QLatin1String kYandexWeb("yandex-web");
 constexpr QLatin1String kBingWeb("bing-web");
 constexpr QLatin1String kReverso("reverso");
+constexpr QLatin1String kDuckDuckGo("duckduckgo");
 
 // MyMemory takes ISO 639-1/RFC 3066 codes and follows the Google catalogue,
 // but a few of its codes differ from the internal ones.
@@ -257,6 +258,13 @@ constexpr const char *kReversoCodes[] = {
     "en", "fr", "de", "es", "it", "ru",
 };
 
+// The only code the follow-up DuckDuckGo probe confirmed that the Bing table
+// does not declare. It stays out of kBingWebCodes: that table is the Bing
+// evidence, and widening Bing's coverage has no probe behind it.
+constexpr const char *kDuckDuckGoExtraCodes[] = {
+    "es",
+};
+
 const LanguageInfo *findInfo(const QString &code)
 {
     for (const LanguageInfo &info : kLanguages) {
@@ -333,6 +341,26 @@ const char *reversoCodeOf(const LanguageInfo &info)
     return nullptr;
 }
 
+// The DuckDuckGo frontend route is Bing Translate behind the search page: Mozhi
+// documents the engine as "1-1 with Bing Translate", and `langlist-duckduckgo.go`
+// in libmozhi at commit 7324b5c528fe is the Bing list converted to Mozhi's
+// format. The catalogue is therefore inherited from kBingWebCodes and
+// kBingWebOverrides rather than copied: one list and one named fix point where
+// the two providers can diverge. The follow-up probe (2026-11-15) answered a
+// translation for de, fr, es, it, pt, zh-Hans, ja, ko, pl, uk, tr, ar, hi, en
+// and ru as targets. Every other code in the inherited catalogue is inherited
+// and unverified: a code the route rejects answers `invalid_to` and becomes
+// UnsupportedLanguage, while a code it maps to another variant would return a
+// plausible but wrong translation.
+const char *duckDuckGoCodeOf(const LanguageInfo &info)
+{
+    for (const char *candidate : kDuckDuckGoExtraCodes) {
+        if (QLatin1String(candidate) == QLatin1String(info.code))
+            return candidate;
+    }
+    return bingWebCodeOf(info);
+}
+
 // LanguageTool takes the long codes of its catalogue and declares exactly the
 // languages in kLanguageToolCodes; anything absent is not offered.
 const char *languageToolCodeOf(const LanguageInfo &info)
@@ -366,6 +394,8 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
         return bingWebCodeOf(info);
     if (serviceId == kReverso)
         return reversoCodeOf(info);
+    if (serviceId == kDuckDuckGo)
+        return duckDuckGoCodeOf(info);
     return nullptr;
 }
 

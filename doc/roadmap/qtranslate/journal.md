@@ -16,10 +16,14 @@ Stages 1-3, 5, 8, 9 and 10 are `done`; stage 4 `04-local-offline-translation` st
 user's 2026-11-05 decision; stage 6 `06-llm-actions` is `blocked` by the user's 2026-11-15 decision
 (the actions are deferred; only the checking backend continues as stage 12); stage 7 is `todo`. The
 root is `in-progress`; its `Done when` requires every stage to be done or dropped, so the blocked
-stages 4 and 6 are deliberate exceptions. Stage 11 is `in-progress` (`base: 8e9c48d`); the planner
-split it into `01-endpoint-research` (detailed), conditional `02-duckduckgo` and `03-libretranslate`
-stages with two tasks each. The research task is `in-progress` and the coordinator is running it;
-stage 12 follows stage 11.
+stages 4 and 6 are deliberate exceptions. Stage 11 is `in-progress` (`base: 8e9c48d`);
+`01-endpoint-research` is `done` as `1dec8e0`, and the research note records the verdicts. User
+decision 2026-11-15: DuckDuckGo is added with the Bing-like `vqd` token and browser User-Agent;
+LibreTranslate is added with a base URL and an optional API key (self-hosted without a key, hosted
+with one). Both `02-duckduckgo` and `03-libretranslate` are worked in that order; the next node is
+`02-duckduckgo/01-duckduckgo-service` (detailed; `in-progress`, the coordinator is running it). Stage 12
+follows stage 11. The user also reported a new bug: on Astra the tray icon appears 3-5 seconds late at
+startup; it is recorded as root task `13-tray-icon-latency`, not started.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
@@ -32,7 +36,7 @@ unreviewed work on the former task `01-llm-action-core` and the stage 6 split is
 not reviewed, and is kept only in case the LLM checking task reuses the transport part. Linux
 Debug/Release 46/46 on the host; Windows 40 (derived, not run locally); `.ts` is at 374. The
 `qtranslate-trixie` image is built. Resume with `/new`, agent `lead`, `@continue`; the current node
-is `11-duckduckgo-libretranslate/01-endpoint-research`.
+is `11-duckduckgo-libretranslate/02-duckduckgo/01-duckduckgo-service`.
 
 Task `10-provider-hint-cleanup` is `done` as `589dbb5`: the eight recipient/privacy sentences are
 gone from the settings hints (fallback, Yandex, Bing, DeepL free web, OpenAI-compatible, MyMemory,
@@ -374,3 +378,26 @@ has six languages and no `auto`. Next: plan and run stage 8.
   performed (no MSVC). No real problems deferred. The lead updated `doc/architecture.md` §4.15/§7,
   `doc/free-endpoints.md` §10 and both README limitation lists; the global README paragraph stays.
   Next node: `06-llm-actions` (needs a planner split).
+- 2026-11-15 — Research verdicts and the user's decisions on the standalone providers.
+  `01-endpoint-research` is `done` as `1dec8e0`; the note is
+  `11-duckduckgo-libretranslate/01-endpoint-research/notes/duckduckgo-libretranslate.md` (476 lines,
+  probes with dates, statuses and quotes). DuckDuckGo: the only browser-less route is the frontend
+  `POST https://duckduckgo.com/translation.js?vqd=...`, whose `vqd` is read from the page HTML, plus a
+  browser User-Agent; no cookies; the body limit is between 986 and 2006 characters; `mozhi` already
+  offers the engine. LibreTranslate: a self-hosted 1.9.6 server works without a key (`POST
+  <base>/translate`, `source:"auto"`, 51 languages, good en↔ru on neutral phrases); no public key-less
+  instance answered and `libretranslate.com` requires a key. User decisions: add DuckDuckGo anyway as
+  a Bing-like provider, because `BingWebService` already reads `params_AbusePreventionHelper` from the
+  page and uses a request-scoped User-Agent; add LibreTranslate with a base URL and an **optional**
+  API key stored as a secret, so a self-hosted server works without a key and a hosted instance works
+  with one. Rejected: dropping DuckDuckGo for the token rule (it contradicts the existing Bing
+  implementation), key-less-only LibreTranslate (the user wants the hosted instance too), and keeping
+  `api_key` out of scope. The note's §4 records the override; stages 02/03 and their child plans were
+  updated to match. Next node: `02-duckduckgo/01-duckduckgo-service` (needs detailing from the note).
+- 2026-11-15 — User bug report, recorded as root task `13-tray-icon-latency` (`todo`, not detailed, not
+  started). On Astra Linux (1.8.7, X11, Qt 6.10.2) the tray slot stays empty for 3-5 seconds after
+  launch before the icon appears; the window and hotkeys start normally. The task lists the suspects
+  (tray creation ordering vs blocking startup work, StatusNotifierItem DBus registration vs XEmbed,
+  icon lookup, panel polling), requires evidence before a fix, and allows recording a panel limitation
+  instead of a code workaround. Not worked now: stage 11 is in progress. No decision from the user
+  beyond "record it for later".
