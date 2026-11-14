@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 2650def
 ---
 
@@ -89,3 +89,40 @@ and depends on the gate-free hint and the gate-free Services page, so it goes se
   messages and `tst_translations` passes; the final count is 379.
 - `doc/architecture.md`, `doc/free-endpoints.md`, `doc/handoff.md`, both READMEs and the root plan
   describe the always-on behavior, the Translation-page fallback row and the provider order.
+
+## Outcome
+
+Done and accepted over `2650def..2ebf5ae`; the lead's documentation pass is in the same closing
+commit as this outcome.
+
+- `01-remove-free-services-gate` (`7b1265c`) removed the `translation/allowFreeServices` setting and
+  the whole opt-in concept: the field and the INI load/save, `requiresOptIn()` and its five
+  overrides, the manager flag, the pre-request refusal and the fallback gate, the six `AppController`
+  places, the checkbox and the **Free web services** group/general hint, the five gate
+  `update*Controls()` functions and the gate sentences in the six hints. Every registered service is
+  available at startup and in the main-window/tray pickers; the fallback accepts any registered
+  non-primary service; an old INI with the key loads without it and keeps the service.
+- `02-move-fallback-and-order-services` (`2ebf5ae`) made **Fallback service** a `Fallback service:`
+  form row with its hint on the Translation page (no group box; `fallbackService`/`fallbackHint`
+  names kept) and put the providers in one order — Google, Yandex, Bing, DeepL,
+  OpenAI-compatible, MyMemory, Mozhi, Reverso — in the Services page, in
+  `AppController::createTranslation()` (the pickers follow it) and in `fallbackServiceIds()`
+  (Yandex, Bing, MyMemory, Mozhi, Reverso). Google stays first and default.
+- Tests: `freeWebGateIsGone`, `anyRegisteredServiceCanBeActive`, `fallbackWorksWithoutAGate`,
+  `fallbackCanBeAnyRegisteredService`, `legacyFreeServicesGateKeyIsIgnored`,
+  `fallbackRowOnTranslationPage` and `providerOrder` replaced the gate coverage; the five service
+  property tests lost only the `requiresOptIn()` assertion. `tst_settings`, `tst_settingsdialog`,
+  `tst_translationmanager` and `tst_translations` pass.
+- Verification: Linux Debug and Release build with `-Wall -Wextra` and no warnings, both 45/45 under
+  `xvfb-run -a`; the 14 `.ts` files are at 379 messages each with 0 unfinished/empty/vanished; the
+  Text checking tab and `proofreading/allowOnlineServices` are byte-identical. Windows Debug/Release
+  and its 39 tests were not performed (no MSVC); CI on Qt 6.8.3/`debian:trixie`, real network requests
+  and the interactive pickers were not exercised.
+- Deliberate deviations, accepted by review: the tests assemble the removed key/object name from two
+  string literals so the strict `rg` gate over `src`/`tests` stays empty while the exact identifier is
+  still checked at run time; the fallback candidate order was aligned with the provider order.
+- Real problems left unfixed: none. `AppController` has no test target, so the startup/picker order
+  paths are covered by code review, `tst_translationmanager` and the legacy-INI smoke; this is a
+  coverage limit, not a defect.
+- Deferred by the user: the text-checking question ("you understood it incorrectly, we will discuss
+  it after this work"). It is the next discussion item; `05-proofreading` and its gate are unchanged.

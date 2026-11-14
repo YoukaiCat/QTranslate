@@ -60,13 +60,13 @@ is English. The migration to the tree roadmap and the English baseline is comple
   `tst_proofreading_selection_x11` 6/6; the shared proofreading tests are
   `tst_proofreadingmanager`, `tst_languagetoolparser`, `tst_languagetoolservice`,
   `tst_proofreadingpanel` and `tst_proofreadingpopup`). Windows keeps 39 tests (36 shared plus 3
-  Windows-only) and was not run here (no MSVC). The 14 `.ts` files have 383 messages each.
-- Fallback: `translation/fallbackService` (off by default, one configured opt-in service) retries a
+  Windows-only) and was not run here (no MSVC). The 14 `.ts` files have 379 messages each.
+- Fallback: `translation/fallbackService` (off by default, one configured service) retries a
   failed primary request once on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`,
   `Network` or `Timeout`; success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and
   `BadResponse` never fall back, there is no second hop, and a failed fallback returns the primary
   error. The fallback result keeps its own `serviceId` and the primary cache key; changing the
-  fallback or turning the gate off clears the cache. `clearCache()` also bumps a cache generation
+  fallback clears the cache. `clearCache()` also bumps a cache generation
   that each reply captures, so a result arriving after a clear is not stored; the running request
   is not aborted.
 - Packaging: the repository is a native Debian source package (`debian/`, `3.0 (native)`), and
@@ -104,10 +104,13 @@ is English. The migration to the tree roadmap and the English baseline is comple
   README download links, `doc/releases/0.12.0.md` and this handoff are in the release commit. The
   tag CI is the build gate; Windows Debug/Release and its 39 tests are not performed locally (no
   MSVC). The old 0.11.1 GitHub release stays until the user checks the current code on Windows. The
-  roadmap is past stages 3 and 5: the opt-in gate, the shared queue, MyMemory, Mozhi, Yandex web,
-  Bing web and Reverso are done, the fallback chain is implemented, and stage 5 proofreading
-  (LanguageTool only, no credentials) is accepted. Stage 4 (`04-local-offline-translation`) stays
-  `blocked` by the user's 2026-11-05 decision; the next stage is `06-llm-actions`.
+  roadmap is past stages 3, 5 and 8: the shared queue, MyMemory, Mozhi, Yandex web, Bing web and
+  Reverso are done, the one-hop fallback is implemented, stage 5 proofreading (LanguageTool only, no
+  credentials) is accepted, and stage 8 removed the free-services opt-in gate: every service is
+  available by default, the **Fallback service** row is on the Translation page, and the provider
+  order is Google, Yandex, Bing, DeepL, OpenAI-compatible, MyMemory, Mozhi, Reverso. Stage 4
+  (`04-local-offline-translation`) stays `blocked` by the user's 2026-11-05 decision; the next stage
+  is `06-llm-actions`.
 
 ## Native Debian packaging (2026-11-14)
 
@@ -260,15 +263,16 @@ is English. The migration to the tree roadmap and the English baseline is comple
 ## Free web endpoints (roadmap stage 3 (old stage 13), partial)
 
 - [`free-endpoints.md`](free-endpoints.md): DeepL web, MyMemory, Mozhi, Yandex web, Bing web and
-  Reverso are implemented; the opt-in gate (`translation/allowFreeServices`) and the shared
-  `QueuedWebService` queue are implemented infrastructure. MyMemory cannot auto-detect the source
+  Reverso are implemented as no-key services available by default (the opt-in gate was removed in
+  stage 8); the shared `QueuedWebService` queue is implemented infrastructure. MyMemory cannot
+  auto-detect the source
   language, so Auto-detect stays a selectable value and returns `UnsupportedLanguage` until the
   user picks a language; Reverso also requires an explicit source language (six languages, no
   `auto`). The settings hints and the errors explain it; fixing the shared language combos is a
   later decision.
 - `TranslationManager` guards the cache with a generation counter: `clearCache()` increments it and
   each reply captures it, so a result that arrives after a clear (a Mozhi instance/engine change,
-  `google.mode`, `deepl.mode`, `deepl.englishVariant`, a language change or a fallback/gate change)
+  `google.mode`, `deepl.mode`, `deepl.englishVariant`, a language change or a fallback change)
   is returned to the caller but not stored under the current key. The active request is not aborted.
   Covered by `tst_translationmanager::resultArrivingAfterClearIsNotCached`.
 - **DeepL web is implemented as a mode:** `src/services/deeplwebservice.*` and `deeplwebparser.*` are
@@ -351,7 +355,7 @@ is English. The migration to the tree roadmap and the English baseline is comple
   Replace selection/Copy/Cancel; the flow uses `Channel::InPlace`, a foreground watchdog, clipboard
   fallback and the shared paste path. The fifth `HotkeyAction::ProofreadSelection` is empty by
   default; the same scenario is `--proofread-selection`.
-- Verification: Linux Debug/Release 45/45 with no warnings, `.ts` 383, Windows 39 not performed
+- Verification: Linux Debug/Release 45/45 with no warnings, `.ts` 379, Windows 39 not performed
   (no MSVC). Known gaps: a click on the non-activating popup under a real window manager is
   unverified and falls back to the clipboard on a focus change; the grabber waits a fixed 400 ms
   for the clipboard; the `QSKIP` for a missing `DISPLAY` is unreachable because `QTEST_MAIN` creates

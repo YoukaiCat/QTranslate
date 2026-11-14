@@ -2,17 +2,20 @@
 
 ## Where we left off
 
-Current node: stage `08-free-services-always-on` is `in-progress` (`base: 2650def`, the 0.13.0
-release commit). Its first child `01-remove-free-services-gate` is `done` as `7b1265c`; the second
-child `02-move-fallback-and-order-services` is `done` in the task commit. The
-stage is a user-requested correction of stage 3: remove the `translation/allowFreeServices` opt-in
-gate and the whole opt-in concept, make every service available by default and delete the **Allow
-free web services** checkbox (user decision, 2026-11-14). Task 02 moves the **Fallback service**
-combo to the Translation page and sets the order Google, Yandex, Bing, DeepL, OpenAI-compatible,
-MyMemory, Mozhi, Reverso. The lead's documentation pass and the stage acceptance follow. Stages 1-3
-and 5 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by the user's 2026-11-05
-decision and is not dropped; stages 6-7 are `todo`. The root is `in-progress`; its `Done when`
-requires every stage to be done or dropped, so stage 4's blocked state is a deliberate exception.
+Current node: no active task. Stage `08-free-services-always-on` is `done` (accepted over
+`2650def..2ebf5ae`; its children are `7b1265c` and `2ebf5ae`, and the documentation pass is in the
+stage-closing commit). The free-services opt-in gate and the whole opt-in concept are gone, every
+service is available by default, the **Allow free web services** checkbox is gone, the **Fallback
+service** row is on the Translation page, and the provider order is Google, Yandex, Bing, DeepL,
+OpenAI-compatible, MyMemory, Mozhi, Reverso. The user deferred the text-checking discussion until
+this work was done and said the lead had understood it incorrectly; that discussion is the next
+item, before new implementation work. `proofreading/allowOnlineServices` and the Text checking tab
+are unchanged for now.
+
+Stages 1-3, 5 and 8 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by the user's
+2026-11-05 decision and is not dropped; stages 6-7 are `todo`. The root is `in-progress`; its
+`Done when` requires every stage to be done or dropped, so stage 4's blocked state is a deliberate
+exception.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
@@ -20,7 +23,8 @@ release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub r
 the user checks the current code on Windows.
 
 Work is on `main` (matches the root `branch:`); the working tree is clean. Linux is 45/45, Windows
-39 (derived, not run locally); `.ts` has 383 messages before this change. The next node is stage 8.
+39 (derived, not run locally); `.ts` has 379 messages. The next node is `06-llm-actions` once the
+text-checking discussion is resolved.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also
@@ -223,3 +227,16 @@ has six languages and no `auto`. Next: plan and run stage 8.
   stay at 379 messages with 0 unfinished/empty/vanished; the old group title is replaced by the
   translated `Fallback service:` label. Linux Debug/Release 45/45 with no warnings; Windows 39 not
   performed. Next: the lead's documentation pass and stage `08-free-services-always-on` acceptance.
+- 2026-11-14 — Stage `08-free-services-always-on` accepted and closed `done` over `2650def..2ebf5ae`
+  (task commits `7b1265c`, `2ebf5ae`); the acceptance found no code defect and no new commit was
+  needed. The lead then applied the documentation pass: `doc/architecture.md` (provider tree,
+  `TranslationService`, the removed gate paragraph, §4.7.3-4.7.7, manager checks and fallback,
+  settings table and normalization, the Translation/Services tabs, the error table, the test table,
+  decisions), `doc/free-endpoints.md` (status, five service sections, integration, priorities,
+  "what not to do"), `doc/handoff.md` (current state, counts, fallback, free endpoints, cache),
+  both READMEs (providers, fallback path, privacy list), `AGENTS.md` (379 messages, no reuse of
+  translation settings for checking) and the root plan history/stage list. Linux Debug/Release 45/45
+  with no warnings, 14 `.ts` at 379 with 0 unfinished/empty/vanished, Windows 39 not performed.
+  Real problems: none; `AppController` has no test target, so the startup/picker order paths remain
+  code-review plus legacy-INI smoke. The user deferred the text-checking discussion until this stage
+  was done; it is the next item, and `06-llm-actions` waits for it.

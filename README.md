@@ -112,14 +112,13 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
 - **DeepL** — official API with a key or the unofficial free web mode without a key. Both modes are
   in **Settings → Services → DeepL**.
 - **Free web services** — MyMemory is a free no-key API; Mozhi, Yandex web, Bing web and Reverso
-  are unofficial no-key endpoints. All are optional and gated by **Settings → Services → Allow free
-  web services**; the unofficial ones may be rate-limited, change or stop working. Google and DeepL
-  remain the primary providers.
+  are unofficial no-key endpoints. All are available by default, like any other provider; the
+  unofficial ones may be rate-limited, change or stop working. Google and DeepL remain the primary
+  providers.
 - **Fallback service** — one optional free web service that retries a failed request once
-  (**Settings → Services → Fallback service**). It is off by default, needs the free web services
-  gate, and is used only on a retryable failure (auth, quota, rate limit, network or timeout); it
-  never loops and the original error is shown when the fallback also fails. The text is sent to the
-  fallback service as well.
+  (**Settings → Translation → Fallback service**). It is off by default and is used only on a
+  retryable failure (auth, quota, rate limit, network or timeout); it never loops and the original
+  error is shown when the fallback also fails. The text is sent to the fallback service as well.
 - **OpenAI-compatible provider** — the default server is [OpenRouter](https://openrouter.ai)
   (`https://openrouter.ai/api/v1`). OpenRouter **requires a key**; it offers free models such as
   `openrouter/free` and paid models. Paste the key, keep or change the model, and press
@@ -309,9 +308,9 @@ security policy's approval. To revoke it, run
 - The trixie Linux packages require glibc 2.38+ and do not run on Astra Linux 1.8.7. Astra uses the
   native `-astra.tar.gz` and `qtranslate_<version>_amd64.deb` packages.
 
-The text being translated is sent to the selected provider: Google, DeepL, OpenRouter or another
-OpenAI-compatible server. A local server such as Ollama keeps the text on your machine. QTranslate
-does not write the texts to its log.
+The text being translated is sent to the selected provider: Google, Yandex, Bing, DeepL, OpenRouter,
+MyMemory, Mozhi, Reverso or another OpenAI-compatible server. A local server such as Ollama keeps
+the text on your machine. QTranslate does not write the texts to its log.
 
 ## License
 

@@ -242,15 +242,15 @@ qtranslate/
 │   │   ├── deeplparser.h/.cpp
 │   │   ├── deeplwebservice.h/.cpp    unofficial free web endpoint
 │   │   ├── deeplwebparser.h/.cpp     pure parsing for the web endpoint
-│   │   ├── mymemoryservice.h/.cpp    free MyMemory API (no key, opt-in)
+│   │   ├── mymemoryservice.h/.cpp    free MyMemory API (no key)
 │   │   ├── mymemoryparser.h/.cpp     pure parsing for the MyMemory API
-│   │   ├── mozhiservice.h/.cpp       free Mozhi API (no key, opt-in)
+│   │   ├── mozhiservice.h/.cpp       free Mozhi API (no key)
 │   │   ├── mozhiparser.h/.cpp        pure parsing for the Mozhi API
-│   │   ├── yandexwebservice.h/.cpp   unofficial Yandex web endpoint (no key, opt-in)
+│   │   ├── yandexwebservice.h/.cpp   unofficial Yandex web endpoint (no key)
 │   │   ├── yandexwebparser.h/.cpp    pure parsing for the Yandex web endpoint
-│   │   ├── bingwebservice.h/.cpp     unofficial Bing web endpoint (no key, opt-in)
+│   │   ├── bingwebservice.h/.cpp     unofficial Bing web endpoint (no key)
 │   │   ├── bingwebparser.h/.cpp      pure parsing for the Bing web endpoint
-│   │   ├── reversoservice.h/.cpp     unofficial Reverso endpoint (no key, opt-in)
+│   │   ├── reversoservice.h/.cpp     unofficial Reverso endpoint (no key)
 │   │   ├── reversoparser.h/.cpp      pure parsing for the Reverso endpoint
 │   │   ├── languagetoolservice.h/.cpp LanguageTool HTTP checking (opt-in, no credentials)
 │   │   ├── languagetoolparser.h/.cpp pure parsing for LanguageTool matches
@@ -676,7 +676,7 @@ enum class TranslationError {
     QuotaExceeded,  // DeepL 456, Google Cloud quota
     RateLimited,    // HTTP 429
     ServiceUnavailable, // blocked or temporarily unavailable web endpoint (HTML/403);
-                        // gated free service while opt-in is off; not used by official APIs
+                        // not used by official APIs
     TooLong,        // request size limit exceeded
     UnsupportedLanguage,
     BadResponse,    // the response could not be parsed
@@ -724,9 +724,6 @@ public:
     virtual QString configurationError() const { return {}; } // hint if not configured
     virtual QStringList sourceLanguages() const = 0;  // internal codes, without "auto"
     virtual QStringList targetLanguages() const = 0;
-    // true for unofficial/free endpoints: the manager refuses them until the
-    // user enables free web services in settings
-    virtual bool requiresOptIn() const { return false; }
     virtual void applySettings(const AppSettings &s) = 0;   // keys, mode, variant
     // Returns the reply object; the caller owns it (deleteLater after finished)
     virtual TranslationReply *translate(const TranslationRequest &req) = 0;
@@ -743,18 +740,11 @@ public:
 - `configurationError()` returns a specific hint when `isConfigured() == false` (for example, "The
   provider needs a model."); `TranslationManager` shows it instead of the generic API key message.
 
-The opt-in gate. A service that sends text to an unofficial or free endpoint overrides
-`requiresOptIn()` to return `true`. `TranslationManager` refuses such a service while
-`translation/allowFreeServices` is `false`: before any request it returns `ServiceUnavailable` with
-the message "Enable free web services in Settings → Services." The check lives in the manager, not
-in each service, so a new service cannot forget it. Google, DeepL (including its `free-web` mode),
-and the OpenAI-compatible provider keep the default `false`; the DeepL `free-web` mode remains an
-explicit mode with its own warning and is not gated. `AppController` hides gated services from the
-main-window and tray pickers while the gate is off, and if the gate is turned off while a gated
-service is active, it switches the active service to Google in memory and logs the switch. The
-`translation/service` value in the INI is not rewritten, so enabling the gate again and restarting
-restores the user's choice. `ServiceUnavailable` is also the error kind for a blocked or HTML
-response from a free web endpoint; the official API paths do not use it.
+All translation services are equal providers. `TranslationService` has no opt-in capability: a
+no-key web service is registered, listed in the pickers and used exactly like Google or DeepL, and
+`TranslationManager` makes no permission check before a request. The unofficial nature of an
+endpoint is a warning in its settings hint, not a gate. `ServiceUnavailable` remains the error kind
+for a blocked or HTML response from a free web endpoint; the official API paths do not use it.
 
 The shared request queue. `QueuedWebService` (in `qtranslate_core`) serializes the replies of a
 service that talks to one host: one instance per host, at most one active reply, and the next reply
@@ -766,7 +756,7 @@ multi-chunk protocol therefore sends its chunks sequentially inside one slot and
 queued is skipped, and a reply deleted while active is dropped through `QPointer`/`destroyed`. The
 default pause is 2000 ms (the moved DeepL value); a service overrides it in its constructor, and
 `setRateLimitMs(0)` disables the pause for tests only. The base knows no endpoints, service
-settings, the opt-in gate, or UI; `DeepLWebService`, `MyMemoryService`, `MozhiService`,
+settings or UI; `DeepLWebService`, `MyMemoryService`, `MozhiService`,
 `YandexWebService`, `BingWebService` and `ReversoService` use it; MyMemory sets 350 ms, Mozhi 500 ms,
 Yandex web 750 ms, Bing web 1000 ms and Reverso 600 ms.
 
@@ -969,10 +959,9 @@ X-Title: qtranslate
 ### 4.7.3. `MyMemoryService` — free no-key API
 
 The `mymemory` service uses the public MyMemory API (see [`free-endpoints.md`](free-endpoints.md),
-§6). It needs no key and works out of the box (`isConfigured() == true`); it is the first real
-consumer of the opt-in gate: `requiresOptIn() == true`, so `TranslationManager` refuses it and
-`AppController` hides it from the pickers until `translation/allowFreeServices` is on (§4.5, §4.9).
-There is no `[mymemory]` settings group and no key, URL or email setting.
+§6). It needs no key and works out of the box (`isConfigured() == true`); it is an ordinary
+registered provider, available in the pickers like the other services. There is no `[mymemory]`
+settings group and no key, URL or email setting.
 
 ```
 GET https://api.mymemory.translated.net/get?q=<text>&langpair=<src>|<dst>&mt=1
@@ -1023,10 +1012,8 @@ Accept: application/json
 
 The `mozhi` service talks to a Mozhi instance (see [`free-endpoints.md`](free-endpoints.md), §5):
 one integration gives access to several public translation engines through a public or a
-self-hosted instance. It needs no key (`isConfigured() == true`), and it is the second real
-consumer of the opt-in gate after MyMemory (§4.7.3): `requiresOptIn() == true`, so
-`TranslationManager` refuses it and `AppController` hides it from the pickers until
-`translation/allowFreeServices` is on (§4.5, §4.9).
+self-hosted instance. It needs no key (`isConfigured() == true`) and is an ordinary registered
+provider like MyMemory (§4.7.3).
 
 The service is configured in `[mozhi]`:
 
@@ -1091,12 +1078,10 @@ The instance is a base URL, and a path prefix is kept: `https://host/mozhi` beco
 ### 4.7.5. `YandexWebService` — unofficial Yandex web endpoint
 
 `YandexWebService` implements the unofficial `api.browser.yandex.com` endpoint. Its id is
-`yandex-web`, its display name is `Yandex`, it needs no key (`isConfigured() == true`), and it is the
-third real opt-in consumer after MyMemory (§4.7.3) and Mozhi (§4.7.4): `requiresOptIn() == true`,
-`TranslationManager` refuses it while `translation/allowFreeServices` is false, and `AppController`
-hides it from the pickers. There is no key or URL field and no `[yandex]` settings group;
-`applySettings()` is a no-op and no `AppSettings`/INI key or cache reset is added. `AppController`
-registers it after Mozhi.
+`yandex-web`, its display name is `Yandex`, and it needs no key (`isConfigured() == true`); it is an
+ordinary registered provider like MyMemory (§4.7.3) and Mozhi (§4.7.4). There is no key or URL
+field and no `[yandex]` settings group; `applySettings()` is a no-op and no `AppSettings`/INI key or
+cache reset is added. `AppController` registers it second, after Google.
 
 Request:
 
@@ -1163,12 +1148,10 @@ Both names and values are percent-encoded as UTF-8 (`QUrl::toPercentEncoding`), 
 ### 4.7.6. `BingWebService` — unofficial Bing web endpoint
 
 `BingWebService` implements the unofficial `www.bing.com` translator endpoint. Its id is `bing-web`,
-its display name is `Bing`, it needs no key (`isConfigured() == true`), and it is the fourth real
-opt-in consumer after MyMemory (§4.7.3), Mozhi (§4.7.4) and Yandex (§4.7.5):
-`requiresOptIn() == true`, `TranslationManager` refuses it while `translation/allowFreeServices` is
-false, and `AppController` hides it from the pickers. There is no key or URL field and no `[bing]`
-settings group; `applySettings()` only clears the token cache and no `AppSettings`/INI key is added.
-`AppController` registers it after Yandex.
+its display name is `Bing`, and it needs no key (`isConfigured() == true`); it is an ordinary
+registered provider like Yandex (§4.7.5). There is no key or URL field and no `[bing]` settings
+group; `applySettings()` only clears the token cache and no `AppSettings`/INI key is added.
+`AppController` registers it third, after Yandex.
 
 Handshake:
 
@@ -1246,12 +1229,10 @@ text=<text>&fromLang=<source>&to=<target>&token=<token>&key=<key>&isAuthv2=true&
 ### 4.7.7. `ReversoService` — unofficial Reverso endpoint
 
 `ReversoService` implements the unofficial `cps.reverso.net` endpoint. Its id is `reverso`, its
-display name is `Reverso`, it needs no key (`isConfigured() == true`), and it is the fifth real
-opt-in consumer after MyMemory (§4.7.3), Mozhi (§4.7.4), Yandex (§4.7.5) and Bing (§4.7.6):
-`requiresOptIn() == true`, `TranslationManager` refuses it while `translation/allowFreeServices` is
-false, and `AppController` hides it from the pickers. There is no key or URL field and no `[reverso]`
-settings group; `applySettings()` is empty and no `AppSettings`/INI key is added. `AppController`
-registers it after Bing.
+display name is `Reverso`, and it needs no key (`isConfigured() == true`); it is an ordinary
+registered provider like Bing (§4.7.6). There is no key or URL field and no `[reverso]` settings
+group; `applySettings()` is empty and no `AppSettings`/INI key is added. `AppController` registers
+it last, after Mozhi.
 
 Request:
 
@@ -1395,8 +1376,6 @@ public:
     TranslationService *activeService() const;
     void setActiveService(const QString &id);
     void setMaxLength(int length);                         // 20,000 by default; from settings — old plan stage 5
-    bool freeServicesAllowed() const;                      // translation/allowFreeServices
-    void setFreeServicesAllowed(bool allowed);             // gated services are refused while false
     QString fallbackService() const;                       // translation/fallbackService
     void setFallbackService(const QString &id);            // trimmed, lowercased; clears the cache
 
@@ -1426,45 +1405,21 @@ Responsibilities:
    works both ways: English → Russian and Russian → English.
 3. **Cache.** LRU of 200 entries, key — `serviceId|src|dst|text`. Re-translating the same
    fragment is instant and does not consume DeepL quota. The cache is in memory only.
-4. **Checks before the network.** Empty text (`EmptyText`), exceeding `maxLength` (`TooLong`),
-   a service whose `requiresOptIn()` is true while `freeServicesAllowed()` is false
-   (`ServiceUnavailable`, with a message pointing to Settings → Services), an unconfigured service
-   (`Auth`) — no request is made. `EmptyText`, `TooLong` and the gate refusal are finished
+4. **Checks before the network.** Empty text (`EmptyText`), exceeding `maxLength` (`TooLong`) and an
+   unconfigured service (`Auth`) — no request is made. `EmptyText` and `TooLong` are finished
    asynchronously through `TranslationReply::createFinished`; the unconfigured case goes through the
-   managed `Reply` (`startWithError()`), so the fallback below can still apply. `AppController`
-   keeps `setFreeServicesAllowed()` in sync with `translation/allowFreeServices` and filters gated
-   services from the pickers.
+   managed `Reply` (`startWithError()`), so the fallback below can still apply.
 
-MyMemory is the first real service with `requiresOptIn() == true` (§4.7.3); the gate logic above is
-unchanged. `AppController` registers it like the other services, hides it from the pickers while the
-gate is off, and if `translation/service=mymemory` is configured, keeps Google active and logs that
-the configured service needs free web services to be enabled.
+MyMemory, Mozhi, Yandex web, Bing web and Reverso are registered like the other providers.
+`AppController` registers the services in the user-visible order Google, Yandex, Bing, DeepL,
+OpenAI-compatible, MyMemory, Mozhi, Reverso, and activates any configured `translation/service` id
+that names a registered service.
 
-Mozhi is the second real service with `requiresOptIn() == true` (§4.7.4); the gate logic is
-unchanged. `AppController` hides it from the pickers while the gate is off and, if
-`translation/service=mozhi` is configured with the gate off, keeps Google active and logs that the
-configured service needs free web services to be enabled.
-
-Yandex web is the third real service with `requiresOptIn() == true` (§4.7.5); the gate logic is
-unchanged. `AppController` hides it from the pickers while the gate is off and, if
-`translation/service=yandex-web` is configured with the gate off, keeps Google active and logs that
-the configured service needs free web services to be enabled.
-
-Bing web is the fourth real service with `requiresOptIn() == true` (§4.7.6); the gate logic is
-unchanged. `AppController` registers it after Yandex, hides it from the pickers while the gate is
-off, and if `translation/service=bing-web` is configured with the gate off, keeps Google active and
-logs that the configured service needs free web services to be enabled.
-
-Reverso is the fifth real service with `requiresOptIn() == true` (§4.7.7); the gate logic is
-unchanged. `AppController` registers it after Bing, hides it from the pickers while the gate is off,
-and if `translation/service=reverso` is configured with the gate off, keeps Google active and logs
-that the configured service needs free web services to be enabled.
-
-The fallback is a `TranslationManager` policy, not a service feature: one configured opt-in service
+The fallback is a `TranslationManager` policy, not a service feature: one configured service
 (`translation/fallbackService`, empty = no fallback) is tried once when the primary reply fails with a
-retryable error. `fallbackFor()` resolves the id at failure time, so a gate or fallback change made
-while the primary is in flight is honoured; it returns no fallback for an empty id, a gate that is
-off, an unregistered id, the reply's own service or a service without `requiresOptIn()`. The
+retryable error. `fallbackFor()` resolves the id at failure time, so a fallback change made while the
+primary is in flight is honoured; it returns no fallback for an empty id, an unregistered id or the
+reply's own service. The
 retryable triggers are `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`, `Network` and
 `Timeout`; success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and `BadResponse` never
 fall back. The pre-request `Auth` path (an unconfigured primary) goes through the same managed
@@ -1472,7 +1427,7 @@ fall back. The pre-request `Auth` path (an unconfigured primary) goes through th
 `serviceId` in the result and is cached under the primary's cache key; a failed fallback logs the
 error kind and returns the primary error. A reply retries at most once (no second hop, no loop), and
 the fallback never gets the smart secondary-language retry. `setFallbackService()` clears the cache
-on a change, and `setFreeServicesAllowed(false)` clears it as well. `clearCache()` also increments a
+on a change. `clearCache()` also increments a
 cache generation that each reply captures, so a result arriving after the clear is not stored; a
 running fallback is not aborted. The log
 names the service and the error kind only — never the text, the URL, the body or the key.
@@ -1642,8 +1597,7 @@ File keys:
 | `translation/secondaryLang` | string | `en` (or `ru` if the system language is English) |
 | `translation/maxLength` | int | `20000` |
 | `translation/autoTranslateDelayMs` | int | `700` (0 — off) |
-| `translation/allowFreeServices` | bool | `false`; enables services whose `requiresOptIn()` is true |
-| `translation/fallbackService` | string | empty; `mymemory`, `mozhi`, `yandex-web`, `bing-web` or `reverso`; needs `translation/allowFreeServices` |
+| `translation/fallbackService` | string | empty; `yandex-web`, `bing-web`, `mymemory`, `mozhi` or `reverso` |
 | `google/mode` | `free` \| `cloud` | `free` |
 | `google/apiKey` | secret | empty |
 | `deepl/mode` | `api` \| `free-web` | `api`; the old `translation/service=deepl-web` migrates to `deepl` + `free-web` |
@@ -1679,11 +1633,11 @@ without the group loads the defaults and is not rewritten, and an invalid instan
 replaced by the default with a fixed warning that does not echo the typed value.
 
 `translation/fallbackService` was added the same way: `settingsVersion` stays `1`, and the value is
-trimmed and lowercased. Empty means no fallback; an unknown or non-opt-in id is replaced by empty
-with a fixed warning that does not echo the typed value. The settings dialog's **Fallback service**
-combo lists the registered opt-in services and is disabled while the gate is off, while the
-remembered value is kept. `AppController` applies the key at startup and on a change and passes the
-registered opt-in services to the dialog.
+trimmed and lowercased. Empty means no fallback; an unknown id is replaced by empty with a fixed
+warning that does not echo the typed value. The settings dialog's **Fallback service** row on the
+Translation page lists the five no-key web services in provider order (Yandex, Bing, MyMemory,
+Mozhi, Reverso) and is always enabled; the remembered value is kept. `AppController` applies the key
+at startup and on a change and passes those services to the dialog.
 
 `[proofreading]` was added without a version bump too. `provider` is trimmed and lowercased and must
 be in `proofreadingProviderIds()` (only `languagetool` in this version); `language` must be `auto` or
@@ -1841,17 +1795,18 @@ applies the changes, "Cancel" changes nothing. Tabs:
    the dialog emits `hotkeyEditingChanged(true)`, and `AppController` suspends global
    hotkeys; after focus leaves/closes — resumes them.
 3. **Translation** — source language (with "Auto-detect"), primary and additional languages, maximum
-   length, auto-translate delay. The additional language is used for smart switching
-   when the text is already in the primary language (old plan stage 8).
-4. **Services** — Google: mode (free/Cloud API), key (password echo). DeepL: mode
+   length, auto-translate delay, and the **Fallback service** row: one optional registered service
+   retried once on a retryable error (`None` means off). The additional language is used for smart
+   switching when the text is already in the primary language (old plan stage 8).
+4. **Services** — the groups are ordered Google, Yandex, Bing, DeepL, OpenAI-compatible, MyMemory,
+   Mozhi, Reverso. Google: mode (free/Cloud API), key (password echo). Yandex, Bing, MyMemory, Mozhi
+   and Reverso are no-key groups with their own unofficial-endpoint, rate-limit and third-party
+   warnings; there is no common gate group or enabling switch. DeepL: mode
    (API with a key or a free web endpoint without a key), key (password echo), English variant,
    "Check key" button with an asynchronous result (`character_count`/`character_limit` or
    an error). In `free-web` mode, the key field and the check are disabled, and a warning about
    being unofficial is shown; there is no separate "DeepL (free web)" group. The check button does not block the dialog;
    the key is taken from the input field. Keys have been stored via DPAPI since old plan stage 5.
-   At the end of the page, the "Free web services" group has the `allowFreeServices` checkbox and
-   the `freeWebHint` warning: free no-key services are mostly unofficial, may stop working or block
-   requests, and send the text to a third party; the switch is off by default.
 5. **Text checking** — `enabled`, provider (LanguageTool only in this version), checking language
    (Auto-detect plus the provider's languages), a self-hosted endpoint (empty means the public API),
    the four categories, check-before-translation and automatic-replacement switches, and the separate
@@ -2129,8 +2084,7 @@ A repeated call (`aboutToQuit`, session end) does nothing.
 | Empty text | `TranslationManager` before the request → `EmptyText` | "Nothing to translate" |
 | Invalid key | `Auth` | "Invalid DeepL API key" + "Open settings" link |
 | Quota / frequent requests | `QuotaExceeded`, `RateLimited` | Explanation and advice to switch service |
-| Free web service disabled | `TranslationManager` before the request → `ServiceUnavailable` | "The translation service is unavailable (Enable free web services in Settings → Services.)" |
-| Free web endpoint blocked | service → `ServiceUnavailable` | Same title, details in the log; no retry storm |
+| Free web endpoint blocked | service → `ServiceUnavailable` | "The translation service is unavailable", details in the log; no retry storm |
 | Unexpected response format | parser → `BadResponse` | "The translation service returned an unexpected response", details in the log |
 | Service not configured | `TranslationManager` before the request | "DeepL requires an API key" + "Open settings" |
 | Online checking disabled | `ProofreadingManager` before the request → `ServiceUnavailable` | "Enable online text checking in Settings → Text checking." |
@@ -2206,11 +2160,11 @@ are linked into separate test targets):
 | `tst_selectiongrabber_linux` | X11 selection capture, clipboard restore, Wayland clipboard read, timeouts (12 cases) |
 | `tst_windowactivation_linux` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus`, `_NET_WM_STATE_FULLSCREEN`, `_NET_WM_PID`, XTest paste, Wayland 0/false (13 cases) |
 | `tst_cli` | CLI parser, mutual exclusion (including `--proofread-selection`), two-process forwarding, the `proofread-selection` wire line and the legacy wire lines (30 cases, Linux) |
-| `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption, the `[mozhi]` defaults, the fallback id normalization, the `[proofreading]` defaults/normalization/endpoint/categories, and canonical round trip |
-| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the MyMemory group and its gate, the Mozhi group (instance, engine, effective value, warning and gate), the Yandex hint and its gate, the Bing group and its gate, the Reverso group and its gate, the fallback group and its gate, the **Text checking** tab, its online gate, endpoint validation and the proofreading hotkey (offscreen) |
+| `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption, the `[mozhi]` defaults, the fallback id normalization and order, the legacy free-services key being ignored, the `[proofreading]` defaults/normalization/endpoint/categories, and canonical round trip |
+| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the provider group order, the MyMemory/Mozhi/Yandex/Bing/Reverso groups being always enabled, the `Fallback service:` row on the Translation page, the **Text checking** tab, its online gate, endpoint validation and the proofreading hotkey (offscreen) |
 | `tst_secretprotector` | Windows: DPAPI round-trip, empty and corrupted data. Linux: libsecret token round-trip, `0600` fallback, capability probe, migration (7+1 in trixie, 8/8 on Astra) |
 | `tst_autostart` | Windows: `Run` command format. Linux: desktop entry quoting, `--minimized`, repair, removal (6 cases) |
-| `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language, the one-hop fallback policy (triggers, non-triggers, pre-request `Auth`, gate, no second hop, cache) — on a fake service; the real MyMemory service refused while the gate is off |
+| `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language, the one-hop fallback policy (triggers, non-triggers, pre-request `Auth`, any registered service, no second hop, cache) — on a fake service; any registered service can be active |
 | `tst_uilanguages` | Supported UI languages, normalization of `system`/regional tags, `.qm` resources |
 | `tst_translations` | Completeness of all `.ts` files, preservation of `%1`/`%2`, emoji and edge whitespace |
 
@@ -2358,7 +2312,7 @@ Local verification (Windows 11, Qt 6.12.0 MSVC 2022 x64):
 | Checksums | `SHA256SUMS.txt` remains a separate release asset but is not listed in README/Downloads; if needed, the user can find the file |
 | Linux | Linux x86_64 is supported from 0.12.0: X11 is a full target, Wayland is a portal/CLI fallback with explicit limitations; trixie artifacts are CI-built and Astra needs a native build; macOS is not planned (§4.14) |
 | Text checking providers | The first version ships **LanguageTool only**, through the public API or a self-hosted endpoint and **without credentials**. Premium `username`/`apiKey` support is deferred; Hunspell/Nuspell, Yandex Speller and the LLM checker are not part of stage 5 (§4.15) |
-| Checking privacy | A separate `proofreading/allowOnlineServices` gate, off by default; it covers every remote endpoint including self-hosted LanguageTool and does not reuse `translation/allowFreeServices` (§4.11, §4.15) |
+| Checking privacy | A separate `proofreading/allowOnlineServices` gate, off by default; it covers every remote endpoint including self-hosted LanguageTool and does not reuse the translation services or their settings (§4.11, §4.15) |
 | External checking replacement | Whole-selection replacement only, after explicit confirmation; a changed foreground window or no target copies the corrected text to the clipboard; undo depends on the other application (§4.15, `proofreading.md`) |
 | Checking defaults | `enabled`, `checkBeforeTranslation`, `autoReplace` and `allowOnlineServices` are all off; the proofreading hotkey is empty, so no combination is taken silently (§4.11, §4.3) |
 | Win+V history entry during capture | The intermediate Ctrl+C may leave an entry; exclusion formats protect only clipboard restoration. A full workaround is a UI Automation strategy (§4.4, §9.2), accepted as future development |
@@ -2407,10 +2361,11 @@ Possible development:
 7. **Code signing** of the installer ([`code-signing.md`](code-signing.md)) and auto-update over
    the installed version.
 8. **Free web endpoints** — DeepL web is implemented as the `free-web` mode of a single "DeepL"
-   service without a key (§4.7.1); MyMemory is implemented as the first opt-in free API
-   (§4.7.3), Mozhi is the second (§4.7.4), Yandex web is the third (§4.7.5), Bing web is the
-   fourth (§4.7.6), and Reverso is the fifth (§4.7.7). Rate limits and an unofficial-status warning
-   apply to all. Details and priorities — [`free-endpoints.md`](free-endpoints.md).
+   service without a key (§4.7.1); MyMemory (§4.7.3), Mozhi (§4.7.4), Yandex web (§4.7.5), Bing web
+   (§4.7.6) and Reverso (§4.7.7) are implemented as ordinary no-key providers. Rate limits and an
+   unofficial-status warning apply to all. The opt-in gate that once guarded them was removed on
+   2026-11-14: every service is available by default and there is no enabling switch. Details and
+   priorities — [`free-endpoints.md`](free-endpoints.md).
 9. **Local offline translation** — Argos models + CTranslate2 without Python: model download by
    button, pivot through English, fallback to the cloud. Details and PoC — [`local-translation.md`](local-translation.md).
 10. **Spelling, grammar, and punctuation checking** — implemented in stage 5 with LanguageTool only

@@ -1,8 +1,8 @@
 # Free web translation endpoints
 
-Date: 2026-11-09. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
-mode of the DeepL service; MyMemory, Mozhi, Yandex web, Bing web and Reverso are implemented as gated
-no-key services**.
+Date: 2026-11-14. Status: **roadmap stage 3 (old stage 13); DeepL web is implemented as a `free-web`
+mode of the DeepL service; MyMemory, Mozhi, Yandex web, Bing web and Reverso are implemented as
+no-key services, available by default since the opt-in gate was removed in stage 8**.
 
 This document records the free endpoints without an API key that can be added to qtranslate as
 experimental services. The main source is the open project
@@ -66,9 +66,8 @@ made the only translation method.
 
 **Implementation in qtranslate (2026-11-09).**
 
-- Service `yandex-web`, opt-in (`requiresOptIn() == true`), no key, behind
-  `translation/allowFreeServices`; the fixed `POST` and the form fields above, with both names and
-  values percent-encoded as UTF-8.
+- Service `yandex-web`, no key; available in the pickers like the other providers. The fixed `POST`
+  and the form fields above, with both names and values percent-encoded as UTF-8.
 - The browser User-Agent is set on this request only; `AppInfo::userAgent()` and every other service
   keep the application UA. This is protocol emulation, not a claim that the application is a
   browser.
@@ -104,8 +103,8 @@ made the only translation method.
 
 **Implementation in qtranslate (2026-11-09).**
 
-- The `bing-web` service: opt-in (`requiresOptIn() == true`), no key, behind
-  `translation/allowFreeServices`; fixed endpoints `https://www.bing.com/translator` (GET) and
+- The `bing-web` service: no key, available in the pickers like the other providers. Fixed
+  endpoints `https://www.bing.com/translator` (GET) and
   `https://www.bing.com/ttranslatev3` (POST). The page parser extracts `IG`, the first `data-iid`,
   the `params_AbusePreventionHelper` key/token/lifetime, and the optional `muid`/`sid`/`tid`; it is
   not an HTML parser and fails with a fixed message when the markers are absent.
@@ -170,9 +169,9 @@ made the only translation method.
   `Timeout`/`Cancelled`. The only variable text is the provider `message` after the short/markup/
   control-character check; it may reach `errorMessage` but is never logged, and the text, the body
   and the URL never appear in a message or the log.
-- Behind the opt-in gate `translation/allowFreeServices` (off by default), like the other unofficial
-  services: `requiresOptIn() == true`, hidden from the pickers and refused by `TranslationManager`
-  while the gate is off. There is no key, URL or `AppSettings`/INI field; `applySettings()` is empty.
+- Available without a gate, like the other no-key services; there is no key, URL or
+  `AppSettings`/INI field; `applySettings()` is empty. The settings hint warns that the endpoint is
+  unofficial.
 - Code: `src/services/reversoparser.*`, `src/services/reversoservice.*`; tests:
   `tst_reversoparser`, `tst_reversoservice`, `tst_languages`, `tst_settingsdialog`. CTest never
   contacts the real endpoint; a live smoke is manual only and is recorded as passed or as not
@@ -217,9 +216,8 @@ made the only translation method.
   missing/empty text or an unknown non-2xx status → `BadResponse`; timeout/abort →
   `Timeout`/`Cancelled`. The body is classified before the status; messages are fixed literals
   without the text, the body or the URL.
-- Behind the opt-in gate `translation/allowFreeServices` (off by default), like MyMemory:
-  `requiresOptIn() == true`, hidden from the pickers and refused by `TranslationManager` while the
-  gate is off. `applySettings()` reads the normalized `[mozhi]` values.
+- Available without a gate, like MyMemory; `applySettings()` reads the normalized `[mozhi]` values.
+  The settings hint warns about unofficial instances and rate limits.
 - Code: `src/services/mozhiparser.*`, `src/services/mozhiservice.*`; tests: `tst_mozhiparser`,
   `tst_mozhiwebservice`, `tst_languages`, `tst_settings`, `tst_settingsdialog`. CTest never contacts
   a real instance; a live smoke is manual only.
@@ -248,9 +246,8 @@ made the only translation method.
   query-length detail → `TooLong`, 5xx → `Network`, HTML → `ServiceUnavailable`, a malformed or
   unknown status → `BadResponse`. The messages are fixed literals and never contain the text, the
   URL or `responseDetails`.
-- Behind the opt-in gate `translation/allowFreeServices` (off by default): the service overrides
-  `requiresOptIn()`, is hidden from the pickers and is refused by `TranslationManager` while the
-  gate is off.
+- Available without a gate, like the other no-key services; the settings hint warns about the
+  unofficial endpoint and rate limits.
 - Code: `src/services/mymemoryparser.*`, `src/services/mymemoryservice.*`; tests:
   `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_languages`, `tst_textchunker`.
 
@@ -268,15 +265,13 @@ remains unofficial.
 ## 8. How to integrate
 
 1. DeepL web — the `free-web` mode inside `DeepLService` (the internal `DeepLWebService`) and a
-   warning in settings; there is no separate service. The common "Allow free web services" toggle
-   (`translation/allowFreeServices`, off by default) is implemented infrastructure: every service
-   that overrides `requiresOptIn()` is hidden from the pickers and refused by `TranslationManager`
-   with `ServiceUnavailable` until the user enables it. The DeepL `free-web` mode stays outside the
-   gate as an explicit mode with its own warning.
+   warning in settings; there is no separate service. The DeepL `free-web` mode stays an explicit
+   mode with its own warning.
 2. For each service — its own `TranslationService` and parser; no keys are needed. Implemented for
    MyMemory (`src/services/mymemory*`), Mozhi (`src/services/mozhi*`), Yandex web
    (`src/services/yandexweb*`), Bing web (`src/services/bingweb*`) and Reverso
-   (`src/services/reverso*`); they are the five real services behind the gate.
+   (`src/services/reverso*`); they are the five no-key web services, available by default like every
+   other provider.
 3. Per-host rate limiting: implemented infrastructure in `QueuedWebService` — replies of one host
    are serialized and paused by the service-specific value (DeepL 2 s, MyMemory 350 ms, Mozhi
    500 ms, Yandex web 750 ms, Bing web 1000 ms, Reverso 600 ms); no parallel requests to one host.
@@ -285,14 +280,13 @@ remains unofficial.
    and Reverso (5000 UTF-16 code units); the rest — according to the service limits.
 5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,
    without a retry storm.
-6. Fallback: implemented as one configured opt-in hop in `TranslationManager` — a
-   `translation/fallbackService` service (`mymemory`, `mozhi`, `yandex-web`, `bing-web` or
+6. Fallback: implemented as one configured hop in `TranslationManager` — a
+   `translation/fallbackService` service (`yandex-web`, `bing-web`, `mymemory`, `mozhi` or
    `reverso`) is tried once when the primary fails with `Auth`, `QuotaExceeded`, `RateLimited`,
    `ServiceUnavailable`, `Network` or `Timeout`; success, `EmptyText`, `TooLong`,
    `UnsupportedLanguage`, `Cancelled` and `BadResponse` never fall back. A failed fallback returns
-   the primary error; the fallback is not retried and there is no second hop. The fallback needs
-   `translation/allowFreeServices`, and a change clears the cache. Do not show raw HTML. See
-   [`architecture.md`](architecture.md) §4.9 and §4.11.
+   the primary error; the fallback is not retried and there is no second hop. A change clears the
+   cache. Do not show raw HTML. See [`architecture.md`](architecture.md) §4.9 and §4.11.
 7. Privacy: the text goes to a third-party service; do not write text, keys, or cookies to the log.
 8. Tests: response fixtures and a local `QTcpServer`; real endpoints — manual smoke only, because
    they are live and unstable.
@@ -304,18 +298,19 @@ remains unofficial.
 3. **Mozhi** — implemented: one integration, many engines, self-hosting possible.
 4. **Yandex web** — implemented: important for the Russian audience, but an unofficial scraped
    endpoint.
-5. **Bing web** — implemented: fragile auth and HTML, but the fourth opt-in free service.
-6. **Reverso** — implemented: niche, fewer languages, no automatic detection, but a clear gated
-   fallback among its six languages.
+5. **Bing web** — implemented: fragile auth and HTML, but the fourth no-key web service.
+6. **Reverso** — implemented: niche, fewer languages, no automatic detection, but a clear fallback
+   among its six languages.
 
 The fallback itself is implemented as one configured hop after the five services, not as an
 arbitrary chain: Google and DeepL free modes are modes of the same service, so they are not separate
 fallback links; Mozhi proxies to engines, so choosing Mozhi as the fallback already covers a
-different engine. The user picks one opt-in service; the primary stays the primary.
+different engine. The user picks one fallback service; the primary stays the primary.
 
 ## 10. What not to do
 
-- Do not enable unofficial endpoints by default or present them as an official API.
+- Do not present unofficial endpoints as an official API. They are available by default, but the
+  settings hints must keep the unofficial, rate-limit, block and third-party warnings.
 - Do not bypass paid quotas or publish other people's keys/cookies.
 - Do not use public Mozhi/LibreTranslate instances as the only channel without a fallback.
 - Do not copy QTranslate code without complying with MPL-2.0; write implementations yourself from

@@ -50,7 +50,7 @@
   `tst_proofreading_selection_x11` tests are Linux-only. The proofreading tests are
   `tst_proofreadingmanager`, `tst_languagetoolparser`, `tst_languagetoolservice`,
   `tst_proofreadingpanel` and `tst_proofreadingpopup` (shared) plus
-  `tst_proofreading_selection_x11` (Linux). The 14 `.ts` files have 383 messages each.
+  `tst_proofreading_selection_x11` (Linux). The 14 `.ts` files have 379 messages each.
 
 ## Git and release approval
 
@@ -129,8 +129,8 @@
   `$XDG_STATE_HOME/qtranslate/qtranslate.log` on Linux.
 - LanguageTool checking is opt-in: `proofreading/allowOnlineServices` defaults to `false`, and the
   public `api.languagetool.org` or a self-hosted endpoint is used without credentials. Do not send
-  `apiKey`/`username` (the public API rejects them and a 400 can echo the value), do not reuse
-  `translation/allowFreeServices`, and keep the checked text out of the logs.
+  `apiKey`/`username` (the public API rejects them and a 400 can echo the value), do not reuse the
+  translation services or their settings, and keep the checked text out of the logs.
 - `AppController::start()` calls `Autostart::sync(settings.general.autostart)`; keep installer-written
   settings consistent with it.
 - Deployment intentionally excludes `vc_redist.x64.exe`, D3D/DXC compilers and `opengl32sw.dll`
