@@ -124,8 +124,9 @@ is English. The migration to the tree roadmap and the English baseline is comple
   the tests, `nodoc` leaves `README.Debian` out of the package, and without `nocheck` the rules run
   45/45 tests under `xvfb-run -a` (no trusted-client entries were needed under Xvfb; a real Parsec
   server may still need them, as `README.Debian` says). The package contains the binary, the
-  desktop entry, the icon, `copyright` and `changelog.gz`, with no maintainer scripts and `Depends`
-  from `dh_shlibdeps` (`libglib2.0-0` on Astra, `libglib2.0-0t64` on trixie).
+  desktop entry, the icon, `copyright`, `changelog.gz` and `LICENSE.gz` (`dh_compress` gzips the
+  license text), with no maintainer scripts and `Depends` from `dh_shlibdeps` (`libglib2.0-0` on
+  Astra, `libglib2.0-0t64` on trixie).
 - `packaging/linux/verify-deb.sh` is the content/`Depends`/install gate (15 checks and a
   `--self-test`); it derives the expected `Depends` from the host's `dpkg-shlibdeps` and the
   tree's `debian/control`, so it works on Astra and trixie. Astra: 15/15, self-test 4/4. Trixie:

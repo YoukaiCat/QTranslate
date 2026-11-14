@@ -375,9 +375,10 @@ targets. Currently:
   dialogs and menus; Qt 6.12 has no file for Hindi, so those remain English. The qtranslate UI
   translation is embedded in the exe.
 - On Linux the Windows deploy block is skipped with `if(WIN32)`; CMake installs `bin/qtranslate`,
-  `share/applications/qtranslate.desktop`, and `share/icons/hicolor/256x256/apps/qtranslate.png`.
-  `packaging/linux/package.sh` owns the bundle: Qt libraries, plugins, Qt translations, `qt.conf`,
-  and RPATH. The install tree keeps `RUNPATH $ORIGIN:$ORIGIN/../lib`.
+  `share/applications/qtranslate.desktop`, `share/icons/hicolor/256x256/apps/qtranslate.png`, and
+  `share/doc/qtranslate/LICENSE`. `packaging/linux/package.sh` owns the bundle: Qt libraries,
+  plugins, Qt translations, `qt.conf`, and RPATH. The install tree keeps
+  `RUNPATH $ORIGIN:$ORIGIN/../lib`.
 
 ### 3.4. Packaging, CI and release
 
@@ -386,9 +387,10 @@ The project version is defined once — `project(qtranslate VERSION 0.12.0)`; `A
 The release tag is `v0.12.0`; CI compares it with `CMakeLists.txt` and fails on a mismatch.
 
 **Portable archive.** `cmake --install <build> --prefix build/dist` creates a self-contained `bin/`,
-`plugins/`, `translations/` directory with Qt, plugins, and the MSVC CRT. `package.ps1` checks the
-required files and packs the contents of `dist` into `qtranslate-<version>-win64.zip`; the archive
-contains the same `bin/`, `plugins/`, `translations/`, and is started via `bin\qtranslate.exe`.
+`plugins/`, `translations/` directory with Qt, plugins, and the MSVC CRT, plus
+`share/doc/qtranslate/LICENSE`. `package.ps1` checks the required files and packs the contents of
+`dist` into `qtranslate-<version>-win64.zip`; the archive contains the same `bin/`, `plugins/`,
+`translations/` and license, and is started via `bin\qtranslate.exe`.
 
 **Linux packages.** The repository is a native Debian source package: `debian/` carries
 `control`, `rules` (the `dh` sequence), `changelog`, `copyright` (DEP-5, GPL-3.0-or-later),
@@ -398,12 +400,14 @@ dpkg-buildpackage -rfakeroot -us -uc` from the repository root builds
 `qtranslate_<version>_amd64.deb` and writes the `.deb`, `.dsc` and `.tar.xz` to the parent directory;
 `nocheck` skips the tests, `nodoc` leaves `README.Debian` out, and without `nocheck` the rules run
 the 45 tests under `xvfb-run -a`. The package installs `usr/bin/qtranslate`, the desktop entry, the
-256x256 icon, `copyright` and `changelog.gz`, has no maintainer scripts, and takes `Depends` from
-`dh_shlibdeps`. `packaging/linux/verify-deb.sh` is the content/`Depends`/install gate.
+256x256 icon, `copyright`, `changelog.gz` and `LICENSE.gz` (`dh_compress` gzips the 35 KB license
+text under `usr/share/doc`), has no maintainer scripts, and takes `Depends` from `dh_shlibdeps`.
+`packaging/linux/verify-deb.sh` is the content/`Depends`/install gate.
 
 `packaging/linux/package.sh` builds the rest from a trixie Release tree or the `qtranslate-trixie`
 image: `qtranslate-<version>-linux-x86_64.tar.gz` (bundled Qt 6.8.2, plugins, Qt translations,
-`qt.conf`, `patchelf` RPATH) and `qtranslate-<version>-x86_64.AppImage` (pinned `linuxdeploy`,
+`qt.conf`, `patchelf` RPATH, `share/doc/qtranslate/LICENSE`) and
+`qtranslate-<version>-x86_64.AppImage` (pinned `linuxdeploy`,
 `appimagetool`, and runtime), plus `SHA256SUMS-linux.txt`. The `.deb` in the same artifact set comes
 from `dpkg-buildpackage` in a clean copy under the staging directory, not from a hand-staged tree;
 `dbgsym`, `.changes` and `.buildinfo` stay unpublished. `--skip-appimage` is for explicit offline
@@ -1928,8 +1932,9 @@ warning is shown in settings. A capability drop during save shows a message box;
 token is reused through a transient keyring outage, and `f:` tokens migrate to libsecret on the next
 save. Silently storing passwords in plain text is not acceptable.
 
-**Build and packages.** CMake installs `bin/qtranslate`, the freedesktop desktop file, and the
-256x256 hicolor icon; the top-level `debian/` makes the tree a native source package, and
+**Build and packages.** CMake installs `bin/qtranslate`, the freedesktop desktop file, the 256x256
+hicolor icon, and `share/doc/qtranslate/LICENSE`; the top-level `debian/` makes the tree a native
+source package, and
 `packaging/linux/package.sh` owns the bundle and builds the trixie `tar.gz`, native `.deb`,
 AppImage and `SHA256SUMS-linux.txt` in the `debian:trixie` container (KDE, GNOME, and the shell read
 the `.desktop` file; `Icon=qtranslate` matches the installed icon). `--target astra` builds the
