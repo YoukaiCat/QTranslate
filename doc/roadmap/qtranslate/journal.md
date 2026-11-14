@@ -12,22 +12,27 @@ shows the result; the second hotkey checks and immediately replaces the selectio
 field. Final host Debug/Release 46/46 each; `.ts` 374; Windows 40 not run. Stage
 `08-free-services-always-on` remains `done` (`2650def..2ebf5ae`, docs in the closing commit).
 
-The next planned node after the wording cleanup is `06-llm-actions` (it needs a planner split); it was
-**not started** because the main session reached the 360k context threshold. Stages 1-3, 5, 8 and 9 are `done`; stage 4
-`04-local-offline-translation` stays `blocked` by the user's 2026-11-05 decision and is not dropped;
-stages 6-7 are `todo`. The root is `in-progress`; its `Done when` requires every stage to be done or
-dropped, so stage 4's blocked state is a deliberate exception.
+Stages 1-3, 5, 8, 9 and 10 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by the
+user's 2026-11-05 decision; stage 6 `06-llm-actions` is `blocked` by the user's 2026-11-15 decision
+(the actions are deferred; only the checking backend continues as stage 12); stage 7 is `todo`. The
+root is `in-progress`; its `Done when` requires every stage to be done or dropped, so the blocked
+stages 4 and 6 are deliberate exceptions. Stage 11 is `in-progress` (`base: 8e9c48d`); the planner
+split it into `01-endpoint-research` (detailed), conditional `02-duckduckgo` and `03-libretranslate`
+stages with two tasks each. The research task is `in-progress` and the coordinator is running it;
+stage 12 follows stage 11.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
 release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub release stays until
 the user checks the current code on Windows.
 
-Work is on `main` (matches the root `branch:`); the working tree is clean after this closing commit.
-Linux Debug/Release 46/46 on the host in fresh `/tmp/opencode/qtranslate-final-{debug,release}` trees
-(the old `build/linux-*` trees are stale and fail with a moc mismatch); Windows 40 (derived, not run
-locally); `.ts` is at 374. The `qtranslate-trixie` image is built. Resume with `/new`, agent `lead`,
-`@continue`; the next node is `06-llm-actions`.
+Work is on `main` (matches the root `branch:`); the working tree is clean at `8e9c48d`. The stopped,
+unreviewed work on the former task `01-llm-action-core` and the stage 6 split is in `stash@{0}`
+(`llm-actions WIP: task 01 unreviewed + stage 06 split, stopped 2026-11-15`); it is not in the tree,
+not reviewed, and is kept only in case the LLM checking task reuses the transport part. Linux
+Debug/Release 46/46 on the host; Windows 40 (derived, not run locally); `.ts` is at 374. The
+`qtranslate-trixie` image is built. Resume with `/new`, agent `lead`, `@continue`; the current node
+is `11-duckduckgo-libretranslate/01-endpoint-research`.
 
 Task `10-provider-hint-cleanup` is `done` as `589dbb5`: the eight recipient/privacy sentences are
 gone from the settings hints (fallback, Yandex, Bing, DeepL free web, OpenAI-compatible, MyMemory,
@@ -36,8 +41,24 @@ Qt 6.10 `lupdate` through `update_translations` and the 112 translations edited 
 DeepL tail was rewritten for grammar); 374 messages, 0 unfinished or vanished. Host Debug/Release
 46/46 and Release in `qtranslate-trixie` 46/46, 0 warnings; Windows 40 not performed. Documentation
 was updated in the same session: architecture §4.15/§7, `doc/free-endpoints.md` §10 and both README
-limitation lists; the single global README paragraph stays. The next node is `06-llm-actions`, which
-needs a planner split.
+limitation lists; the single global README paragraph stays. Stages `11-duckduckgo-libretranslate`
+and `12-llm-proofreading` are the next nodes, in that order.
+- 2026-11-15 — User decision that supersedes the stopped LLM start. (1) LLM actions are deferred:
+  summarize, rewrite, explain, pronounce, the actions window and the result cache; stage 6 is
+  `blocked`. (2) Before any further LLM work, research DuckDuckGo and LibreTranslate as standalone
+  translation providers and add them if feasible — stage 11, the next node. (3) The LLM is taken as a
+  **text-checking backend** first — stage 12. The user corrected the earlier reading: it must be a
+  second proofreading provider in the existing checking window and popup, one feature for the user,
+  not a separate AI-action mode; LanguageTool stays, and the provider combo, issue list, preview and
+  replacement flow are shared. LLM settings may live on a separate AI tab, but the provider itself
+  must work for translation and checking like any other provider and be indistinguishable to the
+  user. (4) No extra consent gate: configuring the OpenAI provider and starting a check with a hotkey
+  or a click is the consent; cost and privacy are obvious, as the user put it. Rejected: my earlier
+  reading that the LLM must not become a checking provider (wrong), the separate AI actions
+  window/menu (deferred with the actions), an extra consent/confirmation step, and keeping the LLM
+  settings only on the Services page (the AI tab is approved). The stopped split and the unreviewed
+  task 01 code were not committed; they are stashed as `stash@{0}` and not part of the map. The map is
+  at `8e9c48d` plus stages 11-12 and this journal; the working tree is clean.
 
 The cache-generation race is fixed in `2c2b1b7`: `clearCache()` bumps a generation that each reply
 captures, so a result arriving after a clear is not stored; `AppController::applySettings()` also

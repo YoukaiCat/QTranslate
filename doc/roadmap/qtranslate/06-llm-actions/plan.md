@@ -1,9 +1,14 @@
 ---
 kind: stage
-status: todo
+status: blocked
 ---
 
 # LLM actions (old stage 16)
+
+**Blocked since 2026-11-15.** User decision: the LLM text actions (summarize, rewrite, explain,
+pronounce, the actions window and the result cache) are deferred; only the LLM backend for text
+checking is taken up now, as stage 12. Unblock when the user asks to resume the actions. The AI
+settings tab and the no-extra-consent rule are part of stage 12.
 
 ## Goal
 
