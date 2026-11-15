@@ -213,9 +213,12 @@ full matrix: a server that has only `en` and `ru` rejects `en→ja` with `400`. 
   (fixed endpoint, no key, no settings group of its own).
 - Request: `POST <base>/translate` with `Content-Type: application/json`, `Accept: application/json`,
   compact JSON `{"q":<chunk>,"source":<code|auto>,"target":<code>}`. The qtranslate User-Agent is
-  accepted; no cookie header, no `Referer`, `SameOriginRedirectPolicy` on the request. Do not send
-  `Accept-Language`: the server localises its `error` strings by that header and the classifier
-  matches on English text.
+  accepted; no cookie header, no `Referer`, `SameOriginRedirectPolicy` on the request.
+  `Accept-Language` is **pinned to `en`**: the server localises its `error` strings by that header and
+  the classifier matches on English text, while Qt's HTTP layer always adds a locale-derived value when
+  the request has none (`QHttpNetworkConnectionPrivate::prepareRequest()`), so the header cannot be
+  omitted. Pinning `en` also keeps the user's system locale from leaking to the server. User decision
+  2026-11-15 (see the task `Outcome` of `03-libretranslate/01-libretranslate-service`).
 - Response: `translatedText` (required, non-empty string) and, when `source` was `auto`, the optional
   `detectedLanguage.language`; `confidence` is parsed and ignored. `detectedSourceLang` is filled
   through `Languages::fromServiceCode(…, Direction::Source)`.

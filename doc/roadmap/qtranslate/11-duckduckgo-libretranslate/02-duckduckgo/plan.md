@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 1dec8e0
 depends: [01-endpoint-research]
 ---
@@ -79,6 +79,20 @@ the observed coverage.
   conservative assumptions.
 - `mozhi` already reaches the same engine through a public instance. The standalone provider is a user
   choice, not a replacement for Mozhi; it must not proxy through Mozhi or reuse its engine path.
+
+## Outcome
+
+Both children are done: `01-duckduckgo-service` (`e0b411b`) and `02-duckduckgo-ui` (`3f393df`). The
+service follows the research route: `vqd` from the page HTML with a browser User-Agent, one refresh on
+`403`, the raw chunk posted to `translation.js`, `auto` without `from`, 900 UTF-16 units per chunk and a
+1000 ms pause; body-first errors, same-origin redirects, clean logs. The language column reuses the
+observed Bing catalogue plus `es` (`kBingWebCodes` itself is unchanged). The settings group is last on
+the Services page with one hint and no input. Verification: host Debug/Release and trixie Release
+48/48, 0 warnings; `tst_settingsdialog` 35; `.ts` 376 with 0 unfinished or vanished; Windows 40 not
+performed. Acceptance over `1dec8e0..3f393df` found no defects and made no commits. Known gap: `es` is
+missing from `kBingWebCodes`, so `bing-web` does not offer Spanish; it is out of this stage.
+Documentation (`doc/free-endpoints.md`, `doc/architecture.md`, both READMEs, `AGENTS.md`,
+`doc/handoff.md`) is the lead's pass after stage 11.
 - The terms of use may forbid automated use. The research records them and the lead tells the user; a
   dropped provider is a normal result and does not need a workaround.
 - Live smoke tests may be blocked from this network and are recorded as not performed, never as broken.

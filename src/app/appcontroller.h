@@ -30,6 +30,7 @@ class BingWebService;
 class DeepLService;
 class DuckDuckGoService;
 class GoogleTranslateService;
+class LibreTranslateService;
 class MyMemoryService;
 class MozhiService;
 class OpenAiCompatibleService;
@@ -128,6 +129,7 @@ private:
     BingWebService *m_bingWeb = nullptr;
     ReversoService *m_reverso = nullptr;
     DuckDuckGoService *m_duckduckgo = nullptr;
+    LibreTranslateService *m_libreTranslate = nullptr;
     ProofreadingManager *m_proofreading = nullptr;
     LanguageToolService *m_languageTool = nullptr;
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for

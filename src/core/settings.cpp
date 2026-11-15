@@ -313,6 +313,7 @@ QStringList fallbackServiceIds()
         QStringLiteral("yandex-web"), QStringLiteral("bing-web"),
         QStringLiteral("mymemory"),   QStringLiteral("mozhi"),
         QStringLiteral("reverso"),    QStringLiteral("duckduckgo"),
+        QStringLiteral("libretranslate"),
     };
 }
 

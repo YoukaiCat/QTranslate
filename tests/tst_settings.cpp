@@ -122,7 +122,8 @@ private slots:
         QCOMPARE(fallbackServiceIds(),
                  QStringList({QStringLiteral("yandex-web"), QStringLiteral("bing-web"),
                               QStringLiteral("mymemory"), QStringLiteral("mozhi"),
-                              QStringLiteral("reverso"), QStringLiteral("duckduckgo")}));
+                              QStringLiteral("reverso"), QStringLiteral("duckduckgo"),
+                              QStringLiteral("libretranslate")}));
 
         QCOMPARE(settings.google.mode, QStringLiteral("free"));
         QCOMPARE(settings.deepl.mode, QStringLiteral("api"));

@@ -162,6 +162,7 @@ constexpr QLatin1String kYandexWeb("yandex-web");
 constexpr QLatin1String kBingWeb("bing-web");
 constexpr QLatin1String kReverso("reverso");
 constexpr QLatin1String kDuckDuckGo("duckduckgo");
+constexpr QLatin1String kLibreTranslate("libretranslate");
 
 // MyMemory takes ISO 639-1/RFC 3066 codes and follows the Google catalogue,
 // but a few of its codes differ from the internal ones.
@@ -265,6 +266,27 @@ constexpr const char *kDuckDuckGoExtraCodes[] = {
     "es",
 };
 
+// The codes of a full `/languages` of a LibreTranslate 1.9.6 server, recorded on
+// 2026-11-15 by the endpoint research (§1.3). A server's own `/languages` is the
+// authority for that server; this table is not fetched per request, so a server
+// with fewer models answers `400 <code> is not supported`, which becomes
+// UnsupportedLanguage after one request. The 59 internal codes outside this table
+// are refused before a request.
+constexpr const char *kLibreTranslateCodes[] = {
+    "en", "sq", "ar", "az", "eu", "bn", "bg", "ca", "zh-Hans", "zh-Hant", "cs", "da",
+    "nl", "eo", "et", "fi", "fr", "gl", "de", "el", "he", "hi", "hu", "id", "ga", "it",
+    "ja", "ko", "ky", "lv", "lt", "ms", "nb", "fa", "pl", "pt", "pt-BR", "ro", "ru", "sr",
+    "sk", "sl", "es", "sw", "sv", "tl", "th", "tr", "uk", "ur", "vi",
+};
+
+// Both aliases are lossy: the server names the Tagalog model `tl`, and it has no
+// `pt-PT` model, so European Portuguese is translated by the general Portuguese
+// model. Mapping `fil` and `pt-PT` keeps both selectable instead of dropping them.
+constexpr CodeOverride kLibreTranslateOverrides[] = {
+    {"fil", "tl"},
+    {"pt-PT", "pt"},
+};
+
 const LanguageInfo *findInfo(const QString &code)
 {
     for (const LanguageInfo &info : kLanguages) {
@@ -361,6 +383,28 @@ const char *duckDuckGoCodeOf(const LanguageInfo &info)
     return bingWebCodeOf(info);
 }
 
+// LibreTranslate takes the internal codes with the two lossy overrides in
+// kLibreTranslateOverrides, and only the codes in its observed catalogue. No
+// keyword row is needed: fromServiceCode() scans serviceCodeOf() in both
+// directions, so `tl` resolves to fil (no other internal code maps to it) and
+// `pt` resolves to pt-PT (pt-BR maps to the different `pt-BR`). Synonyms are
+// consulted only after that scan finds nothing, so a row here would be dead code.
+const char *libreTranslateCodeOf(const LanguageInfo &info)
+{
+    const char *code = info.code;
+    for (const CodeOverride &codeOverride : kLibreTranslateOverrides) {
+        if (QLatin1String(info.code) == QLatin1String(codeOverride.code)) {
+            code = codeOverride.serviceCode;
+            break;
+        }
+    }
+    for (const char *candidate : kLibreTranslateCodes) {
+        if (QLatin1String(candidate) == QLatin1String(code))
+            return candidate;
+    }
+    return nullptr;
+}
+
 // LanguageTool takes the long codes of its catalogue and declares exactly the
 // languages in kLanguageToolCodes; anything absent is not offered.
 const char *languageToolCodeOf(const LanguageInfo &info)
@@ -396,6 +440,8 @@ const char *serviceCodeOf(const LanguageInfo &info, const QString &serviceId,
         return reversoCodeOf(info);
     if (serviceId == kDuckDuckGo)
         return duckDuckGoCodeOf(info);
+    if (serviceId == kLibreTranslate)
+        return libreTranslateCodeOf(info);
     return nullptr;
 }
 

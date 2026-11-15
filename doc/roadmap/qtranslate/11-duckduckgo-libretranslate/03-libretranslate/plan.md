@@ -1,6 +1,7 @@
 ---
 kind: stage
-status: todo
+status: in-progress
+base: 3f393df
 depends: [01-endpoint-research, 02-duckduckgo]
 ---
 

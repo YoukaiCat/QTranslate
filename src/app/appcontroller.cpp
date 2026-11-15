@@ -26,6 +26,7 @@
 #include "services/duckduckgoservice.h"
 #include "services/googletranslateservice.h"
 #include "services/languagetoolservice.h"
+#include "services/libretranslateservice.h"
 #include "services/mozhiservice.h"
 #include "services/mymemoryservice.h"
 #include "services/openaicompatibleservice.h"
@@ -259,6 +260,7 @@ void AppController::createTranslation()
     m_mozhi = new MozhiService(m_network);
     m_reverso = new ReversoService(m_network);
     m_duckduckgo = new DuckDuckGoService(m_network);
+    m_libreTranslate = new LibreTranslateService(m_network);
     m_google->applySettings(settings);
     m_yandexWeb->applySettings(settings);
     m_bingWeb->applySettings(settings);
@@ -268,6 +270,7 @@ void AppController::createTranslation()
     m_mozhi->applySettings(settings);
     m_reverso->applySettings(settings);
     m_duckduckgo->applySettings(settings);
+    m_libreTranslate->applySettings(settings);
     m_translations->registerService(m_google);
     m_translations->registerService(m_yandexWeb);
     m_translations->registerService(m_bingWeb);
@@ -277,6 +280,7 @@ void AppController::createTranslation()
     m_translations->registerService(m_mozhi);
     m_translations->registerService(m_reverso);
     m_translations->registerService(m_duckduckgo);
+    m_translations->registerService(m_libreTranslate);
 
     if (m_translations->service(settings.translation.service))
         m_translations->setActiveService(settings.translation.service);
@@ -661,6 +665,8 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_reverso->applySettings(newSettings);
     if (m_duckduckgo)
         m_duckduckgo->applySettings(newSettings);
+    if (m_libreTranslate)
+        m_libreTranslate->applySettings(newSettings);
     if (m_languageTool)
         m_languageTool->applySettings(newSettings);
     if (m_proofreading) {

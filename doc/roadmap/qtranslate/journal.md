@@ -17,17 +17,18 @@ user's 2026-11-05 decision; stage 6 `06-llm-actions` is `blocked` by the user's 
 (the actions are deferred; only the checking backend continues as stage 12); stage 7 is `todo`. The
 root is `in-progress`; its `Done when` requires every stage to be done or dropped, so the blocked
 stages 4 and 6 are deliberate exceptions. Stage 11 is `in-progress` (`base: 8e9c48d`);
-`01-endpoint-research` is `done` as `1dec8e0`, and the research note records the verdicts. User
-decision 2026-11-15: DuckDuckGo is added with the Bing-like `vqd` token and browser User-Agent;
-LibreTranslate is added with a base URL and an optional API key (self-hosted without a key, hosted
-with one). Both `02-duckduckgo` and `03-libretranslate` are worked in that order;
-`02-duckduckgo/01-duckduckgo-service` is `done` as `e0b411b` and `02-duckduckgo/02-duckduckgo-ui` is
-`done` as well, so the next node is `03-libretranslate/01-libretranslate-service` (needs detailing).
-Stage 12 follows stage 11. The user also reported
-a new bug: on Astra the tray icon appears 3-5 seconds late at startup; it is recorded as root task
-`13-tray-icon-latency`, not started. Real problem found and not fixed: `es` is missing from
-`kBingWebCodes`, so `bing-web` does not offer Spanish; the DuckDuckGo column adds it separately and
-the Bing table is left unchanged — a separate Bing fix with a probe is needed.
+`01-endpoint-research` is `done` as `1dec8e0`; substage `02-duckduckgo` is `done` over
+`1dec8e0..3f393df` (service `e0b411b`, UI `3f393df`). User decisions 2026-11-15: DuckDuckGo is a
+Bing-like `vqd` provider; LibreTranslate is added with a base URL and an optional API key (self-hosted
+without a key, hosted with one). The next node is
+`03-libretranslate/02-libretranslate-settings-ui`; `03-libretranslate/01-libretranslate-service` is
+`done` with this commit (base `3f393df`, 50/376). Stage 12 follows stage 11. The user also reported a
+new bug: on Astra the tray icon appears
+3-5 seconds late at startup; it is recorded as root task `13-tray-icon-latency`, not started. Real
+problem found and not fixed: `es` is missing from `kBingWebCodes`, so `bing-web` does not offer Spanish;
+the DuckDuckGo column adds it separately and the Bing table is left unchanged — a separate Bing fix with
+a probe is needed. Documentation for DuckDuckGo (`doc/free-endpoints.md`, `doc/architecture.md`, both
+READMEs, `AGENTS.md`, `doc/handoff.md`, counts 50/376) is the lead's pass after stage 11.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
@@ -445,3 +446,32 @@ has six languages and no `auto`. Next: plan and run stage 8.
   documentation pass: `doc/architecture.md` lists the Services page groups without `DuckDuckGo`, and
   `doc/free-endpoints.md` still says "five no-key web services" and omits DuckDuckGo from §8. Next:
   `03-libretranslate/01-libretranslate-service`.
+- 2026-11-15 — Substage `02-duckduckgo` accepted and closed `done` over `1dec8e0..3f393df`. The
+  acceptance coordinator reviewed the 65-file diff, checked the service/UI/language/registration/
+  fallback/`.ts` integration, found no regressions and no defects, and made no commits. Full host
+  Debug/Release and trixie Release: 0 warnings, 48/48; `tst_settingsdialog` 35, `tst_translations`
+  4/4, `tst_languages` 296, `tst_duckduckgoparser` 43, `tst_duckduckgoservice` 39; Clang Debug clean;
+  Windows 40 not performed. The stage `## Outcome` records the acceptance and the known
+  `es`/`kBingWebCodes` gap. Next: `03-libretranslate/01-libretranslate-service` (needs detailing).
+- 2026-11-15 — Task `03-libretranslate/01-libretranslate-service` accepted and closed `done` (base
+  `3f393df`). The parser and the service follow the research: `POST <base>/translate` with a compact
+  JSON `q`/`source`/`target` body and `api_key` only when a key is set, 5000 UTF-16 units per chunk
+  with a 500 ms pause, body-first errors, `SameOriginRedirectPolicy`, fixed messages and clean logs;
+  the base URL has no default, and the empty `applySettings()` leaves the provider registered but
+  unconfigured until `02-libretranslate-settings-ui`. The 51-code column uses the two lossy aliases
+  `fil` → `tl` and `pt-PT` → `pt` and no synonym, because the reverse scan of
+  `Languages::fromServiceCode()` already answers both. One plan requirement turned out to be
+  impossible and was replaced by a user decision 2026-11-15: Qt always adds a locale-derived
+  `Accept-Language` (`QHttpNetworkConnectionPrivate::prepareRequest()`), and the server localises its
+  `error` sentences through `request.accept_languages.best_match()` (the image ships a Russian
+  catalogue), so on a Russian-locale host the body classifier lost the `Auth` mapping to
+  `BadResponse`; the service now pins `Accept-Language: en`, which keeps the sentences English and
+  stops the system locale from leaking. Step 6, the `translation()` case, the `Done when` bullet, the
+  risk list and research §1.10 record the decision. Review found no defects; the only remark was a
+  journal wording fix, made here. Verification: trixie Release and host Debug/Release 0 warnings,
+  50/50 (48 + 2); `tst_libretranslateparser` 31 and `tst_libretranslateservice` 39 cases; `.ts`
+  untouched at 376. Windows 42 not performed (no MSVC), reviewed by diff. In the container
+  `xvfb-run` hangs after `ctest` finishes, so the container run used a manually started `Xvfb` and
+  `DISPLAY`. Deferred: the new `tr()` string of `configurationError()` enters `i18n/` with the
+  `lupdate` pass of `02-libretranslate-settings-ui`; the live smoke test was not performed. Next:
+  `03-libretranslate/02-libretranslate-settings-ui`.

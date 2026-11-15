@@ -19,6 +19,7 @@ const QString yandexWeb = QStringLiteral("yandex-web");
 const QString bingWeb = QStringLiteral("bing-web");
 const QString reverso = QStringLiteral("reverso");
 const QString duckduckgo = QStringLiteral("duckduckgo");
+const QString libretranslate = QStringLiteral("libretranslate");
 } // namespace
 
 class TestLanguages : public QObject
@@ -173,6 +174,36 @@ private slots:
         QTest::newRow("duckduckgo haw") << duckduckgo << "haw" << Direction::Source << "";
         QTest::newRow("duckduckgo unknown code") << duckduckgo << "xx" << Direction::Target << "";
         QTest::newRow("duckduckgo auto") << duckduckgo << "auto" << Direction::Source << "";
+        // The LibreTranslate column: 49 identity codes plus the two lossy
+        // aliases, and nothing for the 59 internal codes outside its table.
+        QTest::newRow("libretranslate en") << libretranslate << "en" << Direction::Source << "en";
+        QTest::newRow("libretranslate ru") << libretranslate << "ru" << Direction::Source << "ru";
+        QTest::newRow("libretranslate de") << libretranslate << "de" << Direction::Source << "de";
+        QTest::newRow("libretranslate es") << libretranslate << "es" << Direction::Source << "es";
+        QTest::newRow("libretranslate ja") << libretranslate << "ja" << Direction::Source << "ja";
+        QTest::newRow("libretranslate zh-Hans") << libretranslate << "zh-Hans" << Direction::Source
+                                                << "zh-Hans";
+        QTest::newRow("libretranslate zh-Hant") << libretranslate << "zh-Hant" << Direction::Source
+                                                << "zh-Hant";
+        QTest::newRow("libretranslate nb") << libretranslate << "nb" << Direction::Source << "nb";
+        QTest::newRow("libretranslate sr") << libretranslate << "sr" << Direction::Source << "sr";
+        QTest::newRow("libretranslate pt-BR") << libretranslate << "pt-BR" << Direction::Source
+                                              << "pt-BR";
+        // Both aliases are lossy: tl names the Tagalog model, pt is the general
+        // Portuguese model.
+        QTest::newRow("libretranslate fil") << libretranslate << "fil" << Direction::Source << "tl";
+        QTest::newRow("libretranslate pt-PT") << libretranslate << "pt-PT" << Direction::Source
+                                              << "pt";
+        QTest::newRow("libretranslate af") << libretranslate << "af" << Direction::Source << "";
+        QTest::newRow("libretranslate am") << libretranslate << "am" << Direction::Source << "";
+        QTest::newRow("libretranslate kk") << libretranslate << "kk" << Direction::Source << "";
+        QTest::newRow("libretranslate pa") << libretranslate << "pa" << Direction::Source << "";
+        QTest::newRow("libretranslate haw") << libretranslate << "haw" << Direction::Source << "";
+        QTest::newRow("libretranslate ceb") << libretranslate << "ceb" << Direction::Source << "";
+        QTest::newRow("libretranslate unknown code") << libretranslate << "xx"
+                                                     << Direction::Source << "";
+        QTest::newRow("libretranslate auto") << libretranslate << "auto" << Direction::Source
+                                             << "";
         QTest::newRow("reverso en source") << reverso << "en" << Direction::Source << "en";
         QTest::newRow("reverso en target") << reverso << "en" << Direction::Target << "en";
         QTest::newRow("reverso fr source") << reverso << "fr" << Direction::Source << "fr";
@@ -337,6 +368,23 @@ private slots:
                                             << "zh-Hant";
         QTest::newRow("duckduckgo he") << duckduckgo << "he" << Direction::Source << "he";
         QTest::newRow("duckduckgo unknown") << duckduckgo << "xx" << Direction::Source << "";
+        QTest::newRow("libretranslate en") << libretranslate << "en" << Direction::Source << "en";
+        QTest::newRow("libretranslate ru") << libretranslate << "ru" << Direction::Source << "ru";
+        QTest::newRow("libretranslate zh-Hant") << libretranslate << "zh-Hant" << Direction::Source
+                                                << "zh-Hant";
+        QTest::newRow("libretranslate nb") << libretranslate << "nb" << Direction::Source << "nb";
+        QTest::newRow("libretranslate sr") << libretranslate << "sr" << Direction::Source << "sr";
+        // The reverse aliases come from the existing scan of serviceCodeOf():
+        // `tl` resolves to fil and `pt` to pt-PT, so no synonym row is needed.
+        QTest::newRow("libretranslate tl") << libretranslate << "tl" << Direction::Source << "fil";
+        QTest::newRow("libretranslate pt") << libretranslate << "pt" << Direction::Source
+                                           << "pt-PT";
+        QTest::newRow("libretranslate pt-BR") << libretranslate << "pt-BR" << Direction::Source
+                                              << "pt-BR";
+        QTest::newRow("libretranslate mixed case") << libretranslate << "FR" << Direction::Source
+                                                   << "fr";
+        QTest::newRow("libretranslate unknown") << libretranslate << "xx" << Direction::Source
+                                                << "";
         QTest::newRow("reverso en source") << reverso << "en" << Direction::Source << "en";
         QTest::newRow("reverso en target") << reverso << "en" << Direction::Target << "en";
         QTest::newRow("reverso fr source") << reverso << "fr" << Direction::Source << "fr";
@@ -387,7 +435,7 @@ private slots:
         // Every supported language maps to a service code and back to itself,
         // except where several internal codes share a service code (DeepL "PT", "ZH").
         for (const QString &service : {google, deepl, deeplWeb, llm, languageTool, mozhi, mymemory,
-                                       yandexWeb, bingWeb, reverso, duckduckgo}) {
+                                       yandexWeb, bingWeb, reverso, duckduckgo, libretranslate}) {
             for (Direction direction : {Direction::Source, Direction::Target}) {
                 for (const QString &code : Languages::supported(service, direction)) {
                     const QString serviceCode = Languages::toServiceCode(service, code, direction);
@@ -495,6 +543,23 @@ private slots:
         QVERIFY2(bingWebOnly.isEmpty(), qPrintable(QStringList(bingWebOnly.begin(),
                                                                bingWebOnly.end())
                                                        .join(QLatin1Char(','))));
+        const QStringList libreTranslateSources =
+            Languages::supported(libretranslate, Direction::Source);
+        QCOMPARE(Languages::supported(libretranslate, Direction::Target), libreTranslateSources);
+        // The 51-code table of a full `/languages`: 49 identity codes and the two
+        // lossy aliases. The size is pinned so a table edit cannot drop a code.
+        QCOMPARE(libreTranslateSources.size(), 51);
+        for (const QString &code :
+             {QStringLiteral("en"), QStringLiteral("ru"), QStringLiteral("fil"),
+              QStringLiteral("pt-BR"), QStringLiteral("pt-PT"), QStringLiteral("zh-Hans"),
+              QStringLiteral("zh-Hant"), QStringLiteral("sr"), QStringLiteral("nb")}) {
+            QVERIFY2(libreTranslateSources.contains(code), qPrintable(code));
+        }
+        for (const QString &code :
+             {Languages::autoCode(), QStringLiteral("af"), QStringLiteral("kk"),
+              QStringLiteral("pa"), QStringLiteral("haw"), QStringLiteral("ceb")}) {
+            QVERIFY2(!libreTranslateSources.contains(code), qPrintable(code));
+        }
         const QStringList reversoSources = Languages::supported(reverso, Direction::Source);
         QCOMPARE(Languages::supported(reverso, Direction::Target), reversoSources);
         QCOMPARE(reversoSources.size(), 6);
