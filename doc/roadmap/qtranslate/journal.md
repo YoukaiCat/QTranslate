@@ -877,3 +877,14 @@ has six languages and no `auto`. Next: plan and run stage 8.
   `org.freedesktop.secrets` exists and `secret-tool` works — an observation for a separate look, not a
   stage defect. The stage outcome and `doc/handoff.md` now record the live verification instead of
   "unverified"; the settings (proxy, provider, model, key) stay configured per the user's choice.
+- 2026-11-16 — Local Astra package built and installed at the user's request. `packaging/linux/package.sh
+  --target astra --skip-appimage --output-dir build/artifacts-astra` produced
+  `qtranslate_0.13.0_amd64.deb` (installed size 1803 KiB, depends resolved from Astra's Qt 6.10.2),
+  `qtranslate-0.13.0-linux-x86_64-astra.tar.gz` and `SHA256SUMS-linux-astra.txt`; the same directory
+  keeps the earlier 0.11.0 artifacts, so it is not a release set. The `.deb` was installed over the
+  0.13.0 release build and now carries the stage-12 code (the `AI` tab and `qtranslate.service.
+  llm-proofreading` are present in the binary). Hotkeys: `/usr/bin/qtranslate(KBD_R)` was appended to
+  `/etc/X11/trusted.d/qtranslate` and `sudo /usr/bin/fly-set-execid.sh` was run, after which the
+  installed binary registered `Ctrl+Q`, `Ctrl+Shift+Q` and `Ctrl+W` at 02:44:34 and showed the tray icon
+  immediately. The package version stays `0.13.0` although the code is ahead of the release; a version
+  bump is a release decision and was not made.
