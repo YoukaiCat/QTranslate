@@ -117,8 +117,12 @@ void appendEdits(const QString &source, const QJsonArray &edits, const QStringLi
         // `original` is taken verbatim: a normalised match would move the offset.
         const QString original = object.value(QStringLiteral("original")).toString();
         const QString replacement = object.value(QStringLiteral("replacement")).toString();
-        if (original.isEmpty() || original == replacement) {
+        if (original.isEmpty()) {
             ++parsed->droppedEdits;
+            continue;
+        }
+        if (original == replacement) {
+            ++parsed->filteredEdits;
             continue;
         }
 
@@ -150,7 +154,7 @@ void appendEdits(const QString &source, const QJsonArray &edits, const QStringLi
         QString issueCategory = kFallbackCategory;
         if (known.contains(category)) {
             if (!requested.contains(category)) {
-                ++parsed->droppedEdits;
+                ++parsed->filteredEdits;
                 continue;
             }
             issueCategory = category;
@@ -240,8 +244,9 @@ Parsed parseResponse(const QString &source, const QString &content, const QStrin
         // object with an empty `edits` array is the normal "no changes" answer.
         if (i > 0 && bareArray && edits.isEmpty())
             continue;
-        // An edits document stays Edits even when every edit was dropped: the
-        // service turns that into a bad response instead of "no issues".
+        // An edits document stays Edits even when every edit was dropped or
+        // filtered; the service tells a bad response (`droppedEdits > 0`) from a
+        // clean check whose edits were all filtered out.
         parsed.status = Status::Edits;
         appendEdits(source, edits, categories, &parsed);
         return parsed;

@@ -310,11 +310,27 @@ private slots:
         QCOMPARE(parsed.droppedEdits, 1);
     }
 
-    void dropsEmptyOriginalAndUnchangedReplacement()
+    void dropsEmptyOriginal()
     {
         const QString content = QStringLiteral(
             "{\"edits\":["
-            "{\"original\":\"\",\"replacement\":\"x\",\"message\":\"m\",\"category\":\"grammar\"},"
+            "{\"original\":\"\",\"replacement\":\"x\",\"message\":\"m\","
+            "\"category\":\"grammar\"}]}");
+
+        const LlmProofreading::Parsed parsed =
+            LlmProofreading::parseResponse(QStringLiteral("Hallo"), content, {});
+        QCOMPARE(parsed.status, LlmProofreading::Status::Edits);
+        QVERIFY(parsed.issues.isEmpty());
+        QCOMPARE(parsed.droppedEdits, 1);
+        QCOMPARE(parsed.filteredEdits, 0);
+    }
+
+    void filtersUnchangedReplacement()
+    {
+        // The model answered with an edit that changes nothing: it is expected
+        // output, so it counts as filtered, not as a broken edit.
+        const QString content = QStringLiteral(
+            "{\"edits\":["
             "{\"original\":\"Hallo\",\"replacement\":\"Hallo\",\"message\":\"m\","
             "\"category\":\"grammar\"}]}");
 
@@ -322,7 +338,8 @@ private slots:
             LlmProofreading::parseResponse(QStringLiteral("Hallo"), content, {});
         QCOMPARE(parsed.status, LlmProofreading::Status::Edits);
         QVERIFY(parsed.issues.isEmpty());
-        QCOMPARE(parsed.droppedEdits, 2);
+        QCOMPARE(parsed.droppedEdits, 0);
+        QCOMPARE(parsed.filteredEdits, 1);
     }
 
     void dropsNonObjectEntry()
@@ -381,8 +398,8 @@ private slots:
 
     void keepsEmptyEditsDocument()
     {
-        // An edits document with no edit is still Edits: the service reports it
-        // as a bad response instead of "the text is clean".
+        // An edits document with no edit is still Edits, and with nothing
+        // dropped the service reports the text as clean.
         for (const QString &content :
              {QStringLiteral("{\"edits\":[]}"), QStringLiteral("[]")}) {
             const LlmProofreading::Parsed parsed =
@@ -398,7 +415,8 @@ private slots:
         const QString source = QStringLiteral("teh cat");
         const QStringList spelling = {QStringLiteral("spelling")};
 
-        // A known but unrequested category drops the edit in every shape.
+        // A known but unrequested category drops the edit in every shape; the
+        // filter did its job, so this is not a broken answer.
         const QStringList unrequested =
             editDocuments(QStringLiteral("teh"), QStringLiteral("the"), kGrammar);
         for (const QString &document : unrequested) {
@@ -406,7 +424,8 @@ private slots:
                 LlmProofreading::parseResponse(source, document, spelling);
             QCOMPARE(parsed.status, LlmProofreading::Status::Edits);
             QVERIFY(parsed.issues.isEmpty());
-            QCOMPARE(parsed.droppedEdits, 1);
+            QCOMPARE(parsed.droppedEdits, 0);
+            QCOMPARE(parsed.filteredEdits, 1);
         }
 
         // An unknown category is kept with the grammar fallback.

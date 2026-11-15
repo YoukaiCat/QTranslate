@@ -444,6 +444,34 @@ private slots:
         QVERIFY(reply->result().issues.isEmpty());
     }
 
+    void filteredEditsIsACleanCheck()
+    {
+        // The only edit belongs to a category the check did not ask for: the
+        // filter did its job, so the check succeeds instead of reporting a bad
+        // response.
+        respondWith(editContent({edit(QStringLiteral("teh"), QStringLiteral("the"),
+                                      QStringLiteral("fix"), QStringLiteral("grammar"))}));
+
+        auto reply = check(QStringLiteral("teh cat"), QStringLiteral("de"),
+                           {QStringLiteral("spelling")});
+        QSignalSpy finished(reply.get(), &ProofreadingReply::finished);
+        QVERIFY(finished.wait(5000));
+        QVERIFY2(reply->result().ok(), qPrintable(reply->result().errorMessage));
+        QVERIFY(reply->result().issues.isEmpty());
+
+        // An edit whose replacement equals the original changes nothing: also a
+        // clean check.
+        respondWith(editContent({edit(QStringLiteral("Zeile"), QStringLiteral("Zeile"),
+                                      QStringLiteral("fix"), QStringLiteral("spelling"))}));
+
+        auto unchanged = check(QStringLiteral("Zeile eins"), QStringLiteral("de"),
+                               {QStringLiteral("spelling")});
+        QSignalSpy unchangedFinished(unchanged.get(), &ProofreadingReply::finished);
+        QVERIFY(unchangedFinished.wait(5000));
+        QVERIFY2(unchanged->result().ok(), qPrintable(unchanged->result().errorMessage));
+        QVERIFY(unchanged->result().issues.isEmpty());
+    }
+
     void truncatedAnswerIsTooLong()
     {
         // The JSON is cut off and would read as plain text without the

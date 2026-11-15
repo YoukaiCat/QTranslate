@@ -24,8 +24,14 @@ struct Parsed
     QVector<ProofreadingIssue> issues;
     QString correctedText; // filled only for Status::PlainText
     Status status = Status::Malformed;
-    int droppedEdits = 0; // edits that produced no issue: not found in the source,
-                          // an empty `original`, an unchanged `replacement`, or not an object
+    // Edits that could not be placed in the text: an entry that is not an
+    // object, an empty `original`, an `original` not found in the source, an
+    // offset that splits a surrogate pair, or an edit overlapping an accepted one.
+    int droppedEdits = 0;
+    // Edits dropped by the filter, which is expected rather than a broken
+    // answer: a known category the check did not ask for, or a `replacement`
+    // equal to `original`.
+    int filteredEdits = 0;
 };
 
 // `language` is ProofreadingRequest::language: an internal code, or "auto" to ask the

@@ -257,7 +257,8 @@ void LlmProofreadingService::Reply::onFinished()
     }
 
     qCDebug(lcLlmProofreading) << "Checked" << result.issues.size() << "issue(s),"
-                               << parsed.droppedEdits << "dropped edit(s) in"
+                               << parsed.droppedEdits << "dropped edit(s),"
+                               << parsed.filteredEdits << "filtered edit(s) in"
                                << m_elapsed.elapsed() << "ms, tokens" << response.promptTokens
                                << "+" << response.completionTokens;
     finish(result);
