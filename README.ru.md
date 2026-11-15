@@ -142,7 +142,7 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
    ```bat
    ollama pull bonsai-2:latest
    ```
-3. В QTranslate откройте **Настройки → Сервисы → Провайдер с поддержкой OpenAI** и укажите:
+3. В QTranslate откройте **Настройки → AI → Провайдер с поддержкой OpenAI** и укажите:
    - Адрес сервера: `http://localhost:11434/v1`
    - API-ключ: оставьте пустым
    - Модель: имя из `ollama list`, например `bonsai-2:latest`
@@ -189,7 +189,7 @@ ctest --test-dir build/release --output-on-failure
 
 ### Linux (0.13.0)
 
-QTranslate собирается, компонуется и проходит 50 тестов (41 общий и 9 платформенных Linux) в Debug
+QTranslate собирается, компонуется и проходит 51 тест (42 общих и 9 платформенных Linux) в Debug
 и Release с `-Wall -Wextra` и без предупреждений на Debian 13 (trixie, Qt 6.8.2) и Astra Linux
 1.8.7 (Qt 6.10.2). X11 — полная цель: глобальные горячие клавиши, захват выделения, замена на
 месте, автозагрузка, четыре CLI-команды и работа в трее реализованы. Wayland ограничен: портал
@@ -250,7 +250,7 @@ DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot
 `dpkg-buildpackage` кладёт в родительский каталог `.deb`, `.dsc`, `.tar.xz`, пакет `-dbgsym`,
 `.buildinfo` и `.changes` (`dpkg-buildpackage` 1.21 в Astra не принимает завершающую `.` — в
 команде её нет). Отладочные символы остаются в пакете `-dbgsym` и не публикуются. `nocheck`
-пропускает 50 тестов, `nodoc` не кладёт `README.Debian` в пакет, `parallel=N` ограничивает
+пропускает 51 тест, `nodoc` не кладёт `README.Debian` в пакет, `parallel=N` ограничивает
 сборку; без `nocheck` правила запускают тесты под `xvfb-run -a`. Зависимости сборки — в
 `debian/control`, `dpkg-checkbuilddeps` покажет, чего не хватает.
 

@@ -232,7 +232,8 @@ qtranslate/
 │   │   ├── popupplacement.h/.cpp     popup positioning at the cursor
 │   │   ├── textchunker.h/.cpp        splitting long text into chunks
 │   │   ├── settings.h/.cpp           AppSettings + SettingsStore
-│   │   └── hotkeysequence.h/.cpp     parsing/serializing key combinations
+│   │   ├── hotkeysequence.h/.cpp     parsing/serializing key combinations
+│   │   └── hotkeywarnings.h/.cpp     unavailable shortcuts collected for the settings hint
 │   ├── net/
 │   │   └── networkmanager.h/.cpp     QNAM, proxy, timeouts, User-Agent
 │   ├── services/
@@ -313,6 +314,7 @@ qtranslate/
     ├── tst_hotkeymanager_wayland.cpp   Linux portal backend against a mock DBus
     ├── tst_hotkey_selection_x11.cpp    Linux real manager + grabber
     ├── tst_hotkeysequence.cpp
+    ├── tst_hotkeywarnings.cpp          unavailable shortcut list for the settings hint
     ├── tst_languages.cpp
     ├── tst_languagetoolparser.cpp      pure LanguageTool response parsing
     ├── tst_languagetoolservice.cpp     service against a local HTTP server
@@ -355,9 +357,9 @@ targets. Currently:
 
 | Target | What is included now (0.13.0) |
 |---|---|
-| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language), `proofreadingtypes`, `proofreadingservice`, `proofreadingmanager`, `proofreadingtext`; `net/networkmanager`; `services/`: `bingwebparser`, `bingwebservice`, `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `languagetoolparser`, `languagetoolservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `requestqueue`, `reversoparser`, `reversoservice`, `yandexwebparser`, `yandexwebservice` |
+| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `hotkeywarnings`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language), `proofreadingtypes`, `proofreadingservice`, `proofreadingmanager`, `proofreadingtext`; `net/networkmanager`; `services/`: `bingwebparser`, `bingwebservice`, `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `languagetoolparser`, `languagetoolservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `requestqueue`, `reversoparser`, `reversoservice`, `yandexwebparser`, `yandexwebservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `proofreadingerrortext`, `proofreadingpanel`, `proofreadingwindow`, `proofreadingpopupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_duckduckgoparser`, `tst_duckduckgoservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_languagetoolparser`, `tst_languagetoolservice`, `tst_libretranslateparser`, `tst_libretranslateservice`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_mainwindow` (offscreen), `tst_proofreadingmanager`, `tst_proofreadingwindow` (offscreen), `tst_proofreadingpopup` (offscreen), `tst_proofreading_selection_x11` (Linux), `tst_queuedwebservice`, `tst_reversoparser`, `tst_reversoservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 44 tests on Windows and 50 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_duckduckgoparser`, `tst_duckduckgoservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_hotkeywarnings`, `tst_languages`, `tst_languagetoolparser`, `tst_languagetoolservice`, `tst_libretranslateparser`, `tst_libretranslateservice`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_mainwindow` (offscreen), `tst_proofreadingmanager`, `tst_proofreadingwindow` (offscreen), `tst_proofreadingpopup` (offscreen), `tst_proofreading_selection_x11` (Linux), `tst_queuedwebservice`, `tst_reversoparser`, `tst_reversoservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 45 tests on Windows and 51 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
@@ -410,7 +412,7 @@ The release tag is `v0.13.0`; CI compares it with `CMakeLists.txt` and fails on 
 dpkg-buildpackage -rfakeroot -us -uc` from the repository root builds
 `qtranslate_<version>_amd64.deb` and writes the `.deb`, `.dsc` and `.tar.xz` to the parent directory;
 `nocheck` skips the tests, `nodoc` leaves `README.Debian` out, and without `nocheck` the rules run
-the 50 tests under `xvfb-run -a`. The package installs `usr/bin/qtranslate`, the desktop entry, the
+the 51 tests under `xvfb-run -a`. The package installs `usr/bin/qtranslate`, the desktop entry, the
 256x256 icon, `copyright`, `changelog.gz` and `LICENSE.gz` (`dh_compress` gzips the 35 KB license
 text under `usr/share/doc`), has no maintainer scripts, and takes `Depends` from `dh_shlibdeps`.
 `packaging/linux/verify-deb.sh` is the content/`Depends`/install gate.
@@ -522,7 +524,8 @@ Responsibilities:
 - handling `HotkeyManager::activated(action)` → selection capture → translation → showing the result;
 - applying changed settings (`SettingsStore::changed`): re-registering hotkeys, changing the proxy,
   syncing autostart, switching the service;
-- showing tray notifications (hotkey taken, autostart error, etc.);
+- showing tray notifications (autostart error, network error when the window is hidden) and collecting
+  unavailable global shortcuts for the hint in the settings dialog;
 - clean shutdown: unregistering hotkeys, saving window geometry.
 
 `AppController` contains no translation business logic (that is in `TranslationManager`) and does not
@@ -563,8 +566,9 @@ Windows implementation (`hotkeymanager_win.cpp`):
 - The `QKeySequence` → `(MOD_*, VK_*)` translation is in `core/hotkeysequence` (a pure function covered
   by tests): letters and digits match ASCII, `F1–F24`, `Insert`, `Pause`, etc. — by table.
 - If `RegisterHotKey` returns an error (`ERROR_HOTKEY_ALREADY_REGISTERED`), the method returns `false`,
-  emits `registrationFailed` with the error text, and `AppController` shows a tray notification
-  suggesting another combination.
+  emits `registrationFailed` with the error text; `AppController` logs it and lists the combination in
+  the settings dialog. No tray balloon is used, because it would hide the tray icon while it lives (see
+  the tray notes above); Linux backends go through the same path.
 - The registration id is `1 + int(action)` (`RegisterHotKey` range 0x0001–0xBFFF). `setSuspended(true)`
   unregisters the hotkeys but remembers the combinations; `setSuspended(false)` registers them again
   and reports errors through the same signal.
@@ -1759,8 +1763,12 @@ Quit
   `proofreading/enabled` is off or no checking provider is registered. It is the only entry point of
   the checking window.
 - Icon tooltip: "qtranslate — Ctrl+Q / Ctrl+W" (the current shortcuts).
-- `showMessage()` for notifications: hotkey in use, network error when the window is hidden,
+- `showMessage()` for notifications: autostart error, network error when the window is hidden,
   first launch.
+- An unavailable global shortcut is not a tray balloon: `showMessage()` moves the StatusNotifierItem
+  into `NeedsAttention`, and a panel that hosts the item (Fly on Astra) hides the icon for the whole
+  timeout, 5 s here. The failure goes to the `--verbose` log and to the hint in the settings dialog
+  instead (roadmap node `14-hotkey-warning-delivery`).
 - If `QSystemTrayIcon::isSystemTrayAvailable()` returns `false`, the main window is always shown
   at startup, and closing the window exits the program.
 
@@ -1939,7 +1947,7 @@ buttons and menus for Hindi remain English.
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
 `*_win.cpp`; the Linux backends are `*_linux.cpp`, and `*_stub.cpp` remains only for platforms
 without a backend. `qtranslate_core`, `net/`, `services/`, and the UI do not use WinAPI. The Linux
-tree configures, builds, and links: 50 tests (41 shared plus 9 Linux platform tests) pass under
+tree configures, builds, and links: 51 tests (42 shared plus 9 Linux platform tests) pass under
 `xvfb-run` on Debian 13 (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2;
 Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
 X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
@@ -2058,7 +2066,7 @@ main
      ├─ languages/service/maxLength/restoreClipboard from settings
      ├─ MainWindow + geometry restoration; PopupWindow — lazily on the first Ctrl+Q
      ├─ TrayIcon.show()
-     ├─ HotkeyManager.register(...)  → occupied combinations → tray notification
+     ├─ HotkeyManager.register(...)  → occupied combinations → log + settings hint
      ├─ Autostart::sync(settings.autostart)
      └─ if there is no --minimized and startMinimized is off → MainWindow.show()
 ```
@@ -2251,6 +2259,7 @@ are linked into separate test targets):
 | `tst_proofreading_selection_x11` | Linux: real `SelectionGrabber`, popup and `sendPasteShortcut()` against a focused editor; clipboard restore and the no-focus premise (6 cases) |
 | `tst_textchunker` | Splitting by paragraphs/sentences, words longer than the limit, surrogate pairs are not split; `splitUtf8` splits by UTF-8 bytes without breaking a multi-byte sequence; `splitWithOffsets` preserves exact UTF-16 offsets |
 | `tst_hotkeysequence` | `QKeySequence` ↔ `(MOD, VK)`, unsupported keys |
+| `tst_hotkeywarnings` | Unavailable shortcuts: record/forget per action, clearing, ascending order, empty and duplicate texts dropped (10 cases) |
 | `tst_hotkeymanager` | `RegisterHotKey`: shortcut conflicts, `setSuspended`, delayed registration (Windows; built together with `platform/hotkeymanager_win.cpp`) |
 | `tst_hotkeymanager_x11` | X11 `XGrabKey`: registration, Lock/NumLock variants, auto-repeat, suspend/resume, Wayland refusal (16 cases) |
 | `tst_hotkeymanager_wayland` | `GlobalShortcuts` portal against a mock DBus: session, batched bind, asynchronous failures, `Activated`/`Deactivated`, suspend, close (20 cases) |
@@ -2259,7 +2268,7 @@ are linked into separate test targets):
 | `tst_windowactivation_linux` | `_NET_ACTIVE_WINDOW`/`XGetInputFocus`, `_NET_WM_STATE_FULLSCREEN`, `_NET_WM_PID`, XTest paste, Wayland 0/false (13 cases) |
 | `tst_cli` | CLI parser, mutual exclusion (including `--proofread-selection`), two-process forwarding, the `proofread-selection` wire line and the legacy wire lines (30 cases, Linux) |
 | `tst_settings` | Default values, writing/reading, version migration, portable path, DPAPI-compatible secret encryption, the `[mozhi]` defaults, the fallback id normalization and order, the legacy free-services key being ignored, the `[proofreading]` defaults/normalization/endpoint/categories, and canonical round trip |
-| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the provider group order, the MyMemory/Mozhi/Yandex/Bing/Reverso groups being always enabled, the `Fallback service:` row on the Translation page, the **Text checking** tab without an online gate, endpoint validation and the two proofreading hotkeys (offscreen) |
+| `tst_settingsdialog` | Filling tabs (including keys/mode/variant), returning the changed copy, checking shortcuts and languages, suspending global hotkeys, key check request, the provider group order, the MyMemory/Mozhi/Yandex/Bing/Reverso groups being always enabled, the `Fallback service:` row on the Translation page, the **Text checking** tab without an online gate, endpoint validation, the two proofreading hotkeys, and the unavailable-shortcut hint being shown and hidden (offscreen) |
 | `tst_secretprotector` | Windows: DPAPI round-trip, empty and corrupted data. Linux: libsecret token round-trip, `0600` fallback, capability probe, migration (7+1 in trixie, 8/8 on Astra) |
 | `tst_autostart` | Windows: `Run` command format. Linux: desktop entry quoting, `--minimized`, repair, removal (6 cases) |
 | `tst_translationmanager` | Cancelling requests in a channel, cache, retry to the additional language, the one-hop fallback policy (triggers, non-triggers, pre-request `Auth`, any registered service, no second hop, cache) — on a fake service; any registered service can be active |

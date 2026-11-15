@@ -10,10 +10,19 @@ is English. The migration to the tree roadmap and the English baseline is comple
 
 Stage `11-duckduckgo-libretranslate` was accepted on 2026-11-15 over `8e9c48d..df69d70`: DuckDuckGo
 is a standalone Bing-like `vqd` provider, and LibreTranslate is a provider with a base URL and an
-optional API key (self-hosted without a key, hosted with one). Linux is at 50 tests, `.ts` at 382,
-Windows at 44 (not run here). Stage 6 remains blocked for the deferred LLM actions; the next node is
-stage `12-llm-proofreading`. The Astra tray-icon delay is recorded as root task
-`13-tray-icon-latency`.
+optional API key (self-hosted without a key, hosted with one). Linux is at 51 tests, `.ts` at 383,
+Windows at 45 (not run here). Stage 6 remains blocked for the deferred LLM actions; the next node is
+stage `12-llm-proofreading`.
+
+The Astra tray-icon delay was investigated in root task `13-tray-icon-latency` and fixed in
+`14-hotkey-warning-delivery`: the empty slot was the `NeedsAttention` status that
+`QSystemTrayIcon::showMessage()` sets for the "Hotkey unavailable" balloon, and the Fly panel
+(StatusNotifierItem host in `fly-wm`) hides the icon for the whole 5 s timeout. The startup warning now
+goes to the `--verbose` log and to a red hint on the Hotkeys page of the settings dialog; no balloon is
+shown. The other `showMessage()` calls (autostart failure, the Wayland message) stay. On Astra the
+`security.exec_id` of a rebuilt binary must be restored with `sudo /usr/bin/fly-set-execid.sh` after
+every build, otherwise every `XGrabKey` is refused as "already used by another program" — that is a
+Parsec limitation, not a product defect.
 
 ## Git
 
@@ -60,15 +69,16 @@ stage `12-llm-proofreading`. The Astra tray-icon delay is recorded as root task
   in-place feedback, and explicit warnings; no `ydotool`/`wtype`. A real portal-capable desktop was
   not available; the portal is covered by a mock DBus (20/20) and Weston headless confirms the
   fallback.
-- Tests: 50 on Linux (41 shared plus `tst_hotkeymanager_x11` 16/16,
+- Tests: 51 on Linux (42 shared plus `tst_hotkeymanager_x11` 16/16,
   `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
   `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
   `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 30/30,
   `tst_proofreading_selection_x11` 6/6; the shared proofreading tests are
   `tst_mainwindow`, `tst_proofreadingmanager`, `tst_languagetoolparser`,
-  `tst_languagetoolservice`, `tst_proofreadingwindow` and `tst_proofreadingpopup`). Windows keeps
-  44 tests (41 shared plus 3 Windows-only) and was not run here (no MSVC). The 14 `.ts` files have
-  382 messages each.
+  `tst_languagetoolservice`, `tst_proofreadingwindow` and `tst_proofreadingpopup`;
+  `tst_hotkeywarnings` is 10/10). Windows keeps
+  45 tests (42 shared plus 3 Windows-only) and was not run here (no MSVC). The 14 `.ts` files have
+  383 messages each.
 - Fallback: `translation/fallbackService` (off by default, one configured service) retries a
   failed primary request once on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`,
   `Network` or `Timeout`; success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and

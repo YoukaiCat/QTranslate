@@ -2,10 +2,9 @@
 
 ## Where we left off
 
-Current node: `14-hotkey-warning-delivery` (root task, `in-progress`, `detailed: true`), coordinator
-running. It implements the user's decision (1) below: no startup tray balloon for the
-"Hotkey unavailable" warning, only the `--verbose` log and a hint in the settings dialog.
-`13-tray-icon-latency` is `done` as an investigation with **no code change** (`0052458`).
+Current node: no active task. The Astra tray bug is closed: `13-tray-icon-latency` (investigation,
+`0052458`) and `14-hotkey-warning-delivery` (the fix, `1cbe165`). The next node is
+`12-llm-proofreading/02-llm-check-response` (needs detailing).
 
 The tray defect was settled on 2026-11-15. Cause, measured on this Astra machine (Astra 1.8.7, X11,
 `XDG_CURRENT_DESKTOP=fly`, Qt 6.10.2, panel host `fly-wm`, tray is StatusNotifierItem): the empty slot
@@ -628,3 +627,26 @@ has six languages and no `auto`. Next: plan and run stage 8.
   live-updating the hint while the dialog is open (the dialog is modal). Counts: one new `tr()` string,
   two removed, 384 → 383 messages in each of the 14 `.ts`; `AGENTS.md` and
   `src/services/libretranslateservice.cpp:408` still say 382 and are the lead's edits.
+- 2026-11-15 — Task `14-hotkey-warning-delivery` done as `1cbe165` and the tray bug is closed. The
+  `registrationFailed` lambda no longer calls `TrayIcon::showMessage()`, so the StatusNotifierItem stays
+  `Active` and the Fly panel draws the icon at the first refresh; the failure keeps its `qCWarning` line
+  and is collected in the new `src/core/hotkeywarnings.{h,cpp}` (action id → sequence text, `clear`,
+  `forget`, `record`, ascending order, empty and duplicate texts dropped) and shown as a red hint on the
+  Hotkeys page (`SettingsDialog::setUnavailableHotkeys()`, one new string, two removed). `AppController`
+  clears the list in `createHotkeys()`, forgets an action before every retry in `applySettings()`, and
+  retries the recorded combinations once when the dialog opens (`retryUnavailableHotkeys()`, skipped on
+  Wayland and while suspended); the other four `showMessage()` calls are untouched. Verification: host
+  Debug and Release 51/51, 0 warnings; `tst_settingsdialog` 38 passed; `tst_hotkeywarnings` 10 passed;
+  `.ts` 383 messages each, 0 unfinished or vanished; Windows 45 not run (no MSVC), reviewed by diff. One
+  review round with no remarks. Recorded limitations: the `record`/`forget`/retry wiring in
+  `AppController` has no unit test (no test target for the controller; it is covered by the manual Astra
+  check), the Wayland list is refreshed only at the next start or settings change, and the hint updates
+  when the dialog opens, not live. The manual check needed `sudo /usr/bin/fly-set-execid.sh` again after
+  the rebuild and confirmed `Registered "Ctrl+Q"` at 17:03:50 and no `Notify` call at all. The lead
+  updated the documentation in the same session: `doc/architecture.md` (module and test trees,
+  `hotkeywarnings` and `tst_hotkeywarnings`, the tray `showMessage()` note and the Windows
+  `RegisterHotKey` paragraph, the startup flow, counts 45/51/42 shared), `AGENTS.md` (45/51/42, 383
+  messages), both READMEs (51 tests, the AI tab path instead of `Services → OpenAI-compatible provider`)
+  and `doc/handoff.md`. Still pending for a code task: the stale 382 comment at
+  `src/services/libretranslateservice.cpp:408` (only a coordinator may edit `src/`), to be folded into
+  the next code node.
