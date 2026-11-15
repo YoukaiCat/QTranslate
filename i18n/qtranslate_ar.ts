@@ -4,122 +4,122 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="177"/>
-        <location filename="../src/app/appcontroller.cpp" line="733"/>
+        <location filename="../src/app/appcontroller.cpp" line="178"/>
+        <location filename="../src/app/appcontroller.cpp" line="739"/>
         <source>Autostart</source>
         <translation>تشغيل تلقائي</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="178"/>
-        <location filename="../src/app/appcontroller.cpp" line="734"/>
+        <location filename="../src/app/appcontroller.cpp" line="179"/>
+        <location filename="../src/app/appcontroller.cpp" line="740"/>
         <source>Could not update the autostart entry.</source>
         <translation>تعذر تحديث إدخال التشغيل التلقائي.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="355"/>
+        <location filename="../src/app/appcontroller.cpp" line="359"/>
         <source>Hotkey unavailable</source>
         <translation>مفتاح التشغيل السريع غير متاح</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="356"/>
+        <location filename="../src/app/appcontroller.cpp" line="360"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 مستخدم بالفعل بواسطة برنامج آخر. أغلق هذا البرنامج أو اختر مجموعة أخرى في الإعدادات.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="421"/>
+        <location filename="../src/app/appcontroller.cpp" line="425"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="787"/>
+        <location filename="../src/app/appcontroller.cpp" line="793"/>
         <source>DeepL is not available.</source>
         <translation>DeepL غير متوفر.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="802"/>
+        <location filename="../src/app/appcontroller.cpp" line="808"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>مزوّد الخدمة المتوافق مع OpenAI غير متاح.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="846"/>
+        <location filename="../src/app/appcontroller.cpp" line="852"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>تُخزَّن الأسرار دون تشفير في ملف لا يمكن قراءته إلا من قبل المستخدم الخاص بك لأن حلقة مفاتيح النظام غير متاحة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1066"/>
-        <location filename="../src/app/appcontroller.cpp" line="1158"/>
-        <location filename="../src/app/appcontroller.cpp" line="1238"/>
+        <location filename="../src/app/appcontroller.cpp" line="1072"/>
+        <location filename="../src/app/appcontroller.cpp" line="1164"/>
+        <location filename="../src/app/appcontroller.cpp" line="1244"/>
         <source>Nothing is selected.</source>
         <translation>لم يتم تحديد أي شيء.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1108"/>
+        <location filename="../src/app/appcontroller.cpp" line="1114"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>تغيرت النافذة النشطة. تم نسخ الترجمة إلى الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1129"/>
-        <location filename="../src/app/appcontroller.cpp" line="1209"/>
+        <location filename="../src/app/appcontroller.cpp" line="1135"/>
+        <location filename="../src/app/appcontroller.cpp" line="1215"/>
         <source>Enable text checking in Settings → Text checking.</source>
         <translation>فعّل فحص النص من الإعدادات → فحص النص.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1270"/>
+        <location filename="../src/app/appcontroller.cpp" line="1276"/>
         <source>No issues found in the selection.</source>
         <translation>لم يتم العثور على مشكلات في التحديد.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1278"/>
-        <location filename="../src/app/appcontroller.cpp" line="1315"/>
+        <location filename="../src/app/appcontroller.cpp" line="1284"/>
+        <location filename="../src/app/appcontroller.cpp" line="1321"/>
         <source>Could not paste automatically; the corrected text is on the clipboard.</source>
         <translation>لا يمكن اللصق تلقائيًا؛ النص المصحح موجود في الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1285"/>
-        <location filename="../src/app/appcontroller.cpp" line="1322"/>
+        <location filename="../src/app/appcontroller.cpp" line="1291"/>
+        <location filename="../src/app/appcontroller.cpp" line="1328"/>
         <source>The active window changed; the corrected text was copied to the clipboard.</source>
         <translation>تغيرت النافذة النشطة. تم نسخ النص المصحح إلى الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1335"/>
+        <location filename="../src/app/appcontroller.cpp" line="1341"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>تم نسخ النص المصحح إلى الحافظة</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1413"/>
-        <location filename="../src/app/appcontroller.cpp" line="1416"/>
+        <location filename="../src/app/appcontroller.cpp" line="1419"/>
+        <location filename="../src/app/appcontroller.cpp" line="1422"/>
         <source>Check the selection</source>
         <translation>تحقق من التحديد</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1489"/>
+        <location filename="../src/app/appcontroller.cpp" line="1495"/>
         <source>System tray unavailable</source>
         <translation>علبة النظام غير متاحة</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1490"/>
+        <location filename="../src/app/appcontroller.cpp" line="1496"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>علبة النظام غير متاحة، لذلك لا يمكن للتطبيق البقاء في الخلفية. إغلاق النافذة ينهي التطبيق.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1099"/>
-        <location filename="../src/app/appcontroller.cpp" line="1447"/>
+        <location filename="../src/app/appcontroller.cpp" line="1105"/>
+        <location filename="../src/app/appcontroller.cpp" line="1453"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>لا يمكن اللصق تلقائيًا؛ الترجمة موجودة في الحافظة.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="155"/>
+        <location filename="../src/app/appcontroller.cpp" line="156"/>
         <source>Limited Wayland support</source>
         <translation>دعم محدود لـ Wayland</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="157"/>
+        <location filename="../src/app/appcontroller.cpp" line="158"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>تتطلب اختصارات لوحة المفاتيح العامة بوابة GlobalShortcuts. إذا لم يوفر سطح المكتب هذه البوابة، فانسخ النص المحدد باستخدام Ctrl+C واستخدم أوامر CLI أو اختصارًا على سطح المكتب؛ حيث ينسخ الاستبدال في المكان الترجمة إلى الحافظة بدلاً من لصقها.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1471"/>
-        <location filename="../src/app/appcontroller.cpp" line="1474"/>
+        <location filename="../src/app/appcontroller.cpp" line="1477"/>
+        <location filename="../src/app/appcontroller.cpp" line="1480"/>
         <source>Translate and replace</source>
         <translation>ترجمة واستبدال</translation>
     </message>
@@ -723,7 +723,7 @@
         <translation>الزولو</translation>
     </message>
     <message>
-        <location filename="../src/core/languages.cpp" line="403"/>
+        <location filename="../src/core/languages.cpp" line="433"/>
         <source>Auto-detect</source>
         <translation>الكشف التلقائي</translation>
     </message>
@@ -1261,7 +1261,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="44"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="965"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="979"/>
         <source>Settings</source>
         <translation>الإعدادات</translation>
     </message>
@@ -1342,7 +1342,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="173"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="558"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="572"/>
         <source> ms</source>
         <translation> مللي ثانية</translation>
     </message>
@@ -1487,7 +1487,7 @@
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="307"/>
         <location filename="../src/ui/settingsdialog.cpp" line="353"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="601"/>
         <source>Checking…</source>
         <translation>جارٍ التحقق…</translation>
     </message>
@@ -1607,228 +1607,238 @@
         <translation>خدمة احتياطية:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="439"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="436"/>
+        <source>DuckDuckGo</source>
+        <translation>DuckDuckGo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="440"/>
+        <source>DuckDuckGo is an unofficial endpoint and needs no key. It can detect the source language. Its target languages follow Bing Translate, and some of them were confirmed against the endpoint. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
+        <translation>DuckDuckGo نقطة نهاية غير رسمية ولا تحتاج إلى مفتاح. يمكنها اكتشاف لغة المصدر. تتبع لغاتها الهدفية لغات Bing Translate، ولم يُتحقَّق إلا من بعضها على نقطة النهاية. قد تتوقف عن العمل أو تفرض حدودًا على المعدل أو تحظر الطلبات. يُرسَل النص الطويل في عدة طلبات.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="453"/>
         <source>Services</source>
         <translation>خدمات</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="445"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="459"/>
         <source>Enable text checking</source>
         <translation>تفعيل فحص النص</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="448"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="462"/>
         <source>Finds spelling, grammar, and punctuation errors in a separate mode and does not change translation settings.</source>
         <translation>يبحث عن أخطاء الإملاء والقواعد وعلامات الترقيم في وضع منفصل ولا يغيّر إعدادات الترجمة.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="455"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="469"/>
         <source>Provider</source>
         <translation>المزوّد</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="471"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="485"/>
         <source>Leave empty to use the public LanguageTool endpoint. A self-hosted server keeps the text on your machine; the public service has rate limits and sees the checked text.</source>
         <translation>اتركه فارغًا لاستخدام نقطة نهاية LanguageTool العامة. يحتفظ الخادم المستضاف ذاتيًا بالنص على جهازك؛ أما الخدمة العامة فلها حدود لعدد الطلبات وترى النص المفحوص.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="477"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="952"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="491"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="966"/>
         <source>Enter a valid http(s) LanguageTool URL, or leave the field empty for the public endpoint.</source>
         <translation>أدخل عنوان URL صالحًا لـ LanguageTool بصيغة http(s)، أو اترك الحقل فارغًا لاستخدام نقطة النهاية العامة.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="484"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="498"/>
         <source>Provider:</source>
         <translation>المزوّد:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="485"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="499"/>
         <source>Checking language:</source>
         <translation>لغة الفحص:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="486"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
         <source>LanguageTool URL:</source>
         <translation>عنوان LanguageTool:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="491"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="505"/>
         <source>Issues</source>
         <translation>المشكلات</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="494"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="508"/>
         <source>Categories:</source>
         <translation>الفئات:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="496"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="510"/>
         <source>Spelling</source>
         <translation>الإملاء</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="498"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="512"/>
         <source>Grammar</source>
         <translation>القواعد</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
         <source>Punctuation</source>
         <translation>علامات الترقيم</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="502"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="516"/>
         <source>Style</source>
         <translation>الأسلوب</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="528"/>
         <source>Text checking</source>
         <translation>فحص النص</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
         <source>No proxy</source>
         <translation>لا وكيل</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="532"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="546"/>
         <source>System proxy</source>
         <translation>وكيل النظام</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="533"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="547"/>
         <source>Manual proxy</source>
         <translation>الوكيل اليدوي</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="536"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="550"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="537"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="540"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="554"/>
         <source>Proxy host</source>
         <translation>المضيف الوكيل</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="544"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="558"/>
         <source>Not set</source>
         <translation>لم يتم ضبطه</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="559"/>
         <source>The proxy requires authentication</source>
         <translation>يتطلب الوكيل المصادقة</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="549"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="563"/>
         <source>User name</source>
         <translation>اسم المستخدم</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="553"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
         <source>Password</source>
         <translation>كلمة المرور</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="559"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
         <source>Test connection</source>
         <translation>اتصال الاختبار</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="566"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="580"/>
         <source>Proxy mode:</source>
         <translation>وضع الوكيل:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="581"/>
         <source>Proxy type:</source>
         <translation>نوع الوكيل:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="568"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="582"/>
         <source>Host:</source>
         <translation>يستضيف:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="583"/>
         <source>Port:</source>
         <translation>ميناء:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="585"/>
         <source>User name:</source>
         <translation>اسم المستخدم:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="572"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="586"/>
         <source>Password:</source>
         <translation>كلمة المرور:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
         <source>Request timeout:</source>
         <translation>مهلة الطلب:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="578"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="592"/>
         <source>Network</source>
         <translation>شبكة</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="831"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="845"/>
         <source>Effective instance: %1</source>
         <translation>النسخة الفعلية: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="891"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="905"/>
         <source>Translate in a popup</source>
         <translation>ترجمة في نافذة منبثقة</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="893"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="907"/>
         <source>Replace the selected text with the translation</source>
         <translation>استبدل النص المحدد بالترجمة</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="894"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="908"/>
         <source>Translate in the main window</source>
         <translation>ترجمة في النافذة الرئيسية</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="895"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="909"/>
         <source>Show the main window</source>
         <translation>إظهار النافذة الرئيسية</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="905"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="919"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>يستخدم &quot;%1&quot; أكثر من مجموعة مفاتيح واحدة. تدعم مفاتيح الاختصار العالمية مجموعة واحدة.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="913"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="927"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>لا يمكن استخدام &quot;%1&quot; كمفتاح تشغيل سريع عالمي.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="926"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="940"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>تم تعيين نفس مجموعة المفاتيح أكثر من مرة: %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="937"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="951"/>
         <source>The primary and additional languages must differ.</source>
         <translation>يجب أن تختلف اللغات الأساسية والإضافية.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="944"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="958"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>أدخل مضيف الوكيل والمنفذ، أو اختر وضع وكيل آخر.</translation>
     </message>

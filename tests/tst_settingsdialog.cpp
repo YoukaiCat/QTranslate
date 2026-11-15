@@ -438,7 +438,7 @@ private slots:
         QVERIFY(!dialog.findChild<QLabel *>(QStringLiteral("freeWebHint")));
 
         for (const char *name : {"mymemoryGroup", "mozhiGroup", "yandexGroup", "bingGroup",
-                                 "reversoGroup"}) {
+                                 "reversoGroup", "duckduckgoGroup"}) {
             auto *group = dialog.findChild<QGroupBox *>(QString::fromLatin1(name));
             QVERIFY2(group, name);
             QVERIFY2(group->isEnabled(), name);
@@ -659,6 +659,40 @@ private slots:
         QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
     }
 
+    void duckduckgoGroup()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true);
+        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("duckduckgoGroup"));
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("duckduckgoHint"));
+        auto *reverso = dialog.findChild<QGroupBox *>(QStringLiteral("reversoGroup"));
+        QVERIFY(group);
+        QVERIFY(hint);
+        QVERIFY(reverso);
+
+        QCOMPARE(group->title(), QStringLiteral("DuckDuckGo"));
+        QVERIFY(!group->isHidden());
+        QVERIFY(group->isEnabled());
+        QVERIFY(hint->wordWrap());
+        QVERIFY(hint->text().contains(QStringLiteral("unofficial")));
+        QVERIFY(hint->text().contains(QStringLiteral("no key")));
+        QVERIFY(hint->text().contains(QStringLiteral("source language")));
+        QVERIFY(hint->text().contains(QStringLiteral("Bing")));
+        QVERIFY(hint->text().contains(QStringLiteral("several requests")));
+        QVERIFY(!hint->text().contains(QStringLiteral("third party")));
+        QVERIFY(group->findChildren<QLineEdit *>().isEmpty());
+
+        const QLayout *servicesLayout = group->parentWidget()->layout();
+        QVERIFY(servicesLayout);
+        QVERIFY(servicesLayout->indexOf(reverso) >= 0);
+        QVERIFY(servicesLayout->indexOf(reverso) < servicesLayout->indexOf(group));
+        // The stretch must stay last, so the group is the last block on the
+        // Services page rather than a widget pushed below the stretch.
+        QVERIFY(servicesLayout->itemAt(servicesLayout->count() - 1)->spacerItem());
+    }
+
     void fallbackRowOnTranslationPage()
     {
         const QList<QPair<QString, QString>> services = {
@@ -771,6 +805,7 @@ private slots:
             QStringLiteral("bingGroup"),   QStringLiteral("deepLGroup"),
             QStringLiteral("llmGroup"),    QStringLiteral("mymemoryGroup"),
             QStringLiteral("mozhiGroup"),  QStringLiteral("reversoGroup"),
+            QStringLiteral("duckduckgoGroup"),
         };
         int previous = -1;
         for (const QString &name : names) {

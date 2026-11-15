@@ -4,122 +4,122 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="177"/>
-        <location filename="../src/app/appcontroller.cpp" line="733"/>
+        <location filename="../src/app/appcontroller.cpp" line="178"/>
+        <location filename="../src/app/appcontroller.cpp" line="739"/>
         <source>Autostart</source>
         <translation>Автозапуск</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="178"/>
-        <location filename="../src/app/appcontroller.cpp" line="734"/>
+        <location filename="../src/app/appcontroller.cpp" line="179"/>
+        <location filename="../src/app/appcontroller.cpp" line="740"/>
         <source>Could not update the autostart entry.</source>
         <translation>Не удалось обновить запись автозапуска.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="355"/>
+        <location filename="../src/app/appcontroller.cpp" line="359"/>
         <source>Hotkey unavailable</source>
         <translation>Горячая клавиша недоступна</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="356"/>
+        <location filename="../src/app/appcontroller.cpp" line="360"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 уже используется другой программой. Закройте её или выберите другое сочетание в настройках.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="421"/>
+        <location filename="../src/app/appcontroller.cpp" line="425"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="787"/>
+        <location filename="../src/app/appcontroller.cpp" line="793"/>
         <source>DeepL is not available.</source>
         <translation>DeepL недоступен.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="802"/>
+        <location filename="../src/app/appcontroller.cpp" line="808"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>Провайдер с поддержкой OpenAI недоступен.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="846"/>
+        <location filename="../src/app/appcontroller.cpp" line="852"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>Секреты хранятся в незашифрованном файле, доступном только вашему пользователю, потому что системная связка ключей недоступна.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1066"/>
-        <location filename="../src/app/appcontroller.cpp" line="1158"/>
-        <location filename="../src/app/appcontroller.cpp" line="1238"/>
+        <location filename="../src/app/appcontroller.cpp" line="1072"/>
+        <location filename="../src/app/appcontroller.cpp" line="1164"/>
+        <location filename="../src/app/appcontroller.cpp" line="1244"/>
         <source>Nothing is selected.</source>
         <translation>Ничего не выделено.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1108"/>
+        <location filename="../src/app/appcontroller.cpp" line="1114"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>Активное окно изменилось; перевод скопирован в буфер обмена.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1129"/>
-        <location filename="../src/app/appcontroller.cpp" line="1209"/>
+        <location filename="../src/app/appcontroller.cpp" line="1135"/>
+        <location filename="../src/app/appcontroller.cpp" line="1215"/>
         <source>Enable text checking in Settings → Text checking.</source>
         <translation>Включите проверку текста в разделе «Настройки» → «Проверка текста».</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1270"/>
+        <location filename="../src/app/appcontroller.cpp" line="1276"/>
         <source>No issues found in the selection.</source>
         <translation>В выделенном тексте не найдено ошибок.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1278"/>
-        <location filename="../src/app/appcontroller.cpp" line="1315"/>
+        <location filename="../src/app/appcontroller.cpp" line="1284"/>
+        <location filename="../src/app/appcontroller.cpp" line="1321"/>
         <source>Could not paste automatically; the corrected text is on the clipboard.</source>
         <translation>Не удалось вставить автоматически; исправленный текст находится в буфере обмена.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1285"/>
-        <location filename="../src/app/appcontroller.cpp" line="1322"/>
+        <location filename="../src/app/appcontroller.cpp" line="1291"/>
+        <location filename="../src/app/appcontroller.cpp" line="1328"/>
         <source>The active window changed; the corrected text was copied to the clipboard.</source>
         <translation>Активное окно изменилось; исправленный текст скопирован в буфер обмена.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1335"/>
+        <location filename="../src/app/appcontroller.cpp" line="1341"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>Исправленный текст скопирован в буфер обмена</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1413"/>
-        <location filename="../src/app/appcontroller.cpp" line="1416"/>
+        <location filename="../src/app/appcontroller.cpp" line="1419"/>
+        <location filename="../src/app/appcontroller.cpp" line="1422"/>
         <source>Check the selection</source>
         <translation>Проверить выделение</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1489"/>
+        <location filename="../src/app/appcontroller.cpp" line="1495"/>
         <source>System tray unavailable</source>
         <translation>Системный трей недоступен</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1490"/>
+        <location filename="../src/app/appcontroller.cpp" line="1496"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>Системный трей недоступен, поэтому приложение не может работать в фоне. Закрытие окна завершает приложение.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1099"/>
-        <location filename="../src/app/appcontroller.cpp" line="1447"/>
+        <location filename="../src/app/appcontroller.cpp" line="1105"/>
+        <location filename="../src/app/appcontroller.cpp" line="1453"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>Не удалось вставить автоматически; перевод находится в буфере обмена.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="155"/>
+        <location filename="../src/app/appcontroller.cpp" line="156"/>
         <source>Limited Wayland support</source>
         <translation>Ограниченная поддержка Wayland</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="157"/>
+        <location filename="../src/app/appcontroller.cpp" line="158"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>Глобальные горячие клавиши требуют портала GlobalShortcuts. Если на этом рабочем столе он недоступен, скопируйте выделенный текст с помощью Ctrl+C и используйте команды CLI или ярлык рабочего стола; замена на месте копирует перевод в буфер обмена вместо вставки.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1471"/>
-        <location filename="../src/app/appcontroller.cpp" line="1474"/>
+        <location filename="../src/app/appcontroller.cpp" line="1477"/>
+        <location filename="../src/app/appcontroller.cpp" line="1480"/>
         <source>Translate and replace</source>
         <translation>Перевод с заменой</translation>
     </message>
@@ -723,7 +723,7 @@
         <translation>Зулу</translation>
     </message>
     <message>
-        <location filename="../src/core/languages.cpp" line="403"/>
+        <location filename="../src/core/languages.cpp" line="433"/>
         <source>Auto-detect</source>
         <translation>Автоопределение</translation>
     </message>
@@ -1261,7 +1261,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="44"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="965"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="979"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
@@ -1342,7 +1342,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="173"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="558"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="572"/>
         <source> ms</source>
         <translation> мс</translation>
     </message>
@@ -1487,7 +1487,7 @@
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="307"/>
         <location filename="../src/ui/settingsdialog.cpp" line="353"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="601"/>
         <source>Checking…</source>
         <translation>Проверка…</translation>
     </message>
@@ -1607,228 +1607,238 @@
         <translation>Резервный сервис:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="439"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="436"/>
+        <source>DuckDuckGo</source>
+        <translation>DuckDuckGo</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="440"/>
+        <source>DuckDuckGo is an unofficial endpoint and needs no key. It can detect the source language. Its target languages follow Bing Translate, and some of them were confirmed against the endpoint. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
+        <translation>DuckDuckGo — неофициальный эндпоинт, ключ не нужен. Он определяет исходный язык. Набор целевых языков такой же, как у Bing Translate, и часть из них проверена на эндпоинте. Он может перестать работать, ограничивать частоту запросов или блокировать их. Длинный текст отправляется несколькими запросами.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="453"/>
         <source>Services</source>
         <translation>Сервисы</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="445"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="459"/>
         <source>Enable text checking</source>
         <translation>Включить проверку текста</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="448"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="462"/>
         <source>Finds spelling, grammar, and punctuation errors in a separate mode and does not change translation settings.</source>
         <translation>Находит орфографические, грамматические и пунктуационные ошибки в отдельном режиме и не меняет настройки перевода.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="455"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="469"/>
         <source>Provider</source>
         <translation>Провайдер</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="471"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="485"/>
         <source>Leave empty to use the public LanguageTool endpoint. A self-hosted server keeps the text on your machine; the public service has rate limits and sees the checked text.</source>
         <translation>Оставьте поле пустым, чтобы использовать публичную конечную точку LanguageTool. Собственный сервер оставляет текст на вашей машине; публичный сервис имеет ограничения частоты запросов и видит проверяемый текст.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="477"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="952"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="491"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="966"/>
         <source>Enter a valid http(s) LanguageTool URL, or leave the field empty for the public endpoint.</source>
         <translation>Введите корректный URL LanguageTool (http(s)) или оставьте поле пустым для публичной конечной точки.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="484"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="498"/>
         <source>Provider:</source>
         <translation>Провайдер:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="485"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="499"/>
         <source>Checking language:</source>
         <translation>Язык проверки:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="486"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
         <source>LanguageTool URL:</source>
         <translation>URL LanguageTool:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="491"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="505"/>
         <source>Issues</source>
         <translation>Проблемы</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="494"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="508"/>
         <source>Categories:</source>
         <translation>Категории:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="496"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="510"/>
         <source>Spelling</source>
         <translation>Орфография</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="498"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="512"/>
         <source>Grammar</source>
         <translation>Грамматика</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
         <source>Punctuation</source>
         <translation>Пунктуация</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="502"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="516"/>
         <source>Style</source>
         <translation>Стиль</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="528"/>
         <source>Text checking</source>
         <translation>Проверка текста</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
         <source>No proxy</source>
         <translation>Без прокси</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="532"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="546"/>
         <source>System proxy</source>
         <translation>Системный прокси</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="533"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="547"/>
         <source>Manual proxy</source>
         <translation>Ручной прокси</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="536"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="550"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="537"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="540"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="554"/>
         <source>Proxy host</source>
         <translation>Хост прокси</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="544"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="558"/>
         <source>Not set</source>
         <translation>Не задан</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="559"/>
         <source>The proxy requires authentication</source>
         <translation>Прокси требует авторизацию</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="549"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="563"/>
         <source>User name</source>
         <translation>Имя пользователя</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="553"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
         <source>Password</source>
         <translation>Пароль</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="559"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
         <source>Test connection</source>
         <translation>Проверить соединение</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="566"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="580"/>
         <source>Proxy mode:</source>
         <translation>Режим прокси:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="581"/>
         <source>Proxy type:</source>
         <translation>Тип прокси:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="568"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="582"/>
         <source>Host:</source>
         <translation>Хост:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="583"/>
         <source>Port:</source>
         <translation>Порт:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="585"/>
         <source>User name:</source>
         <translation>Имя пользователя:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="572"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="586"/>
         <source>Password:</source>
         <translation>Пароль:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
         <source>Request timeout:</source>
         <translation>Таймаут запроса:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="578"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="592"/>
         <source>Network</source>
         <translation>Сеть</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="831"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="845"/>
         <source>Effective instance: %1</source>
         <translation>Действующий экземпляр: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="891"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="905"/>
         <source>Translate in a popup</source>
         <translation>Переводить во всплывающем окне</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="893"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="907"/>
         <source>Replace the selected text with the translation</source>
         <translation>Заменить выделенный текст переводом</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="894"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="908"/>
         <source>Translate in the main window</source>
         <translation>Переводить в главном окне</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="895"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="909"/>
         <source>Show the main window</source>
         <translation>Показывать главное окно</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="905"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="919"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>«%1» содержит несколько сочетаний. Глобальная горячая клавиша поддерживает только одно сочетание.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="913"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="927"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>«%1» нельзя использовать как глобальную горячую клавишу.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="926"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="940"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>Одно и то же сочетание назначено несколько раз: %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="937"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="951"/>
         <source>The primary and additional languages must differ.</source>
         <translation>Основной и дополнительный языки должны различаться.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="944"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="958"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>Укажите хост и порт прокси или выберите другой режим.</translation>
     </message>

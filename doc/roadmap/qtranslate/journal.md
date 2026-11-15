@@ -20,10 +20,14 @@ stages 4 and 6 are deliberate exceptions. Stage 11 is `in-progress` (`base: 8e9c
 `01-endpoint-research` is `done` as `1dec8e0`, and the research note records the verdicts. User
 decision 2026-11-15: DuckDuckGo is added with the Bing-like `vqd` token and browser User-Agent;
 LibreTranslate is added with a base URL and an optional API key (self-hosted without a key, hosted
-with one). Both `02-duckduckgo` and `03-libretranslate` are worked in that order; the next node is
-`02-duckduckgo/01-duckduckgo-service` (detailed; `in-progress`, the coordinator is running it). Stage 12
-follows stage 11. The user also reported a new bug: on Astra the tray icon appears 3-5 seconds late at
-startup; it is recorded as root task `13-tray-icon-latency`, not started.
+with one). Both `02-duckduckgo` and `03-libretranslate` are worked in that order;
+`02-duckduckgo/01-duckduckgo-service` is `done` as `e0b411b` and `02-duckduckgo/02-duckduckgo-ui` is
+`done` as well, so the next node is `03-libretranslate/01-libretranslate-service` (needs detailing).
+Stage 12 follows stage 11. The user also reported
+a new bug: on Astra the tray icon appears 3-5 seconds late at startup; it is recorded as root task
+`13-tray-icon-latency`, not started. Real problem found and not fixed: `es` is missing from
+`kBingWebCodes`, so `bing-web` does not offer Spanish; the DuckDuckGo column adds it separately and
+the Bing table is left unchanged — a separate Bing fix with a probe is needed.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
@@ -34,9 +38,9 @@ Work is on `main` (matches the root `branch:`); the working tree is clean at `8e
 unreviewed work on the former task `01-llm-action-core` and the stage 6 split is in `stash@{0}`
 (`llm-actions WIP: task 01 unreviewed + stage 06 split, stopped 2026-11-15`); it is not in the tree,
 not reviewed, and is kept only in case the LLM checking task reuses the transport part. Linux
-Debug/Release 46/46 on the host; Windows 40 (derived, not run locally); `.ts` is at 374. The
+Debug/Release 48/48 on the host; Windows 40 (derived, not run locally); `.ts` is at 376. The
 `qtranslate-trixie` image is built. Resume with `/new`, agent `lead`, `@continue`; the current node
-is `11-duckduckgo-libretranslate/02-duckduckgo/01-duckduckgo-service`.
+is `11-duckduckgo-libretranslate/03-libretranslate/01-libretranslate-service`.
 
 Task `10-provider-hint-cleanup` is `done` as `589dbb5`: the eight recipient/privacy sentences are
 gone from the settings hints (fallback, Yandex, Bing, DeepL free web, OpenAI-compatible, MyMemory,
@@ -401,3 +405,43 @@ has six languages and no `auto`. Next: plan and run stage 8.
   icon lookup, panel polling), requires evidence before a fix, and allows recording a panel limitation
   instead of a code workaround. Not worked now: stage 11 is in progress. No decision from the user
   beyond "record it for later".
+- 2026-11-15 — Task `02-duckduckgo/01-duckduckgo-service` done as `e0b411b`. Added
+  `DuckDuckGoParser`/`DuckDuckGoService` on `QueuedWebService`: the `vqd` token from the page HTML with
+  a browser User-Agent and a cached token refreshed once on `403`, the raw chunk posted to
+  `translation.js`, `auto` without `from`, 900 UTF-16 units per chunk, a 1000 ms pause, body-first
+  errors (`invalid_text` → `TooLong`, `invalid_to` → `UnsupportedLanguage`, `403`/`429` →
+  `RateLimited`, non-JSON → `ServiceUnavailable`/`BadResponse`), same-origin redirects, clean logs, and
+  the service registered after Reverso in `AppController` and `fallbackServiceIds()`. The language
+  column reuses `bingWebCodeOf()` plus `kDuckDuckGoExtraCodes = {"es"}`; `tst_languages` requires the
+  set difference with `bing-web` to be exactly `{"es"}`. Two new tests (43 parser cases, 39 service
+  cases); host Debug/Release and a trixie Release 48/48 with 0 warnings; Windows 40 not performed.
+  Real problem: `es` is absent from `kBingWebCodes` (`src/core/languages.cpp:239-247`), so `bing-web`
+  cannot translate into Spanish; it was not changed here, because that needs a Bing probe and its own
+  `tst_languages` update. Next: `02-duckduckgo/02-duckduckgo-ui`.
+- 2026-11-15 — Task `02-duckduckgo/02-duckduckgo-ui` done (this commit, with `e0b411b` as its base).
+  `src/ui/settingsdialog.cpp:436-449` gets the `duckduckgoGroup` block directly before
+  `servicesLayout->addStretch()`: a `QGroupBox` with the untranslated `DuckDuckGo` title, one
+  `QVBoxLayout` and one word-wrapped `duckduckgoHint` label, no input field, no class member, no
+  `connect()`, and no change to `settings()`, `validate()`, `applySettings()` or `loadValues()`,
+  because the provider has no key and no user-editable endpoint. The hint is one `tr()` with
+  concatenated literals and names the unofficial status, the missing key, the source-language
+  detection, the Bing Translate target list with only part of it confirmed against the endpoint, the
+  possible shutdown, rate limits and blocks, and the long text in several requests; per the
+  2026-11-15 decision it carries no "third party" sentence and promises no unverified code.
+  `tst_settingsdialog` gains `duckduckgoGroup()` (substrings only, `isHidden()`, no `QLineEdit`, the
+  position after `reversoGroup` and the stretch last) and the group joins `freeWebGateIsGone()` and
+  `providerOrder()`; no new target, so 48 Linux tests stay and `tst_settingsdialog` reports 35.
+  `update_translations` (Qt 6.10.2) added `DuckDuckGo` and the hint to all 14 `.ts`: 376 messages
+  each, both translated by hand, product names left untranslated, 0 unfinished and 0 vanished,
+  `lrelease` 376 finished per file. Host Debug/Release 0 warnings and 48/48, trixie Release 0
+  warnings and 48/48; Windows 40 not performed.
+  What turned out on the way: the `.ts` `<location>` churn is larger than this block alone, because
+  `i18n/` was last regenerated at `589dbb5` and `e0b411b` moved lines in `appcontroller.cpp`,
+  `settings.cpp` and `languages.cpp`; no `<source>` or existing `<translation>` changed. Running
+  `xvfb-run -a ctest` inside `qtranslate-trixie` with `docker run` and the container's stdout piped to
+  the host hung three times (Xvfb started, `ctest` never appeared); the same suite with the log
+  redirected to a file inside the container passes in 25 s, so verification commands for the image
+  should redirect inside the container or wrap `ctest` in `timeout`. Deferred to the lead's
+  documentation pass: `doc/architecture.md` lists the Services page groups without `DuckDuckGo`, and
+  `doc/free-endpoints.md` still says "five no-key web services" and omits DuckDuckGo from §8. Next:
+  `03-libretranslate/01-libretranslate-service`.

@@ -433,6 +433,20 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     reversoLayout->addWidget(reversoHint);
     servicesLayout->addWidget(reversoGroup);
 
+    auto *duckDuckGoGroup = new QGroupBox(tr("DuckDuckGo"), servicesContent);
+    duckDuckGoGroup->setObjectName(QStringLiteral("duckduckgoGroup"));
+    auto *duckDuckGoLayout = new QVBoxLayout(duckDuckGoGroup);
+    auto *duckDuckGoHint = new QLabel(
+        tr("DuckDuckGo is an unofficial endpoint and needs no key. It can detect the source "
+           "language. Its target languages follow Bing Translate, and some of them were "
+           "confirmed against the endpoint. It may stop working, apply rate limits or block "
+           "requests. Long text is sent in several requests."),
+        duckDuckGoGroup);
+    duckDuckGoHint->setObjectName(QStringLiteral("duckduckgoHint"));
+    duckDuckGoHint->setWordWrap(true);
+    duckDuckGoLayout->addWidget(duckDuckGoHint);
+    servicesLayout->addWidget(duckDuckGoGroup);
+
     servicesLayout->addStretch();
     servicesScroll->setWidget(servicesContent);
     servicesPageLayout->addWidget(servicesScroll);
