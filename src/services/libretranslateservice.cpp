@@ -1,6 +1,7 @@
 #include "services/libretranslateservice.h"
 
 #include "core/languages.h"
+#include "core/settings.h"
 #include "core/textchunker.h"
 #include "net/networkmanager.h"
 #include "services/libretranslateparser.h"
@@ -388,10 +389,10 @@ QString LibreTranslateService::displayName() const
     return QStringLiteral("LibreTranslate");
 }
 
-// The same four rules isValidMozhiInstance() enforces (src/core/settings.cpp).
-// 02-libretranslate-settings-ui extracts them into isValidServiceBaseUrl(), and
-// this check is deliberately the same predicate so that switch changes no
-// behaviour; the helper is not extracted here because that task owns it.
+// The same rules as isValidServiceBaseUrl() (src/core/settings.cpp). The check
+// stays inline and identical to that predicate on purpose: a value that passes
+// the helper must configure the service, and applySettings() normalizes it
+// first.
 bool LibreTranslateService::isConfigured() const
 {
     return !m_baseUrl.isEmpty() && m_baseUrl.isValid()
@@ -404,8 +405,7 @@ QString LibreTranslateService::configurationError() const
 {
     if (isConfigured())
         return {};
-    // Reaches the .ts files in the update_translations pass of
-    // 02-libretranslate-settings-ui; i18n/ is not touched in this task.
+    // Translated: the message is in the .ts catalogues, 382 entries per file.
     return tr("LibreTranslate needs the base URL of a LibreTranslate server.");
 }
 
@@ -419,11 +419,14 @@ QStringList LibreTranslateService::targetLanguages() const
     return Languages::supported(kServiceId, Languages::Direction::Target);
 }
 
-void LibreTranslateService::applySettings(const AppSettings &)
+void LibreTranslateService::applySettings(const AppSettings &settings)
 {
-    // LibreTranslateSettings, the [libretranslate] baseUrl/apiKey keys and the
-    // shared URL helpers arrive in 02-libretranslate-settings-ui, which calls
-    // setBaseUrl()/setApiKey(). There is no cache to clear in this task.
+    // Re-normalized at the service boundary, as MozhiService does, so a caller
+    // that skips SettingsStore::save() cannot send a request to an uncanonical
+    // URL. An empty or invalid value clears the base URL and leaves the service
+    // unconfigured; the key is optional and never changes isConfigured().
+    setBaseUrl(QUrl(normalizedServiceBaseUrl(settings.libretranslate.baseUrl)));
+    setApiKey(settings.libretranslate.apiKey);
 }
 
 TranslationReply *LibreTranslateService::translate(const TranslationRequest &request)

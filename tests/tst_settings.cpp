@@ -130,6 +130,8 @@ private slots:
         QCOMPARE(settings.deepl.englishVariant, QStringLiteral("EN-US"));
         QCOMPARE(settings.mozhi.instance, QStringLiteral("https://mozhi.adminforge.de"));
         QCOMPARE(settings.mozhi.engine, QStringLiteral("google"));
+        QVERIFY(settings.libretranslate.baseUrl.isEmpty());
+        QVERIFY(settings.libretranslate.apiKey.isEmpty());
         QCOMPARE(mozhiEngineIds(),
                  QStringList({QStringLiteral("google"), QStringLiteral("deepl"),
                               QStringLiteral("duckduckgo"), QStringLiteral("libretranslate"),
@@ -204,6 +206,47 @@ private slots:
         QCOMPARE(normalizedMozhiInstance(input), expected);
     }
 
+    void serviceBaseUrlIsNormalized_data()
+    {
+        QTest::addColumn<QString>("input");
+        QTest::addColumn<QString>("expected");
+        QTest::addColumn<bool>("valid");
+
+        const QString empty;
+        QTest::newRow("origin") << QStringLiteral("https://libretranslate.example.org")
+                                << QStringLiteral("https://libretranslate.example.org") << true;
+        QTest::newRow("local server") << QStringLiteral("http://127.0.0.1:5000")
+                                      << QStringLiteral("http://127.0.0.1:5000") << true;
+        QTest::newRow("trailing slash") << QStringLiteral("http://127.0.0.1:5000/")
+                                        << QStringLiteral("http://127.0.0.1:5000") << true;
+        QTest::newRow("path prefix") << QStringLiteral("http://127.0.0.1:5000/lt/")
+                                     << QStringLiteral("http://127.0.0.1:5000/lt") << true;
+        QTest::newRow("surrounding whitespace") << QStringLiteral("  https://host/lt  ")
+                                                << QStringLiteral("https://host/lt") << true;
+        QTest::newRow("empty") << QString() << empty << false;
+        QTest::newRow("whitespace") << QStringLiteral("   ") << empty << false;
+        QTest::newRow("bare host") << QStringLiteral("libretranslate.example.org") << empty
+                                   << false;
+        QTest::newRow("ftp") << QStringLiteral("ftp://host") << empty << false;
+        QTest::newRow("no host") << QStringLiteral("https://") << empty << false;
+        QTest::newRow("user and password") << QStringLiteral("https://user:pass@host") << empty
+                                           << false;
+        QTest::newRow("query") << QStringLiteral("https://host/?api_key=x") << empty << false;
+        QTest::newRow("fragment") << QStringLiteral("https://host/#fragment") << empty << false;
+        QTest::newRow("malformed ipv6") << QStringLiteral("http://[::1") << empty << false;
+        QTest::newRow("bad port") << QStringLiteral("https://host:bad") << empty << false;
+    }
+
+    void serviceBaseUrlIsNormalized()
+    {
+        QFETCH(QString, input);
+        QFETCH(QString, expected);
+        QFETCH(bool, valid);
+
+        QCOMPARE(isValidServiceBaseUrl(input), valid);
+        QCOMPARE(normalizedServiceBaseUrl(input), expected);
+    }
+
     void mozhiEngineIsNormalized_data()
     {
         QTest::addColumn<QString>("input");
@@ -269,6 +312,8 @@ private slots:
         settings.deepl.englishVariant = QStringLiteral("EN-GB");
         settings.mozhi.instance = QStringLiteral("http://127.0.0.1:8080/mozhi/");
         settings.mozhi.engine = QStringLiteral("deepl");
+        settings.libretranslate.baseUrl = QStringLiteral("http://127.0.0.1:5000/lt/");
+        settings.libretranslate.apiKey = QStringLiteral("libretranslate-secret");
         settings.llm.baseUrl = QStringLiteral("http://127.0.0.1:11434/v1");
         settings.llm.apiKey = QStringLiteral("llm-secret");
         settings.llm.model = QStringLiteral("local-model");
@@ -324,6 +369,8 @@ private slots:
         QCOMPARE(result.deepl.englishVariant, QStringLiteral("EN-GB"));
         QCOMPARE(result.mozhi.instance, QStringLiteral("http://127.0.0.1:8080/mozhi"));
         QCOMPARE(result.mozhi.engine, QStringLiteral("deepl"));
+        QCOMPARE(result.libretranslate.baseUrl, QStringLiteral("http://127.0.0.1:5000/lt"));
+        QCOMPARE(result.libretranslate.apiKey, QStringLiteral("libretranslate-secret"));
         QCOMPARE(result.llm.baseUrl, QStringLiteral("http://127.0.0.1:11434/v1"));
         QCOMPARE(result.llm.apiKey, QStringLiteral("llm-secret"));
         QCOMPARE(result.llm.model, QStringLiteral("local-model"));
@@ -352,6 +399,8 @@ private slots:
                      QStringLiteral("http://127.0.0.1:8080/mozhi"));
             QCOMPARE(raw.value(QStringLiteral("mozhi/engine")).toString(),
                      QStringLiteral("deepl"));
+            QCOMPARE(raw.value(QStringLiteral("libretranslate/baseUrl")).toString(),
+                     QStringLiteral("http://127.0.0.1:5000/lt"));
             QCOMPARE(raw.value(QStringLiteral("translation/fallbackService")).toString(),
                      QStringLiteral("mymemory"));
         }
@@ -363,6 +412,7 @@ private slots:
         QVERIFY(!ini.contains("google-secret"));
         QVERIFY(!ini.contains("deepl-secret"));
         QVERIFY(!ini.contains("llm-secret"));
+        QVERIFY(!ini.contains("libretranslate-secret"));
         QVERIFY(!ini.contains("proxy-secret"));
     }
 
@@ -755,6 +805,9 @@ private slots:
                 QStringLiteral("mozhi/instance"),
                 QStringLiteral("https://user:secret@example.invalid/?engine=google#fragment"));
             raw.setValue(QStringLiteral("mozhi/engine"), QStringLiteral("unknown-engine"));
+            raw.setValue(
+                QStringLiteral("libretranslate/baseUrl"),
+                QStringLiteral("https://user:secret@example.invalid/?q=1#f"));
             raw.sync();
         }
 
@@ -772,6 +825,9 @@ private slots:
         QCOMPARE(result.network.timeoutMs, 10000);
         QCOMPARE(result.mozhi.instance, QStringLiteral("https://mozhi.adminforge.de"));
         QCOMPARE(result.mozhi.engine, QStringLiteral("google"));
+        // An uncanonical base URL is dropped to "not configured", and the warning
+        // text must not contain the typed value.
+        QVERIFY(result.libretranslate.baseUrl.isEmpty());
     }
 
     void fallbackServiceIsNormalized()
@@ -870,6 +926,31 @@ private slots:
         QCOMPARE(store.current().mozhi.instance,
                  QStringLiteral("https://mozhi.adminforge.de"));
         QCOMPARE(store.current().mozhi.engine, QStringLiteral("google"));
+        // Loading an old file must not rewrite it.
+        QCOMPARE(readFile(path), before);
+    }
+
+    void libretranslateGroupIsOptional()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+        {
+            QSettings raw(path, QSettings::IniFormat);
+            raw.setValue(QStringLiteral("settingsVersion"), 1);
+            raw.setValue(QStringLiteral("app/startMinimized"), false);
+            raw.sync();
+        }
+        const QByteArray before = readFile(path);
+        QVERIFY(!before.isEmpty());
+        QVERIFY(!before.contains("[libretranslate]"));
+
+        SettingsStore store(path, fakeCodec());
+        store.load();
+        QCOMPARE(store.current().settingsVersion, 1);
+        QCOMPARE(store.current().general.startMinimized, false);
+        QVERIFY(store.current().libretranslate.baseUrl.isEmpty());
+        QVERIFY(store.current().libretranslate.apiKey.isEmpty());
         // Loading an old file must not rewrite it.
         QCOMPARE(readFile(path), before);
     }

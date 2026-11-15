@@ -388,6 +388,35 @@ private slots:
         QVERIFY(!fresh.isConfigured());
     }
 
+    void appliesSettings()
+    {
+        AppSettings settings;
+        settings.libretranslate.baseUrl =
+            QStringLiteral("http://127.0.0.1:%1/lt/").arg(m_server->port());
+        settings.libretranslate.apiKey = QStringLiteral("secret-key");
+        m_service->applySettings(settings);
+        QCOMPARE(m_service->baseUrl(),
+                 QUrl(QStringLiteral("http://127.0.0.1:%1/lt").arg(m_server->port())));
+        QCOMPARE(m_service->apiKey(), QStringLiteral("secret-key"));
+        QVERIFY(m_service->isConfigured());
+
+        // An invalid URL is normalized away, so the service is unconfigured and
+        // never contacts anything.
+        settings.libretranslate.baseUrl = QStringLiteral("ftp://example.invalid/x");
+        m_service->applySettings(settings);
+        QCOMPARE(m_service->baseUrl(), QUrl());
+        QVERIFY(!m_service->isConfigured());
+        QCOMPARE(m_server->requests.size(), 0);
+
+        // An empty key is valid and leaves the service configured.
+        settings.libretranslate.baseUrl =
+            QStringLiteral("http://127.0.0.1:%1").arg(m_server->port());
+        settings.libretranslate.apiKey.clear();
+        m_service->applySettings(settings);
+        QVERIFY(m_service->apiKey().isEmpty());
+        QVERIFY(m_service->isConfigured());
+    }
+
     void translation()
     {
         m_server->handler = [](const FakeHttpServer::Request &) {

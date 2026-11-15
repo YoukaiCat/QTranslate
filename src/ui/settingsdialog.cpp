@@ -447,6 +447,52 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     duckDuckGoLayout->addWidget(duckDuckGoHint);
     servicesLayout->addWidget(duckDuckGoGroup);
 
+    auto *libreTranslateGroup = new QGroupBox(tr("LibreTranslate"), servicesContent);
+    libreTranslateGroup->setObjectName(QStringLiteral("libretranslateGroup"));
+    auto *libreTranslateLayout = new QVBoxLayout(libreTranslateGroup);
+    auto *libreTranslateForm = new QFormLayout;
+    m_libreTranslateBaseUrl = new QLineEdit(libreTranslateGroup);
+    m_libreTranslateBaseUrl->setObjectName(QStringLiteral("libretranslateBaseUrl"));
+    // The default is empty, so the placeholder is an example, not a value: the
+    // field never names a server the user did not enter.
+    m_libreTranslateBaseUrl->setPlaceholderText(QStringLiteral("http://localhost:5000"));
+    libreTranslateForm->addRow(tr("Server URL:"), m_libreTranslateBaseUrl);
+    m_libreTranslateApiKey = new QLineEdit(libreTranslateGroup);
+    m_libreTranslateApiKey->setObjectName(QStringLiteral("libretranslateApiKey"));
+    m_libreTranslateApiKey->setEchoMode(QLineEdit::Password);
+    m_libreTranslateApiKey->setPlaceholderText(
+        tr("Optional; only a server that requires a key"));
+    libreTranslateForm->addRow(tr("API key:"), m_libreTranslateApiKey);
+    libreTranslateLayout->addLayout(libreTranslateForm);
+    m_libreTranslateEffectiveUrl = new QLabel(libreTranslateGroup);
+    m_libreTranslateEffectiveUrl->setObjectName(QStringLiteral("libretranslateEffectiveUrl"));
+    m_libreTranslateEffectiveUrl->setWordWrap(true);
+    m_libreTranslateEffectiveUrl->setTextFormat(Qt::PlainText);
+    m_libreTranslateEffectiveUrl->setVisible(false);
+    libreTranslateLayout->addWidget(m_libreTranslateEffectiveUrl);
+    m_libreTranslateUrlWarning = new QLabel(
+        tr("Enter a base http(s) URL without credentials, a query or a fragment. The service "
+           "stays unconfigured until then."),
+        libreTranslateGroup);
+    m_libreTranslateUrlWarning->setObjectName(QStringLiteral("libretranslateUrlWarning"));
+    m_libreTranslateUrlWarning->setWordWrap(true);
+    m_libreTranslateUrlWarning->setVisible(false);
+    libreTranslateLayout->addWidget(m_libreTranslateUrlWarning);
+    auto *libreTranslateHint = new QLabel(
+        tr("LibreTranslate translates through a server you run or choose, usually a self-hosted "
+           "one. The base URL must point at a server you trust: its terms, availability, rate "
+           "and text limits and installed languages are your responsibility, and a language the "
+           "server has no model for is rejected. The API key is optional and only a server that "
+           "requires one needs it. Quality is lower than Google or DeepL. Long text is sent in "
+           "several requests."),
+        libreTranslateGroup);
+    libreTranslateHint->setObjectName(QStringLiteral("libretranslateHint"));
+    libreTranslateHint->setWordWrap(true);
+    libreTranslateLayout->addWidget(libreTranslateHint);
+    servicesLayout->addWidget(libreTranslateGroup);
+    connect(m_libreTranslateBaseUrl, &QLineEdit::textChanged, this,
+            &SettingsDialog::updateLibreTranslateControls);
+
     servicesLayout->addStretch();
     servicesScroll->setWidget(servicesContent);
     servicesPageLayout->addWidget(servicesScroll);
@@ -662,6 +708,11 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     const int mozhiEngine =
         m_mozhiEngine->findData(normalizedMozhiEngine(settings.mozhi.engine));
     m_mozhiEngine->setCurrentIndex(mozhiEngine >= 0 ? mozhiEngine : 0);
+    {
+        const QSignalBlocker blocker(m_libreTranslateBaseUrl);
+        m_libreTranslateBaseUrl->setText(settings.libretranslate.baseUrl);
+    }
+    m_libreTranslateApiKey->setText(settings.libretranslate.apiKey);
 
     const int googleMode = m_googleMode->findData(settings.google.mode);
     m_googleMode->setCurrentIndex(googleMode >= 0 ? googleMode : 0);
@@ -720,6 +771,7 @@ void SettingsDialog::loadValues(const AppSettings &settings, bool autostartAppro
     m_testProxy->setEnabled(true);
     updateProxyControls();
     updateMozhiControls();
+    updateLibreTranslateControls();
 }
 
 AppSettings SettingsDialog::settings() const
@@ -750,6 +802,8 @@ AppSettings SettingsDialog::settings() const
     result.deepl.englishVariant = m_deeplEnglishVariant->currentData().toString();
     result.mozhi.instance = normalizedMozhiInstance(m_mozhiInstance->text());
     result.mozhi.engine = normalizedMozhiEngine(m_mozhiEngine->currentData().toString());
+    result.libretranslate.baseUrl = normalizedServiceBaseUrl(m_libreTranslateBaseUrl->text());
+    result.libretranslate.apiKey = m_libreTranslateApiKey->text().trimmed();
     result.llm.baseUrl = m_llmBaseUrl->text().trimmed();
     result.llm.apiKey = m_llmApiKey->text().trimmed();
     result.llm.model = m_llmModel->currentText().trimmed();
@@ -844,6 +898,19 @@ void SettingsDialog::updateMozhiControls()
     m_mozhiEffectiveInstance->setText(
         tr("Effective instance: %1").arg(normalizedMozhiInstance(text)));
     m_mozhiInstanceWarning->setVisible(!isValidMozhiInstance(text));
+}
+
+void SettingsDialog::updateLibreTranslateControls()
+{
+    const QString text = m_libreTranslateBaseUrl->text();
+    const QString normalized = normalizedServiceBaseUrl(text);
+    const bool entered = !text.trimmed().isEmpty();
+    m_libreTranslateEffectiveUrl->setText(tr("Effective base URL: %1").arg(normalized));
+    // An empty field is valid and means "not configured": the hint says what to
+    // enter. Only a non-empty invalid value warns, because normalization then
+    // drops the typed value.
+    m_libreTranslateEffectiveUrl->setVisible(entered && !normalized.isEmpty());
+    m_libreTranslateUrlWarning->setVisible(entered && normalized.isEmpty());
 }
 
 void SettingsDialog::updateProofreadingControls()

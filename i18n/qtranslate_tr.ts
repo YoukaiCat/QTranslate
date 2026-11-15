@@ -4,122 +4,122 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="178"/>
-        <location filename="../src/app/appcontroller.cpp" line="739"/>
+        <location filename="../src/app/appcontroller.cpp" line="179"/>
+        <location filename="../src/app/appcontroller.cpp" line="753"/>
         <source>Autostart</source>
         <translation>Otomatik başlatma</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="179"/>
-        <location filename="../src/app/appcontroller.cpp" line="740"/>
+        <location filename="../src/app/appcontroller.cpp" line="180"/>
+        <location filename="../src/app/appcontroller.cpp" line="754"/>
         <source>Could not update the autostart entry.</source>
         <translation>Otomatik başlatma girişi güncellenemedi.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="359"/>
+        <location filename="../src/app/appcontroller.cpp" line="363"/>
         <source>Hotkey unavailable</source>
         <translation>Kısayol tuşu kullanılamıyor</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="360"/>
+        <location filename="../src/app/appcontroller.cpp" line="364"/>
         <source>%1 is already used by another program. Close that program or choose another combination in the settings.</source>
         <translation>%1 zaten başka bir program tarafından kullanılıyor. Bu programı kapatın veya ayarlardan başka bir kombinasyon seçin.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="425"/>
+        <location filename="../src/app/appcontroller.cpp" line="429"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="793"/>
+        <location filename="../src/app/appcontroller.cpp" line="807"/>
         <source>DeepL is not available.</source>
         <translation>DeepL mevcut değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="808"/>
+        <location filename="../src/app/appcontroller.cpp" line="822"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>OpenAI uyumlu sağlayıcı kullanılamıyor.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="852"/>
+        <location filename="../src/app/appcontroller.cpp" line="866"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>Sırlar, sistem anahtarlık hizmeti kullanılamadığı için yalnızca kullanıcınızın okuyabileceği bir dosyada şifrelenmeden saklanır.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1072"/>
-        <location filename="../src/app/appcontroller.cpp" line="1164"/>
-        <location filename="../src/app/appcontroller.cpp" line="1244"/>
+        <location filename="../src/app/appcontroller.cpp" line="1086"/>
+        <location filename="../src/app/appcontroller.cpp" line="1178"/>
+        <location filename="../src/app/appcontroller.cpp" line="1258"/>
         <source>Nothing is selected.</source>
         <translation>Hiçbir şey seçilmedi.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1114"/>
+        <location filename="../src/app/appcontroller.cpp" line="1128"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>Etkin pencere değişti; çeviri panoya kopyalandı.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1135"/>
-        <location filename="../src/app/appcontroller.cpp" line="1215"/>
+        <location filename="../src/app/appcontroller.cpp" line="1149"/>
+        <location filename="../src/app/appcontroller.cpp" line="1229"/>
         <source>Enable text checking in Settings → Text checking.</source>
         <translation>Ayarlar → Metin denetimi bölümünde metin denetimini etkinleştirin.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1276"/>
+        <location filename="../src/app/appcontroller.cpp" line="1290"/>
         <source>No issues found in the selection.</source>
         <translation>Seçimde sorun bulunamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1284"/>
-        <location filename="../src/app/appcontroller.cpp" line="1321"/>
+        <location filename="../src/app/appcontroller.cpp" line="1298"/>
+        <location filename="../src/app/appcontroller.cpp" line="1335"/>
         <source>Could not paste automatically; the corrected text is on the clipboard.</source>
         <translation>Otomatik olarak yapıştırılamadı; düzeltilmiş metin panodadır.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1291"/>
-        <location filename="../src/app/appcontroller.cpp" line="1328"/>
+        <location filename="../src/app/appcontroller.cpp" line="1305"/>
+        <location filename="../src/app/appcontroller.cpp" line="1342"/>
         <source>The active window changed; the corrected text was copied to the clipboard.</source>
         <translation>Etkin pencere değişti; düzeltilmiş metin panoya kopyalandı.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1341"/>
+        <location filename="../src/app/appcontroller.cpp" line="1355"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>Düzeltilmiş metin panoya kopyalandı</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1419"/>
-        <location filename="../src/app/appcontroller.cpp" line="1422"/>
+        <location filename="../src/app/appcontroller.cpp" line="1433"/>
+        <location filename="../src/app/appcontroller.cpp" line="1436"/>
         <source>Check the selection</source>
         <translation>Seçimi denetle</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1495"/>
+        <location filename="../src/app/appcontroller.cpp" line="1509"/>
         <source>System tray unavailable</source>
         <translation>Sistem tepsisi kullanılamıyor</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1496"/>
+        <location filename="../src/app/appcontroller.cpp" line="1510"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>Sistem tepsisi kullanılamadığından uygulama arka planda kalamaz. Pencereyi kapatmak uygulamadan çıkar.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1105"/>
-        <location filename="../src/app/appcontroller.cpp" line="1453"/>
+        <location filename="../src/app/appcontroller.cpp" line="1119"/>
+        <location filename="../src/app/appcontroller.cpp" line="1467"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>Otomatik olarak yapıştırılamadı; çeviri panodadır.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="156"/>
+        <location filename="../src/app/appcontroller.cpp" line="157"/>
         <source>Limited Wayland support</source>
         <translation>Sınırlı Wayland desteği</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="158"/>
+        <location filename="../src/app/appcontroller.cpp" line="159"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>Genel klavye kısayolları GlobalShortcuts portalını gerektirir. Bu masaüstü portalı sağlamıyorsa seçili metni Ctrl+C ile kopyalayın ve CLI komutlarını veya masaüstü kısayolunu kullanın; yerinde değiştirme, çeviriyi yapıştırmak yerine panoya kopyalar.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1477"/>
-        <location filename="../src/app/appcontroller.cpp" line="1480"/>
+        <location filename="../src/app/appcontroller.cpp" line="1491"/>
+        <location filename="../src/app/appcontroller.cpp" line="1494"/>
         <source>Translate and replace</source>
         <translation>Çevir ve değiştir</translation>
     </message>
@@ -723,9 +723,17 @@
         <translation>Zuluca</translation>
     </message>
     <message>
-        <location filename="../src/core/languages.cpp" line="433"/>
+        <location filename="../src/core/languages.cpp" line="479"/>
         <source>Auto-detect</source>
         <translation>Otomatik algılama</translation>
+    </message>
+</context>
+<context>
+    <name>LibreTranslateService</name>
+    <message>
+        <location filename="../src/services/libretranslateservice.cpp" line="410"/>
+        <source>LibreTranslate needs the base URL of a LibreTranslate server.</source>
+        <translation>LibreTranslate, bir LibreTranslate sunucusunun temel URL&apos;sini gerektirir.</translation>
     </message>
 </context>
 <context>
@@ -1261,7 +1269,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="44"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="979"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1046"/>
         <source>Settings</source>
         <translation>Ayarlar</translation>
     </message>
@@ -1342,7 +1350,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="173"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="572"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="618"/>
         <source> ms</source>
         <translation> ms</translation>
     </message>
@@ -1431,6 +1439,7 @@
         <location filename="../src/ui/settingsdialog.cpp" line="234"/>
         <location filename="../src/ui/settingsdialog.cpp" line="298"/>
         <location filename="../src/ui/settingsdialog.cpp" line="339"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="465"/>
         <source>API key:</source>
         <translation>API anahtarı:</translation>
     </message>
@@ -1487,7 +1496,7 @@
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="307"/>
         <location filename="../src/ui/settingsdialog.cpp" line="353"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="601"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="647"/>
         <source>Checking…</source>
         <translation>Kontrol ediliyor…</translation>
     </message>
@@ -1523,6 +1532,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="338"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="459"/>
         <source>Server URL:</source>
         <translation>Sunucu URL&apos;si:</translation>
     </message>
@@ -1617,228 +1627,253 @@
         <translation>DuckDuckGo resmî olmayan bir uç noktadır ve anahtar gerektirmez. Kaynak dili algılayabilir. Hedef dilleri Bing Translate ile aynıdır ve bunların yalnızca bir kısmı uç noktada doğrulanmıştır. Çalışmayı durdurabilir, hız sınırları uygulayabilir veya istekleri engelleyebilir. Uzun metin birkaç istekte gönderilir.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="453"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="450"/>
+        <source>LibreTranslate</source>
+        <translation>LibreTranslate</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="464"/>
+        <source>Optional; only a server that requires a key</source>
+        <translation>İsteğe bağlı; yalnızca anahtar gerektiren bir sunucu için</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="474"/>
+        <source>Enter a base http(s) URL without credentials, a query or a fragment. The service stays unconfigured until then.</source>
+        <translation>Kimlik bilgileri, sorgu veya parça içermeyen bir temel http(s) URL&apos;si girin. O zamana kadar hizmet yapılandırılmamış kalır.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="482"/>
+        <source>LibreTranslate translates through a server you run or choose, usually a self-hosted one. The base URL must point at a server you trust: its terms, availability, rate and text limits and installed languages are your responsibility, and a language the server has no model for is rejected. The API key is optional and only a server that requires one needs it. Quality is lower than Google or DeepL. Long text is sent in several requests.</source>
+        <translation>LibreTranslate, çalıştırdığınız veya seçtiğiniz bir sunucu üzerinden çeviri yapar, genellikle kendi barındırdığınız bir sunucu. Temel URL, güvendiğiniz bir sunucuyu göstermelidir: koşulları, kullanılabilirliği, hız ve metin sınırları ve kurulu diller sizin sorumluluğunuzdadır ve sunucunun modeli olmayan bir dil reddedilir. API anahtarı isteğe bağlıdır ve yalnızca anahtar gerektiren bir sunucu için gereklidir. Kalite Google veya DeepL&apos;den düşüktür. Uzun metin birkaç istekte gönderilir.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="499"/>
         <source>Services</source>
         <translation>Hizmetler</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="459"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="505"/>
         <source>Enable text checking</source>
         <translation>Metin denetimini etkinleştir</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="462"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="508"/>
         <source>Finds spelling, grammar, and punctuation errors in a separate mode and does not change translation settings.</source>
         <translation>Yazım, dil bilgisi ve noktalama hatalarını ayrı bir modda bulur ve çeviri ayarlarını değiştirmez.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="469"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="515"/>
         <source>Provider</source>
         <translation>Sağlayıcı</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="485"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
         <source>Leave empty to use the public LanguageTool endpoint. A self-hosted server keeps the text on your machine; the public service has rate limits and sees the checked text.</source>
         <translation>Genel LanguageTool uç noktasını kullanmak için boş bırakın. Kendi sunucunuz metni makinenizde tutar; genel hizmetin hız sınırları vardır ve denetlenen metni görür.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="491"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="966"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="537"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1033"/>
         <source>Enter a valid http(s) LanguageTool URL, or leave the field empty for the public endpoint.</source>
         <translation>Geçerli bir http(s) LanguageTool URL&apos;si girin veya genel uç nokta için alanı boş bırakın.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="498"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="544"/>
         <source>Provider:</source>
         <translation>Sağlayıcı:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="499"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
         <source>Checking language:</source>
         <translation>Denetim dili:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="546"/>
         <source>LanguageTool URL:</source>
         <translation>LanguageTool URL&apos;si:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="505"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
         <source>Issues</source>
         <translation>Sorunlar</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="508"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="554"/>
         <source>Categories:</source>
         <translation>Kategoriler:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="510"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="556"/>
         <source>Spelling</source>
         <translation>Yazım</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="512"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="558"/>
         <source>Grammar</source>
         <translation>Dil bilgisi</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="560"/>
         <source>Punctuation</source>
         <translation>Noktalama</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="516"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="562"/>
         <source>Style</source>
         <translation>Üslup</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="528"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="574"/>
         <source>Text checking</source>
         <translation>Metin denetimi</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="591"/>
         <source>No proxy</source>
         <translation>Proxy yok</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="546"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="592"/>
         <source>System proxy</source>
         <translation>Sistem proxy&apos;si</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="547"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="593"/>
         <source>Manual proxy</source>
         <translation>Manuel proxy</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="550"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="596"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="597"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="554"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="600"/>
         <source>Proxy host</source>
         <translation>Proxy ana bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="558"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="604"/>
         <source>Not set</source>
         <translation>Ayarlanmadı</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="559"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="605"/>
         <source>The proxy requires authentication</source>
         <translation>Proxy kimlik doğrulaması gerektiriyor</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="563"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="609"/>
         <source>User name</source>
         <translation>Kullanıcı adı</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="613"/>
         <source>Password</source>
         <translation>Şifre</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="619"/>
         <source>Test connection</source>
         <translation>Bağlantıyı test edin</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="580"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="626"/>
         <source>Proxy mode:</source>
         <translation>Vekil modu:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="581"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="627"/>
         <source>Proxy type:</source>
         <translation>Vekil türü:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="582"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="628"/>
         <source>Host:</source>
         <translation>Ev sahibi:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="583"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="629"/>
         <source>Port:</source>
         <translation>Liman:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="585"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="631"/>
         <source>User name:</source>
         <translation>Kullanıcı adı:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="586"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="632"/>
         <source>Password:</source>
         <translation>Şifre:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="587"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="633"/>
         <source>Request timeout:</source>
         <translation>Zaman aşımı isteği:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="592"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="638"/>
         <source>Network</source>
         <translation>Ağ</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="845"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="899"/>
         <source>Effective instance: %1</source>
         <translation>Etkin örnek: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="905"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="908"/>
+        <source>Effective base URL: %1</source>
+        <translation>Etkin temel URL: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="972"/>
         <source>Translate in a popup</source>
         <translation>Açılır pencerede çevir</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="907"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="974"/>
         <source>Replace the selected text with the translation</source>
         <translation>Seçilen metni çeviriyle değiştir</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="908"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="975"/>
         <source>Translate in the main window</source>
         <translation>Ana pencerede çevir</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="909"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="976"/>
         <source>Show the main window</source>
         <translation>Ana pencereyi göster</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="919"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="986"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>&quot;%1&quot; birden fazla tuş kombinasyonu kullanıyor. Genel kısayol tuşları tek bir kombinasyonu destekler.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="927"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="994"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>&quot;%1&quot; genel kısayol tuşu olarak kullanılamaz.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="940"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1007"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>Aynı tuş kombinasyonu birden fazla kez atanmıştır: %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="951"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1018"/>
         <source>The primary and additional languages must differ.</source>
         <translation>Birincil ve ek diller farklı olmalıdır.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="958"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1025"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>Proxy ana bilgisayarını ve bağlantı noktasını girin veya başka bir proxy modunu seçin.</translation>
     </message>

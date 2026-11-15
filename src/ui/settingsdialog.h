@@ -84,6 +84,7 @@ private:
     void updateGoogleControls();
     void updateDeepLControls();
     void updateMozhiControls();
+    void updateLibreTranslateControls();
     void updateProofreadingControls();
     void updateProofreadingLanguage();
     void updateProxyControls();
@@ -153,6 +154,11 @@ private:
     QLabel *m_mozhiEffectiveInstance = nullptr;
     QLabel *m_mozhiInstanceWarning = nullptr;
     QLabel *m_mozhiHint = nullptr;
+
+    QLineEdit *m_libreTranslateBaseUrl = nullptr;
+    QLineEdit *m_libreTranslateApiKey = nullptr;
+    QLabel *m_libreTranslateEffectiveUrl = nullptr;
+    QLabel *m_libreTranslateUrlWarning = nullptr;
 
     QComboBox *m_proxyMode = nullptr;
     QComboBox *m_proxyType = nullptr;

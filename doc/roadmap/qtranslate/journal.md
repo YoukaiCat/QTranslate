@@ -20,15 +20,16 @@ stages 4 and 6 are deliberate exceptions. Stage 11 is `in-progress` (`base: 8e9c
 `01-endpoint-research` is `done` as `1dec8e0`; substage `02-duckduckgo` is `done` over
 `1dec8e0..3f393df` (service `e0b411b`, UI `3f393df`). User decisions 2026-11-15: DuckDuckGo is a
 Bing-like `vqd` provider; LibreTranslate is added with a base URL and an optional API key (self-hosted
-without a key, hosted with one). The next node is
-`03-libretranslate/02-libretranslate-settings-ui`; `03-libretranslate/01-libretranslate-service` is
-`done` with this commit (base `3f393df`, 50/376). Stage 12 follows stage 11. The user also reported a
-new bug: on Astra the tray icon appears
-3-5 seconds late at startup; it is recorded as root task `13-tray-icon-latency`, not started. Real
-problem found and not fixed: `es` is missing from `kBingWebCodes`, so `bing-web` does not offer Spanish;
-the DuckDuckGo column adds it separately and the Bing table is left unchanged — a separate Bing fix with
-a probe is needed. Documentation for DuckDuckGo (`doc/free-endpoints.md`, `doc/architecture.md`, both
-READMEs, `AGENTS.md`, `doc/handoff.md`, counts 50/376) is the lead's pass after stage 11.
+without a key, hosted with one). Substage `03-libretranslate` has both tasks `done`:
+`01-libretranslate-service` (`49a37a0`) and `02-libretranslate-settings-ui` (this commit, base
+`3f393df`), so `.ts` is at 382 and Windows has 44 targets. The next node is the acceptance of stage 11
+over `3f393df..<this commit>` followed by the lead's documentation pass
+(`doc/free-endpoints.md` and `doc/architecture.md` still omit LibreTranslate, `AGENTS.md` records 374
+messages and 40 Windows tests, both READMEs and `doc/handoff.md` need the provider), then stage 12.
+The user also reported a new bug: on Astra the tray icon appears 3-5 seconds late at startup; it is
+recorded as root task `13-tray-icon-latency`, not started. Real problem found and not fixed: `es` is
+missing from `kBingWebCodes`, so `bing-web` does not offer Spanish; the DuckDuckGo column adds it
+separately and the Bing table is left unchanged — a separate Bing fix with a probe is needed.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
@@ -39,9 +40,9 @@ Work is on `main` (matches the root `branch:`); the working tree is clean at `8e
 unreviewed work on the former task `01-llm-action-core` and the stage 6 split is in `stash@{0}`
 (`llm-actions WIP: task 01 unreviewed + stage 06 split, stopped 2026-11-15`); it is not in the tree,
 not reviewed, and is kept only in case the LLM checking task reuses the transport part. Linux
-Debug/Release 48/48 on the host; Windows 40 (derived, not run locally); `.ts` is at 376. The
+Debug/Release 50/50 on the host; Windows 44 (derived, not run locally); `.ts` is at 382. The
 `qtranslate-trixie` image is built. Resume with `/new`, agent `lead`, `@continue`; the current node
-is `11-duckduckgo-libretranslate/03-libretranslate/01-libretranslate-service`.
+is the acceptance of stage `11-duckduckgo-libretranslate` and its documentation pass.
 
 Task `10-provider-hint-cleanup` is `done` as `589dbb5`: the eight recipient/privacy sentences are
 gone from the settings hints (fallback, Yandex, Bing, DeepL free web, OpenAI-compatible, MyMemory,
@@ -475,3 +476,37 @@ has six languages and no `auto`. Next: plan and run stage 8.
   `DISPLAY`. Deferred: the new `tr()` string of `configurationError()` enters `i18n/` with the
   `lupdate` pass of `02-libretranslate-settings-ui`; the live smoke test was not performed. Next:
   `03-libretranslate/02-libretranslate-settings-ui`.
+- 2026-11-15 — Task `03-libretranslate/02-libretranslate-settings-ui` done (this commit, base
+  `3f393df`). `LibreTranslateSettings` (`src/core/settings.h`) holds `baseUrl` and `apiKey`, both
+  empty by default; `[libretranslate]` is loaded and saved between `[mozhi]` and `[llm]`, the base URL
+  is trimmed and normalized, an empty value stays "not configured", an invalid one is dropped with the
+  fixed warning `LibreTranslate base URL is not a base http(s) URL; the service stays unconfigured`
+  that never echoes the typed value, and the key goes through `readSecret()`/`writeSecret()` (no
+  plaintext in the INI, unchanged secrets not re-protected). `settingsVersion` stays 1 and a file
+  without the group is not rewritten. The Mozhi URL rules are now
+  `isValidServiceBaseUrl()`/`normalizedServiceBaseUrl()` in `src/core/settings.cpp`;
+  `isValidMozhiInstance()`/`normalizedMozhiInstance()` are thin wrappers (the latter keeps the Mozhi
+  default) and `mozhiInstanceIsNormalized` passes without an edit. `LibreTranslateService::applySettings()`
+  re-normalizes at the boundary and calls `setBaseUrl()`/`setApiKey()`; `AppController` clears the
+  translation cache only when `libretranslate.baseUrl` changes and never cancels an active reply.
+  `libretranslateGroup` is last on the Services page, after `duckduckgoGroup` and above the stretch:
+  the reused `Server URL:`/`API key:` labels, the example placeholder `http://localhost:5000`, the
+  key in password echo, `libretranslateEffectiveUrl` (PlainText, hidden while empty),
+  `libretranslateUrlWarning` (only for a non-empty invalid value) and one `tr()` hint with no "third
+  party" sentence. Tests: `tst_settings` 84 (68 before), `tst_settingsdialog` 36 (35),
+  `tst_libretranslateservice` 40 (39), `tst_translations` 4/4, still 50 Linux targets. The 14 `.ts`
+  were regenerated only through `update_translations` (Qt 6.10.2): **382** messages each, the six new
+  strings translated by hand, 0 unfinished, 0 vanished, `release_translations` 382 finished per file.
+  Verification: host Debug/Release and trixie Release 0 warnings and 50/50; Windows 44 not performed
+  (no MSVC), reviewed by diff. Review found no defects; its one remark, two stale comments in
+  `libretranslateservice.cpp` that described this task in the future tense, was accepted and
+  rewritten (comment-only), and the full suite was re-run afterwards. What turned out: the `.ts`
+  `<location>` churn is larger than the inserted block because `i18n/` was last regenerated at
+  `589dbb5` and `e0b411b`/`49a37a0` moved lines; no `<source>` or existing translation changed.
+  `LibreTranslateService::isConfigured()` still duplicates the URL predicate without
+  `userInfo`/query/fragment — unreachable through the settings because `applySettings()` normalizes
+  first, left as `01` wrote it. Deferred to the lead's documentation pass: `doc/architecture.md` and
+  `doc/free-endpoints.md` do not name LibreTranslate, `AGENTS.md` still says 374 messages and 40
+  Windows tests (now 382 and 44), both READMEs and `doc/handoff.md`. The live smoke against a real
+  LibreTranslate server was not performed. Next: acceptance of stage `11-duckduckgo-libretranslate`
+  over `3f393df..<this commit>` and the documentation pass, then `12-llm-proofreading`.

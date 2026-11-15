@@ -701,6 +701,14 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_translations->clearCache();
     }
 
+    // A cached translation from another server must not be reused. The active
+    // reply keeps its captured endpoint and key, so it is not cancelled here; a
+    // key change alone does not clear the cache, because the cached results came
+    // from the same server.
+    if (oldSettings.libretranslate.baseUrl != newSettings.libretranslate.baseUrl) {
+        m_translations->clearCache();
+    }
+
     if (oldSettings.llm.model != newSettings.llm.model
         || oldSettings.llm.baseUrl != newSettings.llm.baseUrl) {
         m_translations->clearCache();

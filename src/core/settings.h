@@ -57,6 +57,15 @@ struct MozhiSettings
     QString engine = QStringLiteral("google");
 };
 
+struct LibreTranslateSettings
+{
+    // Empty by default: research §1.5 found no key-less public instance, and a
+    // default would send the text to a server the user did not enter.
+    QString baseUrl;
+    // Optional: a self-hosted server usually needs no key, a hosted instance does.
+    QString apiKey;
+};
+
 struct LlmSettings
 {
     QString baseUrl = QStringLiteral("https://openrouter.ai/api/v1");
@@ -114,6 +123,7 @@ struct AppSettings
     GoogleSettings google;
     DeepLSettings deepl;
     MozhiSettings mozhi;
+    LibreTranslateSettings libretranslate;
     LlmSettings llm;
     ProofreadingSettings proofreading;
     NetworkSettings network;
@@ -125,8 +135,9 @@ struct AppSettings
 
 Q_DECLARE_METATYPE(AppSettings)
 
-// Pure helpers shared by SettingsStore and the Mozhi settings UI, so the
-// instance and engine rules live in one place. They never log.
+// Pure helpers shared by SettingsStore, the Mozhi settings UI and the
+// LibreTranslate settings group, so the instance, engine and base-URL rules live
+// in one place. They never log.
 QStringList mozhiEngineIds();
 // The settings-layer guard for translation/fallbackService: the five no-key web
 // endpoints that may be a one-hop fallback, listed in the provider order. The
@@ -141,6 +152,13 @@ QStringList proofreadingCategoryIds();
 bool isValidMozhiInstance(const QString &instance);
 QString normalizedMozhiInstance(const QString &instance);
 QString normalizedMozhiEngine(const QString &engine);
+// The base-URL rules shared by the Mozhi instance field and the LibreTranslate
+// base URL: an absolute http(s) URL with a host, without user info, a query or a
+// fragment. normalizedServiceBaseUrl() trims surrounding whitespace, removes the
+// trailing slashes, keeps a path prefix and returns an empty string for an
+// invalid or empty value. They never log.
+bool isValidServiceBaseUrl(const QString &url);
+QString normalizedServiceBaseUrl(const QString &url);
 // An empty endpoint is valid: the provider default applies. Otherwise an
 // absolute http(s) URL with a host, without user info, a query or a fragment.
 bool isValidProofreadingEndpoint(const QString &endpoint);

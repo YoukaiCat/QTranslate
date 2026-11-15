@@ -205,6 +205,20 @@ void normalize(AppSettings &settings)
         settings.mozhi.engine = normalizedMozhiEngine(settings.mozhi.engine);
     }
 
+    // The base URL is user input and may contain credentials, so the warning is
+    // fixed and never echoes the typed value. An empty value is valid and means
+    // "not configured": the service then reports configurationError().
+    const QString libreTranslateBaseUrl = settings.libretranslate.baseUrl.trimmed();
+    if (libreTranslateBaseUrl.isEmpty()) {
+        settings.libretranslate.baseUrl.clear();
+    } else if (!isValidServiceBaseUrl(libreTranslateBaseUrl)) {
+        qCWarning(lcSettings)
+            << "LibreTranslate base URL is not a base http(s) URL; the service stays unconfigured";
+        settings.libretranslate.baseUrl.clear();
+    } else {
+        settings.libretranslate.baseUrl = normalizedServiceBaseUrl(libreTranslateBaseUrl);
+    }
+
     // The proofreading values come from a configuration file, so the warnings
     // are fixed and never echo the typed value.
     const QString provider = settings.proofreading.provider.trimmed().toLower();
@@ -332,29 +346,40 @@ QStringList proofreadingCategoryIds()
     };
 }
 
-bool isValidMozhiInstance(const QString &instance)
+bool isValidServiceBaseUrl(const QString &url)
 {
-    const QString text = instance.trimmed();
+    const QString text = url.trimmed();
     if (text.isEmpty())
         return false;
     // Not fromUserInput(): a bare host or malformed text must not be guessed
     // into an http URL and silently sent somewhere the user did not confirm.
-    const QUrl url(text, QUrl::StrictMode);
-    return url.isValid()
-        && (url.scheme() == QLatin1String("http")
-            || url.scheme() == QLatin1String("https"))
-        && !url.host().isEmpty() && url.userInfo().isEmpty() && !url.hasQuery()
-        && !url.hasFragment();
+    const QUrl value(text, QUrl::StrictMode);
+    return value.isValid()
+        && (value.scheme() == QLatin1String("http")
+            || value.scheme() == QLatin1String("https"))
+        && !value.host().isEmpty() && value.userInfo().isEmpty() && !value.hasQuery()
+        && !value.hasFragment();
+}
+
+QString normalizedServiceBaseUrl(const QString &url)
+{
+    if (!isValidServiceBaseUrl(url))
+        return {};
+    QString text = QUrl(url.trimmed(), QUrl::StrictMode).toString(QUrl::FullyEncoded);
+    while (text.endsWith(QLatin1Char('/')))
+        text.chop(1);
+    return text;
+}
+
+bool isValidMozhiInstance(const QString &instance)
+{
+    return isValidServiceBaseUrl(instance);
 }
 
 QString normalizedMozhiInstance(const QString &instance)
 {
-    if (!isValidMozhiInstance(instance))
-        return MozhiSettings{}.instance;
-    QString text = QUrl(instance.trimmed(), QUrl::StrictMode).toString(QUrl::FullyEncoded);
-    while (text.endsWith(QLatin1Char('/')))
-        text.chop(1);
-    return text;
+    const QString normalized = normalizedServiceBaseUrl(instance);
+    return normalized.isEmpty() ? MozhiSettings{}.instance : normalized;
 }
 
 QString normalizedMozhiEngine(const QString &engine)
@@ -521,6 +546,12 @@ void SettingsStore::load()
         settings.value(QStringLiteral("engine"), loaded.mozhi.engine).toString();
     settings.endGroup();
 
+    settings.beginGroup(QStringLiteral("libretranslate"));
+    loaded.libretranslate.baseUrl =
+        settings.value(QStringLiteral("baseUrl"), loaded.libretranslate.baseUrl).toString();
+    loaded.libretranslate.apiKey = readSecret(settings, QStringLiteral("apiKey"), m_codec);
+    settings.endGroup();
+
     settings.beginGroup(QStringLiteral("llm"));
     loaded.llm.baseUrl =
         settings.value(QStringLiteral("baseUrl"), loaded.llm.baseUrl).toString();
@@ -666,6 +697,12 @@ void SettingsStore::save(const AppSettings &settings)
     out.beginGroup(QStringLiteral("mozhi"));
     out.setValue(QStringLiteral("instance"), normalized.mozhi.instance);
     out.setValue(QStringLiteral("engine"), normalized.mozhi.engine);
+    out.endGroup();
+
+    out.beginGroup(QStringLiteral("libretranslate"));
+    out.setValue(QStringLiteral("baseUrl"), normalized.libretranslate.baseUrl);
+    writeSecret(out, QStringLiteral("apiKey"), normalized.libretranslate.apiKey,
+                old.libretranslate.apiKey, m_codec);
     out.endGroup();
 
     out.beginGroup(QStringLiteral("llm"));

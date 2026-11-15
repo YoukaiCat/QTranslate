@@ -438,7 +438,7 @@ private slots:
         QVERIFY(!dialog.findChild<QLabel *>(QStringLiteral("freeWebHint")));
 
         for (const char *name : {"mymemoryGroup", "mozhiGroup", "yandexGroup", "bingGroup",
-                                 "reversoGroup", "duckduckgoGroup"}) {
+                                 "reversoGroup", "duckduckgoGroup", "libretranslateGroup"}) {
             auto *group = dialog.findChild<QGroupBox *>(QString::fromLatin1(name));
             QVERIFY2(group, name);
             QVERIFY2(group->isEnabled(), name);
@@ -693,6 +693,80 @@ private slots:
         QVERIFY(servicesLayout->itemAt(servicesLayout->count() - 1)->spacerItem());
     }
 
+    void libreTranslateGroup()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true);
+        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("libretranslateGroup"));
+        auto *baseUrl =
+            dialog.findChild<QLineEdit *>(QStringLiteral("libretranslateBaseUrl"));
+        auto *apiKey = dialog.findChild<QLineEdit *>(QStringLiteral("libretranslateApiKey"));
+        auto *effective =
+            dialog.findChild<QLabel *>(QStringLiteral("libretranslateEffectiveUrl"));
+        auto *warning =
+            dialog.findChild<QLabel *>(QStringLiteral("libretranslateUrlWarning"));
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("libretranslateHint"));
+        auto *duckDuckGo = dialog.findChild<QGroupBox *>(QStringLiteral("duckduckgoGroup"));
+        QVERIFY(group);
+        QVERIFY(baseUrl);
+        QVERIFY(apiKey);
+        QVERIFY(effective);
+        QVERIFY(warning);
+        QVERIFY(hint);
+        QVERIFY(duckDuckGo);
+
+        QCOMPARE(group->title(), QStringLiteral("LibreTranslate"));
+        QVERIFY(!group->isHidden());
+        QVERIFY(group->isEnabled());
+        QVERIFY(baseUrl->text().isEmpty());
+        QCOMPARE(apiKey->echoMode(), QLineEdit::Password);
+        QVERIFY(apiKey->text().isEmpty());
+        // Empty is valid and means "not configured": no warning, no effective URL.
+        QVERIFY(effective->isHidden());
+        QVERIFY(warning->isHidden());
+        QVERIFY(hint->wordWrap());
+        QVERIFY(warning->wordWrap());
+        QVERIFY(effective->wordWrap());
+        QVERIFY(hint->text().contains(QStringLiteral("self-hosted")));
+        QVERIFY(hint->text().contains(QStringLiteral("you trust")));
+        QVERIFY(hint->text().contains(QStringLiteral("optional")));
+        QVERIFY(hint->text().contains(QStringLiteral("Google")));
+        QVERIFY(hint->text().contains(QStringLiteral("several requests")));
+        QVERIFY(!hint->text().contains(QStringLiteral("third party")));
+        QCOMPARE(group->findChildren<QLineEdit *>().size(), 2);
+
+        // A non-empty valid value shows the normalized effective URL.
+        baseUrl->setText(QStringLiteral("http://127.0.0.1:8080/lt/"));
+        QVERIFY(!effective->isHidden());
+        QVERIFY(warning->isHidden());
+        QVERIFY(effective->text().contains(QStringLiteral("http://127.0.0.1:8080/lt")));
+        QVERIFY(!effective->text().contains(QStringLiteral("/lt/")));
+        QCOMPARE(dialog.settings().libretranslate.baseUrl,
+                 QStringLiteral("http://127.0.0.1:8080/lt"));
+
+        // A non-empty invalid value warns and is stored as "not configured".
+        baseUrl->setText(QStringLiteral("ftp://host"));
+        QVERIFY(effective->isHidden());
+        QVERIFY(!warning->isHidden());
+        QVERIFY(warning->text().contains(QStringLiteral("http(s)")));
+        QVERIFY(dialog.settings().libretranslate.baseUrl.isEmpty());
+
+        // The key is trimmed and never configures the provider.
+        baseUrl->clear();
+        apiKey->setText(QStringLiteral("  secret-key  "));
+        QCOMPARE(dialog.settings().libretranslate.apiKey, QStringLiteral("secret-key"));
+        QVERIFY(dialog.settings().libretranslate.baseUrl.isEmpty());
+
+        // The group follows DuckDuckGo and stays above the stretch.
+        const QLayout *servicesLayout = group->parentWidget()->layout();
+        QVERIFY(servicesLayout);
+        QVERIFY(servicesLayout->indexOf(duckDuckGo) >= 0);
+        QVERIFY(servicesLayout->indexOf(duckDuckGo) < servicesLayout->indexOf(group));
+        QVERIFY(servicesLayout->itemAt(servicesLayout->count() - 1)->spacerItem());
+    }
+
     void fallbackRowOnTranslationPage()
     {
         const QList<QPair<QString, QString>> services = {
@@ -806,6 +880,7 @@ private slots:
             QStringLiteral("llmGroup"),    QStringLiteral("mymemoryGroup"),
             QStringLiteral("mozhiGroup"),  QStringLiteral("reversoGroup"),
             QStringLiteral("duckduckgoGroup"),
+            QStringLiteral("libretranslateGroup"),
         };
         int previous = -1;
         for (const QString &name : names) {
