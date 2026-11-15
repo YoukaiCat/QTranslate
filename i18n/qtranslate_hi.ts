@@ -731,7 +731,7 @@
 <context>
     <name>LibreTranslateService</name>
     <message>
-        <location filename="../src/services/libretranslateservice.cpp" line="410"/>
+        <location filename="../src/services/libretranslateservice.cpp" line="409"/>
         <source>LibreTranslate needs the base URL of a LibreTranslate server.</source>
         <translation>LibreTranslate को LibreTranslate सर्वर के आधार URL की आवश्यकता है।</translation>
     </message>
@@ -1269,7 +1269,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="44"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="1046"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1061"/>
         <source>Settings</source>
         <translation>सेटिंग्स</translation>
     </message>
@@ -1350,7 +1350,7 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="173"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="618"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="633"/>
         <source> ms</source>
         <translation> मिलीसेकंड</translation>
     </message>
@@ -1438,8 +1438,8 @@
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="234"/>
         <location filename="../src/ui/settingsdialog.cpp" line="298"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="339"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="465"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="424"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="492"/>
         <source>API key:</source>
         <translation>API कुंजी:</translation>
     </message>
@@ -1495,13 +1495,13 @@
     </message>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="307"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="353"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="647"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="506"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="662"/>
         <source>Checking…</source>
         <translation>जाँच हो रही है...</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="426"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="385"/>
         <source>Reverso is an unofficial endpoint and needs no key. It supports only English, French, German, Spanish, Italian and Russian and cannot detect the source language. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
         <translation>Reverso एक अनौपचारिक एंडपॉइंट है और इसके लिए किसी कुंजी की आवश्यकता नहीं है। यह केवल अंग्रेज़ी, फ़्रेंच, जर्मन, स्पेनिश, इतालवी और रूसी का समर्थन करता है और स्रोत भाषा का पता नहीं लगा सकता। यह काम करना बंद कर सकता है, दर सीमाएँ लगा सकता है या अनुरोधों को अवरुद्ध कर सकता है। लंबा पाठ कई अनुरोधों में भेजा जाता है।</translation>
     </message>
@@ -1511,33 +1511,33 @@
         <translation>Windows शुरू होने पर %1 प्रारंभ करें</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="313"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="466"/>
         <source>OpenAI-compatible provider</source>
         <translation>OpenAI-संगत प्रदाता</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="322"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="475"/>
         <source>API key</source>
         <translation>API कुंजी</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="330"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="483"/>
         <source>Model ID, for example openai/gpt-4o-mini</source>
         <translation>मॉडल ID, उदाहरण के लिए openai/gpt-4o-mini</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="332"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="485"/>
         <source>Load models</source>
         <translation>मॉडल लोड करें</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="338"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="459"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="418"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="491"/>
         <source>Server URL:</source>
         <translation>सर्वर URL:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="340"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="493"/>
         <source>Model:</source>
         <translation>मॉडल:</translation>
     </message>
@@ -1547,37 +1547,37 @@
         <translation>कोई नहीं</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="344"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="497"/>
         <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key.</source>
         <translation>OpenAI-संगत Chat Completions API का उपयोग करता है। डिफ़ॉल्ट सर्वर OpenRouter है; URL किसी अन्य संगत एंडपॉइंट जैसे OpenAI, Ollama, llama.cpp या TeamRouter की ओर इंगित कर सकता है। मॉडल आपकी कुंजी के लिए उपलब्ध होना चाहिए।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="360"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="319"/>
         <source>MyMemory</source>
         <translation>MyMemory</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="364"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="323"/>
         <source>MyMemory is a free translation API and needs no key. It cannot detect the source language, and long text is sent in several requests.</source>
         <translation>MyMemory एक मुफ़्त अनुवाद API है और इसके लिए किसी कुंजी की आवश्यकता नहीं है। यह स्रोत भाषा का पता नहीं लगा सकता, और लंबा पाठ कई अनुरोधों में भेजा जाता है।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="372"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="331"/>
         <source>Mozhi</source>
         <translation>Mozhi</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="379"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="338"/>
         <source>Instance URL:</source>
         <translation>इंस्टेंस URL:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="394"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="353"/>
         <source>Engine:</source>
         <translation>इंजन:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="402"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="361"/>
         <source>Enter a base http(s) instance URL without credentials, a query or a fragment. The default instance will be used.</source>
         <translation>बिना क्रेडेंशियल, क्वेरी या फ़्रैगमेंट के आधार http(s) इंस्टेंस URL दर्ज करें। डिफ़ॉल्ट इंस्टेंस का उपयोग किया जाएगा।</translation>
     </message>
@@ -1592,12 +1592,12 @@
         <translation>Bing</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="410"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="369"/>
         <source>Mozhi is a proxy to public translation engines. Instances are unofficial: they may stop working or rate-limit requests, and some engines may be disabled on an instance. A self-hosted instance&apos;s terms and stability are your responsibility. Long text is sent in several requests.</source>
         <translation>Mozhi सार्वजनिक अनुवाद इंजनों के लिए एक प्रॉक्सी है। इंस्टेंस अनौपचारिक हैं: वे काम करना बंद कर सकते हैं या अनुरोधों की दर सीमित कर सकते हैं, और किसी इंस्टेंस पर कुछ इंजन अक्षम हो सकते हैं। स्वयं-होस्ट किए गए इंस्टेंस की शर्तें और स्थिरता आपकी ज़िम्मेदारी है। लंबा पाठ कई अनुरोधों में भेजा जाता है।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="422"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="381"/>
         <source>Reverso</source>
         <translation>Reverso</translation>
     </message>
@@ -1617,263 +1617,273 @@
         <translation>फ़ॉलबैक सेवा:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="436"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="314"/>
+        <source>The OpenAI-compatible provider is configured on the AI tab.</source>
+        <translation>OpenAI-संगत प्रदाता एआई टैब पर कॉन्फ़िगर किया जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="395"/>
         <source>DuckDuckGo</source>
         <translation>DuckDuckGo</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="440"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="399"/>
         <source>DuckDuckGo is an unofficial endpoint and needs no key. It can detect the source language. Its target languages follow Bing Translate, and some of them were confirmed against the endpoint. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
         <translation>DuckDuckGo एक अनौपचारिक एंडपॉइंट है और इसके लिए किसी कुंजी की आवश्यकता नहीं है। यह स्रोत भाषा का पता लगा सकता है। इसकी लक्ष्य भाषाएँ Bing Translate का अनुसरण करती हैं, और उनमें से केवल कुछ को एंडपॉइंट पर सत्यापित किया गया है। यह काम करना बंद कर सकता है, दर सीमाएँ लगा सकता है या अनुरोधों को अवरुद्ध कर सकता है। लंबा पाठ कई अनुरोधों में भेजा जाता है।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="450"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="409"/>
         <source>LibreTranslate</source>
         <translation>LibreTranslate</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="464"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="423"/>
         <source>Optional; only a server that requires a key</source>
         <translation>वैकल्पिक; केवल उस सर्वर के लिए जो कुंजी की आवश्यकता रखता है</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="474"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="433"/>
         <source>Enter a base http(s) URL without credentials, a query or a fragment. The service stays unconfigured until then.</source>
         <translation>बिना क्रेडेंशियल, क्वेरी या फ़्रैगमेंट के आधार http(s) URL दर्ज करें। तब तक सेवा अनकॉन्फ़िगर रहती है।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="482"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="441"/>
         <source>LibreTranslate translates through a server you run or choose, usually a self-hosted one. The base URL must point at a server you trust: its terms, availability, rate and text limits and installed languages are your responsibility, and a language the server has no model for is rejected. The API key is optional and only a server that requires one needs it. Quality is lower than Google or DeepL. Long text is sent in several requests.</source>
         <translation>LibreTranslate उस सर्वर के माध्यम से अनुवाद करता है जिसे आप चलाते या चुनते हैं, आमतौर पर स्वयं-होस्ट किया गया। आधार URL ऐसे सर्वर की ओर इंगित होना चाहिए जिस पर आप भरोसा करते हैं: उसकी शर्तें, उपलब्धता, दर और पाठ सीमाएँ और स्थापित भाषाएँ आपकी ज़िम्मेदारी हैं, और जिस भाषा के लिए सर्वर के पास मॉडल नहीं है वह अस्वीकार कर दी जाएगी। API कुंजी वैकल्पिक है और केवल उसी सर्वर को आवश्यक है जो इसकी माँग करता है। गुणवत्ता Google या DeepL से कम है। लंबा पाठ कई अनुरोधों में भेजा जाता है।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="499"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="458"/>
         <source>Services</source>
         <translation>सेवाएं</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="505"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="514"/>
+        <source>AI</source>
+        <translation>एआई</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="520"/>
         <source>Enable text checking</source>
         <translation>पाठ जाँच सक्षम करें</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="508"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="523"/>
         <source>Finds spelling, grammar, and punctuation errors in a separate mode and does not change translation settings.</source>
         <translation>अलग मोड में वर्तनी, व्याकरण और विराम चिह्न की गलतियाँ ढूँढता है और अनुवाद सेटिंग्स नहीं बदलता।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="515"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="530"/>
         <source>Provider</source>
         <translation>प्रदाता</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="531"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="546"/>
         <source>Leave empty to use the public LanguageTool endpoint. A self-hosted server keeps the text on your machine; the public service has rate limits and sees the checked text.</source>
         <translation>सार्वजनिक LanguageTool एंडपॉइंट का उपयोग करने के लिए खाली छोड़ें। स्व-होस्ट किया गया सर्वर पाठ को आपकी मशीन पर रखता है; सार्वजनिक सेवा पर दर सीमाएँ हैं और वह जाँचे जाने वाले पाठ को देखती है।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="537"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="1033"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="552"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1048"/>
         <source>Enter a valid http(s) LanguageTool URL, or leave the field empty for the public endpoint.</source>
         <translation>मान्य http(s) LanguageTool URL दर्ज करें, या सार्वजनिक एंडपॉइंट के लिए फ़ील्ड खाली छोड़ें।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="544"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="559"/>
         <source>Provider:</source>
         <translation>प्रदाता:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="545"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="560"/>
         <source>Checking language:</source>
         <translation>जाँच भाषा:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="546"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="561"/>
         <source>LanguageTool URL:</source>
         <translation>LanguageTool URL:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="551"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="566"/>
         <source>Issues</source>
         <translation>समस्याएँ</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="554"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
         <source>Categories:</source>
         <translation>श्रेणियाँ:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="556"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
         <source>Spelling</source>
         <translation>वर्तनी</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="558"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="573"/>
         <source>Grammar</source>
         <translation>व्याकरण</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="560"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="575"/>
         <source>Punctuation</source>
         <translation>विराम चिह्न</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="562"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="577"/>
         <source>Style</source>
         <translation>शैली</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="574"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="589"/>
         <source>Text checking</source>
         <translation>पाठ जाँच</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="591"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="606"/>
         <source>No proxy</source>
         <translation>कोई प्रॉक्सी नहीं</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="592"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="607"/>
         <source>System proxy</source>
         <translation>सिस्टम प्रॉक्सी</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="593"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="608"/>
         <source>Manual proxy</source>
         <translation>मैनुअल प्रॉक्सी</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="596"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="611"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="597"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="612"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="600"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="615"/>
         <source>Proxy host</source>
         <translation>छद्म मेजबान</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="604"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="619"/>
         <source>Not set</source>
         <translation>सेट नहीं</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="605"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="620"/>
         <source>The proxy requires authentication</source>
         <translation>प्रॉक्सी को प्रमाणीकरण की आवश्यकता है</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="609"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="624"/>
         <source>User name</source>
         <translation>उपयोगकर्ता नाम</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="613"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="628"/>
         <source>Password</source>
         <translation>पासवर्ड</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="619"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="634"/>
         <source>Test connection</source>
         <translation>कनेक्शन का परीक्षण करें</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="626"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="641"/>
         <source>Proxy mode:</source>
         <translation>प्रॉक्सी मोड:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="627"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="642"/>
         <source>Proxy type:</source>
         <translation>प्रॉक्सी प्रकार:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="628"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="643"/>
         <source>Host:</source>
         <translation>मेज़बान:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="629"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="644"/>
         <source>Port:</source>
         <translation>पत्तन:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="631"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="646"/>
         <source>User name:</source>
         <translation>उपयोगकर्ता नाम:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="632"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="647"/>
         <source>Password:</source>
         <translation>पासवर्ड:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="633"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="648"/>
         <source>Request timeout:</source>
         <translation>ब्रेक का अनुरोध:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="638"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="653"/>
         <source>Network</source>
         <translation>नेटवर्क</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="899"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="914"/>
         <source>Effective instance: %1</source>
         <translation>प्रभावी इंस्टेंस: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="908"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="923"/>
         <source>Effective base URL: %1</source>
         <translation>प्रभावी आधार URL: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="972"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="987"/>
         <source>Translate in a popup</source>
         <translation>पॉपअप में अनुवाद करें</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="974"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="989"/>
         <source>Replace the selected text with the translation</source>
         <translation>चयनित पाठ को अनुवाद से बदलें</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="975"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="990"/>
         <source>Translate in the main window</source>
         <translation>मुख्य विंडो में अनुवाद करें</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="976"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="991"/>
         <source>Show the main window</source>
         <translation>मुख्य विंडो दिखाएँ</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="986"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1001"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>&quot;%1&quot; एक से अधिक कुंजी संयोजन का उपयोग करता है। वैश्विक हॉटकीज़ एकल संयोजन का समर्थन करती हैं।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="994"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1009"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>&quot;%1&quot; का उपयोग वैश्विक हॉटकी के रूप में नहीं किया जा सकता है।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="1007"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1022"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>एक ही कुंजी संयोजन को एक से अधिक बार असाइन किया गया है: %1।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="1018"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1033"/>
         <source>The primary and additional languages must differ.</source>
         <translation>प्राथमिक और अतिरिक्त भाषाएँ अलग-अलग होनी चाहिए।</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="1025"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1040"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>प्रॉक्सी होस्ट और पोर्ट दर्ज करें, या कोई अन्य प्रॉक्सी मोड चुनें।</translation>
     </message>

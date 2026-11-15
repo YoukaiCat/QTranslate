@@ -875,11 +875,10 @@ private slots:
         QVERIFY(layout);
 
         const QStringList names = {
-            QStringLiteral("googleGroup"), QStringLiteral("yandexGroup"),
-            QStringLiteral("bingGroup"),   QStringLiteral("deepLGroup"),
-            QStringLiteral("llmGroup"),    QStringLiteral("mymemoryGroup"),
-            QStringLiteral("mozhiGroup"),  QStringLiteral("reversoGroup"),
-            QStringLiteral("duckduckgoGroup"),
+            QStringLiteral("googleGroup"),   QStringLiteral("yandexGroup"),
+            QStringLiteral("bingGroup"),     QStringLiteral("deepLGroup"),
+            QStringLiteral("mymemoryGroup"), QStringLiteral("mozhiGroup"),
+            QStringLiteral("reversoGroup"),  QStringLiteral("duckduckgoGroup"),
             QStringLiteral("libretranslateGroup"),
         };
         int previous = -1;
@@ -891,6 +890,20 @@ private slots:
             QVERIFY2(index > previous, qPrintable(name));
             previous = index;
         }
+
+        // The provider group lives on the AI tab; the Services page keeps only
+        // a pointer after the DeepL group, which is the regression this guards.
+        auto *llmGroup = dialog.findChild<QGroupBox *>(QStringLiteral("llmGroup"));
+        auto *servicesScroll =
+            dialog.findChild<QScrollArea *>(QStringLiteral("servicesScroll"));
+        auto *movedHint = dialog.findChild<QLabel *>(QStringLiteral("llmMovedHint"));
+        QVERIFY(llmGroup && servicesScroll && movedHint);
+        QVERIFY(!servicesScroll->widget()->isAncestorOf(llmGroup));
+        QCOMPARE(movedHint->parentWidget(), servicesScroll->widget());
+        auto *deepLGroup = dialog.findChild<QGroupBox *>(QStringLiteral("deepLGroup"));
+        QVERIFY(deepLGroup);
+        QVERIFY(layout->indexOf(movedHint) > layout->indexOf(deepLGroup));
+
         QVERIFY(!dialog.findChild<QGroupBox *>(removedFallbackGroupObjectName()));
     }
 
@@ -929,6 +942,40 @@ private slots:
         QVERIFY(status->text().contains(QStringLiteral("Loaded 2")));
         QCOMPARE(model->count(), 2);
         QCOMPARE(model->currentText(), QStringLiteral("openai/gpt-4o-mini"));
+    }
+
+    void aiTab()
+    {
+        AppSettings settings;
+        settings.llm.baseUrl = QStringLiteral("http://127.0.0.1:11434/v1");
+        settings.llm.apiKey = QStringLiteral("llm-key");
+        settings.llm.model = QStringLiteral("local-model");
+        SettingsDialog dialog(settings, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+
+        auto *tabs = dialog.findChild<QTabWidget *>(QStringLiteral("settingsTabs"));
+        auto *group = dialog.findChild<QGroupBox *>(QStringLiteral("llmGroup"));
+        QVERIFY(tabs && group);
+        QCOMPARE(group->title(), QStringLiteral("OpenAI-compatible provider"));
+        QVERIFY(tabs->indexOf(group->parentWidget()) >= 0);
+        QCOMPARE(tabs->tabText(tabs->indexOf(group->parentWidget())), QStringLiteral("AI"));
+
+        auto *url = dialog.findChild<QLineEdit *>(QStringLiteral("llmBaseUrl"));
+        auto *key = dialog.findChild<QLineEdit *>(QStringLiteral("llmApiKey"));
+        auto *model = dialog.findChild<QComboBox *>(QStringLiteral("llmModel"));
+        QVERIFY(url && key && model);
+        QCOMPARE(url->text(), QStringLiteral("http://127.0.0.1:11434/v1"));
+        QCOMPARE(key->text(), QStringLiteral("llm-key"));
+        QCOMPARE(model->currentText(), QStringLiteral("local-model"));
+
+        // The group still edits the one [llm] configuration.
+        url->setText(QStringLiteral("http://127.0.0.1:8080/v1"));
+        key->setText(QStringLiteral("new-key"));
+        model->setCurrentText(QStringLiteral("other-model"));
+        const AppSettings result = dialog.settings();
+        QCOMPARE(result.llm.baseUrl, QStringLiteral("http://127.0.0.1:8080/v1"));
+        QCOMPARE(result.llm.apiKey, QStringLiteral("new-key"));
+        QCOMPARE(result.llm.model, QStringLiteral("other-model"));
     }
 
     void deepLWebHint()
@@ -1104,10 +1151,11 @@ private slots:
         QVERIFY(tabs && enabled && provider && language && endpoint && hint && spelling
                 && grammar && punctuation && style && hotkey);
 
-        QCOMPARE(tabs->count(), 6);
+        QCOMPARE(tabs->count(), 7);
         QCOMPARE(tabs->tabText(3), QStringLiteral("Services"));
-        QCOMPARE(tabs->tabText(4), QStringLiteral("Text checking"));
-        QCOMPARE(tabs->tabText(5), QStringLiteral("Network"));
+        QCOMPARE(tabs->tabText(4), QStringLiteral("AI"));
+        QCOMPARE(tabs->tabText(5), QStringLiteral("Text checking"));
+        QCOMPARE(tabs->tabText(6), QStringLiteral("Network"));
 
         QVERIFY(enabled->isChecked());
         QCOMPARE(provider->count(), 2);

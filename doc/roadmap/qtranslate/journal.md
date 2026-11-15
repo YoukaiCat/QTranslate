@@ -521,3 +521,32 @@ has six languages and no `auto`. Next: plan and run stage 8.
   Windows tests (now 382 and 44), both READMEs and `doc/handoff.md`. The live smoke against a real
   LibreTranslate server was not performed. Next: acceptance of stage `11-duckduckgo-libretranslate`
   over `3f393df..<this commit>` and the documentation pass, then `12-llm-proofreading`.
+- 2026-11-15 — Stage `12-llm-proofreading` split into four children (`01-ai-tab`, `02-llm-check-response`,
+  `03-llm-check-service`, `04-llm-check-ui`) with the boundaries the stage records: `OpenAiChat` is reused,
+  `[llm]` stays the one configuration, the provider is a normal checking provider with id `llm`, one request
+  per check, `.ts` 382 → 384, Linux 50 → 52 and Windows 44 → 46 targets (derived).
+- 2026-11-15 — Task `01-ai-tab` done (this commit, base `5e6f1cb`). The OpenAI-compatible provider group
+  was moved, not copied, from the Services page to a new fifth **AI** tab: `llmGroup` with `llmBaseUrl`,
+  `llmApiKey`, `llmModel`, `loadLlmModels`, `llmStatus` and `llmHint`, all object names and the one
+  `connect(m_loadLlmModels, …)` intact; Services keeps `llmMovedHint` after `deepLGroup` and no provider
+  widget. Tab order is General, Hotkeys, Translation, Services, AI, Text checking, Network. `settingsdialog.h`,
+  `loadValues()`, `settings()`, `showLlmModels()` and `llmModelsRequested` are untouched and nothing under
+  `src/services`, `src/core`, `src/app`, `src/net` or `src/ai` changed, so `[llm]` is still the single
+  translation configuration the checking provider will reuse. Tests: `tst_settingsdialog` 35 cases
+  (`aiTab()` added, `Totals: 37 passed`), `providerOrder()` now proves the group left Services and the
+  pointer follows DeepL, `proofreadingTab()` expects seven tabs with Services/AI/Text checking/Network at
+  3–6; `servicesTab()`, `llmModels()`, `tst_settings` and `tst_openaicompatibleservice` unedited — that is
+  the regression guard for the data path. The 14 `.ts` were regenerated only through `update_translations`
+  (host Qt 6.10.2): **384** messages each, `AI` and the pointer sentence translated by hand (`AI` for
+  ru/pl/zh_CN/ja/ko, `ШІ` uk, `KI` de, `IA` es/fr/it/pt_BR, `YZ` tr, `الذكاء الاصطناعي` ar, `एआई` hi, the
+  pointer using the same word), 0 unfinished, 0 vanished, `release_translations` 384 finished per file, no
+  `<source>` or existing translation changed, only `<location>` churn. Verification: host Debug/Release
+  rebuilt from scratch 0 warnings and 50/50, `ctest -N` 50 on both, trixie Release 0 warnings and 50/50;
+  Windows 44 not performed (no MSVC), reviewed by diff. In the container `xvfb-run -a` hangs after `ctest`
+  (a manual `Xvfb` was used), and `--user $(id -u):$(id -g)` breaks `tst_hotkeymanager_wayland` because uid
+  1000 is missing from the image's `/etc/passwd` (`dbus-daemon did not print a session address`), so the run
+  was made as root, as in CI. Review found no defects; its only remark is documentation, deferred to the
+  lead's pass: `README.md:141` and `README.ru.md:145` still send the user to `Settings → Services →
+  OpenAI-compatible provider`, `AGENTS.md:58` still says 382 messages, and the comment at
+  `src/services/libretranslateservice.cpp:408` says "382 entries per file" (comment-only, left because this
+  task must not touch `src/services`). Next: `02-llm-check-response`.

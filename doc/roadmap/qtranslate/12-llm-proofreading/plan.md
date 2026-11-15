@@ -1,6 +1,7 @@
 ---
 kind: stage
-status: todo
+status: in-progress
+base: 5e6f1cb
 depends: [09-proofreading-standalone]
 ---
 
@@ -30,6 +31,52 @@ extra consent gate and no separate AI actions UI.
 - Tests: request and response parsing against a mock server, error mapping, settings, provider
   selection, and the existing window and popup flow; `.ts` strings for the provider and the AI tab.
 - Documentation is the lead's pass.
+
+The work is split into four children. Each has its own result and gate, and the translation path is
+touched only where the provider configuration moves.
+
+1. [01-ai-tab](01-ai-tab/plan.md) (done) — move the OpenAI-compatible provider group from Services to
+   its own **AI** tab, keep `[llm]` the one configuration, leave a pointer on Services, update the
+   dialog tests and the 14 `.ts`; the translation service is provably untouched. Detailed.
+2. [02-llm-check-response](02-llm-check-response/plan.md) — the prompt and the response module: local
+   UTF-16 offsets, structured edits, the category filter and the diff fallback for a plain corrected
+   text; pure functions and `tst_llmproofreadingparser`.
+3. [03-llm-check-service](03-llm-check-service/plan.md) — `LlmProofreadingService` (id `llm`) on the
+   existing `OpenAiChat` transport, error mapping onto `TranslationError`, cancellation, clean logs,
+   `proofreadingProviderIds()` and the `AppController` registration; `tst_llmproofreadingservice`.
+4. [04-llm-check-ui](04-llm-check-ui/plan.md) — selecting `llm` on the Text checking page: the
+   LanguageTool URL row disappears, the AI-tab hint appears, the stored URL survives, and the choice
+   persists; dialog and settings tests, no new `.ts` message.
+
+Boundaries recorded by the split:
+
+- **The transport that is reused already exists.** `OpenAiChat` (`serialize`, `parse`,
+  `errorForHttpStatus`, `chatCompletionsUrl`, `parseModels`) is shared with the translation service;
+  this stage adds `stripCodeFence` to it and nothing else. The HTTP send/error glue stays in each
+  service because the reply bases differ (`ProofreadingReply` vs `TranslationReply`) and the messages
+  have their own translation context. A new `OpenAiChatCall` abstraction was considered and rejected:
+  it would refactor a reviewed, working translation path for no regression value, and the unreviewed
+  `stash@{0}` draft that tried it is neither used nor trusted.
+- **One configuration, no new keys.** `[llm]` (`baseUrl`, `apiKey`, `model`) serves translation and
+  checking; `proofreading/endpoint` stays LanguageTool-only and is neither read by the LLM provider
+  nor cleared when it is selected. No `proofreading/*` consent key and no extra confirmation (user
+  decision of 2026-11-15).
+- **The provider is a normal checking provider.** Id `llm`, display name the untranslated `LLM` (like
+  `LanguageTool`, `Bing`, `DuckDuckGo`), the full `llm` language catalogue with Auto-detect, the same
+  `ProofreadingIssue`/`ProofreadingResult` contract and the same window, popup and hotkeys. The
+  checking window, the popup and both hotkeys need no provider-specific code.
+- **One request per check, no chunking.** An edit split across a chunk boundary is worse than a size
+  error; `413` and `finish_reason: "length"` map to `TooLong`, and a text that exceeds the model
+  context is reported rather than silently truncated. Recorded as a limitation.
+- **Translations.** The 14 `.ts` files go from 382 to **384** messages (`AI` and the AI-tab pointer
+  sentence, both in `01-ai-tab`); the checking service and parser add no `tr()` — their messages are
+  technical English details under the translated `ProofreadingErrorText` titles, exactly as
+  LanguageTool's. `04-llm-check-ui` reuses the pointer sentence instead of adding a near duplicate.
+- **Test counts.** Two new targets (`tst_llmproofreadingparser`, `tst_llmproofreadingservice`):
+  Linux 50 → **52**, Windows 44 → **46** (derived; no MSVC here). Windows builds and tests stay
+  recorded as not performed.
+- **The live check is the user's.** The automated gate is the mock `QTcpServer`; a real key, a local
+  Ollama/llama.cpp server and the privacy/cost acceptance are the user's, as the stage risks record.
 
 ## Done when
 

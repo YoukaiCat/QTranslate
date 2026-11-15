@@ -310,52 +310,11 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     });
     servicesLayout->addWidget(deepLGroup);
 
-    auto *llmGroup = new QGroupBox(tr("OpenAI-compatible provider"), servicesContent);
-    llmGroup->setObjectName(QStringLiteral("llmGroup"));
-    auto *llmForm = new QFormLayout(llmGroup);
-    m_llmBaseUrl = new QLineEdit(llmGroup);
-    m_llmBaseUrl->setObjectName(QStringLiteral("llmBaseUrl"));
-    m_llmBaseUrl->setPlaceholderText(QStringLiteral("https://openrouter.ai/api/v1"));
-    m_llmApiKey = new QLineEdit(llmGroup);
-    m_llmApiKey->setObjectName(QStringLiteral("llmApiKey"));
-    m_llmApiKey->setEchoMode(QLineEdit::Password);
-    m_llmApiKey->setPlaceholderText(tr("API key"));
-    m_llmModel = new QComboBox(llmGroup);
-    m_llmModel->setObjectName(QStringLiteral("llmModel"));
-    m_llmModel->setEditable(true);
-    m_llmModel->setInsertPolicy(QComboBox::NoInsert);
-    m_llmModel->setMaxVisibleItems(30);
-    if (m_llmModel->lineEdit()) {
-        m_llmModel->lineEdit()->setPlaceholderText(
-            tr("Model ID, for example openai/gpt-4o-mini"));
-    }
-    m_loadLlmModels = new QPushButton(tr("Load models"), llmGroup);
-    m_loadLlmModels->setObjectName(QStringLiteral("loadLlmModels"));
-    m_llmStatus = new QLabel(llmGroup);
-    m_llmStatus->setObjectName(QStringLiteral("llmStatus"));
-    m_llmStatus->setWordWrap(true);
-    m_llmStatus->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    llmForm->addRow(tr("Server URL:"), m_llmBaseUrl);
-    llmForm->addRow(tr("API key:"), m_llmApiKey);
-    llmForm->addRow(tr("Model:"), m_llmModel);
-    llmForm->addRow(m_loadLlmModels);
-    llmForm->addRow(m_llmStatus);
-    auto *llmHint = new QLabel(
-        tr("Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; "
-           "the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp "
-           "or TeamRouter. The model must be available to your key."),
-        llmGroup);
-    llmHint->setObjectName(QStringLiteral("llmHint"));
-    llmHint->setWordWrap(true);
-    llmForm->addRow(llmHint);
-    connect(m_loadLlmModels, &QPushButton::clicked, this, [this] {
-        m_llmStatus->setStyleSheet(QString());
-        m_llmStatus->setText(tr("Checking…"));
-        m_loadLlmModels->setEnabled(false);
-        emit llmModelsRequested(m_llmBaseUrl->text().trimmed(),
-                                m_llmApiKey->text().trimmed());
-    });
-    servicesLayout->addWidget(llmGroup);
+    auto *llmMovedHint = new QLabel(
+        tr("The OpenAI-compatible provider is configured on the AI tab."), servicesContent);
+    llmMovedHint->setObjectName(QStringLiteral("llmMovedHint"));
+    llmMovedHint->setWordWrap(true);
+    servicesLayout->addWidget(llmMovedHint);
 
     auto *myMemoryGroup = new QGroupBox(tr("MyMemory"), servicesContent);
     myMemoryGroup->setObjectName(QStringLiteral("mymemoryGroup"));
@@ -497,6 +456,62 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     servicesScroll->setWidget(servicesContent);
     servicesPageLayout->addWidget(servicesScroll);
     m_tabs->addTab(servicesPage, tr("Services"));
+
+    // The OpenAI-compatible provider is configured here for translation and
+    // text checking alike; the Services page keeps only a pointer (user
+    // decision of 2026-11-15).
+    auto *aiPage = new QWidget(m_tabs);
+    auto *aiLayout = new QVBoxLayout(aiPage);
+
+    auto *llmGroup = new QGroupBox(tr("OpenAI-compatible provider"), aiPage);
+    llmGroup->setObjectName(QStringLiteral("llmGroup"));
+    auto *llmForm = new QFormLayout(llmGroup);
+    m_llmBaseUrl = new QLineEdit(llmGroup);
+    m_llmBaseUrl->setObjectName(QStringLiteral("llmBaseUrl"));
+    m_llmBaseUrl->setPlaceholderText(QStringLiteral("https://openrouter.ai/api/v1"));
+    m_llmApiKey = new QLineEdit(llmGroup);
+    m_llmApiKey->setObjectName(QStringLiteral("llmApiKey"));
+    m_llmApiKey->setEchoMode(QLineEdit::Password);
+    m_llmApiKey->setPlaceholderText(tr("API key"));
+    m_llmModel = new QComboBox(llmGroup);
+    m_llmModel->setObjectName(QStringLiteral("llmModel"));
+    m_llmModel->setEditable(true);
+    m_llmModel->setInsertPolicy(QComboBox::NoInsert);
+    m_llmModel->setMaxVisibleItems(30);
+    if (m_llmModel->lineEdit()) {
+        m_llmModel->lineEdit()->setPlaceholderText(
+            tr("Model ID, for example openai/gpt-4o-mini"));
+    }
+    m_loadLlmModels = new QPushButton(tr("Load models"), llmGroup);
+    m_loadLlmModels->setObjectName(QStringLiteral("loadLlmModels"));
+    m_llmStatus = new QLabel(llmGroup);
+    m_llmStatus->setObjectName(QStringLiteral("llmStatus"));
+    m_llmStatus->setWordWrap(true);
+    m_llmStatus->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    llmForm->addRow(tr("Server URL:"), m_llmBaseUrl);
+    llmForm->addRow(tr("API key:"), m_llmApiKey);
+    llmForm->addRow(tr("Model:"), m_llmModel);
+    llmForm->addRow(m_loadLlmModels);
+    llmForm->addRow(m_llmStatus);
+    auto *llmHint = new QLabel(
+        tr("Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; "
+           "the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp "
+           "or TeamRouter. The model must be available to your key."),
+        llmGroup);
+    llmHint->setObjectName(QStringLiteral("llmHint"));
+    llmHint->setWordWrap(true);
+    llmForm->addRow(llmHint);
+    connect(m_loadLlmModels, &QPushButton::clicked, this, [this] {
+        m_llmStatus->setStyleSheet(QString());
+        m_llmStatus->setText(tr("Checking…"));
+        m_loadLlmModels->setEnabled(false);
+        emit llmModelsRequested(m_llmBaseUrl->text().trimmed(),
+                                m_llmApiKey->text().trimmed());
+    });
+    aiLayout->addWidget(llmGroup);
+
+    aiLayout->addStretch();
+    m_tabs->addTab(aiPage, tr("AI"));
 
     // Text checking. A separate mode with its own settings: the page never
     // reads or writes a translation.* value (see doc/proofreading.md, §5).
