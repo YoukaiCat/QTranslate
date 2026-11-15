@@ -2,7 +2,27 @@
 
 ## Where we left off
 
-Current node: no active task. Stage `09-proofreading-standalone` is `done` (accepted over
+Current node: no active task. `13-tray-icon-latency` (root task) is `done` as an investigation with
+**no code change**; the next node is `12-llm-proofreading/02-llm-check-response` (needs detailing).
+
+The tray defect was settled on 2026-11-15. Cause, measured on this Astra machine (Astra 1.8.7, X11,
+`XDG_CURRENT_DESKTOP=fly`, Qt 6.10.2, panel host `fly-wm`, tray is StatusNotifierItem): the empty slot
+lasts exactly while the item is in `NeedsAttention`, and QTranslate sets that status itself by showing
+the "Hotkey unavailable" warnings at startup — `TrayIcon::showMessage` uses a 5000 ms timeout, so the
+slot is empty for ~5 s. `fly-wm` reads a complete `IconPixmap` at +0.27 s, makes no further call to
+the item, and paints 0.20-0.25 s after the status returns to `Active`; a start without the
+notification draws the icon at 0.41 s. Re-publishing `NewIcon` (the plan's B1 fix) was measured not to
+help, so no workaround was added. Evidence and the nine-run table are in the task's `## Outcome`.
+
+Left open, and outside that task: the ~5 s empty slot needs a product decision on how the hotkey
+warning is delivered (one warning instead of three, delayed delivery, `NoIcon`, another channel) —
+that is the user's call; the panel never reads `AttentionIconPixmap`, which is a vendor-side half
+worth reporting to Astra; and, separately, **no global hotkey can be registered at all on this
+desktop** (every combination is refused as "already used by another program"), which is why the
+warnings appear here. The user's report says hotkeys start normally for them, so that needs its own
+task.
+
+Stage `09-proofreading-standalone` is `done` (accepted over
 `3e75331..31a2a36`; four task commits `11eb5bc`, `d9428c9`, `25f0f5f`, `31a2a36`, docs in the
 closing commit). Text checking is a standalone feature in its own non-modal `ProofreadingWindow`
 (own editor, **Check**, issue list, Replace/Ignore/Replace all/Copy), opened from the tray item
@@ -22,23 +42,24 @@ fix `df69d70`); its documentation pass is committed as `5e6f1cb` (providers, cou
 `doc/free-endpoints.md` §11–§12, architecture §4.7.8–§4.7.9). Stage 12 `12-llm-proofreading` is
 `in-progress` (`base: 5e6f1cb`) and split into four tasks; `01-ai-tab` is `done` as `be1e5f9` (the
 AI settings tab and the moved provider group). The next node is `02-llm-check-response` (needs
-detailing). The user also reported a new bug: on Astra the tray icon appears 3-5 seconds late at
-startup; it is recorded as root task `13-tray-icon-latency`, not started.
+detailing).
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
 release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub release stays until
 the user checks the current code on Windows.
 
-Work is on `main` (matches the root `branch:`); the working tree is clean at `be1e5f9`. The stopped,
+Work is on `main` (matches the root `branch:`); the working tree is clean at `6a0cddd` (`Record the
+context stop after the AI settings tab`) and is 20 commits ahead of `origin/main`. The stopped,
 unreviewed work on the former task `01-llm-action-core` and the stage 6 split is in `stash@{0}`
 (`llm-actions WIP: task 01 unreviewed + stage 06 split, stopped 2026-11-15`); it is not in the tree,
 not reviewed, and is kept only in case the LLM checking task reuses the transport part. Linux
 Debug/Release 50/50 on the host; Windows 44 (derived, not run locally); `.ts` is at 384. The
 `qtranslate-trixie` image is built. Resume with `/new`, agent `lead`, `@continue`; the next node is
-`12-llm-proofreading/02-llm-check-response`. Documentation leftovers for the next pass: both READMEs
-still say `Settings → Services → OpenAI-compatible provider` (now the AI tab), `AGENTS.md` says 382
-messages, and `src/services/libretranslateservice.cpp:408` has a stale 382 comment.
+`12-llm-proofreading/02-llm-check-response`. Documentation leftovers for
+the next pass: both READMEs still say `Settings → Services → OpenAI-compatible provider` (now the AI
+tab), `AGENTS.md` says 382 messages, and `src/services/libretranslateservice.cpp:408` has a stale 382
+comment.
 
 Task `10-provider-hint-cleanup` is `done` as `589dbb5`: the eight recipient/privacy sentences are
 gone from the settings hints (fallback, Yandex, Bing, DeepL free web, OpenAI-compatible, MyMemory,
@@ -553,3 +574,28 @@ has six languages and no `auto`. Next: plan and run stage 8.
   and its first child is done; `02-llm-check-response` is the next node and needs detailing. The
   documentation leftovers (both READMEs' Services path, `AGENTS.md`'s 382 messages, the stale comment
   in `libretranslateservice.cpp`) are listed in `## Where we left off`. Nothing is pushed.
+- 2026-11-15 — Root task `13-tray-icon-latency` closed `done` as an investigation (this commit), **no
+  code change**; the plan's `## Outcome` carries the evidence. Measured on this Astra machine (Astra
+  1.8.7, X11, `XDG_CURRENT_DESKTOP=fly`, Qt 6.10.2), nine launches with `dbus-monitor`, a ~20 fps
+  frame series and `xwd` snapshots of the item window: the tray is StatusNotifierItem hosted by
+  `fly-wm` (PID 1380692, the `flytray` window `0xa00212` belongs to it and has 0 children), the item
+  registers at 0.054-0.073 s with `Started in 62-106 ms`, and `fly-wm` reads a complete `IconPixmap`
+  (seven pixmaps 16…64, `IconName` empty) at +0.27 s. The slot still stays empty ~5 s because the item
+  is in `NeedsAttention` the whole time — QTranslate's own three "Hotkey unavailable" warnings, each
+  with the 5000 ms timeout of `src/ui/trayicon.cpp:66`; the panel paints 0.20-0.25 s after the status
+  returns to `Active` and makes **no** call to the item in between, so there is no refresh interval.
+  A start without the notifications (portable copy, all hotkey sequences emptied) draws the icon at
+  0.41 s, three runs. Re-publishing `NewIcon` after registration (the plan's B1 fix, temporary patch,
+  reverted) was measured not to help — 5.367 s and 5.582 s — so no workaround was added. Cases A and C
+  are out: startup and `AppIcon::create()` are not late. Debug/Release unchanged since the last green
+  build and Linux 50/50; the live manual tray check (menu, `Service` submenu with 10 providers,
+  `Check text…`, `Pause hotkeys`, `Settings…`, `Quit`, tooltip), the `offscreen` no-tray warning and a
+  nested-weston Wayland launch all passed; Windows not built (no MSVC) and there is no diff to review.
+  Review rejected the first verdict ("panel refresh interval") and pushed for the clean-start run that
+  found the real trigger; its remaining remarks were artifact bookkeeping, and its wording fixes are in
+  the Outcome. Left open, all outside this task: a product decision on how the hotkey warning is
+  delivered (one warning instead of three, delayed delivery, `NoIcon`, another channel), the panel
+  never asking for `AttentionIconPixmap` (a vendor-side half for Astra), and — separately — that **no
+  global hotkey can be registered at all on this desktop** (every combination refused as "already used
+  by another program"), which is why the warnings appear here and needs its own task. Evidence stayed
+  in `/tmp/tray-latency/`, outside the repository; nothing is pushed.
