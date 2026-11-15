@@ -44,7 +44,7 @@
   `tst_popupwindow` and `tst_settingsdialog` also set offscreen themselves. The Linux CI job runs
   GUI tests under `xvfb-run`.
 - Debug and Release must build without warnings (`/W4` on Windows, `-Wall -Wextra` on Linux); all
-  40 Windows tests and all 46 Linux tests must pass (37 shared, 3 Windows-only, 9 Linux-only). The
+  44 Windows tests and all 50 Linux tests must pass (41 shared, 3 Windows-only, 9 Linux-only). The
   project requires Qt 6.5+; local development
   uses Qt 6.12 on Windows and Qt 6.10.2 (Astra) or Qt 6.8.2 (trixie) on Linux.
 - Tests use local `QTcpServer` and fixtures; no real Google/DeepL keys or internet are required.
@@ -53,7 +53,9 @@
   `tst_proofreading_selection_x11` tests are Linux-only. The proofreading tests are
   `tst_mainwindow`, `tst_proofreadingmanager`, `tst_languagetoolparser`,
   `tst_languagetoolservice`, `tst_proofreadingwindow` and `tst_proofreadingpopup` (shared) plus
-  `tst_proofreading_selection_x11` (Linux). The 14 `.ts` files have 374 messages each.
+  `tst_proofreading_selection_x11` (Linux). The DuckDuckGo and LibreTranslate services are covered by
+  `tst_duckduckgoparser`, `tst_duckduckgoservice`, `tst_libretranslateparser` and
+  `tst_libretranslateservice` (shared). The 14 `.ts` files have 382 messages each.
 
 ## Git and release approval
 

@@ -1,12 +1,19 @@
 # Handoff: work state
 
-Date: 2026-11-14. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
+Date: 2026-11-15. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
 
 The active roadmaps are [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md) (next:
-`06-llm-actions`) and [`roadmap/debian/plan.md`](roadmap/debian/plan.md) (native Debian packaging,
-accepted on 2026-11-14); the old plan is archived at
+`12-llm-proofreading`; stage 6 is blocked) and [`roadmap/debian/plan.md`](roadmap/debian/plan.md)
+(native Debian packaging, accepted on 2026-11-14); the old plan is archived at
 [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); the active documentation
 is English. The migration to the tree roadmap and the English baseline is complete.
+
+Stage `11-duckduckgo-libretranslate` was accepted on 2026-11-15 over `8e9c48d..df69d70`: DuckDuckGo
+is a standalone Bing-like `vqd` provider, and LibreTranslate is a provider with a base URL and an
+optional API key (self-hosted without a key, hosted with one). Linux is at 50 tests, `.ts` at 382,
+Windows at 44 (not run here). Stage 6 remains blocked for the deferred LLM actions; the next node is
+stage `12-llm-proofreading`. The Astra tray-icon delay is recorded as root task
+`13-tray-icon-latency`.
 
 ## Git
 
@@ -53,15 +60,15 @@ is English. The migration to the tree roadmap and the English baseline is comple
   in-place feedback, and explicit warnings; no `ydotool`/`wtype`. A real portal-capable desktop was
   not available; the portal is covered by a mock DBus (20/20) and Weston headless confirms the
   fallback.
-- Tests: 46 on Linux (37 shared plus `tst_hotkeymanager_x11` 16/16,
+- Tests: 50 on Linux (41 shared plus `tst_hotkeymanager_x11` 16/16,
   `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
   `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
   `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 30/30,
   `tst_proofreading_selection_x11` 6/6; the shared proofreading tests are
   `tst_mainwindow`, `tst_proofreadingmanager`, `tst_languagetoolparser`,
   `tst_languagetoolservice`, `tst_proofreadingwindow` and `tst_proofreadingpopup`). Windows keeps
-  40 tests (37 shared plus 3 Windows-only) and was not run here (no MSVC). The 14 `.ts` files have
-  374 messages each.
+  44 tests (41 shared plus 3 Windows-only) and was not run here (no MSVC). The 14 `.ts` files have
+  382 messages each.
 - Fallback: `translation/fallbackService` (off by default, one configured service) retries a
   failed primary request once on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`,
   `Network` or `Timeout`; success, `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and
@@ -535,6 +542,10 @@ archived plan [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-pl
   errors are covered by local tests — old stage 6.
 - SOCKS5 and an external proxy with authentication: local HTTP/SOCKS5 with authentication is covered
   by `tst_networkmanager`, a real external server was not tested — old stage 7.
+- DuckDuckGo live smoke: the route is token-gated and unstable; CTest never contacts it, and a live
+  request through the application was not performed.
+- LibreTranslate live smoke: the research ran a local 1.9.6 server, but the application was not
+  checked against a real server (self-hosted or hosted with a key).
 
 ## Commands and gotchas
 

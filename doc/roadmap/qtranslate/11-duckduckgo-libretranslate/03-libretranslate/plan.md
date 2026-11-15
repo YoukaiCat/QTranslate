@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 3f393df
 depends: [01-endpoint-research, 02-duckduckgo]
 ---
@@ -100,3 +100,21 @@ the lead removes it from this list and this stage follows `01-endpoint-research`
   measured them.
 - Live smoke tests need a reachable server. Without one they are recorded as not performed, and the
   fixtures plus the local `QTcpServer` stay the automated gate.
+
+## Outcome
+
+Both children are done: `01-libretranslate-service` (`49a37a0`) and
+`02-libretranslate-settings-ui` (`b047766`), plus the acceptance comment fix `df69d70`. The service
+posts to `<base>/translate` with `q`/`source`/`target` and an optional `api_key`, sends
+`Accept-Language: en` so error bodies stay English and `Auth` is classified on every system locale,
+maps 51 language codes with `fil`→`tl` and `pt-PT`→`pt`, uses a 5000-unit chunk and a 500 ms pause as
+named assumptions, and keeps the base URL empty by default. The settings store
+`[libretranslate] baseUrl` and `apiKey` (a secret through `SecretProtector`), extract the shared
+service-base-URL helpers from Mozhi, and show the group last on the Services page with the URL, the
+key, the effective URL, a warning and one hint. Verification: host Debug/Release and trixie Release
+50/50, 0 warnings; `.ts` 382 with 0 unfinished or vanished; `tst_settingsdialog` 36, `tst_settings`
+84, `tst_libretranslateparser` 31, `tst_libretranslateservice` 40; Windows not performed. The live
+smoke against a real server was not performed; the tests use fixtures and a local `QTcpServer`. Known
+gap: `LibreTranslateService::isConfigured()` duplicates the URL predicate and does not reject
+userinfo, a query or a fragment on a direct `setBaseUrl()`; the settings path normalizes, so no user
+path reaches it.

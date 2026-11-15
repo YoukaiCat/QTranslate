@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 8e9c48d
 ---
 
@@ -62,3 +62,20 @@ None. Uses the queued web service infrastructure from stage 3.
   are the user's responsibility.
 - Adding providers changes the service order, the fallback list and the settings page. Live smoke
   tests may be blocked from this network and are recorded as not performed.
+
+## Outcome
+
+The stage is done over `8e9c48d..df69d70`: research (`1dec8e0`, a 476-line note), DuckDuckGo
+(`02-duckduckgo`: service `e0b411b`, UI `3f393df`) and LibreTranslate (`03-libretranslate`: service
+`49a37a0`, settings/UI `b047766`, acceptance fix `df69d70`). User decisions 2026-11-15: add DuckDuckGo
+as a Bing-like `vqd` provider (a token from the page HTML plus a browser User-Agent; the smallest body
+limit of all providers), and add LibreTranslate with a base URL and an optional API key (self-hosted
+without a key, hosted with one; the default base URL stays empty). Both providers are selectable, can
+be the fallback, have language columns, tests and hints without the removed third-party sentence.
+Verification: host Debug/Release and trixie Release 50/50, 0 warnings; `.ts` 382; `tst_settingsdialog`
+36; Windows not performed. Acceptance over the whole range found one comment defect and fixed it in
+`df69d70`; no other defects. Known gaps: `es` is missing from `kBingWebCodes`, so `bing-web` does not
+offer Spanish (a separate Bing task with a probe is needed), and
+`LibreTranslateService::isConfigured()` duplicates the URL predicate for direct `setBaseUrl()` calls.
+Documentation (`doc/free-endpoints.md`, `doc/architecture.md`, both READMEs, `AGENTS.md`,
+`doc/handoff.md`, counts 50/382/44) is the lead's pass.

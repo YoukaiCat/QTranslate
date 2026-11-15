@@ -16,33 +16,30 @@ Stages 1-3, 5, 8, 9 and 10 are `done`; stage 4 `04-local-offline-translation` st
 user's 2026-11-05 decision; stage 6 `06-llm-actions` is `blocked` by the user's 2026-11-15 decision
 (the actions are deferred; only the checking backend continues as stage 12); stage 7 is `todo`. The
 root is `in-progress`; its `Done when` requires every stage to be done or dropped, so the blocked
-stages 4 and 6 are deliberate exceptions. Stage 11 is `in-progress` (`base: 8e9c48d`);
-`01-endpoint-research` is `done` as `1dec8e0`; substage `02-duckduckgo` is `done` over
-`1dec8e0..3f393df` (service `e0b411b`, UI `3f393df`). User decisions 2026-11-15: DuckDuckGo is a
-Bing-like `vqd` provider; LibreTranslate is added with a base URL and an optional API key (self-hosted
-without a key, hosted with one). Substage `03-libretranslate` has both tasks `done`:
-`01-libretranslate-service` (`49a37a0`) and `02-libretranslate-settings-ui` (this commit, base
-`3f393df`), so `.ts` is at 382 and Windows has 44 targets. The next node is the acceptance of stage 11
-over `3f393df..<this commit>` followed by the lead's documentation pass
-(`doc/free-endpoints.md` and `doc/architecture.md` still omit LibreTranslate, `AGENTS.md` records 374
-messages and 40 Windows tests, both READMEs and `doc/handoff.md` need the provider), then stage 12.
-The user also reported a new bug: on Astra the tray icon appears 3-5 seconds late at startup; it is
-recorded as root task `13-tray-icon-latency`, not started. Real problem found and not fixed: `es` is
-missing from `kBingWebCodes`, so `bing-web` does not offer Spanish; the DuckDuckGo column adds it
-separately and the Bing table is left unchanged — a separate Bing fix with a probe is needed.
+stages 4 and 6 are deliberate exceptions. Stage 11 `11-duckduckgo-libretranslate` is `done` over `8e9c48d..df69d70`: research `1dec8e0`,
+DuckDuckGo (service `e0b411b`, UI `3f393df`), LibreTranslate (service `49a37a0`, settings/UI
+`b047766`, acceptance fix `df69d70`). User decisions 2026-11-15: DuckDuckGo is a Bing-like `vqd`
+provider; LibreTranslate is added with a base URL and an optional API key (self-hosted without a key,
+hosted with one). Both are accepted; the stage outcome records the known `es`/Bing gap and the
+`isConfigured()` duplicate. The lead's documentation pass is next (`doc/free-endpoints.md`,
+`doc/architecture.md`, both READMEs, `AGENTS.md`, `doc/handoff.md`; counts 50/382/44), then stage 12
+`12-llm-proofreading` (needs a planner split). The user also reported a new bug: on Astra the tray
+icon appears 3-5 seconds late at startup; it is recorded as root task `13-tray-icon-latency`, not
+started.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
 release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub release stays until
 the user checks the current code on Windows.
 
-Work is on `main` (matches the root `branch:`); the working tree is clean at `8e9c48d`. The stopped,
-unreviewed work on the former task `01-llm-action-core` and the stage 6 split is in `stash@{0}`
-(`llm-actions WIP: task 01 unreviewed + stage 06 split, stopped 2026-11-15`); it is not in the tree,
-not reviewed, and is kept only in case the LLM checking task reuses the transport part. Linux
-Debug/Release 50/50 on the host; Windows 44 (derived, not run locally); `.ts` is at 382. The
-`qtranslate-trixie` image is built. Resume with `/new`, agent `lead`, `@continue`; the current node
-is the acceptance of stage `11-duckduckgo-libretranslate` and its documentation pass.
+Work is on `main` (matches the root `branch:`); the working tree has only the map edits for the stage
+closing and the docs pass at `df69d70`. The stopped, unreviewed work on the former task
+`01-llm-action-core` and the stage 6 split is in `stash@{0}` (`llm-actions WIP: task 01 unreviewed +
+stage 06 split, stopped 2026-11-15`); it is not in the tree, not reviewed, and is kept only in case
+the LLM checking task reuses the transport part. Linux Debug/Release 50/50 on the host; Windows 44
+(derived, not run locally); `.ts` is at 382. The `qtranslate-trixie` image is built. Resume with
+`/new`, agent `lead`, `@continue`; the next nodes are the documentation pass for stage 11 and then
+stage 12.
 
 Task `10-provider-hint-cleanup` is `done` as `589dbb5`: the eight recipient/privacy sentences are
 gone from the settings hints (fallback, Yandex, Bing, DeepL free web, OpenAI-compatible, MyMemory,
@@ -454,6 +451,20 @@ has six languages and no `auto`. Next: plan and run stage 8.
   4/4, `tst_languages` 296, `tst_duckduckgoparser` 43, `tst_duckduckgoservice` 39; Clang Debug clean;
   Windows 40 not performed. The stage `## Outcome` records the acceptance and the known
   `es`/`kBingWebCodes` gap. Next: `03-libretranslate/01-libretranslate-service` (needs detailing).
+- 2026-11-15 — Substage `03-libretranslate` accepted and closed, and stage
+  `11-duckduckgo-libretranslate` accepted and closed `done` over `8e9c48d..df69d70`. The acceptance
+  covered the integration of research, both providers and their settings: provider/fallback order
+  (DuckDuckGo then LibreTranslate, after Reverso), language columns, `[libretranslate]
+  baseUrl`/`apiKey` with a secret, `Accept-Language: en`, the Services groups, the 382-message `.ts`
+  set and the absence of regressions in the older services. It found one stale comment in
+  `src/core/settings.h` ("the five no-key web endpoints") and fixed it in `df69d70`; no other defects
+  and no further commits. Full host Debug/Release and trixie Release: 0 warnings, 50/50;
+  `tst_settingsdialog` 36, `tst_settings` 84, `tst_translations` 4/4, `tst_languages` 326,
+  `tst_libretranslateparser` 31, `tst_libretranslateservice` 40, `tst_duckduckgoparser` 43,
+  `tst_duckduckgoservice` 39; Windows 44 not performed. Known gaps: `es` missing from
+  `kBingWebCodes` (a separate Bing task with a probe), and the `isConfigured()` URL-predicate
+  duplicate for a direct `setBaseUrl()`. Next: the lead's documentation pass for the two providers,
+  then stage 12.
 - 2026-11-15 — Task `03-libretranslate/01-libretranslate-service` accepted and closed `done` (base
   `3f393df`). The parser and the service follow the research: `POST <base>/translate` with a compact
   JSON `q`/`source`/`target` body and `api_key` only when a key is set, 5000 UTF-16 units per chunk

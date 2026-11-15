@@ -267,26 +267,30 @@ remains unofficial.
 1. DeepL web — the `free-web` mode inside `DeepLService` (the internal `DeepLWebService`) and a
    warning in settings; there is no separate service. The DeepL `free-web` mode stays an explicit
    mode with its own warning.
-2. For each service — its own `TranslationService` and parser; no keys are needed. Implemented for
-   MyMemory (`src/services/mymemory*`), Mozhi (`src/services/mozhi*`), Yandex web
-   (`src/services/yandexweb*`), Bing web (`src/services/bingweb*`) and Reverso
-   (`src/services/reverso*`); they are the five no-key web services, available by default like every
-   other provider.
+2. For each service — its own `TranslationService` and parser; no keys are needed (LibreTranslate
+   takes an optional key). Implemented for MyMemory (`src/services/mymemory*`), Mozhi
+   (`src/services/mozhi*`), Yandex web (`src/services/yandexweb*`), Bing web
+   (`src/services/bingweb*`), Reverso (`src/services/reverso*`), DuckDuckGo
+   (`src/services/duckduckgo*`) and LibreTranslate (`src/services/libretranslate*`); they are the
+   seven no-key web services, available by default like every other provider.
 3. Per-host rate limiting: implemented infrastructure in `QueuedWebService` — replies of one host
    are serialized and paused by the service-specific value (DeepL 2 s, MyMemory 350 ms, Mozhi
-   500 ms, Yandex web 750 ms, Bing web 1000 ms, Reverso 600 ms); no parallel requests to one host.
+   500 ms, Yandex web 750 ms, Bing web 1000 ms, Reverso 600 ms, DuckDuckGo 1000 ms, LibreTranslate
+   500 ms); no parallel requests to one host.
 4. Text splitting: implemented for DeepL (5000 characters), MyMemory (500 UTF-8 bytes), Mozhi
-   (5000 UTF-16 code units), Yandex web (5000 UTF-16 code units), Bing web (5000 UTF-16 code units)
-   and Reverso (5000 UTF-16 code units); the rest — according to the service limits.
+   (5000 UTF-16 code units), Yandex web (5000 UTF-16 code units), Bing web (5000 UTF-16 code units),
+   Reverso (5000 UTF-16 code units), DuckDuckGo (900 UTF-16 code units) and LibreTranslate
+   (5000 UTF-16 code units); the rest — according to the service limits.
 5. Errors: `429`/`403`/an HTML stub → `RateLimited`/`ServiceUnavailable` with a clear message,
    without a retry storm.
 6. Fallback: implemented as one configured hop in `TranslationManager` — a
-   `translation/fallbackService` service (`yandex-web`, `bing-web`, `mymemory`, `mozhi` or
-   `reverso`) is tried once when the primary fails with `Auth`, `QuotaExceeded`, `RateLimited`,
-   `ServiceUnavailable`, `Network` or `Timeout`; success, `EmptyText`, `TooLong`,
-   `UnsupportedLanguage`, `Cancelled` and `BadResponse` never fall back. A failed fallback returns
-   the primary error; the fallback is not retried and there is no second hop. A change clears the
-   cache. Do not show raw HTML. See [`architecture.md`](architecture.md) §4.9 and §4.11.
+   `translation/fallbackService` service (`yandex-web`, `bing-web`, `mymemory`, `mozhi`, `reverso`,
+   `duckduckgo` or `libretranslate`) is tried once when the primary fails with `Auth`,
+   `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`, `Network` or `Timeout`; success,
+   `EmptyText`, `TooLong`, `UnsupportedLanguage`, `Cancelled` and `BadResponse` never fall back. A
+   failed fallback returns the primary error; the fallback is not retried and there is no second hop.
+   A change clears the cache. Do not show raw HTML. See [`architecture.md`](architecture.md) §4.9 and
+   §4.11.
 7. Privacy: the text goes to a third-party service; do not write text, keys, or cookies to the log.
 8. Tests: response fixtures and a local `QTcpServer`; real endpoints — manual smoke only, because
    they are live and unstable.
@@ -298,11 +302,15 @@ remains unofficial.
 3. **Mozhi** — implemented: one integration, many engines, self-hosting possible.
 4. **Yandex web** — implemented: important for the Russian audience, but an unofficial scraped
    endpoint.
-5. **Bing web** — implemented: fragile auth and HTML, but the fourth no-key web service.
+5. **Bing web** — implemented: fragile auth and HTML, one of the no-key web services.
 6. **Reverso** — implemented: niche, fewer languages, no automatic detection, but a clear fallback
    among its six languages.
+7. **DuckDuckGo** — implemented: a token-gated frontend route with the smallest body limit; the user
+   accepted it on 2026-11-15 because Bing already uses the same token/User-Agent pattern.
+8. **LibreTranslate** — implemented: a server the user points the application at, self-hosted or
+   hosted with an optional key; there is no public key-less default.
 
-The fallback itself is implemented as one configured hop after the five services, not as an
+The fallback itself is implemented as one configured hop after the seven services, not as an
 arbitrary chain: Google and DeepL free modes are modes of the same service, so they are not separate
 fallback links; Mozhi proxies to engines, so choosing Mozhi as the fallback already covers a
 different engine. The user picks one fallback service; the primary stays the primary.
@@ -313,5 +321,46 @@ different engine. The user picks one fallback service; the primary stays the pri
   settings hints must keep the unofficial, rate-limit and block warnings.
 - Do not bypass paid quotas or publish other people's keys/cookies.
 - Do not use public Mozhi/LibreTranslate instances as the only channel without a fallback.
+- Do not present DuckDuckGo as a public API. It is a frontend route guarded by a `vqd` token read
+  from the page HTML and a browser User-Agent; the standalone provider is a user decision
+  (2026-11-15) and may be blocked or changed without notice.
 - Do not copy QTranslate code without complying with MPL-2.0; write implementations yourself from
   the observed HTTP protocol.
+
+## 11. DuckDuckGo (standalone, added 2026-11-15)
+
+- Route: `GET https://duckduckgo.com/?q=translate` with a browser User-Agent, then
+  `vqd="..."` from the returned HTML; `POST https://duckduckgo.com/translation.js?vqd=<token>&query=translate&to=<code>[&from=<code>]`
+  with the raw text as the body and `Content-Type: application/json`; the response is
+  `{"detected_language": "...", "translated": "..."}`. No cookies. A token still answered after 26
+  minutes; a `403` refreshes it once per reply, a second `403` becomes `RateLimited`.
+- Limits: the body between 986 and 2006 characters (986 accepted, 2006 rejected as `invalid_text`);
+  the service splits at 900 UTF-16 code units with a 1000 ms pause, both named assumptions.
+- Languages: DuckDuckGo is Bing Translate 1-1 (Mozhi `langlist-duckduckgo.go`, libmozhi commit
+  `7324b5c528fe`); the language column reuses the observed Bing catalogue plus `es`. `es` is missing
+  from `kBingWebCodes`, so `bing-web` does not offer Spanish — a separate Bing gap.
+- Terms: an internal frontend route, not an API; the terms do not bless automated use, and it can be
+  rate-limited, challenged or changed without notice. The user accepted this on 2026-11-15 because
+  Bing already uses the same pattern.
+- Tests: `tst_duckduckgoparser` and `tst_duckduckgoservice` with fixtures and a local `QTcpServer`;
+  CTest never contacts the real endpoint.
+
+## 12. LibreTranslate (standalone, added 2026-11-15)
+
+- Route: `POST <base>/translate` with the JSON body `q`, `source`, `target` and `api_key` when set;
+  the response is `translatedText` with an optional `detectedLanguage.language`/`confidence`;
+  `source:"auto"` is supported; `/languages` and `/health` exist. The base URL is a server the user
+  enters (usually self-hosted); there is no default, and an empty base URL means "not configured".
+- Key: optional. A self-hosted server without `--api-keys` needs none; a hosted instance such as
+  `libretranslate.com` requires one. The key is stored as a secret (DPAPI/libsecret/`0600`) and sent
+  as `api_key`. The service sends `Accept-Language: en` so error bodies stay English and `Auth` is
+  classified on any system locale.
+- Languages: the 51 codes of the observed `/languages` (49 map directly; `fil`→`tl`,
+  `pt-PT`→`pt`); a server with fewer installed models rejects a pair and maps to
+  `UnsupportedLanguage`.
+- Limits: 5000 UTF-16 code units per chunk and a 500 ms pause are named assumptions; the server's own
+  limits are its configuration (`--req-limit`, `--api-keys`).
+- Licence: AGPL-3.0 server; QTranslate stays GPL-3.0-or-later and ships only an HTTP client, no server
+  code or binary.
+- Tests: `tst_libretranslateparser` and `tst_libretranslateservice` with fixtures and a local
+  `QTcpServer`; CTest never contacts a real server.

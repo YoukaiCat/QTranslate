@@ -252,6 +252,10 @@ qtranslate/
 │   │   ├── bingwebparser.h/.cpp      pure parsing for the Bing web endpoint
 │   │   ├── reversoservice.h/.cpp     unofficial Reverso endpoint (no key)
 │   │   ├── reversoparser.h/.cpp      pure parsing for the Reverso endpoint
+│   │   ├── duckduckgoservice.h/.cpp  token-gated DuckDuckGo frontend (no key)
+│   │   ├── duckduckgoparser.h/.cpp   pure parsing for the DuckDuckGo endpoint
+│   │   ├── libretranslateservice.h/.cpp LibreTranslate HTTP client (base URL, optional key)
+│   │   ├── libretranslateparser.h/.cpp  pure parsing for LibreTranslate
 │   │   ├── languagetoolservice.h/.cpp LanguageTool HTTP checking (opt-in, no credentials)
 │   │   ├── languagetoolparser.h/.cpp pure parsing for LanguageTool matches
 │   │   ├── requestqueue.h/.cpp       serialized request queue shared by the HTTP services
@@ -290,7 +294,7 @@ qtranslate/
 │       └── appicon.h/.cpp
 └── tests/
     ├── CMakeLists.txt
-    ├── fixtures/                     saved Google/DeepL/MyMemory/Mozhi/Yandex/Bing/Reverso/LanguageTool responses (google/, deepl/, mymemory/, mozhi/, yandexweb/, bingweb/, reverso/, languagetool/)
+    ├── fixtures/                     saved Google/DeepL/MyMemory/Mozhi/Yandex/Bing/Reverso/DuckDuckGo/LibreTranslate/LanguageTool responses (google/, deepl/, mymemory/, mozhi/, yandexweb/, bingweb/, reverso/, duckduckgo/, libretranslate/, languagetool/)
     ├── tst_appinfo.cpp
     ├── tst_autostart.cpp               Windows and Linux variants
     ├── tst_bingwebparser.cpp
@@ -300,6 +304,8 @@ qtranslate/
     ├── tst_deeplservice.cpp
     ├── tst_deeplwebparser.cpp
     ├── tst_deeplwebservice.cpp
+    ├── tst_duckduckgoparser.cpp        pure DuckDuckGo response parsing
+    ├── tst_duckduckgoservice.cpp       service against a local HTTP server
     ├── tst_googleparser.cpp
     ├── tst_googletranslateservice.cpp  service against a local HTTP server
     ├── tst_hotkeymanager.cpp           Windows-only
@@ -310,6 +316,8 @@ qtranslate/
     ├── tst_languages.cpp
     ├── tst_languagetoolparser.cpp      pure LanguageTool response parsing
     ├── tst_languagetoolservice.cpp     service against a local HTTP server
+    ├── tst_libretranslateparser.cpp    pure LibreTranslate response parsing
+    ├── tst_libretranslateservice.cpp   service against a local HTTP server
     ├── tst_mainwindow.cpp              translation window: no checking UI, translate/copy paths
     ├── tst_mozhiparser.cpp
     ├── tst_mozhiwebservice.cpp         service against a local HTTP server
@@ -349,7 +357,7 @@ targets. Currently:
 |---|---|
 | `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language), `proofreadingtypes`, `proofreadingservice`, `proofreadingmanager`, `proofreadingtext`; `net/networkmanager`; `services/`: `bingwebparser`, `bingwebservice`, `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `languagetoolparser`, `languagetoolservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `requestqueue`, `reversoparser`, `reversoservice`, `yandexwebparser`, `yandexwebservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `proofreadingerrortext`, `proofreadingpanel`, `proofreadingwindow`, `proofreadingpopupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_languagetoolparser`, `tst_languagetoolservice`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_mainwindow` (offscreen), `tst_proofreadingmanager`, `tst_proofreadingwindow` (offscreen), `tst_proofreadingpopup` (offscreen), `tst_proofreading_selection_x11` (Linux), `tst_queuedwebservice`, `tst_reversoparser`, `tst_reversoservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 40 tests on Windows and 46 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_duckduckgoparser`, `tst_duckduckgoservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_languages`, `tst_languagetoolparser`, `tst_languagetoolservice`, `tst_libretranslateparser`, `tst_libretranslateservice`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_mainwindow` (offscreen), `tst_proofreadingmanager`, `tst_proofreadingwindow` (offscreen), `tst_proofreadingpopup` (offscreen), `tst_proofreading_selection_x11` (Linux), `tst_queuedwebservice`, `tst_reversoparser`, `tst_reversoservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 44 tests on Windows and 50 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
@@ -402,7 +410,7 @@ The release tag is `v0.13.0`; CI compares it with `CMakeLists.txt` and fails on 
 dpkg-buildpackage -rfakeroot -us -uc` from the repository root builds
 `qtranslate_<version>_amd64.deb` and writes the `.deb`, `.dsc` and `.tar.xz` to the parent directory;
 `nocheck` skips the tests, `nodoc` leaves `README.Debian` out, and without `nocheck` the rules run
-the 46 tests under `xvfb-run -a`. The package installs `usr/bin/qtranslate`, the desktop entry, the
+the 50 tests under `xvfb-run -a`. The package installs `usr/bin/qtranslate`, the desktop entry, the
 256x256 icon, `copyright`, `changelog.gz` and `LICENSE.gz` (`dh_compress` gzips the 35 KB license
 text under `usr/share/doc`), has no maintainer scripts, and takes `Depends` from `dh_shlibdeps`.
 `packaging/linux/verify-deb.sh` is the content/`Depends`/install gate.
@@ -760,8 +768,9 @@ queued is skipped, and a reply deleted while active is dropped through `QPointer
 default pause is 2000 ms (the moved DeepL value); a service overrides it in its constructor, and
 `setRateLimitMs(0)` disables the pause for tests only. The base knows no endpoints, service
 settings or UI; `DeepLWebService`, `MyMemoryService`, `MozhiService`,
-`YandexWebService`, `BingWebService` and `ReversoService` use it; MyMemory sets 350 ms, Mozhi 500 ms,
-Yandex web 750 ms, Bing web 1000 ms and Reverso 600 ms.
+`YandexWebService`, `BingWebService`, `ReversoService`, `DuckDuckGoService` and
+`LibreTranslateService` use it; MyMemory sets 350 ms, Mozhi 500 ms, Yandex web 750 ms, Bing web
+1000 ms, Reverso 600 ms, DuckDuckGo 1000 ms and LibreTranslate 500 ms.
 
 Each service receives a `NetworkManager` pointer (the shared `QNetworkAccessManager` and
 `makeRequest()` with a timeout and `User-Agent`) and does not create its own manager — this way the
@@ -1284,6 +1293,52 @@ Accept: application/json
   contacts the real endpoint; a live smoke is manual only and is recorded as passed or as not
   performed with the reason (block, a rejected pair, or no live run).
 
+### 4.7.8. `DuckDuckGoService` — token-gated frontend (user decision, 2026-11-15)
+
+`DuckDuckGoService` implements the frontend route recorded in `doc/free-endpoints.md` §11. Its id is
+`duckduckgo`, its display name is `DuckDuckGo`, and it needs no key (`isConfigured() == true`).
+
+- The service first fetches `https://duckduckgo.com/?q=translate` with a browser User-Agent and reads
+  the `vqd="..."` token from the HTML, then posts the raw chunk to
+  `https://duckduckgo.com/translation.js?vqd=<token>&query=translate&to=<code>[&from=<code>]` with
+  `Content-Type: application/json`; the response is `translated` plus `detected_language`.
+- No cookies are sent; the token is cached until a `403` refreshes it once per reply, and a second
+  `403` is `RateLimited`.
+- 900 UTF-16 code units per chunk and a 1000 ms pause are named assumptions (the observed body limit
+  is between 986 and 2006 characters).
+- Errors are body-first (`invalid_text` → `TooLong`, `invalid_to` → `UnsupportedLanguage`,
+  `403`/`429` → `RateLimited`, `5xx` → `Network`, HTML/unknown → `ServiceUnavailable`, malformed →
+  `BadResponse`), redirects are same-origin, and logs and messages contain neither the text nor the
+  token or URL.
+- Tests: `tst_duckduckgoparser`, `tst_duckduckgoservice`, the `duckduckgo` rows in `tst_languages`,
+  and the `DuckDuckGo` group in `tst_settingsdialog`. CTest never contacts the real endpoint.
+
+### 4.7.9. `LibreTranslateService` — a user-provided server (user decision, 2026-11-15)
+
+`LibreTranslateService` implements the HTTP client for a LibreTranslate server. Its id is
+`libretranslate`, its display name is `LibreTranslate`; the base URL is empty by default, so
+`isConfigured()` is false until the user enters a server; the optional key does not affect it.
+
+- Request: `POST <base>/translate` with the JSON body `q`, `source`, `target` and `api_key` when set;
+  the response is `translatedText` and optional `detectedLanguage.language`/`confidence`;
+  `source:"auto"` is supported. `Accept-Language: en` keeps error bodies English so `Auth` is
+  classified on any system locale.
+- The base URL is a base `http(s)` URL without credentials, a query or a fragment; a path prefix is
+  kept. The key is stored as a secret through `SecretProtector` and sent only to the configured
+  server.
+- 51 language codes (49 direct, `fil`→`tl`, `pt-PT`→`pt`); a server with fewer models rejects a pair
+  and maps to `UnsupportedLanguage`.
+- 5000 UTF-16 code units and a 500 ms pause are named assumptions; the server's limits are its own
+  configuration.
+- Errors: `Auth` by a key/permission body (status fallback 401/403), `RateLimited` on 429/rate-limit,
+  `TooLong` on 413/414, `Network` on 5xx, `ServiceUnavailable` on HTML/unknown, `BadResponse` on
+  malformed or empty text; same-origin redirects; logs and messages contain neither the text, the
+  body, the URL nor the key.
+- Licence: the server is AGPL-3.0; QTranslate ships only the client.
+- Tests: `tst_libretranslateparser`, `tst_libretranslateservice`, the `libretranslate` rows in
+  `tst_languages`, and the `LibreTranslate` group in `tst_settingsdialog`. CTest never contacts a real
+  server.
+
 ### 4.8. Languages — `languages`
 
 The program uses its own language codes internally (`en`, `ru`, `de`, `pt-BR`, `zh-Hans`…).
@@ -1331,6 +1386,17 @@ returns the code only for those six, `nullptr` otherwise. `auto` is not supporte
 returns `UnsupportedLanguage` with a message telling the user to choose an explicit source language
 before any request. The six languages form the full 36-direction cross product, and `direction` is
 `<source>-<target>`. No `LanguageInfo` column is added and the table's columns are unchanged.
+
+DuckDuckGo reuses the observed Bing column: `duckDuckGoCodeOf()` returns `bingWebCodeOf()` and adds
+`es` through `kDuckDuckGoExtraCodes`, because the observed Bing table lacks Spanish. `auto` is sent
+by omitting `from`, and a detected `pt` reverses to `pt-BR` through the ordinary table scan; codes
+outside the Bing catalogue (for example `ceb`, `kk`, `pa`, `haw`) are not declared. `es` is missing
+from `kBingWebCodes`, so `bing-web` itself does not offer Spanish — a known gap.
+
+LibreTranslate declares the 51 codes observed from `/languages`, with `fil`→`tl` and `pt-PT`→`pt`;
+the reverse scan maps `tl` to `fil` and `pt` to `pt-PT`. `auto` is sent literally as `source:"auto"`.
+An internal code without a LibreTranslate code is rejected as `UnsupportedLanguage` before any
+request. `libreTranslateCodeOf()` is the single fix point.
 
 LanguageTool declares 30 internal codes mapped to its `longCode` values, for example `en` → `en-US`,
 `de` → `de-DE`, `ru` → `ru-RU`, `zh-Hans` → `zh-CN`, `fil` → `tl-PH`. `languageToolCodeOf()` is the
@@ -1599,7 +1665,7 @@ File keys:
 | `translation/secondaryLang` | string | `en` (or `ru` if the system language is English) |
 | `translation/maxLength` | int | `20000` |
 | `translation/autoTranslateDelayMs` | int | `700` (0 — off) |
-| `translation/fallbackService` | string | empty; `yandex-web`, `bing-web`, `mymemory`, `mozhi` or `reverso` |
+| `translation/fallbackService` | string | empty; `yandex-web`, `bing-web`, `mymemory`, `mozhi`, `reverso`, `duckduckgo` or `libretranslate` |
 | `google/mode` | `free` \| `cloud` | `free` |
 | `google/apiKey` | secret | empty |
 | `deepl/mode` | `api` \| `free-web` | `api`; the old `translation/service=deepl-web` migrates to `deepl` + `free-web` |
@@ -1607,6 +1673,8 @@ File keys:
 | `deepl/englishVariant` | `EN-US` \| `EN-GB` | `EN-US` |
 | `mozhi/instance` | string | `https://mozhi.adminforge.de`; a base `http`/`https` URL without credentials, a query or a fragment; trailing slashes are removed |
 | `mozhi/engine` | `google` \| `deepl` \| `duckduckgo` \| `libretranslate` \| `mymemory` \| `reverso` \| `yandex` | `google` |
+| `libretranslate/baseUrl` | string | empty (not configured); a base `http`/`https` URL without credentials, a query or a fragment |
+| `libretranslate/apiKey` | secret | empty; only for a hosted server that requires a key |
 | `llm/baseUrl` | string | `https://openrouter.ai/api/v1` |
 | `llm/apiKey` | secret | empty |
 | `llm/model` | string | `openrouter/free` |
@@ -1635,8 +1703,9 @@ replaced by the default with a fixed warning that does not echo the typed value.
 `translation/fallbackService` was added the same way: `settingsVersion` stays `1`, and the value is
 trimmed and lowercased. Empty means no fallback; an unknown id is replaced by empty with a fixed
 warning that does not echo the typed value. The settings dialog's **Fallback service** row on the
-Translation page lists the five no-key web services in provider order (Yandex, Bing, MyMemory,
-Mozhi, Reverso) and is always enabled; the remembered value is kept. `AppController` applies the key
+Translation page lists the seven no-key web services in provider order (Yandex, Bing, MyMemory,
+Mozhi, Reverso, DuckDuckGo, LibreTranslate) and is always enabled; the remembered value is kept.
+LibreTranslate works only after its base URL is configured. `AppController` applies the key
 at startup and on a change and passes those services to the dialog.
 
 `[proofreading]` was added without a version bump too. `provider` is trimmed and lowercased and must
@@ -1812,9 +1881,12 @@ applies the changes, "Cancel" changes nothing. Tabs:
    retried once on a retryable error (`None` means off). The additional language is used for smart
    switching when the text is already in the primary language (old plan stage 8).
 4. **Services** — the groups are ordered Google, Yandex, Bing, DeepL, OpenAI-compatible, MyMemory,
-   Mozhi, Reverso. Google: mode (free/Cloud API), key (password echo). Yandex, Bing, MyMemory, Mozhi
-   and Reverso are no-key groups with their own unofficial-endpoint, rate-limit and block
-   warnings; there is no common gate group or enabling switch. DeepL: mode
+   Mozhi, Reverso, DuckDuckGo, LibreTranslate. Google: mode (free/Cloud API), key (password echo).
+   Yandex, Bing, MyMemory, Mozhi, Reverso and DuckDuckGo are no-key groups with their own
+   unofficial-endpoint, rate-limit and block warnings; there is no common gate group or enabling
+   switch. DuckDuckGo is a token-gated frontend route and says so in its hint. LibreTranslate: a
+   base-URL field (empty by default; the group explains that a server must be entered) and an
+   optional key with password echo for a hosted server; a self-hosted server needs no key. DeepL: mode
    (API with a key or a free web endpoint without a key), key (password echo), English variant,
    "Check key" button with an asynchronous result (`character_count`/`character_limit` or
    an error). In `free-web` mode, the key field and the check are disabled, and a warning about
@@ -1867,7 +1939,7 @@ buttons and menus for Hindi remain English.
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
 `*_win.cpp`; the Linux backends are `*_linux.cpp`, and `*_stub.cpp` remains only for platforms
 without a backend. `qtranslate_core`, `net/`, `services/`, and the UI do not use WinAPI. The Linux
-tree configures, builds, and links: 46 tests (37 shared plus 9 Linux platform tests) pass under
+tree configures, builds, and links: 50 tests (41 shared plus 9 Linux platform tests) pass under
 `xvfb-run` on Debian 13 (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2;
 Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
 X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
@@ -2159,6 +2231,10 @@ are linked into separate test targets):
 | `tst_bingwebservice` | Bing web against a local HTTP server: the two-step GET/POST, browser User-Agent, manual cookie attributes and the explicit `MUID`, the urlencoded fields/order/UTF-8 encoding, mapped target codes and `auto-detect`, 5000-unit chunks, 1000 ms pacing, the token+MUID cache, the one-time 401 refresh/retry, 403 as a block, serialization/cancellation, a refused cross-origin redirect, cookie isolation and message/log hygiene |
 | `tst_reversoparser` | Parsing Reverso fixtures: the flat success object with `translation`/`directionFrom`/`directionTo`, `success: true`/`error: false`, the error flag and `success: false` under HTTP 200, the validated short `message` versus the fixed literals, malformed/non-object/empty bodies, HTML/rate-limit/block plain text and the status mapping without the text, body or URL |
 | `tst_reversoservice` | Reverso against a local HTTP server: the seven-field JSON `POST`, browser User-Agent on this request only, manual cookie attributes and cookie isolation, UTF-8 text, all 36 directions, `auto`/unmapped/empty rejection with zero requests, 5000-unit chunks with edge whitespace, 600 ms default and 100 ms pacing, serialization/cancellation, a failed middle chunk, classified errors, the provider message, timeout, closed server, a refused cross-origin redirect and message/log hygiene |
+| `tst_duckduckgoparser` | Parsing DuckDuckGo fixtures: the `vqd="..."` token (the unquoted form ignored, an empty or truncated token rejected), `detected_language`/`translated`, `invalid_text`/`invalid_to`, HTML and plain-text errors, the status mapping and fixed messages without the text, body or URL |
+| `tst_duckduckgoservice` | DuckDuckGo against a local HTTP server: the token GET with a browser User-Agent, the POST to `translation.js` with the raw chunk body and the `vqd`/`query`/`to`/`from` order, `auto` without `from`, the token cache and its one-time `403` refresh, 900-unit chunks, 1000 ms pacing, serialization/cancellation, a refused cross-origin redirect, cookie isolation and hygiene of messages and logs |
+| `tst_libretranslateparser` | Parsing LibreTranslate fixtures: `translatedText` and `detectedLanguage.language`/`confidence`, the JSON `error` body with several statuses, key/permission text as `Auth`, `invalid_text`/`invalid_to`, HTML and malformed bodies, the status mapping and fixed messages without the text, body, URL or key |
+| `tst_libretranslateservice` | LibreTranslate against a local HTTP server: the JSON `POST` with `q`/`source`/`target` and `api_key` only when set, `Accept-Language: en`, a base URL with a path prefix, `auto` and detected language, the 51-code table and rejected pairs, 5000-unit chunks and 500 ms pacing, serialization/cancellation, a refused cross-origin redirect, `Auth`/`RateLimited`/`TooLong`/`Network`/`BadResponse`, `configurationError()` for an empty URL, `applySettings()` and message/log hygiene |
 | `tst_queuedwebservice` | The shared per-host queue on a fake service: one reply at a time, the rate pause, aborting a queued reply, deleting the active reply, `noteRequestSent()` restarting the pause, a multi-chunk reply holding its slot |
 | `tst_openaichat` | Chat Completions request serialization (model, messages, temperature, `max_tokens`, stream), response parsing, error and finish-reason mapping, model list, endpoint building |
 | `tst_openaicompatibleservice` | The OpenAI-compatible service against a local HTTP server: configuration errors, chat request, source language, plain-text and fenced-JSON responses, whitespace, HTTP errors, timeout, cancellation, OpenRouter key rules, model loading and edited base URL |
@@ -2354,7 +2430,7 @@ Limitations of the environment in which the final verification was performed (no
 - The installer is not code-signed: Windows SmartScreen may show a warning. There is no certificate
   in the project; options and requirements are described in [`code-signing.md`](code-signing.md).
   Adding a signature does not change the artifact format.
-- Linux is implemented from 0.12.0 (39 tests at the 0.12.0 release; 46 now, X11 full, Wayland
+- Linux is implemented from 0.12.0 (39 tests at the 0.12.0 release; 50 now, X11 full, Wayland
   limited); the 0.11.x releases remain Windows-only, so the Linux packages appear only with 0.12.0.
   The trixie artifacts do not run on Astra 1.8.7, which needs the separate native build (§4.14).
   macOS is not planned.
