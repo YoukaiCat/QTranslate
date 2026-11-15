@@ -1224,6 +1224,187 @@ private slots:
         QCOMPARE(language->currentCode(), Languages::autoCode());
     }
 
+    void proofreadingLlmProviderHidesLanguageToolRow()
+    {
+        AppSettings settings;
+        settings.proofreading.enabled = true;
+        settings.proofreading.language = QStringLiteral("en");
+        settings.proofreading.endpoint = QStringLiteral("http://127.0.0.1:8081/v2/check");
+
+        const QList<SettingsDialog::ProofreadingProvider> providers = {
+            {QStringLiteral("languagetool"), QStringLiteral("LanguageTool"),
+             Languages::supported(QStringLiteral("languagetool"),
+                                  Languages::Direction::Source),
+             true},
+            {QStringLiteral("llm"), QStringLiteral("LLM"),
+             Languages::supported(QStringLiteral("llm"), Languages::Direction::Source), true},
+        };
+        SettingsDialog dialog(settings, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true, {}, false, providers);
+
+        auto *enabled = dialog.findChild<QCheckBox *>(QStringLiteral("proofreadingEnabled"));
+        auto *providerGroup =
+            dialog.findChild<QGroupBox *>(QStringLiteral("proofreadingProviderGroup"));
+        auto *provider = dialog.findChild<QComboBox *>(QStringLiteral("proofreadingProvider"));
+        auto *language =
+            dialog.findChild<LanguageComboBox *>(QStringLiteral("proofreadingLanguage"));
+        auto *endpoint = dialog.findChild<QLineEdit *>(QStringLiteral("proofreadingEndpoint"));
+        auto *endpointHint =
+            dialog.findChild<QLabel *>(QStringLiteral("proofreadingEndpointHint"));
+        auto *endpointWarning =
+            dialog.findChild<QLabel *>(QStringLiteral("proofreadingEndpointWarning"));
+        auto *llmHint = dialog.findChild<QLabel *>(QStringLiteral("proofreadingLlmHint"));
+        QVERIFY(enabled && providerGroup && provider && language && endpoint && endpointHint
+                && endpointWarning && llmHint);
+        QVERIFY(llmHint->wordWrap());
+        QCOMPARE(llmHint->parentWidget(), providerGroup);
+
+        auto *form = qobject_cast<QFormLayout *>(providerGroup->layout());
+        QVERIFY(form);
+        QWidget *endpointLabel = form->labelForField(endpoint);
+        QVERIFY(endpointLabel);
+
+        // On open the LanguageTool row and hint are visible and the LLM hint is not.
+        QVERIFY(enabled->isChecked());
+        QCOMPARE(provider->currentData().toString(), QStringLiteral("languagetool"));
+        QVERIFY(!endpoint->isHidden());
+        QVERIFY(!endpointHint->isHidden());
+        QVERIFY(llmHint->isHidden());
+        QVERIFY(!endpointLabel->isHidden());
+        QCOMPARE(dialog.settings().proofreading.provider, QStringLiteral("languagetool"));
+
+        // The row label goes with the field; the hint text names the AI tab.
+        provider->setCurrentIndex(provider->findData(QStringLiteral("llm")));
+        QCOMPARE(provider->currentData().toString(), QStringLiteral("llm"));
+        QVERIFY(endpoint->isHidden());
+        QVERIFY(endpointHint->isHidden());
+        QVERIFY(endpointWarning->isHidden());
+        QVERIFY(endpointLabel->isHidden());
+        QVERIFY(!llmHint->isHidden());
+        QCOMPARE(llmHint->text(),
+                 QStringLiteral("The OpenAI-compatible provider is configured on the AI tab."));
+        QCOMPARE(endpoint->text(), QStringLiteral("http://127.0.0.1:8081/v2/check"));
+        QCOMPARE(dialog.settings().proofreading.provider, QStringLiteral("llm"));
+        QCOMPARE(dialog.settings().proofreading.endpoint,
+                 QStringLiteral("http://127.0.0.1:8081/v2/check"));
+        QString error;
+        QVERIFY(dialog.validate(&error));
+        QVERIFY(error.isEmpty());
+        QVERIFY(language->findData(Languages::autoCode()) >= 0);
+        QVERIFY(language->findData(QStringLiteral("en")) >= 0);
+
+        // Switching back restores the row without reopening the dialog.
+        provider->setCurrentIndex(0);
+        QVERIFY(!endpoint->isHidden());
+        QVERIFY(!endpointHint->isHidden());
+        QVERIFY(llmHint->isHidden());
+        QVERIFY(!endpointLabel->isHidden());
+        QCOMPARE(endpoint->text(), QStringLiteral("http://127.0.0.1:8081/v2/check"));
+        QCOMPARE(dialog.settings().proofreading.provider, QStringLiteral("languagetool"));
+    }
+
+    void proofreadingLlmProviderFromSettings()
+    {
+        AppSettings settings;
+        settings.proofreading.enabled = true;
+        settings.proofreading.provider = QStringLiteral("llm");
+        settings.proofreading.language = QStringLiteral("de");
+        settings.proofreading.endpoint = QStringLiteral("http://127.0.0.1:11435/v2/check");
+
+        const QList<SettingsDialog::ProofreadingProvider> providers = {
+            {QStringLiteral("languagetool"), QStringLiteral("LanguageTool"),
+             Languages::supported(QStringLiteral("languagetool"),
+                                  Languages::Direction::Source),
+             true},
+            {QStringLiteral("llm"), QStringLiteral("LLM"),
+             Languages::supported(QStringLiteral("llm"), Languages::Direction::Source), true},
+        };
+        SettingsDialog dialog(settings, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true, {}, false, providers);
+
+        auto *provider = dialog.findChild<QComboBox *>(QStringLiteral("proofreadingProvider"));
+        auto *endpoint = dialog.findChild<QLineEdit *>(QStringLiteral("proofreadingEndpoint"));
+        auto *endpointHint =
+            dialog.findChild<QLabel *>(QStringLiteral("proofreadingEndpointHint"));
+        auto *endpointWarning =
+            dialog.findChild<QLabel *>(QStringLiteral("proofreadingEndpointWarning"));
+        auto *llmHint = dialog.findChild<QLabel *>(QStringLiteral("proofreadingLlmHint"));
+        QVERIFY(provider && endpoint && endpointHint && endpointWarning && llmHint);
+
+        // A stored llm opens the page in the hidden-row state; the URL is kept.
+        QCOMPARE(provider->currentData().toString(), QStringLiteral("llm"));
+        QVERIFY(endpoint->isHidden());
+        QVERIFY(endpointHint->isHidden());
+        QVERIFY(endpointWarning->isHidden());
+        QVERIFY(!llmHint->isHidden());
+        QCOMPARE(endpoint->text(), QStringLiteral("http://127.0.0.1:11435/v2/check"));
+        QCOMPARE(dialog.settings().proofreading.provider, QStringLiteral("llm"));
+        QCOMPARE(dialog.settings().proofreading.endpoint,
+                 QStringLiteral("http://127.0.0.1:11435/v2/check"));
+    }
+
+    void proofreadingLlmProviderKeepsTheLanguageToolWarning()
+    {
+        AppSettings settings;
+        settings.proofreading.enabled = true;
+        settings.proofreading.language = QStringLiteral("en");
+        settings.proofreading.endpoint = QStringLiteral("http://127.0.0.1:8081/v2/check");
+
+        const QList<SettingsDialog::ProofreadingProvider> providers = {
+            {QStringLiteral("languagetool"), QStringLiteral("LanguageTool"),
+             Languages::supported(QStringLiteral("languagetool"),
+                                  Languages::Direction::Source),
+             true},
+            {QStringLiteral("llm"), QStringLiteral("LLM"),
+             Languages::supported(QStringLiteral("llm"), Languages::Direction::Source), true},
+        };
+        SettingsDialog dialog(settings, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en"),
+                               QStringLiteral("ru")},
+                              true, {}, false, providers);
+
+        auto *provider = dialog.findChild<QComboBox *>(QStringLiteral("proofreadingProvider"));
+        auto *endpoint = dialog.findChild<QLineEdit *>(QStringLiteral("proofreadingEndpoint"));
+        auto *endpointWarning =
+            dialog.findChild<QLabel *>(QStringLiteral("proofreadingEndpointWarning"));
+        QVERIFY(provider && endpoint && endpointWarning);
+
+        const QString invalidUrlError = QStringLiteral(
+            "Enter a valid http(s) LanguageTool URL, or leave the field empty for the public "
+            "endpoint.");
+
+        endpoint->setText(QStringLiteral("not a URL"));
+        QVERIFY(!endpointWarning->isHidden());
+        QString error;
+        QVERIFY(!dialog.validate(&error));
+        QCOMPARE(error, invalidUrlError);
+
+        // The warning stays hidden under llm, but validate() still refuses the
+        // invalid value instead of letting settings() drop it silently.
+        provider->setCurrentIndex(provider->findData(QStringLiteral("llm")));
+        QVERIFY(endpointWarning->isHidden());
+        QVERIFY(endpoint->isHidden());
+        error.clear();
+        QVERIFY(!dialog.validate(&error));
+        QCOMPARE(error, invalidUrlError);
+
+        provider->setCurrentIndex(0);
+        QVERIFY(!endpointWarning->isHidden());
+
+        endpoint->setText(QStringLiteral("http://127.0.0.1:8081/v2/check"));
+        QVERIFY(endpointWarning->isHidden());
+        provider->setCurrentIndex(provider->findData(QStringLiteral("llm")));
+        error.clear();
+        QVERIFY(dialog.validate(&error));
+        QVERIFY(error.isEmpty());
+        QCOMPARE(dialog.settings().proofreading.endpoint,
+                 QStringLiteral("http://127.0.0.1:8081/v2/check"));
+    }
+
     void proofreadingHotkeyIsIndependentOfMode()
     {
         SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},

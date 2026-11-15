@@ -535,7 +535,7 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
 
     m_proofreadingProviderGroup = new QGroupBox(tr("Provider"), textCheckingPage);
     m_proofreadingProviderGroup->setObjectName(QStringLiteral("proofreadingProviderGroup"));
-    auto *proofreadingProviderForm = new QFormLayout(m_proofreadingProviderGroup);
+    m_proofreadingProviderForm = new QFormLayout(m_proofreadingProviderGroup);
     m_proofreadingProvider = new QComboBox(m_proofreadingProviderGroup);
     m_proofreadingProvider->setObjectName(QStringLiteral("proofreadingProvider"));
     // Display names are product names, so they stay untranslated.
@@ -562,11 +562,20 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     m_proofreadingEndpointWarning->setWordWrap(true);
     m_proofreadingEndpointWarning->setStyleSheet(QStringLiteral("color: #d32f2f;"));
     m_proofreadingEndpointWarning->setVisible(false);
-    proofreadingProviderForm->addRow(tr("Provider:"), m_proofreadingProvider);
-    proofreadingProviderForm->addRow(tr("Checking language:"), m_proofreadingLanguage);
-    proofreadingProviderForm->addRow(tr("LanguageTool URL:"), m_proofreadingEndpoint);
-    proofreadingProviderForm->addRow(m_proofreadingEndpointHint);
-    proofreadingProviderForm->addRow(m_proofreadingEndpointWarning);
+    // The LLM provider is configured on the AI tab; the sentence is the one the
+    // Services page already shows, so it is translated once (01-ai-tab).
+    m_proofreadingLlmHint = new QLabel(
+        tr("The OpenAI-compatible provider is configured on the AI tab."),
+        m_proofreadingProviderGroup);
+    m_proofreadingLlmHint->setObjectName(QStringLiteral("proofreadingLlmHint"));
+    m_proofreadingLlmHint->setWordWrap(true);
+    m_proofreadingLlmHint->setVisible(false);
+    m_proofreadingProviderForm->addRow(tr("Provider:"), m_proofreadingProvider);
+    m_proofreadingProviderForm->addRow(tr("Checking language:"), m_proofreadingLanguage);
+    m_proofreadingProviderForm->addRow(tr("LanguageTool URL:"), m_proofreadingEndpoint);
+    m_proofreadingProviderForm->addRow(m_proofreadingEndpointHint);
+    m_proofreadingProviderForm->addRow(m_proofreadingEndpointWarning);
+    m_proofreadingProviderForm->addRow(m_proofreadingLlmHint);
     textCheckingLayout->addWidget(m_proofreadingProviderGroup);
 
     m_proofreadingIssuesGroup = new QGroupBox(tr("Issues"), textCheckingPage);
@@ -945,7 +954,15 @@ void SettingsDialog::updateProofreadingControls()
     m_proofreadingEndpoint->setEnabled(enabled && hasProvider);
 
     const QString endpoint = m_proofreadingEndpoint->text().trimmed();
-    m_proofreadingEndpointWarning->setVisible(!endpoint.isEmpty()
+    const bool llmSelected =
+        m_proofreadingProvider->currentData().toString() == QStringLiteral("llm");
+    // The LLM provider reads its server, model and key from the AI tab, so the
+    // LanguageTool row and its hint disappear; the URL stays in the hidden field
+    // so a switch back does not lose a self-hosted endpoint.
+    m_proofreadingProviderForm->setRowVisible(m_proofreadingEndpoint, !llmSelected);
+    m_proofreadingEndpointHint->setVisible(!llmSelected);
+    m_proofreadingLlmHint->setVisible(llmSelected);
+    m_proofreadingEndpointWarning->setVisible(!llmSelected && !endpoint.isEmpty()
                                              && !isValidProofreadingEndpoint(endpoint));
 }
 

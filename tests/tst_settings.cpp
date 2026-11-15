@@ -519,15 +519,22 @@ private slots:
         SettingsStore store(path, fakeCodec());
         AppSettings settings = store.current();
         settings.proofreading.provider = QStringLiteral("llm");
+        settings.proofreading.endpoint = QStringLiteral("https://lt.example.invalid/v2/check");
         store.save(settings);
 
         SettingsStore loaded(path, fakeCodec());
         loaded.load();
         QCOMPARE(loaded.current().proofreading.provider, QStringLiteral("llm"));
+        // The stored LanguageTool endpoint survives the provider change: the LLM
+        // service never reads it, but a switch back must not lose it.
+        QCOMPARE(loaded.current().proofreading.endpoint,
+                 QStringLiteral("https://lt.example.invalid/v2/check"));
 
         QSettings raw(path, QSettings::IniFormat);
         QCOMPARE(raw.value(QStringLiteral("proofreading/provider")).toString(),
                  QStringLiteral("llm"));
+        QCOMPARE(raw.value(QStringLiteral("proofreading/endpoint")).toString(),
+                 QStringLiteral("https://lt.example.invalid/v2/check"));
     }
 
     void proofreadingValuesAreNormalized()

@@ -2,11 +2,12 @@
 
 ## Where we left off
 
-Current node: `12-llm-proofreading/03-llm-check-service` (stage `12-llm-proofreading` is
-`in-progress`, `base: 5e6f1cb`; `01-ai-tab` and `02-llm-check-response` are `done`), now `in-progress`,
-`detailed: true` (7 steps), coordinator running. It adds `LlmProofreadingService` (id `llm`) on the
-existing `OpenAiChat`, registers it after LanguageTool, and maps the response contract of `02`; new
-`tst_llmproofreadingservice` takes Linux to 53 and Windows to 47 (derived), `.ts` stays 383.
+Current node: `12-llm-proofreading/04-llm-check-ui` (stage `12-llm-proofreading` is `in-progress`,
+`base: 5e6f1cb`; `01-ai-tab`, `02-llm-check-response` and `03-llm-check-service` are `done`), now
+`in-progress`, `detailed: true` (7 steps), coordinator running. It hides the LanguageTool URL row and
+shows the AI-tab hint when `llm` is selected on the **Text checking** page, keeps the stored
+`proofreading/endpoint` untouched, and adds three slots to `tst_settingsdialog` (36 → 39). Linux stays
+53 tests, Windows 47 (derived), `.ts` 383.
 
 The Astra tray bug is closed: `13-tray-icon-latency` (investigation, `0052458`) and
 `14-hotkey-warning-delivery` (the fix, `1cbe165`); the documentation pass is `be3fa92`.
@@ -766,3 +767,62 @@ has six languages and no `auto`. Next: plan and run stage 8.
   and one request per check means a text beyond the model context is `TooLong` rather than split.
   Documentation for the lead: `doc/architecture.md` (lines 260, 319, 360, 362 and §…:1716 "only
   languagetool in this version") and `doc/handoff.md`. Next: `04-llm-check-ui`.
+- 2026-11-15 — Task `12-llm-proofreading/03-llm-check-service` done as `c5b10f0`. Added
+  `src/services/llmproofreadingservice.{h,cpp}`: id `llm`, `displayName()` the untranslated `LLM`,
+  languages from `Languages::supported("llm", Source)` with auto-detect, `isConfigured()` false only
+  without a model, one request per check (`temperature 0`, no `max_tokens`, `systemPrompt()` with the
+  internal language code), errors mapped onto `TranslationError` with fixed English literals, and a
+  single log category whose lines carry only counters, `droppedEdits`, milliseconds, tokens and the
+  HTTP status. `proofreadingProviderIds()` is `{"languagetool", "llm"}`, the service is registered
+  after `m_languageTool` and before `setActiveService()`, `applySettings()` forwards changes, and the
+  new member is `m_llmProofreading`. The `02` contract is honoured literally (empty `Edits` with
+  `droppedEdits == 0` is success, `droppedEdits > 0` is `BadResponse`, `Malformed` is `BadResponse`,
+  `PlainText` is success, offsets shifted by the leading whitespace, `correctedText` only for
+  `PlainText`) and `finish_reason` is not re-read because `OpenAiChat::parse()` already maps `length`
+  to `TooLong`. New `tst_llmproofreadingservice` (27 cases); host Debug and Release 53/53 with 0
+  warnings, `qtranslate-trixie` Release 53/53 in 28 s with the bounded command, `.ts` 383, no new
+  `tr()`, Windows by diff (47). Review accepted two remarks (a stale `proofreadingservice.h` comment
+  and a missing "partial answer is success" row). Recorded and not fixed, each with its price:
+  `droppedEdits` mixes "could not be placed in the text" with "dropped by the category filter or an
+  unchanged replacement", so a filter can turn a clean check into `BadResponse`; the error literals are
+  not shared with the other providers (translating them would need new `.ts` entries); the
+  `AppController` wiring has no test target; and the live provider is unverified (mock only).
+- 2026-11-15 — Planner detailed `04-llm-check-ui` (7 steps, three source files and two test files).
+  Decisions: the provider form becomes a member `m_proofreadingProviderForm` so
+  `QFormLayout::setRowVisible()` can hide the whole row (label included — hiding only the field would
+  leave the `LanguageTool URL:` label and the public-server hint behind); the existing signal wiring
+  (`currentIndexChanged`/`textChanged` → `updateProofreadingControls()`, plus the explicit call at the
+  end of `loadValues()`) already covers switching inside the dialog, so no new signal is added; the
+  key is `currentData() == "llm"`, not "not LanguageTool", so a third provider inherits neither the
+  hiding nor the hint; the hint reuses the existing `The OpenAI-compatible provider is configured on
+  the AI tab.` source string byte for byte, so `.ts` stays at 383; `settings()`/`loadValues()` keep
+  `proofreading/endpoint` intact and `SettingsStore` never looks at the provider. `validate()` stays
+  unconditional: disabling it for `llm` would let `normalizedProofreadingEndpoint()` turn an invalid
+  value into an empty one and silently erase the stored endpoint, while the current behaviour only
+  reports a hidden field — recorded as a rough edge and pinned by a test. Tests: three new slots in
+  `tst_settingsdialog` (36 → 39) and an extended `proofreadingLlmProviderRoundTrip()` in
+  `tst_settings`; no new target. The planner could not compile `setRowVisible()` here (no Qt build
+  under its role) and named a fallback via `labelForField()`.
+- 2026-11-16 — Task `12-llm-proofreading/04-llm-check-ui` done (this commit, base `c5b10f0`). The
+  **Text checking** page now hides the whole `LanguageTool URL:` row when `llm` is selected: the
+  provider form became the member `m_proofreadingProviderForm`, so
+  `QFormLayout::setRowVisible(m_proofreadingEndpoint, !llmSelected)` takes the auto-created label with
+  the field, `m_proofreadingEndpointHint` and the new word-wrapped `m_proofreadingLlmHint`
+  (`objectName` `proofreadingLlmHint`) swap, and the invalid-URL warning is additionally gated on
+  `!llmSelected` so an old value cannot pop back through `textChanged` in the hidden field.
+  `llmSelected` is `currentData() == "llm"`, not "not LanguageTool", so `other` and any future
+  provider keep today's page. `loadValues()`, `settings()` and `validate()` are untouched: the URL
+  stays in the hidden field and is still saved, `proofreading/endpoint` is never cleared by the
+  provider id (`SettingsStore` ignores it), and an invalid URL typed on LanguageTool still blocks OK
+  under `llm` — recorded as a rough edge and pinned by a test, because skipping the check would let
+  `normalizedProofreadingEndpoint()` erase the stored value. The hint reuses `settingsdialog.cpp:320`
+  byte for byte, so no new `tr()`, `.ts` stays 383, `lupdate` was not run. Decisions beyond the plan:
+  `labelForField()` returns `QWidget *` (test variable adjusted); the test provider catalogues are
+  `{de, en, ru}` because with `{de, en}` the dialog's primary/additional-language rule rejects the
+  fixture before the assertions. Tests: three slots in `tst_settingsdialog` (36 → 39, `Totals` 41) and
+  an extended `proofreadingLlmProviderRoundTrip()` in `tst_settings` (`Totals` 85), no new target.
+  Verification: host Debug and Release 53/53 with 0 warnings, `qtranslate-trixie` Release 53/53 on the
+  first attempt, `.ts` 383 in each of the 14 files with one occurrence of the string each, Windows 47
+  derived and not built (reviewed by diff). Review: no remarks. Left open: no live check with a real
+  key or model; documentation (`doc/architecture.md`, `doc/handoff.md`, the stage tables) is the
+  lead's pass. Next: the stage is one task from complete; the lead closes `12-llm-proofreading`.

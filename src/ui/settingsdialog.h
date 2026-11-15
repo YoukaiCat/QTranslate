@@ -10,6 +10,7 @@
 class QCheckBox;
 class QCloseEvent;
 class QComboBox;
+class QFormLayout;
 class QGroupBox;
 class QLabel;
 class QKeySequenceEdit;
@@ -144,10 +145,14 @@ private:
     QCheckBox *m_proofreadingEnabled = nullptr;
     QGroupBox *m_proofreadingProviderGroup = nullptr;
     QComboBox *m_proofreadingProvider = nullptr;
+    // Kept for the LanguageTool-only row: setRowVisible() hides its label too.
+    QFormLayout *m_proofreadingProviderForm = nullptr;
     LanguageComboBox *m_proofreadingLanguage = nullptr;
     QLineEdit *m_proofreadingEndpoint = nullptr;
     QLabel *m_proofreadingEndpointHint = nullptr;
     QLabel *m_proofreadingEndpointWarning = nullptr;
+    // Points at the AI tab and is shown only while the llm provider is selected.
+    QLabel *m_proofreadingLlmHint = nullptr;
     QGroupBox *m_proofreadingIssuesGroup = nullptr;
     QCheckBox *m_proofreadingSpelling = nullptr;
     QCheckBox *m_proofreadingGrammar = nullptr;
