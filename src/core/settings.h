@@ -76,7 +76,7 @@ struct LlmSettings
 struct ProofreadingSettings
 {
     bool enabled = false;
-    QString provider = QStringLiteral("languagetool"); // the only id of this stage
+    QString provider = QStringLiteral("languagetool"); // "languagetool" | "llm"
     QString language = QStringLiteral("auto");
     QString endpoint; // empty: the provider default
     // proofreadingCategoryIds(); initialised in AppSettings' constructor.

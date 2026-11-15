@@ -13,6 +13,7 @@
 
 class HotkeyManager;
 class LanguageToolService;
+class LlmProofreadingService;
 class MainWindow;
 class NetworkManager;
 class PopupWindow;
@@ -134,6 +135,7 @@ private:
     LibreTranslateService *m_libreTranslate = nullptr;
     ProofreadingManager *m_proofreading = nullptr;
     LanguageToolService *m_languageTool = nullptr;
+    LlmProofreadingService *m_llmProofreading = nullptr; // the LLM text-checking provider
     QPointer<TranslationReply> m_mainWindowReply; // the request the main window waits for
     QPointer<TranslationReply> m_popupReply;      // the request the popup waits for
     QPointer<ProofreadingReply> m_windowCheck;    // the check the checking window waits for

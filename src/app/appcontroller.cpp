@@ -27,6 +27,7 @@
 #include "services/googletranslateservice.h"
 #include "services/languagetoolservice.h"
 #include "services/libretranslateservice.h"
+#include "services/llmproofreadingservice.h"
 #include "services/mozhiservice.h"
 #include "services/mymemoryservice.h"
 #include "services/openaicompatibleservice.h"
@@ -298,6 +299,12 @@ void AppController::createProofreading()
     m_languageTool = new LanguageToolService(m_network);
     m_languageTool->applySettings(settings);
     m_proofreading->registerService(m_languageTool);
+
+    // Registered after LanguageTool, which therefore stays the first service
+    // and the default for a stored id the manager cannot resolve.
+    m_llmProofreading = new LlmProofreadingService(m_network);
+    m_llmProofreading->applySettings(settings);
+    m_proofreading->registerService(m_llmProofreading);
     // An unknown id is ignored by the manager with its fixed warning; the
     // settings normalise it to "languagetool".
     m_proofreading->setActiveService(settings.proofreading.provider);
@@ -678,6 +685,8 @@ void AppController::applySettings(const AppSettings &oldSettings,
         m_libreTranslate->applySettings(newSettings);
     if (m_languageTool)
         m_languageTool->applySettings(newSettings);
+    if (m_llmProofreading)
+        m_llmProofreading->applySettings(newSettings);
     if (m_proofreading) {
         if (oldSettings.proofreading.provider != newSettings.proofreading.provider)
             m_proofreading->setActiveService(newSettings.proofreading.provider);

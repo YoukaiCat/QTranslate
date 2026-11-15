@@ -56,7 +56,7 @@ class ProofreadingService : public QObject
 public:
     using QObject::QObject;
 
-    virtual QString id() const = 0; // "languagetool" (stage 6 adds "llm")
+    virtual QString id() const = 0; // "languagetool" | "llm"
     virtual QString displayName() const = 0;
     virtual bool isConfigured() const = 0; // False when the provider's settings are incomplete.
     // Optional user-facing hint when isConfigured() is false.

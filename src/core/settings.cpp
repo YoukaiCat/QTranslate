@@ -333,7 +333,7 @@ QStringList fallbackServiceIds()
 
 QStringList proofreadingProviderIds()
 {
-    return {QStringLiteral("languagetool")};
+    return {QStringLiteral("languagetool"), QStringLiteral("llm")};
 }
 
 QStringList proofreadingCategoryIds()

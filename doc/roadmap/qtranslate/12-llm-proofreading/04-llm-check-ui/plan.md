@@ -21,7 +21,7 @@ stored `proofreading/endpoint` is not cleared when `provider=llm` (the LLM servi
 
 Only one message is added, and it is the one `01-ai-tab` already introduced
 (`The OpenAI-compatible provider is configured on the AI tab.`): the Text checking page reuses it, so
-the `.ts` count stays 384 and no new translation work is needed here.
+the `.ts` count stays 383 and no new translation work is needed here.
 
 ## Done when
 
@@ -39,11 +39,11 @@ the `.ts` count stays 384 and no new translation work is needed here.
   `tst_proofreading_selection_x11` pass unchanged: the popup and the second hotkey are
   provider-agnostic, and their coverage plus the service/manager tests is the automated proof that
   the LLM provider reaches them.
-- `.ts` files stay at 384 messages with no unfinished or vanished entry; exactly one
+- `.ts` files stay at 383 messages with no unfinished or vanished entry; exactly one
   `<source>The OpenAI-compatible provider is configured on the AI tab.</source>` per file, translated
   consistently with the AI tab title.
-- Debug and Release build without warnings on the host and in `qtranslate-trixie`; 52/52 Linux tests
-  in both; Windows 46 (derived) reviewed by diff and recorded as not performed.
+- Debug and Release build without warnings on the host and in `qtranslate-trixie`; 53/53 Linux tests
+  in both; Windows 47 (derived) reviewed by diff and recorded as not performed.
 
 ## Risks
 

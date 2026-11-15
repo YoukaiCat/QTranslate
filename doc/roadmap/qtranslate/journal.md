@@ -2,11 +2,11 @@
 
 ## Where we left off
 
-Current node: `12-llm-proofreading/02-llm-check-response` (stage `12-llm-proofreading` is
-`in-progress`, `base: 5e6f1cb`; `01-ai-tab` is `done`), now `in-progress`, `detailed: true`, coordinator
-running. It is the pure-function part: the system prompt, the parse of the model answer into
-`ProofreadingIssue` values with locally computed UTF-16 offsets, the category filter and the diff
-fallback, plus the new `tst_llmproofreadingparser` (Linux 51 → 52, Windows 45 → 46, `.ts` stays 383).
+Current node: `12-llm-proofreading/03-llm-check-service` (stage `12-llm-proofreading` is
+`in-progress`, `base: 5e6f1cb`; `01-ai-tab` and `02-llm-check-response` are `done`), now `in-progress`,
+`detailed: true` (7 steps), coordinator running. It adds `LlmProofreadingService` (id `llm`) on the
+existing `OpenAiChat`, registers it after LanguageTool, and maps the response contract of `02`; new
+`tst_llmproofreadingservice` takes Linux to 53 and Windows to 47 (derived), `.ts` stays 383.
 
 The Astra tray bug is closed: `13-tray-icon-latency` (investigation, `0052458`) and
 `14-hotkey-warning-delivery` (the fix, `1cbe165`); the documentation pass is `be3fa92`.
@@ -701,3 +701,68 @@ has six languages and no `auto`. Next: plan and run stage 8.
   array would also reject a bare array of edits wrapped in prose. Left open, below the threshold: a
   non-empty bare array of objects inside an ordinary sentence still reads as an edits document (a bad
   response instead of "no issues", no damage to the text).
+- 2026-11-15 — Task `12-llm-proofreading/02-llm-check-response` done as `5dcc390`. Added
+  `src/services/llmproofreadingparser.{h,cpp}` (the `LlmProofreading` API, 47-case
+  `tst_llmproofreadingparser`), moved the fence stripper statement for statement to
+  `OpenAiChat::stripCodeFence()` (no second spelling; `tst_openaicompatibleservice` passes unedited as
+  the regression gate, `tst_openaichat` grew seven rows), and fixed the drive-by 382 → 383 comment.
+  Five decisions from the review: the prompt says "copied verbatim, character for character" instead
+  of "including punctuation" (the plan's own category test needs that); only the whole answer decides
+  `PlainText` vs `Malformed` (a slice counts only as an object with an `edits` array or a non-empty
+  bare array); an answer that differs from the source only in surrounding whitespace is "no change";
+  overlapping edits are dropped and counted (otherwise `ProofreadingText::corrected()` lost one
+  silently); and **`Edits` with no issues and `droppedEdits == 0` is a clean answer** — the service must
+  map `issues.isEmpty() && droppedEdits > 0`, plus `finish_reason: "length"`, to `BadResponse`, and
+  cannot rely on `Status` alone because a truncated JSON answer arrives as `PlainText`. Verification:
+  host Debug/Release 52/52 with 0 warnings, `qtranslate-trixie` Release 52/52, `.ts` 383, Windows by
+  diff. Recorded limitation: a non-empty bare array of objects inside an ordinary sentence still reads
+  as an edits document (needs the model to ignore the format; the text itself is not damaged). The
+  verification took hours because `xvfb-run` in the container hung three times; the lead measured the
+  suite directly (52/52 in 28 s), killed the stuck containers and handed the coordinator a bounded
+  command. Next: replan `03-llm-check-service` for the new contract and detail it.
+- 2026-11-15 — Planner replanned and detailed `03-llm-check-service` (7 steps, 10 files) against the
+  contract of `02`, and fixed two factual errors in `04-llm-check-ui` (`.ts` 383, tests 53/53 and
+  Windows 47). Decisions: the service gates on `OpenAiChat`'s own `parse()`, which already turns
+  `finish_reason: "length"` into `TooLong` before the content is read, so no second check of
+  `finish_reason` is added; `systemPrompt()` receives `ProofreadingRequest::language` untouched;
+  `ProofreadingResult::correctedText` is filled for `Status::PlainText` so the field keeps the promise
+  its comment makes; `OpenAiCompatibleService::defaultBaseUrl()`/`defaultEndpoint()` are reused so the
+  default endpoint has one spelling in the tree; **offsets are shifted by the leading whitespace**,
+  because the model gets `request.text.trimmed()` while the window and `AppController` apply the
+  issues to the untrimmed text — without the shift every highlight would slide by that many units.
+  The plan now states `isConfigured()` is false only without a model (the endpoint always has a valid
+  default), uses current line numbers after the move, and registers the service after `m_languageTool`
+  so LanguageTool stays the default (`proofreadingmanager.cpp:102-105`); the new member is
+  `m_llmProofreading` because `m_llm` holds the translation service. Recorded risks: no pre-check of
+  the key (a missing key surfaces as `401` → `Auth`, whose wording reads oddly), a partially applied
+  answer counts as success with the losses only in `droppedEdits`, and the `AppController` wiring has
+  no test, as in `01` and `02`. Documentation still to update after `03`/`04`: the service and test
+  lists in `doc/architecture.md` (lines 260, 319, 360, 362), §…:1716 "only languagetool in this
+  version", and `doc/handoff.md`.
+- 2026-11-15 — Task `12-llm-proofreading/03-llm-check-service` done in this commit.
+  `LlmProofreadingService` (`src/services/llmproofreadingservice.{h,cpp}`) is the second checking
+  provider: id `llm`, untranslated `LLM`, `[llm]` the only configuration, one Chat Completions request
+  per check through `OpenAiChat` with `temperature 0` and no `max_tokens`, offsets shifted by the
+  leading whitespace of the trimmed message, `correctedText` filled for the `PlainText` answer only.
+  The gate for a truncated answer is `OpenAiChat::parse()` alone (`finish_reason: "length"` →
+  `TooLong`), and the four outcomes of the `02` contract each have their own row; a partial answer
+  with usable edits stays a success. `proofreadingProviderIds()` is `{"languagetool", "llm"}` and
+  `AppController` registers the service after `m_languageTool` but before `setActiveService()`, so a
+  stored `llm` is active at start while LanguageTool stays the default for an unknown id. Decisions
+  beyond the plan: a public `endpoint()` test seam (the plan's `applySettings()` rows were otherwise
+  unwritable, and `LanguageToolService` already has one); fixed messages of their own wording except
+  the plan's verbatim `400`/`404`; the HTTP debug line also logs the numeric `QNetworkReply` error, as
+  the translation service does. One comment-only fix outside the ten files (second review round):
+  `src/core/proofreadingservice.h:59` now says `"languagetool" | "llm"`. Verification: host Debug and
+  Release 53/53 with 0 warnings, `ctest -N` 53; `qtranslate-trixie` Release 53/53 in 27.9 s (the
+  `xvfb-run` flake did not reappear, the bounded command from `02` was used); `.ts` 383 in each of the
+  14 files, no `tr()`, no `lupdate`; Windows 47 derived, not built, reviewed by diff. Review: two
+  remarks accepted (the stale `id()` comment and a missing "partial answer is a success" row), no
+  defects; observations recorded in the node's `## Outcome` — the issue list keeps the model's order,
+  an empty `content` shows the transport's "no translation text" literal, `droppedEdits` also counts a
+  requested-category mismatch (a model that ignores the filter can produce `BadResponse`), and two
+  concurrent replies are untested because the request state is copied into `Reply`. Open, below the
+  threshold: no live provider run (the mock proves the protocol), `AppController` has no test target,
+  and one request per check means a text beyond the model context is `TooLong` rather than split.
+  Documentation for the lead: `doc/architecture.md` (lines 260, 319, 360, 362 and §…:1716 "only
+  languagetool in this version") and `doc/handoff.md`. Next: `04-llm-check-ui`.

@@ -144,7 +144,7 @@ private slots:
         QVERIFY(!settings.proofreading.enabled);
         QCOMPARE(settings.proofreading.provider, QStringLiteral("languagetool"));
         QCOMPARE(proofreadingProviderIds(),
-                 QStringList({QStringLiteral("languagetool")}));
+                 QStringList({QStringLiteral("languagetool"), QStringLiteral("llm")}));
         QCOMPARE(settings.proofreading.language, Languages::autoCode());
         QVERIFY(settings.proofreading.endpoint.isEmpty());
         QCOMPARE(settings.proofreading.categories, proofreadingCategoryIds());
@@ -508,6 +508,26 @@ private slots:
         }
         const QByteArray ini = readFile(path);
         QVERIFY(ini.contains("[proofreading]"));
+    }
+
+    void proofreadingLlmProviderRoundTrip()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath(QStringLiteral("qtranslate.ini"));
+
+        SettingsStore store(path, fakeCodec());
+        AppSettings settings = store.current();
+        settings.proofreading.provider = QStringLiteral("llm");
+        store.save(settings);
+
+        SettingsStore loaded(path, fakeCodec());
+        loaded.load();
+        QCOMPARE(loaded.current().proofreading.provider, QStringLiteral("llm"));
+
+        QSettings raw(path, QSettings::IniFormat);
+        QCOMPARE(raw.value(QStringLiteral("proofreading/provider")).toString(),
+                 QStringLiteral("llm"));
     }
 
     void proofreadingValuesAreNormalized()
