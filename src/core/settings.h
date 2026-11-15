@@ -139,7 +139,7 @@ Q_DECLARE_METATYPE(AppSettings)
 // LibreTranslate settings group, so the instance, engine and base-URL rules live
 // in one place. They never log.
 QStringList mozhiEngineIds();
-// The settings-layer guard for translation/fallbackService: the five no-key web
+// The settings-layer guard for translation/fallbackService: the no-key web
 // endpoints that may be a one-hop fallback, listed in the provider order. The
 // manager resolves the id at request time and ignores an unknown or
 // unregistered one.
