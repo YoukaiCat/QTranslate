@@ -1,6 +1,6 @@
 ---
 kind: stage
-status: in-progress
+status: done
 base: 5e6f1cb
 depends: [09-proofreading-standalone]
 ---
@@ -104,3 +104,48 @@ already exists for translation.
 - Cost and privacy: the text goes to the provider; the user configures the key and the model and
   accepts the cost. No extra gate, per the user's 2026-11-15 decision.
 - Live verification needs the user's key or a local Ollama/llama.cpp server; tests use a mock.
+
+## Outcome
+
+Accepted on 2026-11-16 over `5e6f1cb..HEAD` without the unrelated tray commits (`0052458`,
+`1cbe165`, `be3fa92`, `6a0cddd`). The stage delivered, in four task commits, the AI tab (`be1e5f9`),
+the response module (`5dcc390`), the `llm` checking provider (`c5b10f0`) and the provider-aware Text
+checking page (`e70bf38`); the acceptance fix `5210d43` separated the parser counters.
+
+What exists now: the **AI** tab edits the single `[llm]` block (`baseUrl`, `apiKey`, `model`) that
+serves both the OpenAI-compatible translation service and the new checking provider; the Services page
+keeps a pointer. `LlmProofreadingService` (id `llm`, untranslated display name `LLM`) sits next to
+LanguageTool in `proofreadingProviderIds()`, registered right after `m_languageTool` and before
+`setActiveService()`, so LanguageTool stays the default. It sends one request per check over the
+existing `OpenAiChat` transport (`temperature 0`, no `max_tokens`, `systemPrompt()` with the internal
+language code), parses the answer locally (`src/services/llmproofreadingparser.*`: UTF-16 offsets,
+forward-only search, surrogate-pair guard, category filter, coarse diff for a plain corrected text,
+offsets shifted by the trimmed leading whitespace) and maps every failure onto the existing
+`ProofreadingError` values. The checking window, the popup, the issue panel and both hotkeys needed no
+provider-specific code. An empty answer, a clean `edits` array and a whitespace-only difference are a
+successful "no issues" result; `Malformed`, unplaceable edits and `finish_reason: "length"`/`413` are
+reported as errors. No consent key was added, `proofreading/enabled` remains the only gate, and the
+logs carry counters, statuses and timings only.
+
+Verification: host Debug and Release 53/53 with 0 warnings, `qtranslate-trixie` Release 53/53 (a clean
+build), `.ts` 383 messages in each of the 14 files with no new `tr()`, Windows 47 by diff (no MSVC).
+The acceptance review found no regression in the LanguageTool path, the translation provider or the
+settings normalisation, and confirmed every stage criterion.
+
+Deferred, with the price of a full fix:
+
+- **No chunking.** One request per check: text past the model context, or an answer truncated without
+  `finish_reason: "length"` on providers that do not set it, becomes `TooLong` or a parse of a
+  truncated answer instead of a split check with recomputed offsets.
+- **`validate()` stays unconditional while the URL row is hidden.** A user who typed an invalid
+  LanguageTool URL and switched to `llm` is blocked by an error about a field they cannot see; skipping
+  the check instead would let `normalizedProofreadingEndpoint()` erase the stored endpoint. A real fix
+  changes that normalisation contract and needs a new `tr()` and a 14-file `.ts` pass.
+- **No test target for the `AppController` wiring.** Registration order and `applySettings()` are
+  covered only by reading the diff, the dialog combo test and the manual path — the same gap `01` and
+  `02` recorded.
+- **The live provider is unverified.** The automated gate is a mock `QTcpServer`; a real key or a local
+  Ollama/llama.cpp model, the cost and the privacy acceptance are the user's.
+- **Model output quirks stay handled, not fixed:** a non-empty bare array of objects inside an ordinary
+  sentence still reads as an edits document, a valid JSON envelope without `edits` is `Malformed`, and
+  an unknown category falls back to `grammar`.

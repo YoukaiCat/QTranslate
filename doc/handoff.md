@@ -1,18 +1,27 @@
 # Handoff: work state
 
-Date: 2026-11-15. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
+Date: 2026-11-16. Repository: `/home/parsee/sync/mine/QTranslate`, branch `main`.
 
-The active roadmaps are [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md) (next:
-`12-llm-proofreading`; stage 6 is blocked) and [`roadmap/debian/plan.md`](roadmap/debian/plan.md)
+The active roadmaps are [`roadmap/qtranslate/plan.md`](roadmap/qtranslate/plan.md) (next: the
+dictionary stage `07-dictionary`; stage 4 and stage 6 are blocked) and
+[`roadmap/debian/plan.md`](roadmap/debian/plan.md)
 (native Debian packaging, accepted on 2026-11-14); the old plan is archived at
 [`roadmap/qtranslate/legacy-plan.md`](roadmap/qtranslate/legacy-plan.md); the active documentation
 is English. The migration to the tree roadmap and the English baseline is complete.
 
 Stage `11-duckduckgo-libretranslate` was accepted on 2026-11-15 over `8e9c48d..df69d70`: DuckDuckGo
 is a standalone Bing-like `vqd` provider, and LibreTranslate is a provider with a base URL and an
-optional API key (self-hosted without a key, hosted with one). Linux is at 51 tests, `.ts` at 383,
-Windows at 45 (not run here). Stage 6 remains blocked for the deferred LLM actions; the next node is
-stage `12-llm-proofreading`.
+optional API key (self-hosted without a key, hosted with one). Linux is at 53 tests, `.ts` at 383,
+Windows at 46 (not run here). Stage 6 remains blocked for the deferred LLM actions.
+
+Stage `12-llm-proofreading` was accepted on 2026-11-16 over `5e6f1cb..HEAD` (four task commits plus the
+acceptance fix `5210d43`). The OpenAI-compatible provider is now a second text-checking provider next
+to LanguageTool, with the same issue list, preview and Replace/Ignore flow in the same window, popup
+and hotkeys; `[llm]` edited on the **AI** tab serves translation and checking, with no extra consent
+gate. Recorded and not fixed: no chunking (text over the model context is `TooLong`), the checking
+`provider` selection hides the LanguageTool URL row while `validate()` still reports an invalid hidden
+URL, the `AppController` wiring has no test target, and the live provider is unverified — the mock
+`QTcpServer` is the automated gate, so a real key or a local model is the user's check.
 
 The Astra tray-icon delay was investigated in root task `13-tray-icon-latency` and fixed in
 `14-hotkey-warning-delivery`: the empty slot was the `NeedsAttention` status that
@@ -69,15 +78,16 @@ Parsec limitation, not a product defect.
   in-place feedback, and explicit warnings; no `ydotool`/`wtype`. A real portal-capable desktop was
   not available; the portal is covered by a mock DBus (20/20) and Weston headless confirms the
   fallback.
-- Tests: 51 on Linux (42 shared plus `tst_hotkeymanager_x11` 16/16,
+- Tests: 53 on Linux (44 shared plus `tst_hotkeymanager_x11` 16/16,
   `tst_hotkeymanager_wayland` 20/20, `tst_selectiongrabber_linux` 12/12,
   `tst_windowactivation_linux` 13/13, `tst_hotkey_selection_x11` 7/7, `tst_autostart` 6/6,
   `tst_secretprotector` 7+1 in trixie / 8/8 on Astra, `tst_cli` 30/30,
   `tst_proofreading_selection_x11` 6/6; the shared proofreading tests are
   `tst_mainwindow`, `tst_proofreadingmanager`, `tst_languagetoolparser`,
   `tst_languagetoolservice`, `tst_proofreadingwindow` and `tst_proofreadingpopup`;
-  `tst_hotkeywarnings` is 10/10). Windows keeps
-  45 tests (42 shared plus 3 Windows-only) and was not run here (no MSVC). The 14 `.ts` files have
+  `tst_hotkeywarnings` is 10/10, `tst_llmproofreadingparser` 47 cases,
+  `tst_llmproofreadingservice` 27 cases). Windows keeps
+  46 tests (44 shared plus 3 Windows-only) and was not run here (no MSVC). The 14 `.ts` files have
   383 messages each.
 - Fallback: `translation/fallbackService` (off by default, one configured service) retries a
   failed primary request once on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`,

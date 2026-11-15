@@ -478,3 +478,9 @@ mapping and cancellation; one request per check without chunking means a text be
 is reported as `TooLong` rather than split. Documentation still to update after `04`: the service and
 test lists in `doc/architecture.md` (lines 260, 319, 360, 362), §…:1716 "only languagetool in this
 version", and `doc/handoff.md`.
+
+**Superseded by the stage acceptance (`5210d43`).** The parser was changed during acceptance: the
+edits dropped by the category filter and the unchanged replacements moved to the new
+`Parsed::filteredEdits`, so `droppedEdits` now means "could not be placed in the text" only. The
+condition in this service stayed `issues.isEmpty() && droppedEdits > 0` → `BadResponse`, which is why
+the contract above still reads correctly; a category-filtered answer is now a clean check.

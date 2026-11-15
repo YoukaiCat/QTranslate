@@ -1,10 +1,13 @@
 # Spelling, grammar, and punctuation checking
 
-Date: 2026-11-14. Status: **implemented in roadmap stages 5 and 9 (old stage 15)**. The first version
-ships **LanguageTool only** (user decision of 2026-11-09); Yandex Speller and Hunspell/Nuspell are
-deferred and kept here as the longer-term design. Stage 9 (2026-11-14) made checking a standalone
-feature in its own window, removed the pre-translation check, the automatic-replacement setting and
-the online gate, and added the second external-selection hotkey.
+Date: 2026-11-16. Status: **implemented in roadmap stages 5, 9 and 12 (old stage 15)**. Two providers
+ship: **LanguageTool** (user decision of 2026-11-09) and the **LLM** through the configured
+OpenAI-compatible provider (user decision of 2026-11-15, roadmap stage 12); Yandex Speller and
+Hunspell/Nuspell are deferred and kept here as the longer-term design. Stage 9 (2026-11-14) made
+checking a standalone feature in its own window, removed the pre-translation check, the
+automatic-replacement setting and the online gate, and added the second external-selection hotkey.
+Stage 12 (2026-11-16) added the LLM provider next to LanguageTool in the same window, popup and issue
+list, with its settings on the **AI** tab and no extra consent gate.
 
 ## 1. Goal
 
@@ -42,7 +45,7 @@ settings tab, and a separate set of settings. The translation window contains no
 | **LanguageTool** | spelling, grammar, punctuation, style | 25+ languages, including ru, uk, en, de, fr, es, pl, pt, zh, ja, ar | HTTP API or a self-hosted Java server | The best multilingual option; LGPL-2.1; a public API with limits |
 | **Hunspell / Nuspell** | spelling only | many languages, dictionaries separately | C/C++ library | Easy to embed; no grammar/punctuation |
 | **Yandex Speller** | spelling, typos, case | ru, uk, en, and others | HTTP without a key | Free, but does not check commas/grammar |
-| **LLM** | spelling, punctuation, style, tone | many languages | API or a local model | Returns corrected text rather than a list of errors; a diff and confirmation are needed |
+| **LLM** (implemented) | spelling, grammar, punctuation, style | any language the configured model handles | OpenAI-compatible API (OpenRouter by default) or a local Ollama/llama.cpp server; shares `[llm]` with translation | Asks for structured edits and falls back to a diff of a plain corrected text; one request per check, no chunking |
 
 LanguageTool HTTP:
 
@@ -123,9 +126,11 @@ For text replacement:
 A separate **"Text checking"** tab (do not mix it with "Translation"):
 
 - `proofreading/enabled` — enable the mode; the only switch and the consent for remote checking;
-- `proofreading/provider` — `languagetool` in the first version; `llm` arrives with stage 6;
+- `proofreading/provider` — `languagetool` or `llm`; `llm` reads the **AI** tab (`[llm]`), so the
+  LanguageTool URL row is hidden while it is selected and the stored endpoint is kept;
 - `proofreading/language` — checking language (`auto` or a specific one);
-- `proofreading/endpoint` — URL of your own LanguageTool/LLM;
+- `proofreading/endpoint` — URL of your own LanguageTool server (LanguageTool only; the LLM provider
+  uses `llm/baseUrl`);
 - `proofreading/categories` — spelling, grammar, punctuation, style;
 - `proofreading/hotkey` — check the selection and show the popup result, empty by default;
 - `proofreading/replaceHotkey` — check and replace the selection immediately, empty by default.
@@ -186,14 +191,15 @@ affect the selected translation service.
 ## 9. Priorities
 
 1. **LanguageTool** — grammar and punctuation for the main languages.
-2. **Hunspell/Nuspell** — lightweight offline spelling.
-3. **Yandex Speller** — free spelling for ru/uk/en.
-4. **LLM** — optional, for style/tone, not as the only checker.
+2. **LLM** — implemented; a second checker through the configured OpenAI-compatible provider, with
+   the model's own quality and cost.
+3. **Hunspell/Nuspell** — lightweight offline spelling.
+4. **Yandex Speller** — free spelling for ru/uk/en.
 
 ## 10. Done criteria
 
-The first version implements LanguageTool as a standalone feature; the Hunspell/Nuspell and Yandex
-Speller items below are the long-term design and are not part of stages 5/9 (user decision of
+Stages 5, 9 and 12 implement LanguageTool and the LLM provider as standalone features; the
+Hunspell/Nuspell and Yandex Speller items below are the long-term design (user decision of
 2026-11-09). The stage criteria live in
 [`roadmap/qtranslate/09-proofreading-standalone/plan.md`](roadmap/qtranslate/09-proofreading-standalone/plan.md).
 

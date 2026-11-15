@@ -259,6 +259,8 @@ qtranslate/
 │   │   ├── libretranslateparser.h/.cpp  pure parsing for LibreTranslate
 │   │   ├── languagetoolservice.h/.cpp LanguageTool HTTP checking (opt-in, no credentials)
 │   │   ├── languagetoolparser.h/.cpp pure parsing for LanguageTool matches
+│   │   ├── llmproofreadingservice.h/.cpp checking through the OpenAI-compatible provider
+│   │   ├── llmproofreadingparser.h/.cpp prompt, edits, local offsets, diff fallback
 │   │   ├── requestqueue.h/.cpp       serialized request queue shared by the HTTP services
 │   │   ├── queuedwebservice.h/.cpp   TranslationService adapter over RequestQueue
 │   │   └── openaicompatibleservice.h/.cpp  OpenAI-compatible provider
@@ -318,6 +320,8 @@ qtranslate/
     ├── tst_languages.cpp
     ├── tst_languagetoolparser.cpp      pure LanguageTool response parsing
     ├── tst_languagetoolservice.cpp     service against a local HTTP server
+    ├── tst_llmproofreadingparser.cpp   prompt, edits, offsets, diff fallback
+    ├── tst_llmproofreadingservice.cpp  service against a local HTTP server
     ├── tst_libretranslateparser.cpp    pure LibreTranslate response parsing
     ├── tst_libretranslateservice.cpp   service against a local HTTP server
     ├── tst_mainwindow.cpp              translation window: no checking UI, translate/copy paths
@@ -357,9 +361,9 @@ targets. Currently:
 
 | Target | What is included now (0.13.0) |
 |---|---|
-| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `hotkeywarnings`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language), `proofreadingtypes`, `proofreadingservice`, `proofreadingmanager`, `proofreadingtext`; `net/networkmanager`; `services/`: `bingwebparser`, `bingwebservice`, `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `languagetoolparser`, `languagetoolservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `requestqueue`, `reversoparser`, `reversoservice`, `yandexwebparser`, `yandexwebservice` |
+| `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `hotkeywarnings`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language), `proofreadingtypes`, `proofreadingservice`, `proofreadingmanager`, `proofreadingtext`; `net/networkmanager`; `services/`: `bingwebparser`, `bingwebservice`, `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `languagetoolparser`, `languagetoolservice`, `llmproofreadingparser`, `llmproofreadingservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `requestqueue`, `reversoparser`, `reversoservice`, `yandexwebparser`, `yandexwebservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `proofreadingerrortext`, `proofreadingpanel`, `proofreadingwindow`, `proofreadingpopupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_duckduckgoparser`, `tst_duckduckgoservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_hotkeywarnings`, `tst_languages`, `tst_languagetoolparser`, `tst_languagetoolservice`, `tst_libretranslateparser`, `tst_libretranslateservice`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_mainwindow` (offscreen), `tst_proofreadingmanager`, `tst_proofreadingwindow` (offscreen), `tst_proofreadingpopup` (offscreen), `tst_proofreading_selection_x11` (Linux), `tst_queuedwebservice`, `tst_reversoparser`, `tst_reversoservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 45 tests on Windows and 51 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_duckduckgoparser`, `tst_duckduckgoservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_hotkeywarnings`, `tst_languages`, `tst_languagetoolparser`, `tst_languagetoolservice`, `tst_llmproofreadingparser`, `tst_llmproofreadingservice`, `tst_libretranslateparser`, `tst_libretranslateservice`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_mainwindow` (offscreen), `tst_proofreadingmanager`, `tst_proofreadingwindow` (offscreen), `tst_proofreadingpopup` (offscreen), `tst_proofreading_selection_x11` (Linux), `tst_queuedwebservice`, `tst_reversoparser`, `tst_reversoservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 46 tests on Windows and 53 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
@@ -412,7 +416,7 @@ The release tag is `v0.13.0`; CI compares it with `CMakeLists.txt` and fails on 
 dpkg-buildpackage -rfakeroot -us -uc` from the repository root builds
 `qtranslate_<version>_amd64.deb` and writes the `.deb`, `.dsc` and `.tar.xz` to the parent directory;
 `nocheck` skips the tests, `nodoc` leaves `README.Debian` out, and without `nocheck` the rules run
-the 51 tests under `xvfb-run -a`. The package installs `usr/bin/qtranslate`, the desktop entry, the
+the 53 tests under `xvfb-run -a`. The package installs `usr/bin/qtranslate`, the desktop entry, the
 256x256 icon, `copyright`, `changelog.gz` and `LICENSE.gz` (`dh_compress` gzips the 35 KB license
 text under `usr/share/doc`), has no maintainer scripts, and takes `Depends` from `dh_shlibdeps`.
 `packaging/linux/verify-deb.sh` is the content/`Depends`/install gate.
@@ -1713,7 +1717,7 @@ LibreTranslate works only after its base URL is configured. `AppController` appl
 at startup and on a change and passes those services to the dialog.
 
 `[proofreading]` was added without a version bump too. `provider` is trimmed and lowercased and must
-be in `proofreadingProviderIds()` (only `languagetool` in this version); `language` must be `auto` or
+be in `proofreadingProviderIds()` (`languagetool` or `llm`); `language` must be `auto` or
 a known code; `endpoint` must be an absolute `http(s)` URL with a host and without user info, query
 or fragment (empty is valid and means the public API); `categories` is split on commas, trimmed,
 lowercased and normalized to the known four in canonical order, and an empty or unknown list becomes
@@ -1947,7 +1951,7 @@ buttons and menus for Hindi remain English.
 Windows code is isolated: `platform/*.h` headers do not include `<windows.h>`, and the implementations are
 `*_win.cpp`; the Linux backends are `*_linux.cpp`, and `*_stub.cpp` remains only for platforms
 without a backend. `qtranslate_core`, `net/`, `services/`, and the UI do not use WinAPI. The Linux
-tree configures, builds, and links: 51 tests (42 shared plus 9 Linux platform tests) pass under
+tree configures, builds, and links: 53 tests (44 shared plus 9 Linux platform tests) pass under
 `xvfb-run` on Debian 13 (trixie, Qt 6.8.2, GCC 14.2) and Astra Linux 1.8.7 (Qt 6.10.2, GCC 12.2;
 Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
 X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
@@ -2005,19 +2009,20 @@ synthetic-input backend is used. macOS is not planned.
 
 Implemented in roadmap stage 5 and reworked in stage 9 (2026-11-14) as a standalone feature on par
 with translation, in its own window and mode. The detailed design and the deferred providers are in
-[`proofreading.md`](proofreading.md). The first version uses **LanguageTool only**, through the public
-API or a self-hosted endpoint and without credentials; enabling text checking is the only consent and
-there is no second online gate. The value types, `ProofreadingReply`, `ProofreadingService`,
-`ProofreadingManager`, the text replacement helper, the settings group, the **Text checking** tab,
-the separate `ProofreadingWindow` with its own editor, issue list and highlighting, the
-external-selection popup, the `--proofread-selection` command and the two optional hotkeys are
-implemented. Hunspell/Nuspell, Yandex Speller and the LLM checker remain deferred (stage 6 owns the
-LLM action).
+[`proofreading.md`](proofreading.md). Two providers are implemented: **LanguageTool** through the
+public API or a self-hosted endpoint without credentials, and **LLM** through the configured
+OpenAI-compatible provider (`[llm]`, the **AI** tab; roadmap stage 12, 2026-11-16). Enabling text
+checking is the only consent and there is no second online gate. The value types, `ProofreadingReply`,
+`ProofreadingService`, `ProofreadingManager`, the text replacement helper, the settings group, the
+**Text checking** tab, the separate `ProofreadingWindow` with its own editor, issue list and
+highlighting, the external-selection popup, the `--proofread-selection` command and the two optional
+hotkeys are implemented. Hunspell/Nuspell and Yandex Speller remain deferred.
 
 - A separate `ProofreadingService` and `ProofreadingIssue` with `offset`/`length` in UTF-16,
   `message`, `replacements`, `ruleId`, `category`, `severity`.
-- Providers: LanguageTool (HTTP/self-hosted, grammar and punctuation), Hunspell/Nuspell
-  (spelling only), Yandex Speller (spelling ru/uk/en), LLM (optional, via diff).
+- Providers: LanguageTool (HTTP/self-hosted, grammar and punctuation) and LLM (OpenAI-compatible
+  provider, one request per check, edits parsed locally with a diff fallback); Hunspell/Nuspell
+  (spelling only) and Yandex Speller (spelling ru/uk/en) are deferred.
 - A separate "Text checking" settings tab, independent `proofreading/*` keys; API keys — DPAPI.
   `enabled` is off by default; both checking hotkeys are empty by default.
 - The translation window and the checking window are separate windows and modes; the translation
@@ -2199,7 +2204,7 @@ C++ exceptions are not used for flow control: errors are passed in `TranslationR
 
 - `QLoggingCategory` categories: `qtranslate.app`, `.hotkey`, `.grab`, `.net`, `.translation`
   (`TranslationManager`), `.proofreading` (`ProofreadingManager`), `.service.google`, `.service.deepl`,
-  `.service.languagetool`, `.settings`, `.autostart`, `.secret`.
+  `.service.languagetool`, `.service.llm-proofreading`, `.settings`, `.autostart`, `.secret`.
   Only warnings are output by default; detailed logging is enabled by the
   `QT_LOGGING_RULES` environment variable or the `--verbose` flag (writing to
   `%LOCALAPPDATA%\qtranslate\qtranslate.log` on Windows or
@@ -2253,6 +2258,8 @@ are linked into separate test targets):
 | `tst_proofreadingmanager` | Registry, `Window`/`InPlace` channels, cancellation, every pre-network refusal with zero provider calls, asynchronous `finished()`, caller-owned replies, log hygiene |
 | `tst_languagetoolparser` | The `matches[]` parser: category mapping, UTF-16 offsets with an emoji, ordered replacements, invalid ranges, HTML/malformed/empty bodies and the status table, fixed messages without the body |
 | `tst_languagetoolservice` | The service against a local HTTP server: endpoint fallback, the request form without credentials, `auto`, chunking with offset shifts and de-duplication, the category filter, the error matrix, timeout, abort, cookie isolation, log hygiene |
+| `tst_llmproofreadingparser` | The prompt (field names, data-not-instructions, language, category narrowing), the edits path (exact UTF-16 offsets, fenced/prose-wrapped/bare-array answers, emoji before an error and as `original`, a repeated fragment, an absent fragment, deletions, adjacent and overlapping edits), the category filter, the classification matrix, and `ProofreadingText::corrected()` as the invariant over every diff fixture (47 cases) |
+| `tst_llmproofreadingservice` | The service against a local HTTP server: request shape and headers, shifted offsets with the corrected-text invariant, the three clean-answer forms, the plain-text fallback, a partial answer, `finish_reason: "length"` and `413`, malformed answers, nine HTTP statuses, an `error` object in `200`, an unsupported language and empty text without a request, timeout, abort, log hygiene (27 cases) |
 | `tst_mainwindow` | Translation window (offscreen): no checking widget or button, translate, auto-translate and copy paths |
 | `tst_proofreadingwindow` | Separate checking window (offscreen): issues, highlighting, Replace/Ignore/Replace all with preview, undo, copy, states, disable clears and cancels, stale cancellation |
 | `tst_proofreadingpopup` | External-selection popup (offscreen): non-activating flags, corrected preview, Replace selection/Copy/Cancel, the error message and the `Cancelled` path |
@@ -2420,7 +2427,7 @@ Local verification (Windows 11, Qt 6.12.0 MSVC 2022 x64):
 | Checksums | `SHA256SUMS.txt` remains a separate release asset but is not listed in README/Downloads; if needed, the user can find the file |
 | Linux | Linux x86_64 is supported from 0.12.0: X11 is a full target, Wayland is a portal/CLI fallback with explicit limitations; trixie artifacts are CI-built and Astra needs a native build; macOS is not planned (§4.14) |
 | Text checking providers | The first version ships **LanguageTool only**, through the public API or a self-hosted endpoint and **without credentials**. Premium `username`/`apiKey` support is deferred; Hunspell/Nuspell, Yandex Speller and the LLM checker are not part of stage 5 (§4.15) |
-| Checking privacy | `proofreading/enabled` is the only consent; it covers every remote endpoint including self-hosted LanguageTool, and there is no second online gate. Text checking does not reuse the translation services or their settings (§4.11, §4.15) |
+| Checking privacy | `proofreading/enabled` is the only consent; it covers every remote endpoint including self-hosted LanguageTool and the OpenAI-compatible provider used for checking (which shares `[llm]` with translation), and there is no second online gate. Text checking does not reuse the translation services' protocol objects or `proofreading/*` default keys (§4.11, §4.15) |
 | External checking replacement | The popup hotkey offers whole-selection replacement after confirmation; the second hotkey replaces the selection immediately. A changed foreground window or no target copies the corrected text to the clipboard; undo depends on the other application (§4.15, `proofreading.md`) |
 | Checking defaults | `enabled` is off and both checking hotkeys are empty, so no combination is taken silently and nothing is sent until the user enables checking (§4.11, §4.3) |
 | Win+V history entry during capture | The intermediate Ctrl+C may leave an entry; exclusion formats protect only clipboard restoration. A full workaround is a UI Automation strategy (§4.4, §9.2), accepted as future development |
@@ -2476,11 +2483,13 @@ Possible development:
    priorities — [`free-endpoints.md`](free-endpoints.md).
 9. **Local offline translation** — Argos models + CTranslate2 without Python: model download by
    button, pivot through English, fallback to the cloud. Details and PoC — [`local-translation.md`](local-translation.md).
-10. **Spelling, grammar, and punctuation checking** — implemented in stage 5 and reworked in stage 9
-    with LanguageTool only (public API or self-hosted, no credentials; `proofreading/enabled` is the
-    only consent), a separate **Text checking** tab and a separate non-modal checking window, and two
-    external-selection hotkeys: popup result and check-and-replace. Deferred: Hunspell/Nuspell and
-    Yandex Speller, the premium LanguageTool credentials, and the LLM checker (stage 6). Known gaps:
+10. **Spelling, grammar, and punctuation checking** — implemented in stage 5, reworked in stage 9 and
+    given a second provider in stage 12: LanguageTool (public API or self-hosted, no credentials) and
+    the OpenAI-compatible provider (LLM) share the issue list, the preview and the replacement flow;
+    `proofreading/enabled` is the only consent. A separate **Text checking** tab and a separate
+    non-modal checking window, and two external-selection hotkeys: popup result and check-and-replace.
+    Deferred: Hunspell/Nuspell and Yandex Speller, the premium LanguageTool credentials, and chunking
+    for LLM checks longer than the model context. Known gaps:
     a click on the non-activating popup under a real window manager is unverified; the grabber waits
     a fixed 400 ms for the clipboard; the `QSKIP` for a missing `DISPLAY` is unreachable because
     `QTEST_MAIN` creates the xcb application first; a paste-shortcut failure reuses the shared

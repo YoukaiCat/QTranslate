@@ -379,3 +379,11 @@ the threshold and recorded only here: a non-empty bare array of objects inside a
 still reads as an edits document (`droppedEdits` 1, so `03` reports a bad response rather than
 "no issues"); it needs the model to ignore the format *and* the text to contain exactly such an array,
 and the text itself is not damaged.
+
+**Superseded by the stage acceptance (`5210d43`).** The single `droppedEdits` counter described above
+was split: `droppedEdits` now covers only "an edit that could not be placed in the text" (not an
+object, empty `original`, not found in the source, a surrogate-pair split, an overlap), and the new
+`Parsed::filteredEdits` counts "a known but unrequested category" and "`replacement == original`".
+The reason: a user who restricts categories would otherwise see `BadResponse` for a clean check,
+which is what LanguageTool does not do. `03-llm-check-service` decides `BadResponse` on
+`droppedEdits > 0` only, so the condition it was given still reads correctly.

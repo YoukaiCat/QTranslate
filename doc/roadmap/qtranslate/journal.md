@@ -2,12 +2,11 @@
 
 ## Where we left off
 
-Current node: `12-llm-proofreading/04-llm-check-ui` (stage `12-llm-proofreading` is `in-progress`,
-`base: 5e6f1cb`; `01-ai-tab`, `02-llm-check-response` and `03-llm-check-service` are `done`), now
-`in-progress`, `detailed: true` (7 steps), coordinator running. It hides the LanguageTool URL row and
-shows the AI-tab hint when `llm` is selected on the **Text checking** page, keeps the stored
-`proofreading/endpoint` untouched, and adds three slots to `tst_settingsdialog` (36 → 39). Linux stays
-53 tests, Windows 47 (derived), `.ts` 383.
+Current node: no active task. Stage `12-llm-proofreading` was accepted and closed on 2026-11-16 over
+`5e6f1cb..HEAD` (`be1e5f9`, `5dcc390`, `c5b10f0`, `e70bf38`, acceptance fix `5210d43`) and its
+documentation pass is committed with this entry. The next node is the dictionary stage
+`07-dictionary` (`todo`, needs a split); stages 4 and 6 stay `blocked` by user decisions. Linux is at
+53 tests, Windows 46 (derived; 47 counting the LLM service target), `.ts` 383, tree clean.
 
 The Astra tray bug is closed: `13-tray-icon-latency` (investigation, `0052458`) and
 `14-hotkey-warning-delivery` (the fix, `1cbe165`); the documentation pass is `be3fa92`.
@@ -826,3 +825,39 @@ has six languages and no `auto`. Next: plan and run stage 8.
   derived and not built (reviewed by diff). Review: no remarks. Left open: no live check with a real
   key or model; documentation (`doc/architecture.md`, `doc/handoff.md`, the stage tables) is the
   lead's pass. Next: the stage is one task from complete; the lead closes `12-llm-proofreading`.
+- 2026-11-15 — Task `12-llm-proofreading/04-llm-check-ui` done as `e70bf38`. Selecting `llm` on the
+  **Text checking** page hides the whole `LanguageTool URL:` row (`QFormLayout::setRowVisible()`, so
+  the auto-created label goes too), its hint and the invalid-URL warning, and shows the word-wrapped
+  `proofreadingLlmHint` with the existing AI-tab sentence, byte for byte; switching back restores
+  everything without reopening the dialog, and a stored `provider=llm` opens the page in the right
+  state. The provider form became the member `m_proofreadingProviderForm`; the key is
+  `currentData() == "llm"`. `settings()`/`validate()`/`SettingsStore` keep `proofreading/endpoint`
+  intact. Three new slots in `tst_settingsdialog` (36 → 39, `Totals: 41 passed`) and an extended
+  `proofreadingLlmProviderRoundTrip()` in `tst_settings`. Verification: host Debug/Release 53/53 with 0
+  warnings, `qtranslate-trixie` Release 53/53, `.ts` 383 with exactly one occurrence of the reused
+  string, Windows by diff (47). Review found nothing. Recorded rough edge: with `llm` selected and an
+  invalid URL typed earlier under LanguageTool, `validate()` still reports a field the user cannot see
+  — kept because skipping the check would let `normalizedProofreadingEndpoint()` erase the stored
+  endpoint silently; a real fix changes the normalisation contract and needs a new `tr()`.
+- 2026-11-16 — Stage `12-llm-proofreading` accepted over `5e6f1cb..HEAD` (the unrelated tray commits
+  `0052458`, `1cbe165`, `be3fa92`, `6a0cddd` were excluded from the range) and closed with its
+  `## Outcome`. The acceptance review found no regression in the LanguageTool path, the translation
+  provider, the settings normalisation or the dialog tests, confirmed all stage criteria (one `[llm]`
+  configuration, no consent key, clean logs, clear errors, no hang) and made one fix, `5210d43`: the
+  parser's `droppedEdits` mixed "could not be placed in the text" with "dropped by the category filter
+  or an unchanged replacement", so a user who restricted categories saw `BadResponse` for a clean
+  check. `droppedEdits` now counts only unplaceable edits, `filteredEdits` is new, the service
+  condition did not change, and `tst_llmproofreadingparser`/`tst_llmproofreadingservice` pin both
+  paths. Verification: clean host Debug and Release builds 53/53 with 0 warnings, `qtranslate-trixie`
+  Release 53/53, `.ts` 383, Windows by diff. Recorded limitations carried in the stage outcome: no
+  chunking, `validate()` reports an invalid hidden LanguageTool URL while `llm` is selected, no test
+  target for the `AppController` wiring, unverified live provider, and the model-output quirks that are
+  handled rather than fixed. Parallel `ctest -j4` under one Xvfb fails four X11 tests — an artifact of
+  the parallel run, the sequential run is the gate. Documentation pass (lead): `doc/architecture.md`
+  (service and test trees, module list, `53`/`46` counts, `qtranslate.service.llm-proofreading`, the
+  §4.15 provider text, the privacy row, the two new test-table rows), `doc/proofreading.md` (two
+  providers, the `provider`/`endpoint` settings split, priorities), `doc/handoff.md`, `AGENTS.md`
+  (46/53/44 and the two-provider checking rule), both READMEs (53 tests, the LLM provider and its
+  one-request limitation), the root `## Done when`/`## History` counts, and a "superseded by the
+  acceptance" note in the `02` and `03` outcomes, which still described the single counter. Next node:
+  `07-dictionary` (stage, `todo`, needs a planner split).

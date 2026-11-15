@@ -44,7 +44,7 @@
   `tst_popupwindow` and `tst_settingsdialog` also set offscreen themselves. The Linux CI job runs
   GUI tests under `xvfb-run`.
 - Debug and Release must build without warnings (`/W4` on Windows, `-Wall -Wextra` on Linux); all
-  45 Windows tests and all 51 Linux tests must pass (42 shared, 3 Windows-only, 9 Linux-only). The
+  46 Windows tests and all 53 Linux tests must pass (44 shared, 3 Windows-only, 9 Linux-only). The
   project requires Qt 6.5+; local development
   uses Qt 6.12 on Windows and Qt 6.10.2 (Astra) or Qt 6.8.2 (trixie) on Linux.
 - Tests use local `QTcpServer` and fixtures; no real Google/DeepL keys or internet are required.
@@ -132,12 +132,14 @@
 - Logs must never contain translated or checked text, API keys or passwords. `--verbose` writes to
   `%LOCALAPPDATA%\qtranslate\qtranslate.log` on Windows and
   `$XDG_STATE_HOME/qtranslate/qtranslate.log` on Linux.
-- LanguageTool checking is enabled by `proofreading/enabled` (default `false`), which is the only
-  consent; there is no second online gate. The public `api.languagetool.org` or a self-hosted
-  endpoint is used without credentials. Text checking is a separate window and mode; the translation
-  window has no checking UI. Do not send `apiKey`/`username` (the public API rejects them and a 400
-  can echo the value), do not reuse the translation services or their settings, and keep the checked
-  text out of the logs.
+- Text checking is enabled by `proofreading/enabled` (default `false`), which is the only consent;
+  there is no second online gate, including for the second provider. Two providers exist:
+  `languagetool` (public `api.languagetool.org` or a self-hosted endpoint, no credentials) and `llm`
+  (the OpenAI-compatible provider configured on the **AI** tab, `[llm]`, shared with translation).
+  Checking is a separate window and mode; the translation window has no checking UI. Do not send
+  `apiKey`/`username` to LanguageTool (the public API rejects them and a 400 can echo the value), do
+  not reuse the translation services' protocol objects or `proofreading/*` defaults for the LLM
+  provider, and keep the checked text, keys and model answers out of the logs.
 - `AppController::start()` calls `Autostart::sync(settings.general.autostart)`; keep installer-written
   settings consistent with it.
 - Deployment intentionally excludes `vc_redist.x64.exe`, D3D/DXC compilers and `opengl32sw.dll`

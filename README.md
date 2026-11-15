@@ -18,11 +18,13 @@ translation directly in the active input field.
   field, which is convenient for replying in chats.
 - **Ctrl+W** opens the main window with the selection translated.
 - **Text checking** is a separate window and mode, opened from the tray item **Check text…**, with
-  the **Text checking** settings tab: LanguageTool finds spelling, grammar and punctuation issues,
-  the checking window highlights them and can replace one issue, all issues or copy the corrected
-  text, and every replacement is one undo step. The translation window has no checking UI.
-  `proofreading/enabled` is the only switch; the public LanguageTool API and a self-hosted URL work
-  without a key. Two optional hotkeys (empty by default) check a selection in another application:
+  the **Text checking** settings tab: two providers find spelling, grammar and punctuation issues —
+  LanguageTool and the OpenAI-compatible model configured on the **AI** tab (OpenRouter or a local
+  Ollama/llama.cpp server). The checking window highlights the issues and can replace one issue, all
+  issues or copy the corrected text, and every replacement is one undo step. The translation window
+  has no checking UI. `proofreading/enabled` is the only switch; the public LanguageTool API and a
+  self-hosted URL work without a key, and the LLM provider needs no extra consent beyond its own
+  configuration. Two optional hotkeys (empty by default) check a selection in another application:
   one shows the result in a popup, the other replaces the selection with the corrected text
   immediately; `--proofread-selection` uses the popup scenario.
 - Google Translate (free endpoint or Cloud API) and DeepL (API key or unofficial free web mode),
@@ -184,7 +186,7 @@ these artifacts; the tag must match the version in `CMakeLists.txt`.
 
 ### Linux (0.13.0)
 
-QTranslate builds, links, and passes 51 tests (42 shared plus 9 Linux platform tests) in Debug and
+QTranslate builds, links, and passes 53 tests (44 shared plus 9 Linux platform tests) in Debug and
 Release with `-Wall -Wextra` and no warnings on Debian 13 (trixie, Qt 6.8.2) and Astra Linux 1.8.7
 (Qt 6.10.2). X11 is the full target: global hotkeys, selection capture, in-place replacement,
 autostart, the four CLI commands, and tray integration are implemented. Wayland is limited: the
@@ -247,7 +249,7 @@ DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc" dpkg-buildpackage -rfakeroot
 `dpkg-buildpackage` writes the `.deb`, the `.dsc`, the `.tar.xz`, the `-dbgsym` package, the
 `.buildinfo` and the `.changes` to the parent directory (Astra's `dpkg-buildpackage` 1.21 rejects a
 trailing `.`; the command has none). The debug symbols stay in the `-dbgsym` package and are not
-released. `nocheck` skips the 51 tests, `nodoc` leaves `README.Debian` out of the package, and
+released. `nocheck` skips the 53 tests, `nodoc` leaves `README.Debian` out of the package, and
 `parallel=N` bounds the build; without `nocheck` the rules run the tests under `xvfb-run -a`. The
 build dependencies are in `debian/control`, and `dpkg-checkbuilddeps` reports what is missing.
 
@@ -288,10 +290,12 @@ security policy's approval. To revoke it, run
   Russian and cannot detect the source language.
 - OpenRouter and other OpenAI-compatible providers need an API key and an available model. Quality,
   speed and cost depend on the chosen model; free models have strict rate limits.
-- LanguageTool checking is enabled by **Settings → Text checking**; there is no separate online
-  gate. The public API limits requests to about 20 per minute and 20 000 characters per request, and
+- Text checking is enabled by **Settings → Text checking**; there is no separate online gate, and the
+  LLM provider is chosen there too (its endpoint, key and model live on the **AI** tab). The public
+  LanguageTool API limits requests to about 20 per minute and 20 000 characters per request, and
   self-hosted LanguageTool is more reliable for long or frequent checks. The checked text goes to the
-  LanguageTool server. The popup hotkey replaces a selection after confirmation; the second hotkey
+  selected provider; an LLM check is one request, so a text longer than the model context is reported
+  as too long instead of being split. The popup hotkey replaces a selection after confirmation; the second hotkey
   replaces it immediately. Undo depends on the other application, and a changed foreground window
   falls back to copying the corrected text to the clipboard.
 - The intermediate `Ctrl+C` used to grab a selection may appear in the Windows clipboard history
