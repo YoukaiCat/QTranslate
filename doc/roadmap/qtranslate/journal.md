@@ -12,34 +12,33 @@ shows the result; the second hotkey checks and immediately replaces the selectio
 field. Final host Debug/Release 46/46 each; `.ts` 374; Windows 40 not run. Stage
 `08-free-services-always-on` remains `done` (`2650def..2ebf5ae`, docs in the closing commit).
 
-Stages 1-3, 5, 8, 9 and 10 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by the
-user's 2026-11-05 decision; stage 6 `06-llm-actions` is `blocked` by the user's 2026-11-15 decision
+Stages 1-3, 5, 8, 9, 10 and 11 are `done`; stage 4 `04-local-offline-translation` stays `blocked` by
+the user's 2026-11-05 decision; stage 6 `06-llm-actions` is `blocked` by the user's 2026-11-15 decision
 (the actions are deferred; only the checking backend continues as stage 12); stage 7 is `todo`. The
 root is `in-progress`; its `Done when` requires every stage to be done or dropped, so the blocked
-stages 4 and 6 are deliberate exceptions. Stage 11 `11-duckduckgo-libretranslate` is `done` over `8e9c48d..df69d70`: research `1dec8e0`,
-DuckDuckGo (service `e0b411b`, UI `3f393df`), LibreTranslate (service `49a37a0`, settings/UI
-`b047766`, acceptance fix `df69d70`). User decisions 2026-11-15: DuckDuckGo is a Bing-like `vqd`
-provider; LibreTranslate is added with a base URL and an optional API key (self-hosted without a key,
-hosted with one). Both are accepted; the stage outcome records the known `es`/Bing gap and the
-`isConfigured()` duplicate. The lead's documentation pass is next (`doc/free-endpoints.md`,
-`doc/architecture.md`, both READMEs, `AGENTS.md`, `doc/handoff.md`; counts 50/382/44), then stage 12
-`12-llm-proofreading` (needs a planner split). The user also reported a new bug: on Astra the tray
-icon appears 3-5 seconds late at startup; it is recorded as root task `13-tray-icon-latency`, not
-started.
+stages 4 and 6 are deliberate exceptions. Stage 11 was accepted and closed over `8e9c48d..df69d70`
+(research `1dec8e0`, DuckDuckGo `e0b411b`/`3f393df`, LibreTranslate `49a37a0`/`b047766`, acceptance
+fix `df69d70`); its documentation pass is committed as `5e6f1cb` (providers, counts 50/382/44,
+`doc/free-endpoints.md` §11–§12, architecture §4.7.8–§4.7.9). Stage 12 `12-llm-proofreading` is
+`in-progress` (`base: 5e6f1cb`) and split into four tasks; `01-ai-tab` is `done` as `be1e5f9` (the
+AI settings tab and the moved provider group). The next node is `02-llm-check-response` (needs
+detailing). The user also reported a new bug: on Astra the tray icon appears 3-5 seconds late at
+startup; it is recorded as root task `13-tray-icon-latency`, not started.
 
 Release **0.13.0** was published on 2026-11-14 from `main` (tag `v0.13.0`); it includes the
 proofreading stage, the native Debian source package and GPL-3.0-or-later. The previous 0.12.0
 release (2026-11-09, tag `v0.12.0`) stays published, and the old 0.11.1 GitHub release stays until
 the user checks the current code on Windows.
 
-Work is on `main` (matches the root `branch:`); the working tree has only the map edits for the stage
-closing and the docs pass at `df69d70`. The stopped, unreviewed work on the former task
-`01-llm-action-core` and the stage 6 split is in `stash@{0}` (`llm-actions WIP: task 01 unreviewed +
-stage 06 split, stopped 2026-11-15`); it is not in the tree, not reviewed, and is kept only in case
-the LLM checking task reuses the transport part. Linux Debug/Release 50/50 on the host; Windows 44
-(derived, not run locally); `.ts` is at 382. The `qtranslate-trixie` image is built. Resume with
-`/new`, agent `lead`, `@continue`; the next nodes are the documentation pass for stage 11 and then
-stage 12.
+Work is on `main` (matches the root `branch:`); the working tree is clean at `be1e5f9`. The stopped,
+unreviewed work on the former task `01-llm-action-core` and the stage 6 split is in `stash@{0}`
+(`llm-actions WIP: task 01 unreviewed + stage 06 split, stopped 2026-11-15`); it is not in the tree,
+not reviewed, and is kept only in case the LLM checking task reuses the transport part. Linux
+Debug/Release 50/50 on the host; Windows 44 (derived, not run locally); `.ts` is at 384. The
+`qtranslate-trixie` image is built. Resume with `/new`, agent `lead`, `@continue`; the next node is
+`12-llm-proofreading/02-llm-check-response`. Documentation leftovers for the next pass: both READMEs
+still say `Settings → Services → OpenAI-compatible provider` (now the AI tab), `AGENTS.md` says 382
+messages, and `src/services/libretranslateservice.cpp:408` has a stale 382 comment.
 
 Task `10-provider-hint-cleanup` is `done` as `589dbb5`: the eight recipient/privacy sentences are
 gone from the settings hints (fallback, Yandex, Bing, DeepL free web, OpenAI-compatible, MyMemory,
@@ -550,3 +549,7 @@ has six languages and no `auto`. Next: plan and run stage 8.
   OpenAI-compatible provider`, `AGENTS.md:58` still says 382 messages, and the comment at
   `src/services/libretranslateservice.cpp:408` says "382 entries per file" (comment-only, left because this
   task must not touch `src/services`). Next: `02-llm-check-response`.
+- 2026-11-15 — Context stop after `be1e5f9` (~364k). The working tree is clean, stage 12 is in progress
+  and its first child is done; `02-llm-check-response` is the next node and needs detailing. The
+  documentation leftovers (both READMEs' Services path, `AGENTS.md`'s 382 messages, the stale comment
+  in `libretranslateservice.cpp`) are listed in `## Where we left off`. Nothing is pushed.
