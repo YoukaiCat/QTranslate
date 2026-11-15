@@ -47,6 +47,7 @@ Old stages 13 (free web endpoints) and 16 (LLM actions) are partially implemente
 11. [DuckDuckGo and LibreTranslate as standalone providers](11-duckduckgo-libretranslate/plan.md) — research both endpoints and add the viable ones as no-key translation providers, with settings, fallback, tests and documentation (user decision, 2026-11-15).
 12. [LLM as a text-checking provider](12-llm-proofreading/plan.md) — the configured OpenAI-compatible provider becomes a second checking provider in the existing window and popup, with AI settings on their own tab and no extra consent (user decision, 2026-11-15).
 13. [Tray icon appears 3-5 seconds late on Astra](13-tray-icon-latency/plan.md) — user report, 2026-11-15: the tray slot stays empty for 3-5 seconds after launch; reproduce, find the cause, fix it or record the panel limitation.
+14. [Hotkey warning delivery](14-hotkey-warning-delivery/plan.md) — the "hotkey unavailable" warning stops using a tray balloon and goes to the `--verbose` log and a hint in the settings dialog (user decision, 2026-11-15).
 
 The order follows the old plan. Stages 3-7 are independent except where they state a dependency.
 Stage 8 is a user-requested correction of stage 3 and was worked before stage 6. Stage 9 is a
@@ -54,4 +55,6 @@ user-requested correction of stage 5 and was worked before stage 6 as well. Stag
 user-requested wording cleanup and was worked before stage 6. Stage 11 is the current node: the user
 asked to research DuckDuckGo and LibreTranslate and add both as providers. Stage 12 follows stage 11
 and takes the LLM checking backend that stage 6 would have provided; stage 6 stays blocked for the
-remaining actions. Stage 13 is a user-reported Astra bug and is worked when the user asks.
+remaining actions. Stage 13 is a user-reported Astra bug and is worked when the user asks. Stage 14
+implements the user's decision after stage 13's investigation: the hotkey warning leaves the tray and
+moves to the `--verbose` log and the settings dialog.

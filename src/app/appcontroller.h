@@ -1,6 +1,7 @@
 #pragma once
 
 #include "app/singleinstance.h"
+#include "core/hotkeywarnings.h"
 
 #include <QObject>
 #include <QPointer>
@@ -74,6 +75,7 @@ private:
     void onActiveServiceChanged(const QString &id);
     void selectService(const QString &id);
     void updateTrayToolTip();
+    void retryUnavailableHotkeys();
     void applyUiLanguage(const QString &code);
     void applySettings(const AppSettings &oldSettings, const AppSettings &newSettings);
     void showSettings();
@@ -155,6 +157,7 @@ private:
     std::unique_ptr<ProofreadingWindow> m_proofreadingWindow;
     TrayIcon *m_tray = nullptr;
     HotkeyManager *m_hotkeys = nullptr;
+    HotkeyWarnings m_hotkeyWarnings;
     QTimer *m_fullscreenTimer = nullptr;
     QTimer *m_proofreadFocusTimer = nullptr;
     bool m_hotkeyEditing = false;

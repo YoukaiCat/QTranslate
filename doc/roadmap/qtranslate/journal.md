@@ -2,8 +2,10 @@
 
 ## Where we left off
 
-Current node: no active task. `13-tray-icon-latency` (root task) is `done` as an investigation with
-**no code change**; the next node is `12-llm-proofreading/02-llm-check-response` (needs detailing).
+Current node: `14-hotkey-warning-delivery` (root task, `in-progress`, `detailed: true`), coordinator
+running. It implements the user's decision (1) below: no startup tray balloon for the
+"Hotkey unavailable" warning, only the `--verbose` log and a hint in the settings dialog.
+`13-tray-icon-latency` is `done` as an investigation with **no code change** (`0052458`).
 
 The tray defect was settled on 2026-11-15. Cause, measured on this Astra machine (Astra 1.8.7, X11,
 `XDG_CURRENT_DESKTOP=fly`, Qt 6.10.2, panel host `fly-wm`, tray is StatusNotifierItem): the empty slot
@@ -14,13 +16,15 @@ the item, and paints 0.20-0.25 s after the status returns to `Active`; a start w
 notification draws the icon at 0.41 s. Re-publishing `NewIcon` (the plan's B1 fix) was measured not to
 help, so no workaround was added. Evidence and the nine-run table are in the task's `## Outcome`.
 
-Left open, and outside that task: the ~5 s empty slot needs a product decision on how the hotkey
-warning is delivered (one warning instead of three, delayed delivery, `NoIcon`, another channel) —
-that is the user's call; the panel never reads `AttentionIconPixmap`, which is a vendor-side half
-worth reporting to Astra; and, separately, **no global hotkey can be registered at all on this
-desktop** (every combination is refused as "already used by another program"), which is why the
-warnings appear here. The user's report says hotkeys start normally for them, so that needs its own
-task.
+User decisions of 2026-11-15 after the investigation: (1) the hotkey-unavailable warning must not be a
+tray balloon — no startup popup at all; it goes to the `--verbose` log and to a hint in the settings
+dialog. Rejected: one non-modal message box, one shortened balloon, keeping the current behaviour.
+(2) The rebuilt binaries were re-trusted with `sudo /usr/bin/fly-set-execid.sh` (the
+`/etc/X11/trusted.d/qtranslate` `security.exec_id` is lost on every rebuild), after which `Ctrl+Q`,
+`Ctrl+Shift+Q` and `Ctrl+W` register again (`Registered ...` at 16:31:48) and the tray icon is drawn in
+the first slot right away — so the 3-5 s delay the user reported is the `NeedsAttention` window from
+our own notifications, not a panel polling interval. Still open: the panel never reads
+`AttentionIconPixmap`, which is a vendor-side half worth reporting to Astra.
 
 Stage `09-proofreading-standalone` is `done` (accepted over
 `3e75331..31a2a36`; four task commits `11eb5bc`, `d9428c9`, `25f0f5f`, `31a2a36`, docs in the
@@ -599,3 +603,28 @@ has six languages and no `auto`. Next: plan and run stage 8.
   global hotkey can be registered at all on this desktop** (every combination refused as "already used
   by another program"), which is why the warnings appear here and needs its own task. Evidence stayed
   in `/tmp/tray-latency/`, outside the repository; nothing is pushed.
+- 2026-11-15 — User decisions after the tray investigation, both supplied verbatim by the user when
+  asked. (1) How to deliver the "Hotkey unavailable" warning so the tray never blanks: **no startup
+  popup at all — the `--verbose` log plus a hint in the settings dialog**. Rejected: one non-modal
+  message box in the style of the no-tray/Wayland warnings (the lead's recommendation), one shortened
+  2 s balloon (the slot would still be empty while it lives), and keeping the current behaviour. This
+  turns the investigation into a code node. (2) Re-trusting the rebuilt binaries was approved: `sudo
+  /usr/bin/fly-set-execid.sh` was run and `Ctrl+Q`, `Ctrl+Shift+Q`, `Ctrl+W` register again
+  (`Registered ...` at 16:31:48, `Started in 46 ms`); a screenshot of the Fly tray at 16:32 shows the
+  QTranslate icon in the first slot immediately, which confirms the empty slot was the
+  `NeedsAttention` window of our own balloons. The trust attribute belongs to the binary and is lost
+  on every rebuild, so this step repeats after each build; that is a known Astra/Parsec limitation,
+  recorded already in the stage 2 outcome. Next: the new node implementing (1).
+- 2026-11-15 — The planner added node `14-hotkey-warning-delivery` (root task, `depends:
+  [13-tray-icon-latency]`) and detailed it. Decisions it made on its own: no success signal exists in
+  `HotkeyManager`, so the list of unavailable shortcuts is rebuilt from attempts (the entry is dropped
+  before each retry and written again on failure) and re-checked once when the settings dialog opens,
+  instead of being cleared by a signal; the reason stays in the log only, because the platform reason
+  is either an untranslated English literal or a raw OS error; the collection lives in a small testable
+  `src/core/hotkeywarnings.{h,cpp}` (new `tst_hotkeywarnings`, Linux 50 → 51) rather than a private
+  `QMap` in `AppController`, which has no test target; the hint text does not claim "already used by
+  another program" because on Wayland the cause is a missing portal. Rejected: a duplicate sequence in
+  the INI as the reproduction (X11 gives no `BadAccess` for a repeat grab by the same client), and
+  live-updating the hint while the dialog is open (the dialog is modal). Counts: one new `tr()` string,
+  two removed, 384 → 383 messages in each of the 14 `.ts`; `AGENTS.md` and
+  `src/services/libretranslateservice.cpp:408` still say 382 and are the lead's edits.

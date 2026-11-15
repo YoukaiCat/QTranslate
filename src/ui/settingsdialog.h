@@ -51,6 +51,10 @@ public:
     // unsupported key sequence, duplicate hotkeys or equal languages fail.
     bool validate(QString *error) const;
 
+    // The combinations whose registration failed; shown as a hint on the
+    // Hotkeys page. An empty list hides the hint.
+    void setUnavailableHotkeys(const QStringList &sequences);
+
     void accept() override;
 
 public slots:
@@ -111,6 +115,7 @@ private:
     QKeySequenceEdit *m_proofreadingHotkey = nullptr;
     QKeySequenceEdit *m_proofreadReplaceHotkey = nullptr;
     QCheckBox *m_pauseInFullscreen = nullptr;
+    QLabel *m_hotkeyWarning = nullptr;
 
     LanguageComboBox *m_sourceLanguage = nullptr;
     LanguageComboBox *m_primaryLanguage = nullptr;

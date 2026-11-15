@@ -313,6 +313,7 @@ void AppController::createHotkeys()
     m_fullscreenAppActive =
         m_pauseInFullscreen && Platform::isFullscreenForegroundWindow();
     m_hotkeys = new HotkeyManager(this);
+    m_hotkeyWarnings.clear();
     if (m_fullscreenAppActive)
         m_hotkeys->setSuspended(true);
 
@@ -352,20 +353,10 @@ void AppController::createHotkeys()
     });
 
     connect(m_hotkeys, &HotkeyManager::registrationFailed, this,
-            [this](HotkeyAction, const QKeySequence &sequence, const QString &reason) {
+            [this](HotkeyAction action, const QKeySequence &sequence, const QString &reason) {
                 const QString keys = sequence.toString(QKeySequence::NativeText);
                 qCWarning(lcApp) << "Hotkey" << keys << "is unavailable:" << reason;
-                // On Wayland the desktop may reject every shortcut because the
-                // portal is missing; the single startup warning explains that.
-                if (m_waylandSession)
-                    return;
-                if (m_tray) {
-                    m_tray->showMessage(tr("Hotkey unavailable"),
-                                        tr("%1 is already used by another program. "
-                                           "Close that program or choose another combination "
-                                           "in the settings.")
-                                            .arg(keys));
-                }
+                m_hotkeyWarnings.record(static_cast<int>(action), keys);
             });
 
     const auto registerHotkey = [this](HotkeyAction action, const QKeySequence &sequence) {
@@ -427,6 +418,23 @@ void AppController::updateTrayToolTip()
     m_tray->setToolTip(keys.isEmpty()
                            ? AppInfo::name()
                            : tr("%1 — %2").arg(AppInfo::name(), keys.join(QStringLiteral(" / "))));
+}
+
+void AppController::retryUnavailableHotkeys()
+{
+    if (!m_hotkeys || m_hotkeyWarnings.isEmpty())
+        return;
+    // A suspended manager only remembers the sequence, and a Wayland retry
+    // would show the desktop's shortcut dialog again.
+    if (m_hotkeys->isSuspended() || m_waylandSession)
+        return;
+    const QList<int> actions = m_hotkeyWarnings.actions();
+    for (const int action : actions) {
+        m_hotkeyWarnings.forget(action);
+        const QKeySequence sequence = m_hotkeys->hotkey(static_cast<HotkeyAction>(action));
+        if (!sequence.isEmpty())
+            m_hotkeys->registerHotkey(static_cast<HotkeyAction>(action), sequence);
+    }
 }
 
 void AppController::applyUiLanguage(const QString &code)
@@ -594,6 +602,7 @@ void AppController::applySettings(const AppSettings &oldSettings,
                                      const QKeySequence &newSequence) {
         if (oldSequence == newSequence)
             return;
+        m_hotkeyWarnings.forget(static_cast<int>(action));
         if (newSequence.isEmpty())
             m_hotkeys->unregisterHotkey(action);
         else
@@ -791,6 +800,8 @@ void AppController::showSettings()
                           Autostart::isApproved(), fallbackServices, !secretStorageAvailable,
                           proofreadingProviders, m_mainWindow.get());
     if (m_hotkeys) {
+        retryUnavailableHotkeys();
+        dialog.setUnavailableHotkeys(m_hotkeyWarnings.sequences());
         connect(&dialog, &SettingsDialog::hotkeyEditingChanged, this,
                 [this](bool editing) {
                     m_hotkeyEditing = editing;

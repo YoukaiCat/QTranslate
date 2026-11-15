@@ -40,6 +40,7 @@ qt_add_library(qtranslate_core STATIC
     src/core/appinfo.cpp                    src/core/appinfo.h
     src/core/apppaths.h
     src/core/hotkeysequence.cpp             src/core/hotkeysequence.h
+    src/core/hotkeywarnings.cpp             src/core/hotkeywarnings.h
     src/core/languages.cpp                  src/core/languages.h
     src/core/popupplacement.cpp             src/core/popupplacement.h
     src/core/proofreadingmanager.cpp        src/core/proofreadingmanager.h

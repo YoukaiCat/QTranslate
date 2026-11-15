@@ -1030,6 +1030,28 @@ private slots:
         }
     }
 
+    void hotkeyWarningHint()
+    {
+        SettingsDialog dialog(AppSettings{}, {QStringLiteral("en")},
+                              {QStringLiteral("de"), QStringLiteral("en")}, true);
+        auto *hint = dialog.findChild<QLabel *>(QStringLiteral("hotkeyWarning"));
+        QVERIFY(hint);
+        QVERIFY(hint->isHidden());
+
+        dialog.setUnavailableHotkeys({QStringLiteral("Ctrl+Q"), QStringLiteral("Ctrl+W")});
+        QVERIFY(!hint->isHidden());
+        QVERIFY(hint->text().contains(QStringLiteral("Ctrl+Q")));
+        QVERIFY(hint->text().contains(QStringLiteral("Ctrl+W")));
+        QVERIFY(hint->text().contains(QStringLiteral("--verbose")));
+        // The reason is not always a foreign program: on Wayland it is a
+        // missing portal, so the hint must not claim one.
+        QVERIFY(!hint->text().contains(QStringLiteral("already used")));
+
+        dialog.setUnavailableHotkeys({});
+        QVERIFY(hint->isHidden());
+        QVERIFY(hint->text().isEmpty());
+    }
+
     void deepLKeyCheck()
     {
         SettingsDialog dialog(AppSettings{}, {QStringLiteral("en"), QStringLiteral("ru")},

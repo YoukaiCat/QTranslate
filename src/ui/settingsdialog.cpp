@@ -143,9 +143,15 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
            "Leave a field empty to disable that action."),
         hotkeysPage);
     hotkeysHint->setWordWrap(true);
+    m_hotkeyWarning = new QLabel(hotkeysPage);
+    m_hotkeyWarning->setObjectName(QStringLiteral("hotkeyWarning"));
+    m_hotkeyWarning->setWordWrap(true);
+    m_hotkeyWarning->setStyleSheet(QStringLiteral("color: #d32f2f;"));
+    m_hotkeyWarning->setVisible(false);
     hotkeysLayout->addLayout(hotkeysForm);
     hotkeysLayout->addWidget(m_pauseInFullscreen);
     hotkeysLayout->addWidget(hotkeysHint);
+    hotkeysLayout->addWidget(m_hotkeyWarning);
     hotkeysLayout->addStretch();
 
     // Translation.
@@ -1052,6 +1058,20 @@ bool SettingsDialog::validate(QString *error) const
         }
     }
     return true;
+}
+
+void SettingsDialog::setUnavailableHotkeys(const QStringList &sequences)
+{
+    if (sequences.isEmpty()) {
+        m_hotkeyWarning->setText(QString());
+        m_hotkeyWarning->setVisible(false);
+        return;
+    }
+    m_hotkeyWarning->setText(
+        tr("Unavailable shortcuts: %1. They will not work; choose other combinations, or run "
+           "with --verbose to see why.")
+            .arg(sequences.join(QStringLiteral(", "))));
+    m_hotkeyWarning->setVisible(true);
 }
 
 void SettingsDialog::accept()
