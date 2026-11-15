@@ -144,8 +144,13 @@ Deferred, with the price of a full fix:
 - **No test target for the `AppController` wiring.** Registration order and `applySettings()` are
   covered only by reading the diff, the dialog combo test and the manual path — the same gap `01` and
   `02` recorded.
-- **The live provider is unverified.** The automated gate is a mock `QTcpServer`; a real key or a local
-  Ollama/llama.cpp model, the cost and the privacy acceptance are the user's.
+- **The live provider was verified on one free model only.** On 2026-11-16 the user's OpenRouter key
+  was used through the HTTP proxy `127.0.0.1:2080` with `inclusionai/ling-3.2-flash:free`: the check
+  window found one German spelling issue in 17.4 s (215 + 195 tokens), applying it produced
+  `Testsatz`, and the automatic re-check returned zero issues in 3.9 s (214 + 163 tokens). A keyless
+  request produced the expected `401` shown as "the provider rejected the request (HTTP 401)". The
+  mock `QTcpServer` stays the automated gate; other free models, paid models, a local Ollama/llama.cpp
+  server and the cost/privacy acceptance remain the user's.
 - **Model output quirks stay handled, not fixed:** a non-empty bare array of objects inside an ordinary
   sentence still reads as an edits document, a valid JSON envelope without `edits` is `Malformed`, and
   an unknown category falls back to `grammar`.

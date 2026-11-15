@@ -861,3 +861,19 @@ has six languages and no `auto`. Next: plan and run stage 8.
   one-request limitation), the root `## Done when`/`## History` counts, and a "superseded by the
   acceptance" note in the `02` and `03` outcomes, which still described the single counter. Next node:
   `07-dictionary` (stage, `todo`, needs a planner split).
+- 2026-11-16 — Live check of the `llm` provider performed at the user's request ("проверить на
+  бесплатных моделях openrouter, но только через прокси 127.0.0.1:2080"). Facts measured: the proxy is
+  alive and OpenRouter answers through it (467 models, 14 with a `:free` suffix); a keyless request
+  gets `401`; the first key the user gave (40 characters, no `sk-or-v1-` prefix) is not an OpenRouter
+  key — OpenRouter answers `Missing Authentication header`, while a fake `sk-or-v1-…` key answers
+  `User not found`; the second key works. `google/gemma-4-31b-it:free` was rate-limited upstream (429)
+  and `nvidia/nemotron-3.5-lightning:free` had no available endpoint (404), so the run used
+  `inclusionai/ling-3.2-flash:free`. Settings were set to `network/proxyMode=manual` with
+  `127.0.0.1:2080`, `proofreading/provider=llm` and that model; the key was entered in the **AI** tab
+  and the user chose to keep the configuration. Results in the real window: one German spelling issue
+  found in 17.4 s (215 + 195 tokens), replacement produced `Testsatz`, the automatic re-check returned
+  zero issues in 3.9 s (214 + 163 tokens), and `grep` of the log for the sample text and the key found
+  nothing. The app stored the key in the `0600` fallback file and showed the red keyring hint although
+  `org.freedesktop.secrets` exists and `secret-tool` works — an observation for a separate look, not a
+  stage defect. The stage outcome and `doc/handoff.md` now record the live verification instead of
+  "unverified"; the settings (proxy, provider, model, key) stay configured per the user's choice.

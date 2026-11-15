@@ -20,8 +20,16 @@ to LanguageTool, with the same issue list, preview and Replace/Ignore flow in th
 and hotkeys; `[llm]` edited on the **AI** tab serves translation and checking, with no extra consent
 gate. Recorded and not fixed: no chunking (text over the model context is `TooLong`), the checking
 `provider` selection hides the LanguageTool URL row while `validate()` still reports an invalid hidden
-URL, the `AppController` wiring has no test target, and the live provider is unverified — the mock
-`QTcpServer` is the automated gate, so a real key or a local model is the user's check.
+URL, and the `AppController` wiring has no test target.
+
+The live provider was checked on 2026-11-16 with an OpenRouter key through the HTTP proxy
+`127.0.0.1:2080` and the free model `inclusionai/ling-3.2-flash:free`: a check in the window found one
+German spelling issue (17.4 s, 215 + 195 tokens, `ruleId: llm`), applying it produced `Testsatz`, and
+the following automatic re-check reported zero issues (3.9 s, 214 + 163 tokens). A keyless request
+surfaced the mapped `401` message. On this Astra session the application stored the key in the
+`0600` fallback file (`proofreading`/`llm` secrets directory) and showed the red "system keyring
+unavailable" hint, although `org.freedesktop.secrets` is present and `secret-tool` works — recorded as
+an observation for a separate look, since the stage 2 libsecret round-trip passed earlier.
 
 The Astra tray-icon delay was investigated in root task `13-tray-icon-latency` and fixed in
 `14-hotkey-warning-delivery`: the empty slot was the `NeedsAttention` status that
