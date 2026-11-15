@@ -61,4 +61,8 @@ QUrl modelsUrl(const QString &baseUrl);
 // Parses the {"data":[{"id":...}]} model list. Returns sorted unique IDs.
 QStringList parseModels(const QByteArray &body, QString *error = nullptr);
 
+// Strips the surrounding whitespace and removes one Markdown code fence
+// (``` or ```json); text without a fence comes back trimmed.
+QString stripCodeFence(QString text);
+
 } // namespace OpenAiChat

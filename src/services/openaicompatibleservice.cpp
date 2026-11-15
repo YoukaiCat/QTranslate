@@ -25,21 +25,6 @@ namespace {
 
 const QString kServiceId = QStringLiteral("llm");
 
-QString stripMarkdownFence(QString text)
-{
-    text = text.trimmed();
-    if (!text.startsWith(QLatin1String("```")))
-        return text;
-
-    const qsizetype firstLineEnd = text.indexOf(QLatin1Char('\n'));
-    if (firstLineEnd < 0)
-        return text;
-    text = text.mid(firstLineEnd + 1);
-    if (text.endsWith(QLatin1String("```")))
-        text.chop(3);
-    return text.trimmed();
-}
-
 struct ParsedTranslation
 {
     QString text;
@@ -70,7 +55,7 @@ bool parseTranslationJson(const QString &candidate, ParsedTranslation *parsed)
 ParsedTranslation parseTranslationContent(const QString &content)
 {
     ParsedTranslation parsed;
-    const QString text = stripMarkdownFence(content);
+    const QString text = OpenAiChat::stripCodeFence(content);
     if (parseTranslationJson(text, &parsed))
         return parsed;
 

@@ -68,12 +68,13 @@ Boundaries recorded by the split:
 - **One request per check, no chunking.** An edit split across a chunk boundary is worse than a size
   error; `413` and `finish_reason: "length"` map to `TooLong`, and a text that exceeds the model
   context is reported rather than silently truncated. Recorded as a limitation.
-- **Translations.** The 14 `.ts` files go from 382 to **384** messages (`AI` and the AI-tab pointer
-  sentence, both in `01-ai-tab`); the checking service and parser add no `tr()` — their messages are
-  technical English details under the translated `ProofreadingErrorText` titles, exactly as
-  LanguageTool's. `04-llm-check-ui` reuses the pointer sentence instead of adding a near duplicate.
+- **Translations.** The 14 `.ts` files are at **383** messages after `01-ai-tab`; the checking service,
+  the parser and the settings hint add no `tr()` — their messages are technical English details under
+  the translated `ProofreadingErrorText` titles, exactly as LanguageTool's. `04-llm-check-ui` reuses
+  the existing pointer sentence instead of adding a near duplicate, so the stage leaves the message
+  count where it is.
 - **Test counts.** Two new targets (`tst_llmproofreadingparser`, `tst_llmproofreadingservice`):
-  Linux 50 → **52**, Windows 44 → **46** (derived; no MSVC here). Windows builds and tests stay
+  Linux 51 → **53**, Windows 45 → **47** (derived; no MSVC here). Windows builds and tests stay
   recorded as not performed.
 - **The live check is the user's.** The automated gate is the mock `QTcpServer`; a real key, a local
   Ollama/llama.cpp server and the privacy/cost acceptance are the user's, as the stage risks record.

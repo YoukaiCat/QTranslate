@@ -405,7 +405,7 @@ QString LibreTranslateService::configurationError() const
 {
     if (isConfigured())
         return {};
-    // Translated: the message is in the .ts catalogues, 382 entries per file.
+    // Translated: the message is in the .ts catalogues, 383 entries per file.
     return tr("LibreTranslate needs the base URL of a LibreTranslate server.");
 }
 

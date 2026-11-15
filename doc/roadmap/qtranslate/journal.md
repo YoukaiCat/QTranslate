@@ -2,9 +2,14 @@
 
 ## Where we left off
 
-Current node: no active task. The Astra tray bug is closed: `13-tray-icon-latency` (investigation,
-`0052458`) and `14-hotkey-warning-delivery` (the fix, `1cbe165`). The next node is
-`12-llm-proofreading/02-llm-check-response` (needs detailing).
+Current node: `12-llm-proofreading/02-llm-check-response` (stage `12-llm-proofreading` is
+`in-progress`, `base: 5e6f1cb`; `01-ai-tab` is `done`), now `in-progress`, `detailed: true`, coordinator
+running. It is the pure-function part: the system prompt, the parse of the model answer into
+`ProofreadingIssue` values with locally computed UTF-16 offsets, the category filter and the diff
+fallback, plus the new `tst_llmproofreadingparser` (Linux 51 → 52, Windows 45 → 46, `.ts` stays 383).
+
+The Astra tray bug is closed: `13-tray-icon-latency` (investigation, `0052458`) and
+`14-hotkey-warning-delivery` (the fix, `1cbe165`); the documentation pass is `be3fa92`.
 
 The tray defect was settled on 2026-11-15. Cause, measured on this Astra machine (Astra 1.8.7, X11,
 `XDG_CURRENT_DESKTOP=fly`, Qt 6.10.2, panel host `fly-wm`, tray is StatusNotifierItem): the empty slot
@@ -650,3 +655,49 @@ has six languages and no `auto`. Next: plan and run stage 8.
   and `doc/handoff.md`. Still pending for a code task: the stale 382 comment at
   `src/services/libretranslateservice.cpp:408` (only a coordinator may edit `src/`), to be folded into
   the next code node.
+- 2026-11-15 — Planner detailed `12-llm-proofreading/02-llm-check-response` (6 steps,
+  `detailed: true`) and corrected the stale counts in it and in the stage text. Decisions: the
+  fence stripper is moved **and renamed** to `OpenAiChat::stripCodeFence()` (the name the stage and
+  `03-llm-check-service` already use), body statement for statement, with
+  `tst_openaicompatibleservice` as the regression gate and new rows in `tst_openaichat`; the second
+  implementation disappears. `systemPrompt()` takes the internal language code and resolves `auto` and
+  the English name inside the module, so the `auto` branch is tested here and not in the
+  un-detailed `03`. `droppedEdits` counts every edit that produced no issue (not an object, empty
+  `original`, unchanged `replacement`, not found in the source, or a range that splits a surrogate
+  pair — `ProofreadingText::corrected()` silently skips the last kind). A known but unrequested
+  category is dropped and counted, an unknown or empty one is kept with `grammar` (the
+  `LanguageToolParser` fallback), and diff issues always get `grammar` with `ruleId: llm-diff`. An
+  empty model message and the diff message become fixed English literals (no `tr()`, no `.ts`).
+  Classification: an empty answer or valid JSON that is not an edits document is `Malformed`; anything
+  that is not JSON at all is `PlainText` plus `diffIssues`; a document with zero usable edits stays
+  `Edits`, so `03` can map it to `BadResponse`. Counts now: this node 52/46, the stage 53/47, `.ts`
+  383. Left for the lead: the counts inside `03-llm-check-service`, `04-llm-check-ui`, the
+  `01-ai-tab` outcome (384/50), and the root `## History`/`## Done when` still quote older numbers.
+- 2026-11-15 — Task `12-llm-proofreading/02-llm-check-response` done in this commit. The response
+  module `src/services/llmproofreadingparser.{h,cpp}` exists with the planned `LlmProofreading` API,
+  no logging, no `tr()`, no widgets and no network, and `OpenAiChat::stripCodeFence()` is the single
+  fence helper (`stripMarkdownFence` is gone from the tree; `tst_openaicompatibleservice` passes
+  unchanged, which is the regression gate for the move). Four decisions went beyond the plan's
+  letter, all inside the module: only the whole answer decides `PlainText` versus `Malformed`
+  (`sawJson` for the first candidate alone, and a slice counts only as an object with `edits` or a
+  non-empty bare array — without this a plain text containing `{}` was `Malformed` and one containing
+  `[]` was `Edits`); an answer that differs from the source only in surrounding whitespace is
+  `PlainText` with `correctedText = source` and no issues; overlapping edits are dropped and counted,
+  because `ProofreadingText::corrected()` silently skips the second one (`"abc"` with `abc→X` and
+  `bc→Y` used to give `"aY"` with `droppedEdits == 0`); and the test-only row that pins the strict
+  intersection. The prompt rule reads "copied verbatim, character for character, including case",
+  because the plan's own row forbids the word `punctuation` for a `spelling`-only request. For
+  `03-llm-check-service`: `droppedEdits == 0` with no issues is a clean text, not a bad response —
+  only `issues.isEmpty() && droppedEdits > 0` (and `finish_reason: "length"`) is `BadResponse`, and a
+  truncated JSON answer lands in `PlainText`, so `Status` alone cannot drive that mapping. New
+  `tst_llmproofreadingparser` with 47 cases, `tst_openaichat` +7 fence rows; host Debug and Release
+  0 warnings and 52/52 each, `qtranslate-trixie` Release (Qt 6.8.2) 52/52, container Debug green
+  before the review fixes and not repeated; `.ts` 383 in each of the 14 files; Windows 46 derived,
+  not built. Drive-by in the same commit: the stale `382 entries per file` comment at
+  `src/services/libretranslateservice.cpp:408` now says 383. Review: four remarks accepted and fixed,
+  the fix of the first introduced a regression (prose around `{"edits":[]}` became `PlainText` and
+  offered to replace the whole text with the model's sentence) that the coordinator caught on read and
+  a third round corrected; one observation rejected — widening the slice gate to any non-empty bare
+  array would also reject a bare array of edits wrapped in prose. Left open, below the threshold: a
+  non-empty bare array of objects inside an ordinary sentence still reads as an edits document (a bad
+  response instead of "no issues", no damage to the text).

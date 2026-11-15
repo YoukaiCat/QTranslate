@@ -159,6 +159,30 @@ private slots:
                  QUrl(QStringLiteral("http://127.0.0.1:8080/v1/chat/completions")));
         QVERIFY(OpenAiChat::chatCompletionsUrl(QString()).isEmpty());
     }
+
+    void stripCodeFence_data()
+    {
+        QTest::addColumn<QString>("input");
+        QTest::addColumn<QString>("expected");
+
+        QTest::newRow("plain text") << "Hallo" << "Hallo";
+        QTest::newRow("surrounding whitespace") << "  Hallo \n" << "Hallo";
+        QTest::newRow("json fence") << "```json\n{\"a\":1}\n```" << "{\"a\":1}";
+        QTest::newRow("fence without closing fence")
+            << "```json\n{\"a\":1}" << "{\"a\":1}";
+        QTest::newRow("fence alone") << "```" << "```";
+        QTest::newRow("fence without newline") << "```json" << "```json";
+        QTest::newRow("fenced block with inner newlines")
+            << "```\nline one\nline two\n```" << "line one\nline two";
+    }
+
+    void stripCodeFence()
+    {
+        QFETCH(QString, input);
+        QFETCH(QString, expected);
+
+        QCOMPARE(OpenAiChat::stripCodeFence(input), expected);
+    }
 };
 
 QTEST_GUILESS_MAIN(TestOpenAiChat)

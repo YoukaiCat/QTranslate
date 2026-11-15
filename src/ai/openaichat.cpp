@@ -225,4 +225,19 @@ QStringList parseModels(const QByteArray &body, QString *error)
     return models;
 }
 
+QString stripCodeFence(QString text)
+{
+    text = text.trimmed();
+    if (!text.startsWith(QLatin1String("```")))
+        return text;
+
+    const qsizetype firstLineEnd = text.indexOf(QLatin1Char('\n'));
+    if (firstLineEnd < 0)
+        return text;
+    text = text.mid(firstLineEnd + 1);
+    if (text.endsWith(QLatin1String("```")))
+        text.chop(3);
+    return text.trimmed();
+}
+
 } // namespace OpenAiChat
