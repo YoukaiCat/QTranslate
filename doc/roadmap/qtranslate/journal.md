@@ -2,7 +2,10 @@
 
 ## Where we left off
 
-Current node: no active task. Stage `12-llm-proofreading` was accepted and closed on 2026-11-16 over
+Current node: `15-short-proofreading-hotkey-labels` (root task, `in-progress`, `detailed: true`), a
+coordinator run: the two checking rows on the Hotkeys page are shortened to `Check in a popup:` and
+`Replace with the corrected text:` with the same meaning, and the 14 `.ts` catalogues are updated
+(383 messages per file, counts unchanged). Stage `12-llm-proofreading` was accepted and closed on 2026-11-16 over
 `5e6f1cb..HEAD` (`be1e5f9`, `5dcc390`, `c5b10f0`, `e70bf38`, acceptance fix `5210d43`) and its
 documentation pass is committed with this entry. The next node is the dictionary stage
 `07-dictionary` (`todo`, needs a split); stages 4 and 6 stay `blocked` by user decisions. Linux is at
@@ -888,3 +891,35 @@ has six languages and no `auto`. Next: plan and run stage 8.
   installed binary registered `Ctrl+Q`, `Ctrl+Shift+Q` and `Ctrl+W` at 02:44:34 and showed the tray icon
   immediately. The package version stays `0.13.0` although the code is ahead of the release; a version
   bump is a release decision and was not made.
+- 2026-11-16 — User decision on the hotkey labels: the two checking rows lose the spelled-out scenario
+  and keep only the short wording. The user then corrected the Russian form of the first one from
+  "Проверять во всплывающем окне" to "**Проверить** во всплывающем окне", to match the imperative of
+  the second ("Заменить исправленным текстом"). The English source stays `Check in a popup:` and
+  `Replace with the corrected text:`, which are imperatives already. Counts stay 383 per `.ts`.
+- 2026-11-16 — User decision on the provider name: the settings tab is `AI` while the checking provider
+  is labelled `LLM`, and the user wants one name — **AI** in both places. Decided here: only the
+  display name and the user-facing sentences change; the internal id stays `llm`, because it is the
+  stored `proofreading/provider` value, appears in logs and tests, and renaming it would need a
+  settings migration for no user benefit. `Local LLM` (the translation service at
+  `src/services/openaicompatibleservice.cpp:330`) and the `[llm]` block keep their names. Node
+  `16-ai-provider-name` was written for it and runs after the label task, since only one coordinator
+  runs at a time.
+- 2026-11-16 — Node `15-short-proofreading-hotkey-labels` accepted and closed with its `## Outcome`.
+  `src/ui/settingsdialog.cpp:130-131` now holds `Check in a popup:` and `Replace with the corrected
+  text:` in place of the two spelled-out sources; nothing else in the file moved, and empty still means
+  disabled. The 14 catalogues were regenerated with the `update_translations` target (Qt 6.10.2
+  `lupdate`; the Qt 5.15 binaries in `/usr/bin` would have corrupted the files), the two obsolete
+  blocks were deleted and the two sources translated, leaving 383 messages with 0 unfinished, 0
+  vanished and 0 obsolete per file; `release_translations` finished 383 per file. `ru` is the user's
+  wording (`Проверить во всплывающем окне:`, `Заменить исправленным текстом:`); the other twelve keep
+  their file's verb form and punctuation, which is why `ja` stays in the polite `ます` sentence form,
+  `ko` keeps a colon, `uk` uses the imperative of its neighbours, `fr` keeps its `&#xa0;` and `zh_CN`
+  its full-width colon — all reviewed and accepted as file convention. Review made one remark, the `hi`
+  term for "corrected text" (`सुधारे गए पाठ` against `सुधरा हुआ पाठ` in the other seven messages), and
+  it was fixed; the `&apos;` normalisation that `lupdate` applied to one `fr` message was kept because a
+  manual revert would not survive the next update. Verification: host Debug 53/53 and Release 53/53
+  with 0 warnings, `qtranslate-trixie` Release 53/53, `tst_settingsdialog`/`tst_translations` untouched
+  and green, Windows reviewed by diff. Recorded rough edges, not fixed: `i18n/README.md:42` still asks
+  for `lupdate --no-obsolete` while the CMake target omits it, the portal description in
+  `src/platform/hotkeymanager_linux.cpp:82-85` still spells out the scenario, and the `name` field that
+  `SettingsDialog::validate()` fills is never read (the last two predate this node).

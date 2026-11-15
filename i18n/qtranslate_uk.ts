@@ -4,112 +4,112 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="179"/>
-        <location filename="../src/app/appcontroller.cpp" line="762"/>
+        <location filename="../src/app/appcontroller.cpp" line="180"/>
+        <location filename="../src/app/appcontroller.cpp" line="771"/>
         <source>Autostart</source>
         <translation>Автозапуск</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="180"/>
-        <location filename="../src/app/appcontroller.cpp" line="763"/>
+        <location filename="../src/app/appcontroller.cpp" line="181"/>
+        <location filename="../src/app/appcontroller.cpp" line="772"/>
         <source>Could not update the autostart entry.</source>
         <translation>Не вдалося оновити запис автозапуску.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="420"/>
+        <location filename="../src/app/appcontroller.cpp" line="427"/>
         <source>%1 — %2</source>
         <translation>%1 — %2</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="818"/>
+        <location filename="../src/app/appcontroller.cpp" line="827"/>
         <source>DeepL is not available.</source>
         <translation>DeepL недоступний.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="833"/>
+        <location filename="../src/app/appcontroller.cpp" line="842"/>
         <source>The OpenAI-compatible provider is not available.</source>
         <translation>Провайдер із підтримкою OpenAI недоступний.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="877"/>
+        <location filename="../src/app/appcontroller.cpp" line="886"/>
         <source>Secrets are stored unencrypted in a file readable only by your user because the system keyring is unavailable.</source>
         <translation>Секрети зберігаються в незашифрованому файлі, доступному лише вашому користувачеві, оскільки системна зв&apos;язка ключів недоступна.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1097"/>
-        <location filename="../src/app/appcontroller.cpp" line="1189"/>
-        <location filename="../src/app/appcontroller.cpp" line="1269"/>
+        <location filename="../src/app/appcontroller.cpp" line="1106"/>
+        <location filename="../src/app/appcontroller.cpp" line="1198"/>
+        <location filename="../src/app/appcontroller.cpp" line="1278"/>
         <source>Nothing is selected.</source>
         <translation>Нічого не виділено.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1139"/>
+        <location filename="../src/app/appcontroller.cpp" line="1148"/>
         <source>The active window changed; the translation was copied to the clipboard.</source>
         <translation>Активне вікно змінено; переклад скопійовано в буфер обміну.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1160"/>
-        <location filename="../src/app/appcontroller.cpp" line="1240"/>
+        <location filename="../src/app/appcontroller.cpp" line="1169"/>
+        <location filename="../src/app/appcontroller.cpp" line="1249"/>
         <source>Enable text checking in Settings → Text checking.</source>
         <translation>Увімкніть перевірку тексту в розділі «Налаштування» → «Перевірка тексту».</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1301"/>
+        <location filename="../src/app/appcontroller.cpp" line="1310"/>
         <source>No issues found in the selection.</source>
         <translation>У виділеному тексті не знайдено помилок.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1309"/>
-        <location filename="../src/app/appcontroller.cpp" line="1346"/>
+        <location filename="../src/app/appcontroller.cpp" line="1318"/>
+        <location filename="../src/app/appcontroller.cpp" line="1355"/>
         <source>Could not paste automatically; the corrected text is on the clipboard.</source>
         <translation>Не вдалося вставити автоматично; виправлений текст знаходиться в буфері обміну.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1316"/>
-        <location filename="../src/app/appcontroller.cpp" line="1353"/>
+        <location filename="../src/app/appcontroller.cpp" line="1325"/>
+        <location filename="../src/app/appcontroller.cpp" line="1362"/>
         <source>The active window changed; the corrected text was copied to the clipboard.</source>
         <translation>Активне вікно змінено; виправлений текст скопійовано в буфер обміну.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1366"/>
+        <location filename="../src/app/appcontroller.cpp" line="1375"/>
         <source>Corrected text copied to the clipboard</source>
         <translation>Виправлений текст скопійовано до буфера обміну</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1444"/>
-        <location filename="../src/app/appcontroller.cpp" line="1447"/>
+        <location filename="../src/app/appcontroller.cpp" line="1453"/>
+        <location filename="../src/app/appcontroller.cpp" line="1456"/>
         <source>Check the selection</source>
         <translation>Перевірити виділене</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1520"/>
+        <location filename="../src/app/appcontroller.cpp" line="1529"/>
         <source>System tray unavailable</source>
         <translation>Системний лоток недоступний</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1521"/>
+        <location filename="../src/app/appcontroller.cpp" line="1530"/>
         <source>The system tray is not available, so the application cannot stay in the background. Closing the window quits the application.</source>
         <translation>Системний лоток недоступний, тому програма не може працювати у фоні. Закриття вікна завершує програму.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1130"/>
-        <location filename="../src/app/appcontroller.cpp" line="1478"/>
+        <location filename="../src/app/appcontroller.cpp" line="1139"/>
+        <location filename="../src/app/appcontroller.cpp" line="1487"/>
         <source>Could not paste automatically; the translation is on the clipboard.</source>
         <translation>Не вдалося вставити автоматично; переклад знаходиться в буфері обміну.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="157"/>
+        <location filename="../src/app/appcontroller.cpp" line="158"/>
         <source>Limited Wayland support</source>
         <translation>Обмежена підтримка Wayland</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="159"/>
+        <location filename="../src/app/appcontroller.cpp" line="160"/>
         <source>Global hotkeys require the GlobalShortcuts portal. If this desktop does not provide it, copy the selected text with Ctrl+C and use the CLI commands or a desktop shortcut; in-place replacement copies the translation to the clipboard instead of pasting it.</source>
         <translation>Глобальні гарячі клавіші потребують порталу GlobalShortcuts. Якщо цей робочий стіл його не надає, скопіюйте виділений текст за допомогою Ctrl+C і використовуйте команди CLI або ярлик робочого столу; заміна на місці копіює переклад у буфер обміну замість вставлення.</translation>
     </message>
     <message>
-        <location filename="../src/app/appcontroller.cpp" line="1502"/>
-        <location filename="../src/app/appcontroller.cpp" line="1505"/>
+        <location filename="../src/app/appcontroller.cpp" line="1511"/>
+        <location filename="../src/app/appcontroller.cpp" line="1514"/>
         <source>Translate and replace</source>
         <translation>Перекладіть і замініть</translation>
     </message>
@@ -850,90 +850,90 @@
 <context>
     <name>OpenAiCompatibleService</name>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="139"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="124"/>
         <source>The provider rejected the API key (HTTP %1).</source>
         <translation>Провайдер відхилив API-ключ (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="141"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="126"/>
         <source>The provider has no available credits or the key limit is exceeded (HTTP %1).</source>
         <translation>У провайдера закінчилися кредити або перевищено ліміт ключа (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="145"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="130"/>
         <source>Too many requests; try again later (HTTP %1).</source>
         <translation>Забагато запитів; спробуйте пізніше (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="147"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="132"/>
         <source>The request is too large for the provider (HTTP %1).</source>
         <translation>Запит завеликий для провайдера (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="149"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="134"/>
         <source>The provider did not respond in time (HTTP %1).</source>
         <translation>Провайдер не відповів вчасно (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="151"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="136"/>
         <source>The provider is temporarily unavailable (HTTP %1).</source>
         <translation>Провайдер тимчасово недоступний (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="153"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="138"/>
         <source>The provider returned an unexpected response (HTTP %1).</source>
         <translation>Провайдер повернув неочікувану відповідь (HTTP %1).</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="254"/>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="562"/>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="606"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="239"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="547"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="591"/>
         <source>The provider did not respond in time (%1 s).</source>
         <translation>Провайдер не відповів за %1 с.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="345"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="330"/>
         <source>Local LLM</source>
         <translation>Локальна LLM</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="358"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="343"/>
         <source>The provider needs a model.</source>
         <translation>Провайдеру потрібна модель.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="359"/>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="509"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="344"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="494"/>
         <source>The provider needs a valid server URL.</source>
         <translation>Провайдеру потрібна коректна адреса сервера.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="408"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="393"/>
         <source>The provider needs an API key.</source>
         <translation>Провайдеру потрібен API-ключ.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="494"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="479"/>
         <source>The network is not available.</source>
         <translation>Мережа недоступна.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="526"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="511"/>
         <source>Enter an API key.</source>
         <translation>Введіть API-ключ.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="625"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="610"/>
         <source>The provider returned an unexpected response.</source>
         <translation>Провайдер повернув неочікувану відповідь.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="630"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="615"/>
         <source>Loaded %1 models.</source>
         <translation>Завантажено моделей: %1.</translation>
     </message>
     <message>
-        <location filename="../src/services/openaicompatibleservice.cpp" line="631"/>
+        <location filename="../src/services/openaicompatibleservice.cpp" line="616"/>
         <source>API key is valid. Loaded %1 models.</source>
         <translation>API-ключ дійсний. Завантажено моделей: %1.</translation>
     </message>
@@ -1259,7 +1259,7 @@
     <name>SettingsDialog</name>
     <message>
         <location filename="../src/ui/settingsdialog.cpp" line="44"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="1081"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1094"/>
         <source>Settings</source>
         <translation>Налаштування</translation>
     </message>
@@ -1314,184 +1314,194 @@
         <translation>Замініть виділений текст перекладом:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="136"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="130"/>
+        <source>Check in a popup:</source>
+        <translation>Перевірте у спливаючому вікні:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="131"/>
+        <source>Replace with the corrected text:</source>
+        <translation>Замініть виправленим текстом:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/settingsdialog.cpp" line="132"/>
         <source>Translate in the main window:</source>
         <translation>Перекласти в головному вікні:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="137"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="133"/>
         <source>Show the main window:</source>
         <translation>Показати головне вікно:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="139"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="135"/>
         <source>Pause global hotkeys in fullscreen apps</source>
         <translation>Призупиняти глобальні гарячі клавіші в повноекранних програмах</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="142"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="138"/>
         <source>Global hotkeys are disabled while a key combination field is focused. Leave a field empty to disable that action.</source>
         <translation>Глобальні гарячі клавіші вимкнено, коли у фокусі поле комбінації клавіш. Залиште поле порожнім, щоб вимкнути цю дію.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="174"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="170"/>
         <source> characters</source>
         <translation> символів</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="179"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="639"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="175"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="644"/>
         <source> ms</source>
         <translation> мс</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="180"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="176"/>
         <source>Off</source>
         <translation>Вимкнено</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="182"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="178"/>
         <source>Source language:</source>
         <translation>Мова оригіналу:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="183"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="179"/>
         <source>Primary language:</source>
         <translation>Основна мова:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="184"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="180"/>
         <source>Additional language:</source>
         <translation>Додаткова мова:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="185"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="181"/>
         <source>Maximum text length:</source>
         <translation>Максимальна довжина тексту:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="186"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="182"/>
         <source>Auto-translate delay:</source>
         <translation>Затримка автоматичного перекладу:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="193"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="189"/>
         <source>When the selected service fails with no connection, a timeout, a rate limit, an exceeded quota or an invalid key, the text is sent once more to the fallback service. None turns it off.</source>
         <translation>Якщо вибраний сервіс завершується помилкою через відсутність з&apos;єднання, тайм-аут, обмеження частоти, перевищення квоти або неправильний ключ, текст надсилається ще раз до резервного сервісу. «Немає» вимикає це.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="202"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="198"/>
         <source>The additional language is used automatically when the detected text is already in the primary language.</source>
         <translation>Додаткова мова використовується автоматично, коли виявлений текст уже є основною мовою.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="210"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="206"/>
         <source>General</source>
         <translation>Загальний</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="211"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="207"/>
         <source>Hotkeys</source>
         <translation>Гарячі клавіші</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="212"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="208"/>
         <source>Translation</source>
         <translation>Переклад</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="227"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="223"/>
         <source>Google Translate</source>
         <translation>Google Перекладач</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="232"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="228"/>
         <source>Free endpoint (no key)</source>
         <translation>Вільна кінцева точка (без ключа)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="233"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="229"/>
         <source>Cloud Translation API (key required)</source>
         <translation>Cloud Translation API (потрібен ключ)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="238"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="234"/>
         <source>Google Cloud API key</source>
         <translation>Ключ Google Cloud API</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="239"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="303"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="235"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="299"/>
         <source>Mode:</source>
         <translation>режим:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="240"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="304"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="430"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="498"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="236"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="300"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="426"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="494"/>
         <source>API key:</source>
         <translation>Ключ API:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="242"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="238"/>
         <source>The free mode uses the public endpoint and needs no key. The Cloud API requires a key with the Translation API enabled.</source>
         <translation>Безкоштовний режим використовує загальнодоступну кінцеву точку та не потребує ключа. Cloud API вимагає ключа з увімкненим перекладом API.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="256"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="252"/>
         <source>Yandex web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
         <translation>Yandex web — неофіційна кінцева точка, ключ не потрібен. Вона може перестати працювати, обмежувати частоту або блокувати запити. Довгий текст надсилається кількома запитами.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="268"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="264"/>
         <source>Bing web is an unofficial endpoint and needs no key. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
         <translation>Bing web — неофіційна кінцева точка, ключ не потрібен. Вона може перестати працювати, обмежувати частоту або блокувати запити. Довгий текст надсилається кількома запитами.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="276"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="272"/>
         <source>DeepL</source>
         <translation>DeepL</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="281"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="277"/>
         <source>API (key required)</source>
         <translation>API (потрібен ключ)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="282"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="278"/>
         <source>Free web (unofficial, no key)</source>
         <translation>Безкоштовний веб-доступ (неофіційно, без ключа)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="286"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="282"/>
         <source>DeepL API key (ends with :fx for Free)</source>
         <translation>Ключ DeepL API (закінчується на :fx безкоштовно)</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="291"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="287"/>
         <source>Check key</source>
         <translation>Перевірити ключ</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="298"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="294"/>
         <source>Available without an API key. This unofficial endpoint may stop working, apply rate limits or block requests.</source>
         <translation>Доступно без API-ключа. Ця неофіційна кінцева точка може перестати працювати, обмежувати частоту або блокувати запити.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="305"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="301"/>
         <source>English target:</source>
         <translation>англійська ціль:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="313"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="512"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="668"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="309"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="508"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="673"/>
         <source>Checking…</source>
         <translation>Перевірка…</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="391"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="387"/>
         <source>Reverso is an unofficial endpoint and needs no key. It supports only English, French, German, Spanish, Italian and Russian and cannot detect the source language. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
         <translation>Reverso — неофіційна кінцева точка, ключ не потрібен. Вона підтримує лише англійську, французьку, німецьку, іспанську, італійську та російську і не визначає мову оригіналу. Вона може перестати працювати, обмежувати частоту або блокувати запити. Довгий текст надсилається кількома запитами.</translation>
     </message>
@@ -1501,384 +1511,375 @@
         <translation>Запускати %1 під час запуску Windows</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="472"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="468"/>
         <source>OpenAI-compatible provider</source>
         <translation>Провайдер із підтримкою OpenAI</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="481"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="477"/>
         <source>API key</source>
         <translation>API-ключ</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="489"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="485"/>
         <source>Model ID, for example openai/gpt-4o-mini</source>
         <translation>ID моделі, наприклад openai/gpt-4o-mini</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="491"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="487"/>
         <source>Load models</source>
         <translation>Завантажити моделі</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="424"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="497"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="420"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="493"/>
         <source>Server URL:</source>
         <translation>Адреса сервера:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="499"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="495"/>
         <source>Model:</source>
         <translation>Модель:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="189"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="185"/>
         <source>None</source>
         <translation>Немає</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="503"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="499"/>
         <source>Uses the OpenAI-compatible Chat Completions API. The default server is OpenRouter; the URL can point to another compatible endpoint such as OpenAI, Ollama, llama.cpp or TeamRouter. The model must be available to your key.</source>
         <translation>Використовує API Chat Completions, сумісний з OpenAI. Типовий сервер — OpenRouter; URL може вказувати на іншу сумісну кінцеву точку, наприклад OpenAI, Ollama, llama.cpp або TeamRouter. Модель має бути доступною для вашого ключа.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="321"/>
         <source>MyMemory</source>
         <translation>MyMemory</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="329"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
         <source>MyMemory is a free translation API and needs no key. It cannot detect the source language, and long text is sent in several requests.</source>
         <translation>MyMemory — безкоштовний API перекладу, ключ не потрібен. Він не визначає мову оригіналу, а довгий текст надсилається кількома запитами.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="337"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="333"/>
         <source>Mozhi</source>
         <translation>Mozhi</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="344"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="340"/>
         <source>Instance URL:</source>
         <translation>URL екземпляра:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="359"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="355"/>
         <source>Engine:</source>
         <translation>Движок:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="367"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="363"/>
         <source>Enter a base http(s) instance URL without credentials, a query or a fragment. The default instance will be used.</source>
         <translation>Введіть базовий URL екземпляра http(s) без облікових даних, запиту та фрагмента. Буде використано екземпляр за замовчуванням.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="252"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="248"/>
         <source>Yandex</source>
         <translation>Yandex</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="264"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="260"/>
         <source>Bing</source>
         <translation>Bing</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="375"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="371"/>
         <source>Mozhi is a proxy to public translation engines. Instances are unofficial: they may stop working or rate-limit requests, and some engines may be disabled on an instance. A self-hosted instance&apos;s terms and stability are your responsibility. Long text is sent in several requests.</source>
         <translation>Mozhi — проксі до публічних систем перекладу. Екземпляри неофіційні: вони можуть перестати працювати або обмежувати частоту запитів, а деякі движки можуть бути вимкнені на екземплярі. За умови та стабільність власного екземпляра відповідаєте ви. Довгий текст надсилається кількома запитами.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="387"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="383"/>
         <source>Reverso</source>
         <translation>Reverso</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="131"/>
-        <source>Check the selection in another application and show the result in a popup:</source>
-        <translation>Перевіряти виділений текст в іншій програмі та показувати результат у спливаючому вікні:</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="134"/>
-        <source>Check the selection in another application and replace it with the corrected text:</source>
-        <translation>Перевіряти виділений текст в іншій програмі та замінювати його виправленим текстом:</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="199"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="195"/>
         <source>Fallback service:</source>
         <translation>Резервний сервіс:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="320"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="316"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="564"/>
         <source>The OpenAI-compatible provider is configured on the AI tab.</source>
         <translation>Провайдер із підтримкою OpenAI налаштовується на вкладці ШІ.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="401"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="397"/>
         <source>DuckDuckGo</source>
         <translation>DuckDuckGo</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="405"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="401"/>
         <source>DuckDuckGo is an unofficial endpoint and needs no key. It can detect the source language. Its target languages follow Bing Translate, and some of them were confirmed against the endpoint. It may stop working, apply rate limits or block requests. Long text is sent in several requests.</source>
         <translation>DuckDuckGo — неофіційна кінцева точка, ключ не потрібен. Вона визначає мову оригіналу. Набір цільових мов такий самий, як у Bing Translate, і частину з них перевірено на кінцевій точці. Вона може перестати працювати, обмежувати частоту або блокувати запити. Довгий текст надсилається кількома запитами.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="415"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="411"/>
         <source>LibreTranslate</source>
         <translation>LibreTranslate</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="429"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="425"/>
         <source>Optional; only a server that requires a key</source>
         <translation>Необов&apos;язково; лише для сервера, який вимагає ключ</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="439"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="435"/>
         <source>Enter a base http(s) URL without credentials, a query or a fragment. The service stays unconfigured until then.</source>
         <translation>Введіть базовий URL http(s) без облікових даних, запиту та фрагмента. До цього сервіс залишається неналаштованим.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="447"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="443"/>
         <source>LibreTranslate translates through a server you run or choose, usually a self-hosted one. The base URL must point at a server you trust: its terms, availability, rate and text limits and installed languages are your responsibility, and a language the server has no model for is rejected. The API key is optional and only a server that requires one needs it. Quality is lower than Google or DeepL. Long text is sent in several requests.</source>
         <translation>LibreTranslate перекладає через сервер, який ви запускаєте або обираєте, зазвичай власний. Базовий URL має вказувати на сервер, якому ви довіряєте: його умови, доступність, обмеження частоти й довжини тексту та встановлені мови — ваша відповідальність, а мова, для якої на сервері немає моделі, буде відхилена. Ключ API необов&apos;язковий і потрібен лише серверу, який його вимагає. Якість нижча, ніж у Google або DeepL. Довгий текст надсилається кількома запитами.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="464"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="460"/>
         <source>Services</source>
         <translation>Послуги</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="520"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="516"/>
         <source>AI</source>
         <translation>ШІ</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="526"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="522"/>
         <source>Enable text checking</source>
         <translation>Увімкнути перевірку тексту</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="529"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="525"/>
         <source>Finds spelling, grammar, and punctuation errors in a separate mode and does not change translation settings.</source>
         <translation>Знаходить орфографічні, граматичні та пунктуаційні помилки в окремому режимі й не змінює налаштування перекладу.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="536"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="532"/>
         <source>Provider</source>
         <translation>Постачальник</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="552"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="548"/>
         <source>Leave empty to use the public LanguageTool endpoint. A self-hosted server keeps the text on your machine; the public service has rate limits and sees the checked text.</source>
         <translation>Залиште поле порожнім, щоб використовувати публічну кінцеву точку LanguageTool. Власний сервер залишає текст на вашій машині; публічний сервіс має обмеження частоти запитів і бачить текст, що перевіряється.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="558"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="1054"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="554"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1067"/>
         <source>Enter a valid http(s) LanguageTool URL, or leave the field empty for the public endpoint.</source>
         <translation>Введіть коректний URL LanguageTool (http(s)) або залиште поле порожнім для публічної кінцевої точки.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="565"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="569"/>
         <source>Provider:</source>
         <translation>Постачальник:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="566"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="570"/>
         <source>Checking language:</source>
         <translation>Мова перевірки:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="567"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="571"/>
         <source>LanguageTool URL:</source>
         <translation>URL LanguageTool:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="572"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="577"/>
         <source>Issues</source>
         <translation>Проблеми</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="575"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="580"/>
         <source>Categories:</source>
         <translation>Категорії:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="577"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="582"/>
         <source>Spelling</source>
         <translation>Орфографія</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="579"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="584"/>
         <source>Grammar</source>
         <translation>Граматика</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="581"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="586"/>
         <source>Punctuation</source>
         <translation>Пунктуація</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="583"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="588"/>
         <source>Style</source>
         <translation>Стиль</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="595"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="600"/>
         <source>Text checking</source>
         <translation>Перевірка тексту</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="612"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="617"/>
         <source>No proxy</source>
         <translation>Немає проксі</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="613"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="618"/>
         <source>System proxy</source>
         <translation>Системний проксі</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="614"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="619"/>
         <source>Manual proxy</source>
         <translation>Ручний проксі</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="617"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="622"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="618"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="623"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="621"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="626"/>
         <source>Proxy host</source>
         <translation>Проксі-хост</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="625"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="630"/>
         <source>Not set</source>
         <translation>Не встановлено</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="626"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="631"/>
         <source>The proxy requires authentication</source>
         <translation>Проксі вимагає автентифікації</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="630"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="635"/>
         <source>User name</source>
         <translation>Ім&apos;я користувача</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="634"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="639"/>
         <source>Password</source>
         <translation>Пароль</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="640"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="645"/>
         <source>Test connection</source>
         <translation>Тестове підключення</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="647"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="652"/>
         <source>Proxy mode:</source>
         <translation>Режим проксі:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="648"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="653"/>
         <source>Proxy type:</source>
         <translation>Тип проксі:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="649"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="654"/>
         <source>Host:</source>
         <translation>Ведучий:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="650"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="655"/>
         <source>Port:</source>
         <translation>Порт:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="652"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="657"/>
         <source>User name:</source>
         <translation>Ім&apos;я користувача:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="653"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="658"/>
         <source>Password:</source>
         <translation>Пароль:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="654"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="659"/>
         <source>Request timeout:</source>
         <translation>Час очікування запиту:</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="659"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="664"/>
         <source>Network</source>
         <translation>Мережа</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="920"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="925"/>
         <source>Effective instance: %1</source>
         <translation>Чинний екземпляр: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="929"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="934"/>
         <source>Effective base URL: %1</source>
         <translation>Чинний базовий URL: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="993"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1006"/>
         <source>Translate in a popup</source>
         <translation>Перекладіть у спливаючому вікні</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="995"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1008"/>
         <source>Replace the selected text with the translation</source>
         <translation>Замініть виділений текст перекладом</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="996"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1009"/>
         <source>Translate in the main window</source>
         <translation>Перекладіть у головному вікні</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="997"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1010"/>
         <source>Show the main window</source>
         <translation>Показати головне вікно</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="1007"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1020"/>
         <source>&quot;%1&quot; uses more than one key combination. Global hotkeys support a single combination.</source>
         <translation>&quot;%1&quot; використовує більше однієї комбінації клавіш. Глобальні гарячі клавіші підтримують одну комбінацію.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="1015"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1028"/>
         <source>&quot;%1&quot; cannot be used as a global hotkey.</source>
         <translation>&quot;%1&quot; не можна використовувати як глобальну гарячу клавішу.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="1028"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1041"/>
         <source>The same key combination is assigned more than once: %1.</source>
         <translation>Та сама комбінація клавіш призначається кілька разів: %1.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="1039"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1052"/>
         <source>The primary and additional languages must differ.</source>
         <translation>Основна та додаткова мови мають відрізнятися.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="1046"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1059"/>
         <source>Enter the proxy host and port, or choose another proxy mode.</source>
         <translation>Введіть хост і порт проксі-сервера або виберіть інший режим проксі-сервера.</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="1071"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="1084"/>
         <source>Unavailable shortcuts: %1. They will not work; choose other combinations, or run with --verbose to see why.</source>
         <translation>Недоступні сполучення: %1. Вони не працюватимуть; виберіть інші сполучення або запустіть із --verbose, щоб дізнатися причину.</translation>
     </message>

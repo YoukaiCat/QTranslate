@@ -127,12 +127,8 @@ void SettingsDialog::buildUi(const QStringList &sourceLanguages)
     hotkeysForm->addRow(tr("Translate in a popup:"), m_popupHotkey);
     hotkeysForm->addRow(tr("Replace the selected text with the translation:"),
                         m_replaceSelectionHotkey);
-    hotkeysForm->addRow(
-        tr("Check the selection in another application and show the result in a popup:"),
-        m_proofreadingHotkey);
-    hotkeysForm->addRow(
-        tr("Check the selection in another application and replace it with the corrected text:"),
-        m_proofreadReplaceHotkey);
+    hotkeysForm->addRow(tr("Check in a popup:"), m_proofreadingHotkey);
+    hotkeysForm->addRow(tr("Replace with the corrected text:"), m_proofreadReplaceHotkey);
     hotkeysForm->addRow(tr("Translate in the main window:"), m_mainWindowHotkey);
     hotkeysForm->addRow(tr("Show the main window:"), m_showMainWindowHotkey);
     m_pauseInFullscreen =
