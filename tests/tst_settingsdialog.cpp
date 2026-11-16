@@ -1236,7 +1236,7 @@ private slots:
              Languages::supported(QStringLiteral("languagetool"),
                                   Languages::Direction::Source),
              true},
-            {QStringLiteral("llm"), QStringLiteral("LLM"),
+            {QStringLiteral("llm"), QStringLiteral("AI"),
              Languages::supported(QStringLiteral("llm"), Languages::Direction::Source), true},
         };
         SettingsDialog dialog(settings, {QStringLiteral("en")},
@@ -1318,7 +1318,7 @@ private slots:
              Languages::supported(QStringLiteral("languagetool"),
                                   Languages::Direction::Source),
              true},
-            {QStringLiteral("llm"), QStringLiteral("LLM"),
+            {QStringLiteral("llm"), QStringLiteral("AI"),
              Languages::supported(QStringLiteral("llm"), Languages::Direction::Source), true},
         };
         SettingsDialog dialog(settings, {QStringLiteral("en")},
@@ -1359,7 +1359,7 @@ private slots:
              Languages::supported(QStringLiteral("languagetool"),
                                   Languages::Direction::Source),
              true},
-            {QStringLiteral("llm"), QStringLiteral("LLM"),
+            {QStringLiteral("llm"), QStringLiteral("AI"),
              Languages::supported(QStringLiteral("llm"), Languages::Direction::Source), true},
         };
         SettingsDialog dialog(settings, {QStringLiteral("en")},

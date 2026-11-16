@@ -298,7 +298,7 @@ QString LlmProofreadingService::id() const
 
 QString LlmProofreadingService::displayName() const
 {
-    return QStringLiteral("LLM");
+    return QStringLiteral("AI");
 }
 
 bool LlmProofreadingService::isConfigured() const
@@ -311,7 +311,7 @@ bool LlmProofreadingService::isConfigured() const
 
 QString LlmProofreadingService::configurationError() const
 {
-    return QStringLiteral("the LLM provider is configured on the AI tab");
+    return QStringLiteral("the AI provider is configured on the settings AI tab");
 }
 
 QStringList LlmProofreadingService::languages() const

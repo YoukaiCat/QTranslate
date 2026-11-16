@@ -240,7 +240,7 @@ private slots:
     void properties()
     {
         QCOMPARE(m_service->id(), QStringLiteral("llm"));
-        QCOMPARE(m_service->displayName(), QStringLiteral("LLM"));
+        QCOMPARE(m_service->displayName(), QStringLiteral("AI"));
         QVERIFY(m_service->isConfigured());
         QVERIFY(m_service->supportsAutoLanguage());
 
@@ -253,7 +253,8 @@ private slots:
         // A missing model is a configuration failure; a missing key is not.
         m_service->applySettings(makeSettings(m_server->port(), QStringLiteral("test-key"), {}));
         QVERIFY(!m_service->isConfigured());
-        QVERIFY(m_service->configurationError().contains(QStringLiteral("AI tab")));
+        QCOMPARE(m_service->configurationError(),
+                 QStringLiteral("the AI provider is configured on the settings AI tab"));
 
         m_service->applySettings(makeSettings(m_server->port(), {}));
         QVERIFY(m_service->isConfigured());

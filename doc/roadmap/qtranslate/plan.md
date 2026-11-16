@@ -50,6 +50,7 @@ Old stages 13 (free web endpoints) and 16 (LLM actions) are partially implemente
 13. [Tray icon appears 3-5 seconds late on Astra](13-tray-icon-latency/plan.md) — user report, 2026-11-15: the tray slot stays empty for 3-5 seconds after launch; reproduce, find the cause, fix it or record the panel limitation.
 14. [Hotkey warning delivery](14-hotkey-warning-delivery/plan.md) — the "hotkey unavailable" warning stops using a tray balloon and goes to the `--verbose` log and a hint in the settings dialog (user decision, 2026-11-15).
 15. [Short labels for the proofreading hotkeys](15-short-proofreading-hotkey-labels/plan.md) — the two checking rows on the Hotkeys page get the short wording the user asked for: "Check in a popup:" and "Replace with the corrected text:" (user decision, 2026-11-16).
+16. [Call the checking provider AI, like its settings tab](16-ai-provider-name/plan.md) — the provider is displayed as `AI` instead of `LLM`, so the interface uses one name for one thing; the stored id `llm` stays (user decision, 2026-11-16).
 
 The order follows the old plan. Stages 3-7 are independent except where they state a dependency.
 Stage 8 is a user-requested correction of stage 3 and was worked before stage 6. Stage 9 is a

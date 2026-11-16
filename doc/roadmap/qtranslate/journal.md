@@ -2,10 +2,12 @@
 
 ## Where we left off
 
-Current node: `15-short-proofreading-hotkey-labels` (root task, `in-progress`, `detailed: true`), a
-coordinator run: the two checking rows on the Hotkeys page are shortened to `Check in a popup:` and
-`Replace with the corrected text:` with the same meaning, and the 14 `.ts` catalogues are updated
-(383 messages per file, counts unchanged). Stage `12-llm-proofreading` was accepted and closed on 2026-11-16 over
+Last node: `16-ai-provider-name` (root task, `done`, `detailed: true`), accepted in the commit below:
+the checking provider is displayed as `AI` instead of `LLM`, so the interface has one name for one
+thing; the stored id `llm` and the `[llm]` block stay, and its `## Outcome` records the chosen
+configuration-error wording. Task
+`15-short-proofreading-hotkey-labels` is `done` as `23bd078` (`Check in a popup:` /
+`Replace with the corrected text:`, 383 messages per `.ts`, 53/53 on the host and in trixie). Stage `12-llm-proofreading` was accepted and closed on 2026-11-16 over
 `5e6f1cb..HEAD` (`be1e5f9`, `5dcc390`, `c5b10f0`, `e70bf38`, acceptance fix `5210d43`) and its
 documentation pass is committed with this entry. The next node is the dictionary stage
 `07-dictionary` (`todo`, needs a split); stages 4 and 6 stay `blocked` by user decisions. Linux is at
@@ -923,3 +925,17 @@ has six languages and no `auto`. Next: plan and run stage 8.
   for `lupdate --no-obsolete` while the CMake target omits it, the portal description in
   `src/platform/hotkeymanager_linux.cpp:82-85` still spells out the scenario, and the `name` field that
   `SettingsDialog::validate()` fills is never read (the last two predate this node).
+- 2026-11-16 — Node `16-ai-provider-name` accepted and closed with its `## Outcome`.
+  `src/services/llmproofreadingservice.cpp:301` now returns `AI`, and `:314` says
+  `the AI provider is configured on the settings AI tab` — declarative like its neighbours, with
+  `settings` added so it does not read as "the AI provider is configured on the AI tab". The id `llm`,
+  the `[llm]` block, `Local LLM` and every class and file name stay. Four expectations moved to `AI`
+  (`tests/tst_llmproofreadingservice.cpp:243`, `tests/tst_settingsdialog.cpp:1239`, `:1321`, `:1362`).
+  Review made one remark, and it was the useful kind: the assertion on the error sentence was a
+  `contains("AI tab")`, which the old wording satisfied too, so nothing pinned the sentence this node
+  changes; it is an exact `QCOMPARE` now. No `.ts` change, no new `tr()`, 383 messages per file.
+  Verification: host Debug 53/53 and Release 53/53 with 0 warnings, `qtranslate-trixie` Release 53/53
+  with 0 warnings, Windows reviewed by diff. Recorded, not fixed: `README.md:294` and
+  `README.ru.md:296` still call the chosen provider "LLM" (documentation pass outside this node), and
+  the hint at `src/ui/settingsdialog.cpp:564` keeps the third name "OpenAI-compatible" because it is a
+  shared `tr()` string; the comments at `:561` and `:955` say "LLM" in prose only.
