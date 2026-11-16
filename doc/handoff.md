@@ -17,8 +17,8 @@ Windows at 46 (not run here). Stage 6 remains blocked for the deferred LLM actio
 Stage `12-llm-proofreading` was accepted on 2026-11-16 over `5e6f1cb..HEAD` (four task commits plus the
 acceptance fix `5210d43`). The OpenAI-compatible provider is now a second text-checking provider next
 to LanguageTool, with the same issue list, preview and Replace/Ignore flow in the same window, popup
-and hotkeys; `[llm]` edited on the **AI** tab serves translation and checking, with no extra consent
-gate. Recorded and not fixed: no chunking (text over the model context is `TooLong`), the checking
+and hotkeys; it is displayed as **AI**, keeps the id `llm`, and `[llm]` edited on the **AI** tab serves
+translation and checking, with no extra consent gate. Recorded and not fixed: no chunking (text over the model context is `TooLong`), the checking
 `provider` selection hides the LanguageTool URL row while `validate()` still reports an invalid hidden
 URL, and the `AppController` wiring has no test target.
 
@@ -372,7 +372,8 @@ Parsec limitation, not a product defect.
 
 - [`proofreading.md`](proofreading.md): implemented in stage 5 over `eb91f6b..263091f` and reworked
   in stage 9 over `3e75331..31a2a36`. The first version ships **LanguageTool only** (user decision
-  of 2026-11-09); Hunspell/Nuspell, Yandex Speller and the LLM checker are deferred. The premium
+  of 2026-11-09); Hunspell/Nuspell and Yandex Speller remain deferred. The AI checker landed in stage
+  12. The premium
   LanguageTool credentials are out of scope: the public API rejects them and can echo a submitted
   key, so the application sends no `apiKey`/`username`.
 - The provider-independent layer is `core/proofreadingtypes`, `proofreadingservice` (a

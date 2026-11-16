@@ -43,8 +43,10 @@ C:\Qt\6.12.0\msvc2022_64\bin\lupdate.exe src -ts i18n/qtranslate_ru_RU.ts i18n/q
 ```
 
 Or build the `update_translations` target if it is available in the selected generator. New strings
-appear with `type="unfinished"`; they must be translated. `tst_translations` fails if any supported
-`.ts` still has an empty or unfinished string.
+appear with `type="unfinished"`; they must be translated. The target does not pass `--no-obsolete`,
+so run it first and then delete the `<message>` blocks `lupdate` marks as `obsolete`/`vanished` —
+`tst_translations` fails on an empty or unfinished string and the review expects a `vanished` count
+of zero.
 
 Integrity check:
 

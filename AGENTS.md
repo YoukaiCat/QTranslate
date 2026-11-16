@@ -135,7 +135,8 @@
 - Text checking is enabled by `proofreading/enabled` (default `false`), which is the only consent;
   there is no second online gate, including for the second provider. Two providers exist:
   `languagetool` (public `api.languagetool.org` or a self-hosted endpoint, no credentials) and `llm`
-  (the OpenAI-compatible provider configured on the **AI** tab, `[llm]`, shared with translation).
+  (displayed as **AI**, the OpenAI-compatible provider configured on the **AI** tab, `[llm]`, shared
+  with translation; the id stays `llm` because it is the stored `proofreading/provider` value).
   Checking is a separate window and mode; the translation window has no checking UI. Do not send
   `apiKey`/`username` to LanguageTool (the public API rejects them and a 400 can echo the value), do
   not reuse the translation services' protocol objects or `proofreading/*` defaults for the LLM

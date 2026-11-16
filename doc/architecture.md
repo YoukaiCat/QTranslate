@@ -2010,8 +2010,9 @@ synthetic-input backend is used. macOS is not planned.
 Implemented in roadmap stage 5 and reworked in stage 9 (2026-11-14) as a standalone feature on par
 with translation, in its own window and mode. The detailed design and the deferred providers are in
 [`proofreading.md`](proofreading.md). Two providers are implemented: **LanguageTool** through the
-public API or a self-hosted endpoint without credentials, and **LLM** through the configured
-OpenAI-compatible provider (`[llm]`, the **AI** tab; roadmap stage 12, 2026-11-16). Enabling text
+public API or a self-hosted endpoint without credentials, and **AI** through the configured
+OpenAI-compatible provider (display name `AI`, id `llm`, settings on the **AI** tab; roadmap stage 12,
+2026-11-16). Enabling text
 checking is the only consent and there is no second online gate. The value types, `ProofreadingReply`,
 `ProofreadingService`, `ProofreadingManager`, the text replacement helper, the settings group, the
 **Text checking** tab, the separate `ProofreadingWindow` with its own editor, issue list and
@@ -2020,9 +2021,9 @@ hotkeys are implemented. Hunspell/Nuspell and Yandex Speller remain deferred.
 
 - A separate `ProofreadingService` and `ProofreadingIssue` with `offset`/`length` in UTF-16,
   `message`, `replacements`, `ruleId`, `category`, `severity`.
-- Providers: LanguageTool (HTTP/self-hosted, grammar and punctuation) and LLM (OpenAI-compatible
-  provider, one request per check, edits parsed locally with a diff fallback); Hunspell/Nuspell
-  (spelling only) and Yandex Speller (spelling ru/uk/en) are deferred.
+- Providers: LanguageTool (HTTP/self-hosted, grammar and punctuation) and AI (the OpenAI-compatible
+  provider, id `llm`; one request per check, edits parsed locally with a diff fallback);
+  Hunspell/Nuspell (spelling only) and Yandex Speller (spelling ru/uk/en) are deferred.
 - A separate "Text checking" settings tab, independent `proofreading/*` keys; API keys — DPAPI.
   `enabled` is off by default; both checking hotkeys are empty by default.
 - The translation window and the checking window are separate windows and modes; the translation
@@ -2485,11 +2486,12 @@ Possible development:
    button, pivot through English, fallback to the cloud. Details and PoC — [`local-translation.md`](local-translation.md).
 10. **Spelling, grammar, and punctuation checking** — implemented in stage 5, reworked in stage 9 and
     given a second provider in stage 12: LanguageTool (public API or self-hosted, no credentials) and
-    the OpenAI-compatible provider (LLM) share the issue list, the preview and the replacement flow;
+    the OpenAI-compatible provider (**AI**, id `llm`) share the issue list, the preview and the
+    replacement flow;
     `proofreading/enabled` is the only consent. A separate **Text checking** tab and a separate
     non-modal checking window, and two external-selection hotkeys: popup result and check-and-replace.
     Deferred: Hunspell/Nuspell and Yandex Speller, the premium LanguageTool credentials, and chunking
-    for LLM checks longer than the model context. Known gaps:
+    for AI checks longer than the model context. Known gaps:
     a click on the non-activating popup under a real window manager is unverified; the grabber waits
     a fixed 400 ms for the clipboard; the `QSKIP` for a missing `DISPLAY` is unreachable because
     `QTEST_MAIN` creates the xcb application first; a paste-shortcut failure reuses the shared
