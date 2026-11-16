@@ -1,3 +1,13 @@
+qtranslate (0.14.0) unstable; urgency=medium
+
+  * New upstream release: text checking as a separate mode with the LanguageTool and AI providers.
+  * Add the DuckDuckGo and LibreTranslate translation providers.
+  * Remove the opt-in gates; every translation provider is available by default.
+  * Move the OpenAI-compatible provider to its own AI tab and call it AI in the interface.
+  * Fix the tray icon on Astra Linux.
+
+ -- Vladislav Mileshkin <1074478+youkaicat@users.noreply.github.com>  Mon, 16 Nov 2026 00:00:00 +0000
+
 qtranslate (0.13.0) unstable; urgency=medium
 
   * New upstream release: proofreading with LanguageTool.
