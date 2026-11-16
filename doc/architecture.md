@@ -42,7 +42,7 @@ The project is licensed under the GNU General Public License, version 3 or later
   trixie with Qt 6.10.2/6.8.2; Clang 16 is also clean), CMake ≥ 3.19.
 - Qt modules: `Core`, `Gui`, `Widgets`, `Network`; `DBus` on Linux for the portal and the tray. Tests
   additionally use `Test`.
-- Platforms: **Windows 10/11 x64** and **Linux x86_64 (0.13.0)**; macOS is not planned. Platform code
+- Platforms: **Windows 10/11 x64** and **Linux x86_64 (0.14.0)**; macOS is not planned. Platform code
   is isolated (see §3.3 and §4.14) so the port does not touch the core.
 - TLS: on Windows the stock Qt 6 Schannel backend (`qschannelbackend`), OpenSSL is not needed; on Linux
   the Qt OpenSSL backend is used.
@@ -50,7 +50,7 @@ The project is licensed under the GNU General Public License, version 3 or later
 
 ### 1.4. Platform matrix
 
-| Component | Windows 10/11 x64 (0.13.0) | Linux x86_64 (0.13.0) |
+| Component | Windows 10/11 x64 (0.14.0) | Linux x86_64 (0.14.0) |
 |---|---|---|
 | Build | MSVC 2022, Qt 6.12 | GCC/Clang, Qt 6.5+ (trixie 6.8.2, Astra 6.10.2), CMake |
 | UI | Qt Widgets, tray | Qt Widgets, StatusNotifierItem/AppIndicator |
@@ -174,7 +174,8 @@ qtranslate/
 │   │   ├── 0.10.0.md
 │   │   ├── 0.11.0.md
 │   │   ├── 0.12.0.md
-│   │   └── 0.13.0.md
+│   │   ├── 0.13.0.md
+│   │   └── 0.14.0.md
 │   └── roadmap/
 │       ├── README.md           map list
 │       ├── debian/             native Debian packaging, closed 2026-11-14
@@ -359,11 +360,11 @@ qtranslate/
 The §3.1 tree shows the repository's current layout, and the table below maps it to the current
 targets. Currently:
 
-| Target | What is included now (0.13.0) |
+| Target | What is included now (0.14.0) |
 |---|---|
 | `qtranslate_core` | `ai/openaichat`; `core/`: `appinfo`, `apppaths`, `hotkeysequence`, `hotkeywarnings`, `languages`, `uilanguages`, `popupplacement`, `settings`, `textchunker`, `translationtypes`, `translationservice`, `translationmanager` (cache, smart language), `proofreadingtypes`, `proofreadingservice`, `proofreadingmanager`, `proofreadingtext`; `net/networkmanager`; `services/`: `bingwebparser`, `bingwebservice`, `googleparser`, `googletranslateservice`, `deeplparser`, `deeplservice`, `deeplwebparser`, `deeplwebservice`, `languagetoolparser`, `languagetoolservice`, `llmproofreadingparser`, `llmproofreadingservice`, `mozhiparser`, `mozhiservice`, `mymemoryparser`, `mymemoryservice`, `openaicompatibleservice`, `queuedwebservice`, `requestqueue`, `reversoparser`, `reversoservice`, `yandexwebparser`, `yandexwebservice` |
 | `qtranslate` | `main.cpp`, `app/*` (including `commandline` and the file log), `ui/*` (`appicon`, `languagecombobox`, `mainwindow` with auto-translation, `popupwindow`, `proofreadingerrortext`, `proofreadingpanel`, `proofreadingwindow`, `proofreadingpopupwindow`, `settingsdialog`, `translationerrortext`, `trayicon`), `platform/*` (Windows and Linux backends; `Qt6::DBus` is linked on Linux), `resources/qtranslate.rc`, `resources/icons/app.ico`, `i18n/qtranslate_*.ts` |
-| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_duckduckgoparser`, `tst_duckduckgoservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_hotkeywarnings`, `tst_languages`, `tst_languagetoolparser`, `tst_languagetoolservice`, `tst_llmproofreadingparser`, `tst_llmproofreadingservice`, `tst_libretranslateparser`, `tst_libretranslateservice`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_mainwindow` (offscreen), `tst_proofreadingmanager`, `tst_proofreadingwindow` (offscreen), `tst_proofreadingpopup` (offscreen), `tst_proofreading_selection_x11` (Linux), `tst_queuedwebservice`, `tst_reversoparser`, `tst_reversoservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 46 tests on Windows and 53 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
+| tests (`tests/CMakeLists.txt`) | `tst_appinfo`, `tst_autostart` (Windows/Linux), `tst_bingwebparser`, `tst_bingwebservice`, `tst_cli` (Linux), `tst_deeplparser`, `tst_deeplservice`, `tst_deeplwebparser`, `tst_deeplwebservice`, `tst_duckduckgoparser`, `tst_duckduckgoservice`, `tst_googleparser`, `tst_googletranslateservice`, `tst_hotkeymanager` (Windows), `tst_hotkeymanager_x11`/`tst_hotkeymanager_wayland` (Linux), `tst_hotkey_selection_x11` (Linux), `tst_hotkeysequence`, `tst_hotkeywarnings`, `tst_languages`, `tst_languagetoolparser`, `tst_languagetoolservice`, `tst_llmproofreadingparser`, `tst_llmproofreadingservice`, `tst_libretranslateparser`, `tst_libretranslateservice`, `tst_mozhiparser`, `tst_mozhiwebservice`, `tst_mymemoryparser`, `tst_mymemoryservice`, `tst_networkmanager`, `tst_popupplacement`, `tst_popupwindow` (offscreen), `tst_mainwindow` (offscreen), `tst_proofreadingmanager`, `tst_proofreadingwindow` (offscreen), `tst_proofreadingpopup` (offscreen), `tst_proofreading_selection_x11` (Linux), `tst_queuedwebservice`, `tst_reversoparser`, `tst_reversoservice`, `tst_secretprotector` (Windows/Linux), `tst_selectiongrabber_linux`, `tst_settings`, `tst_settingsdialog` (offscreen), `tst_textchunker`, `tst_translationmanager` (cache and smart retry), `tst_translations`, `tst_uilanguages`, `tst_windowactivation_linux`, `tst_openaichat`, `tst_openaicompatibleservice`, `tst_yandexwebparser`, `tst_yandexwebservice`; 47 tests on Windows and 53 on Linux. Each test is added by the `qtranslate_add_test(<name>)` function, links against `qtranslate_core`, and receives the `tests/fixtures` path in the `QTRANSLATE_FIXTURES_DIR` macro |
 
 ### 3.3. Build
 
@@ -399,9 +400,9 @@ targets. Currently:
 
 ### 3.4. Packaging, CI and release
 
-The project version is defined once — `project(qtranslate VERSION 0.13.0)`; `AppInfo::version()`, the
+The project version is defined once — `project(qtranslate VERSION 0.14.0)`; `AppInfo::version()`, the
 `User-Agent`, the exe version resource, `debian/changelog`, and artifact names are derived from it.
-The release tag is `v0.13.0`; CI compares it with `CMakeLists.txt` and fails on a mismatch.
+The release tag is `v0.14.0`; CI compares it with `CMakeLists.txt` and fails on a mismatch.
 
 **Portable archive.** `cmake --install <build> --prefix build/dist` creates a self-contained `bin/`,
 `plugins/`, `translations/` directory with Qt, plugins, and the MSVC CRT, plus
@@ -1956,7 +1957,7 @@ tree configures, builds, and links: 53 tests (44 shared plus 9 Linux platform te
 Clang 16 is also clean), with `-Wall -Wextra` and no warnings. The project minimum stays Qt 6.5+.
 X11 is the full Linux target; Wayland is limited, as the table and the notes below show.
 
-| Module | Windows (current) | Linux X11 (0.13.0) | Linux Wayland (0.13.0, limited) |
+| Module | Windows (current) | Linux X11 (0.14.0) | Linux Wayland (0.14.0, limited) |
 |---|---|---|---|
 | Hotkeys | `RegisterHotKey` | `XGrabKey` via xcb/Xlib | the `org.freedesktop.portal.GlobalShortcuts` portal; if unavailable — CLI commands bound in the DE |
 | Selection capture | `SendInput` Ctrl+C | XTest + `QClipboard` | synthetic input is unavailable; the user copies manually |

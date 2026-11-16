@@ -12,7 +12,7 @@ is English. The migration to the tree roadmap and the English baseline is comple
 Stage `11-duckduckgo-libretranslate` was accepted on 2026-11-15 over `8e9c48d..df69d70`: DuckDuckGo
 is a standalone Bing-like `vqd` provider, and LibreTranslate is a provider with a base URL and an
 optional API key (self-hosted without a key, hosted with one). Linux is at 53 tests, `.ts` at 383,
-Windows at 46 (not run here). Stage 6 remains blocked for the deferred LLM actions.
+Windows at 47 (not run here). Stage 6 remains blocked for the deferred LLM actions.
 
 Stage `12-llm-proofreading` was accepted on 2026-11-16 over `5e6f1cb..HEAD` (four task commits plus the
 acceptance fix `5210d43`). The OpenAI-compatible provider is now a second text-checking provider next
@@ -95,7 +95,7 @@ Parsec limitation, not a product defect.
   `tst_languagetoolservice`, `tst_proofreadingwindow` and `tst_proofreadingpopup`;
   `tst_hotkeywarnings` is 10/10, `tst_llmproofreadingparser` 47 cases,
   `tst_llmproofreadingservice` 27 cases). Windows keeps
-  46 tests (44 shared plus 3 Windows-only) and was not run here (no MSVC). The 14 `.ts` files have
+  47 tests (44 shared plus 3 Windows-only) and was not run here (no MSVC). The 14 `.ts` files have
   383 messages each.
 - Fallback: `translation/fallbackService` (off by default, one configured service) retries a
   failed primary request once on `Auth`, `QuotaExceeded`, `RateLimited`, `ServiceUnavailable`,
