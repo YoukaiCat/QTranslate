@@ -939,3 +939,19 @@ has six languages and no `auto`. Next: plan and run stage 8.
   `README.ru.md:296` still call the chosen provider "LLM" (documentation pass outside this node), and
   the hint at `src/ui/settingsdialog.cpp:564` keeps the third name "OpenAI-compatible" because it is a
   shared `tr()` string; the comments at `:561` and `:955` say "LLM" in prose only.
+- 2026-11-16 — Release **0.14.0** published by user decision. Scope since `v0.13.0`: `23bd078` and
+  `7b2c3e1` (short hotkey labels, provider displayed as `AI`), `6d711e1` `Release 0.14.0` (version in
+  `CMakeLists.txt`/`resources/qtranslate.rc`/`debian/changelog`) and `11d8fba` (docs: version labels,
+  `debian/README.Debian`, Windows test count corrected to 47 = 44 shared + 3 Windows-only). The Astra
+  `.deb` was built locally and installed on the host: `qtranslate_0.14.0_amd64.deb`, 643 716 bytes,
+  installed size 1807 KiB; `/usr/bin/qtranslate` reports 0.14.0, `sudo /usr/bin/fly-set-execid.sh`
+  restored the Parsec trust, and the installed binary registered `Ctrl+Q`, `Ctrl+Shift+Q`, `Ctrl+W`
+  and `Ctrl+Shift+S` at 03:46:46. Verification before the tag: host Debug and Release 53/53 with 0
+  warnings under `xvfb-run -a`, `qtranslate-trixie` Release 53/53. One container run failed
+  `TestCli::forwarding(proofread-selection)` ("the child did not exit after forwarding"); three
+  bounded reruns of `tst_cli` passed, recorded as a load flake, not fixed (the test waits for the
+  child process by timeout). CI run 43781592754 (tag): Linux 5m19s, Windows 6m50s, publish 11s, all
+  green; assets installer 11 428 568 B, ZIP 14 119 362 B, Linux tar.gz 28 994 725 B, `.deb` 660 552 B,
+  AppImage 39 606 776 B, `SHA256SUMS.txt` and `SHA256SUMS-linux.txt`. The release-record commit is
+  local and not pushed, to avoid another full CI run. Known flake kept in the record: X11
+  focus-dependent tests fail without `xvfb-run` on a live desktop.

@@ -45,8 +45,10 @@ Parsec limitation, not a product defect.
 
 - The GitHub repository was recreated on 2026-11-06; the new repository contains only the clean
   local history and no pre-recreation commits, tags, or releases. Its releases are 0.11.1 (tag
-  `v0.11.1`), 0.12.0 (tag `v0.12.0`, published on 2026-11-09 by the tag CI), and 0.13.0 (tag
-  `v0.13.0`, published on 2026-11-14 by the tag CI). The old repository's history and activity are
+  `v0.11.1`), 0.12.0 (tag `v0.12.0`, published on 2026-11-09 by the tag CI), 0.13.0 (tag
+  `v0.13.0`, published on 2026-11-14 by the tag CI) and 0.14.0 (tag `v0.14.0`, published on
+  2026-11-16 by the tag CI: installer, ZIP, Linux tar.gz, `.deb`, AppImage and both checksum files).
+  The old repository's history and activity are
   gone.
 - The local history was rewritten on 2026-11-06 to replace a wrong author/committer address; all
   local commits use the GitHub noreply identity. The rewritten history was pushed to the new
