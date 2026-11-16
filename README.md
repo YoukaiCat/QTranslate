@@ -22,9 +22,9 @@ translation directly in the active input field.
   corrected text. Two optional hotkeys check a selection in another application. Details in
   [Usage](#usage).
 - Google Translate (free endpoint or Cloud API) and DeepL (API key or unofficial free web mode),
-  plus OpenRouter or another OpenAI-compatible provider. OpenRouter offers free models such as
-  `openrouter/free`; any compatible endpoint works, including local Ollama, LM Studio or
-  llama.cpp. See [Translation providers](#translation-providers) for setup.
+  plus OpenRouter or another OpenAI-compatible provider — and 7 more providers, most of them without
+  a key: MyMemory, Mozhi, Yandex, Bing, Reverso, DuckDuckGo and LibreTranslate. See
+  [Translation providers](#translation-providers) for setup.
 - Automatic source language detection, smart switching to the additional language, in-memory
   translation cache and automatic translation while typing.
 - System/manual HTTP and SOCKS5 proxies with optional authentication.
