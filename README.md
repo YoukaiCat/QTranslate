@@ -17,16 +17,10 @@ translation directly in the active input field.
 - **Ctrl+Shift+Q** translates the selected text and replaces the selection in the active input
   field, which is convenient for replying in chats.
 - **Ctrl+W** opens the main window with the selection translated.
-- **Text checking** is a separate window and mode, opened from the tray item **Check text…**, with
-  the **Text checking** settings tab: two providers find spelling, grammar and punctuation issues —
-  LanguageTool and the OpenAI-compatible model configured on the **AI** tab (OpenRouter or a local
-  Ollama/llama.cpp server). The checking window highlights the issues and can replace one issue, all
-  issues or copy the corrected text, and every replacement is one undo step. The translation window
-  has no checking UI. `proofreading/enabled` is the only switch; the public LanguageTool API and a
-  self-hosted URL work without a key, and the LLM provider needs no extra consent beyond its own
-  configuration. Two optional hotkeys (empty by default) check a selection in another application:
-  one shows the result in a popup, the other replaces the selection with the corrected text
-  immediately; `--proofread-selection` uses the popup scenario.
+- **Text checking** in a separate window (tray → **Check text…**): two providers, LanguageTool and
+  the AI model, highlight spelling, grammar and punctuation issues; replace one, all or copy the
+  corrected text. Two optional hotkeys check a selection in another application. Details in
+  [Usage](#usage).
 - Google Translate (free endpoint or Cloud API) and DeepL (API key or unofficial free web mode),
   plus OpenRouter or another OpenAI-compatible provider. OpenRouter offers free models such as
   `openrouter/free`; any compatible endpoint works, including local Ollama, LM Studio or
@@ -89,10 +83,13 @@ qtranslate [--minimized] [--verbose] --translate-popup|--translate-main|--transl
 - `Ctrl+Shift+Q` — translate the selection and replace it in the active input field.
 - `Ctrl+W` — open the main window with the selection translated.
 - `Ctrl+Enter` — translate in the main window.
-- **Tray → Check text…** opens the separate text-checking window; **Settings → Text checking**
-  chooses the language, categories and a self-hosted URL. Two optional hotkeys (empty by default)
-  check the selected text in another application: one shows the result in a popup, the other
-  replaces the selection with the corrected text immediately.
+- **Tray → Check text…** opens the separate, non-modal text-checking window; **Settings → Text
+  checking** chooses the provider (LanguageTool or AI), the language and categories, and a
+  self-hosted LanguageTool URL. The window highlights issues and can replace one, replace all or copy
+  the corrected text, one undo step per replacement; the translation window has no checking UI, and
+  `proofreading/enabled` is the only switch. Two optional hotkeys (empty by default) check a selection
+  in another application: one shows the result in a popup, the other replaces the selection with the
+  corrected text immediately; `--proofread-selection` uses the popup.
 - Settings, service selection, **Show window**, **Check text…** and **Quit** are available from the
   tray menu.
   Hotkeys, languages, proxy, autostart and API keys are configured in **Settings**.
